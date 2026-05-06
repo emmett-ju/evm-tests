@@ -1,0 +1,41 @@
+{
+  "name": "custom-storage-smoke",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "custom_chain",
+      "case_id": "custom.balance.and.storage",
+      "family": "custom/smoke",
+      "description": "A chain-specific case that updates balance and storage in a namespaced environment.",
+      "namespace_seed": "custom-balance-storage",
+      "notes": [
+        "Uses idempotent namespace allocation.",
+        "Represents a chain-specific suite outside upstream mirrors."
+      ],
+      "observe": {
+        "address": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "set_balance",
+          "value": "0x64"
+        },
+        {
+          "action": "set_storage",
+          "slot": "0x00",
+          "value": "0x2a"
+        }
+      ],
+      "expected": {
+        "balance": "0x64",
+        "storage": {
+          "0x00": "0x2a"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "juchain-smoke",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "custom_chain",
+      "case_id": "juchain.self-transfer.receipt",
+      "family": "custom/juchain-smoke",
+      "description": "Send a zero-value self-transfer with local signing and assert the receipt succeeds.",
+      "namespace_seed": "juchain-self-transfer-receipt",
+      "notes": [
+        "Safe for non-resettable chains because it only increments the sender nonce.",
+        "Does not rely on mock-only state mutation actions."
+      ],
+      "filters": {},
+      "steps": [
+        {
+          "action": "transfer_native",
+          "to": "0x5a9B6AB4e8e13EEb5552d0181B73f8D75bBF83BC",
+          "value": "0x0",
+          "gas": "0x5208"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1"
+      }
+    }
+  ]
+}

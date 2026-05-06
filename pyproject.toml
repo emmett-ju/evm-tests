@@ -1,0 +1,18 @@
+[project]
+name = "evm-rpc-tests"
+version = "0.1.0"
+description = "RPC-only execution-layer test harness for dedicated EVM chains"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+evm-rpc-tests = "adapter.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+

@@ -1,0 +1,451 @@
+{
+  "name": "upstream-storage-mapped",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.storage.write_new_value.absent_slots.success",
+      "family": "state/storage",
+      "description": "Mapped from execution-specs SSTORE new value success path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-new-value-absent-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE new value]",
+      "notes": [
+        "Upstream intent: cold SSTORE to an absent slot, writing a new non-zero value with successful completion.",
+        "RPC mapping: deploy a minimal storage contract, invoke it once with calldata 0x2a, then assert slot0 on-chain.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6007600c60003960076000f360003560005500",
+          "bytecode_runtime": "0x60003560005500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.storage.write_same_value.absent_slots.success",
+      "family": "state/storage",
+      "description": "Mapped from execution-specs SSTORE same value cold path on an absent slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-same-value-absent-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE same value]",
+      "notes": [
+        "Upstream intent: cold SSTORE to an absent slot, using the same benchmark write shape with successful completion.",
+        "RPC mapping: deploy a minimal storage contract, invoke it once with calldata 0x01, then assert slot0 on-chain.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6007600c60003960076000f360003560005500",
+          "bytecode_runtime": "0x60003560005500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.storage.write_same_value.present_slots.success",
+      "family": "state/storage",
+      "description": "Mapped from execution-specs SSTORE same value success path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-same-value-present-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE same value]",
+      "notes": [
+        "Upstream intent: cold SSTORE to a present slot, writing back the same value with successful completion.",
+        "RPC mapping: deploy a minimal storage contract, write 0x2a once to establish present storage, then write 0x2a again and assert slot0 remains unchanged.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6007600c60003960076000f360003560005500",
+          "bytecode_runtime": "0x60003560005500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.storage.write_new_value.present_slots.success",
+      "family": "state/storage",
+      "description": "Mapped from execution-specs SSTORE new value cold path on a present slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-new-value-present-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE new value]",
+      "notes": [
+        "Upstream intent: cold SSTORE to a present slot, writing a new non-zero value with successful completion.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x01, then invoke runtime that writes 0xff and assert slot0 changes.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x60016000556007601160003960076000f360003560005500",
+          "bytecode_runtime": "0x60003560005500",
+          "initial_storage": {
+            "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+          },
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.storage.read.present_slots.success",
+      "family": "state/storage",
+      "description": "Mapped from execution-specs SLOAD success path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-read-present-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSLOAD]",
+      "notes": [
+        "Upstream intent: cold SLOAD from a present slot with successful completion.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x2a, then invoke runtime that SLOADs slot0 and SSTOREs the read value into slot1.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x602a6000556007601160003960076000f360005460015500",
+          "bytecode_runtime": "0x60005460015500",
+          "initial_storage": {
+            "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+          },
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "0x01": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.storage.read.absent_slots.success",
+      "family": "state/storage",
+      "description": "Mapped from execution-specs SLOAD cold path on an absent slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-read-absent-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSLOAD]",
+      "notes": [
+        "Upstream intent: cold SLOAD from an absent slot with successful completion.",
+        "RPC mapping: deploy a contract with a runtime SLOAD/SSTORE mirror and assert the read value remains zero in storage.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6007600c60003960076000f360005460015500",
+          "bytecode_runtime": "0x60005460015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.storage.warm.read.present_slots.success",
+      "family": "state/storage",
+      "description": "Mapped from execution-specs warm SLOAD success path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-warm-read-present-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_warm[storage_action=READ]",
+      "notes": [
+        "Upstream intent: warm SLOAD from a present slot in a looping execution contract.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x2a, then invoke runtime that mirrors the read-then-write shape and assert storage state.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x602a6000556007601160003960076000f360005460015500",
+          "bytecode_runtime": "0x60005460015500",
+          "initial_storage": {
+            "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+          },
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "0x01": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.storage.warm.write_same_value.present_slots.success",
+      "family": "state/storage",
+      "description": "Mapped from execution-specs warm SSTORE same value success path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-warm-write-same-present-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_warm[storage_action=WRITE_SAME_VALUE]",
+      "notes": [
+        "Upstream intent: warm SSTORE to a present slot, writing the same value in a looping execution contract.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x2a, then invoke runtime that preserves the stored value and assert slot0 remains unchanged.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x602a6000556007601160003960076000f360005460015500",
+          "bytecode_runtime": "0x60005460005500",
+          "initial_storage": {
+            "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+          },
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.storage.warm.write_new_value.present_slots.success",
+      "family": "state/storage",
+      "description": "Mapped from execution-specs warm SSTORE new value success path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-warm-write-new-present-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_warm[storage_action=WRITE_NEW_VALUE]",
+      "notes": [
+        "Upstream intent: warm SSTORE to a present slot, writing a new value in a looping execution contract.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x2a, then invoke runtime that writes a different nonzero value and assert slot0 becomes 0x2b.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x602a6000556007601160003960076000f360005460015500",
+          "bytecode_runtime": "0x602b60005500",
+          "initial_storage": {
+            "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+          },
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002b"
+        }
+      }
+    }
+  ]
+}

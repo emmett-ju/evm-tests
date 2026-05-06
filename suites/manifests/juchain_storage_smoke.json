@@ -1,0 +1,53 @@
+{
+  "name": "juchain-storage-smoke",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "custom_chain",
+      "case_id": "juchain.deploy-and-store.slot0",
+      "family": "custom/juchain-storage-smoke",
+      "description": "Deploy a minimal storage contract, write slot0 via calldata, and assert storage on-chain.",
+      "namespace_seed": "juchain-deploy-store-slot0",
+      "notes": [
+        "Covers deployment, contract invocation, and final storage assertion on a non-resettable chain.",
+        "The runtime stores the first calldata word into slot0."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6007600c60003960076000f360003560005500",
+          "bytecode_runtime": "0x60003560005500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x000000000000000000000000000000000000000000000000000000000000002a",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    }
+  ]
+}

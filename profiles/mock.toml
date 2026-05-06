@@ -1,0 +1,21 @@
+name = "mock-devnet"
+rpc_url = "http://127.0.0.1:8545"
+chain_id = 1337
+hardfork = "cancun"
+admin_account = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+backend = "mock"
+trace_support = false
+
+[gas_policy]
+gas_limit = 30000000
+max_fee_per_gas = 1000000000
+max_priority_fee_per_gas = 100000000
+
+[namespace_policy]
+prefix = "evmtest"
+reuse_strategy = "idempotent"
+
+[feature_flags]
+base_fee = true
+blob = false
+

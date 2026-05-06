@@ -1,0 +1,47 @@
+{
+  "name": "upstream-smoke",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.storage.basic",
+      "family": "state/storage",
+      "description": "A storage write/read case that is safe for RPC-only execution.",
+      "namespace_seed": "upstream-storage-basic",
+      "upstream_ref": "tests/frontier/opcodes/storage/basic",
+      "notes": [
+        "Admitted because it only asserts final storage state.",
+        "Does not require genesis prestate or precise gas accounting."
+      ],
+      "filters": {},
+      "steps": [
+        {
+          "action": "set_storage",
+          "slot": "0x00",
+          "value": "0x01"
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x01"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.block.control",
+      "family": "block/env",
+      "description": "A placeholder upstream case that must be filtered from RPC-only mode.",
+      "namespace_seed": "upstream-block-control",
+      "upstream_ref": "tests/shanghai/block/env/control",
+      "filters": {
+        "requires_block_control": true
+      },
+      "steps": [],
+      "expected": {}
+    }
+  ]
+}

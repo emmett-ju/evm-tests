@@ -1,0 +1,20 @@
+name = "juchain-testnet"
+rpc_url = "https://testnet-rpc.juchain.org"
+chain_id = 202599
+hardfork = "cancun"
+admin_account = "0x5a9B6AB4e8e13EEb5552d0181B73f8D75bBF83BC"
+admin_key_source = "env:JUCHAIN_PRIVATE_KEY"
+trace_support = true
+
+[gas_policy]
+gas_limit = 30000000
+max_fee_per_gas = 20000000000
+max_priority_fee_per_gas = 1000000000
+
+[namespace_policy]
+prefix = "evmtest"
+reuse_strategy = "idempotent"
+
+[feature_flags]
+base_fee = true
+blob = false

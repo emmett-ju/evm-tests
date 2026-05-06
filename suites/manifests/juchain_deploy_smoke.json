@@ -1,0 +1,42 @@
+{
+  "name": "juchain-deploy-smoke",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "custom_chain",
+      "case_id": "juchain.deploy.stop-contract",
+      "family": "custom/juchain-deploy-smoke",
+      "description": "Deploy a one-byte STOP runtime contract and assert the deployed code via receipt contractAddress.",
+      "namespace_seed": "juchain-deploy-stop-contract",
+      "notes": [
+        "Safe for non-resettable chains because each deployment uses a new nonce-derived address.",
+        "Asserts real chain deployment plus post-deployment code lookup."
+      ],
+      "observe": {
+        "code_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6001600c60003960016000f300",
+          "bytecode_runtime": "0x00",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "receipt_contract_address": "nonempty",
+        "code": "0x00"
+      }
+    }
+  ]
+}
