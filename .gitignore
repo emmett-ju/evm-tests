@@ -1,3 +1,6 @@
 .env
 .state/
 reports/
+__pycache__/
+*.pyc
+*.pyo
