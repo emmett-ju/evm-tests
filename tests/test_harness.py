@@ -11,7 +11,13 @@ import unittest
 from adapter.bootstrap import StateBootstrapper
 from adapter.cli import main
 from adapter.env import load_dotenv
-from adapter.executor import JsonRpcBackend, MockBackend
+from adapter.executor import (
+    BALANCE_RUNTIME,
+    CODESIZE_RUNTIME,
+    SELFBALANCE_RUNTIME,
+    JsonRpcBackend,
+    MockBackend,
+)
 from adapter.generator import (
     generate_upstream_storage_manifest,
     generate_upstream_storage_templates,
@@ -211,6 +217,19 @@ class HarnessTests(unittest.TestCase):
         )
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
+        allowed_runtimes = {CODESIZE_RUNTIME, BALANCE_RUNTIME, SELFBALANCE_RUNTIME}
+        self.assertEqual(
+            {case.steps[0]["bytecode_runtime"] for case in selected if case.steps and case.steps[0]["action"] == "deploy_contract"},
+            allowed_runtimes,
+        )
+        for case in selected:
+            step_actions = [step["action"] for step in case.steps]
+            self.assertNotIn("set_balance", step_actions)
+            self.assertNotIn("set_storage", step_actions)
+            self.assertNotIn("set_code", step_actions)
+            deploy_steps = [step for step in case.steps if step["action"] == "deploy_contract"]
+            self.assertEqual(len(deploy_steps), 1)
+            self.assertIn(deploy_steps[0]["bytecode_runtime"], allowed_runtimes)
 
     def test_manifest_resolves_execution_specs_ref(self) -> None:
         manifest = load_manifest(ROOT / "suites/manifests/upstream_smoke.json")
@@ -1331,6 +1350,8 @@ class HarnessTests(unittest.TestCase):
         )
 
         families = {item["family"]: item for item in summary["families"]}
+        self.assertIn("account-query", families)
+        self.assertEqual(families["account-query"]["inventory"], "upstream_account_query_inventory.json")
         self.assertEqual(
             {
                 family: {
@@ -1350,10 +1371,38 @@ class HarnessTests(unittest.TestCase):
                 "account-query": {"total": 40, "admitted": 5, "blocked": 35},
             },
         )
+        self.assertEqual(
+            families["account-query"]["blocked_reasons"],
+            {
+                "requires byte-range code-copy observation not yet mapped": 30,
+                "requires external-account code-copy fixtures and byte-range observation not yet mapped": 5,
+            },
+        )
 
     def test_inventory_summary_aggregates_checked_in_first_family_inventories(self) -> None:
         summary = summarize_inventory_dir(ROOT / "suites/templates")
         self._assert_checked_in_first_family_inventory_summary(summary)
+
+    def test_inventory_summary_ignores_account_query_when_filename_drops_inventory_suffix(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            for inventory_path in sorted((ROOT / "suites/templates").glob("*_inventory.json")):
+                target_name = inventory_path.name
+                if inventory_path.name == "upstream_account_query_inventory.json":
+                    target_name = "upstream_account_query_renamed.json"
+                (tmp_path / target_name).write_text(inventory_path.read_text())
+
+            summary = summarize_inventory_dir(tmp_path)
+            families = {item["family"]: item for item in summary["families"]}
+            self.assertNotIn("account-query", families)
+            self.assertEqual(
+                summary["totals"],
+                {"families": 9, "cases": 292, "admitted": 32, "blocked": 260},
+            )
+            self.assertNotEqual(
+                summary["totals"],
+                {"families": 10, "cases": 332, "admitted": 37, "blocked": 295},
+            )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1409,6 +1458,55 @@ class HarnessTests(unittest.TestCase):
             summary = json.loads(output_path.read_text())
             self._assert_checked_in_first_family_inventory_summary(summary)
             self.assertEqual(summary, summarize_inventory_dir(ROOT / "suites/templates"))
+
+    def test_cli_summarize_upstream_inventory_detects_account_query_total_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_dir = Path(tmpdir) / "inventories"
+            inventory_dir.mkdir()
+            for inventory_path in sorted((ROOT / "suites/templates").glob("*_inventory.json")):
+                payload = json.loads(inventory_path.read_text())
+                if inventory_path.name == "upstream_account_query_inventory.json":
+                    payload["entries"] = payload["entries"][:-1]
+                (inventory_dir / inventory_path.name).write_text(json.dumps(payload, indent=2) + "\n")
+
+            helper_summary = summarize_inventory_dir(inventory_dir)
+            self.assertEqual(
+                helper_summary["totals"],
+                {"families": 10, "cases": 331, "admitted": 36, "blocked": 295},
+            )
+            self.assertNotEqual(
+                helper_summary["totals"],
+                {"families": 10, "cases": 332, "admitted": 37, "blocked": 295},
+            )
+
+            output_path = Path(tmpdir) / "summary.json"
+            self.assertEqual(
+                main(
+                    [
+                        "summarize-upstream-inventory",
+                        "--inventory-dir",
+                        str(inventory_dir),
+                        "--output",
+                        str(output_path),
+                    ]
+                ),
+                0,
+            )
+            cli_summary = json.loads(output_path.read_text())
+            self.assertEqual(cli_summary, helper_summary)
+            self.assertEqual(
+                cli_summary["totals"],
+                {"families": 10, "cases": 331, "admitted": 36, "blocked": 295},
+            )
+            account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
+            self.assertEqual(
+                {
+                    "total": account_query_row["total"],
+                    "admitted": account_query_row["admitted"],
+                    "blocked": account_query_row["blocked"],
+                },
+                {"total": 39, "admitted": 4, "blocked": 35},
+            )
 
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1924,6 +2022,30 @@ class HarnessTests(unittest.TestCase):
         broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-account-query-runtime")
+
+    def test_selector_rejects_mock_only_account_query_shortcuts_on_jsonrpc_profile(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
+        broken_case = manifest.cases[0]
+        broken_case.steps.insert(0, {"action": "set_balance", "value": "0x1"})
+        decision = TestSelector(profile).decide(broken_case)
+        self.assertFalse(decision.selected)
+        self.assertEqual(
+            decision.reasons,
+            ["contains mock-only actions not runnable on jsonrpc backend: set_balance"],
+        )
+
+    def test_selector_rejects_codecopy_neighbor_runtime_shape_for_account_query_manifest(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
+        selected, _ = TestSelector(profile).select(manifest)
+        selected_runtimes = {
+            case.steps[0]["bytecode_runtime"]
+            for case in selected
+            if case.steps and case.steps[0]["action"] == "deploy_contract"
+        }
+        self.assertEqual(selected_runtimes, {CODESIZE_RUNTIME, BALANCE_RUNTIME, SELFBALANCE_RUNTIME})
+        self.assertNotIn("0x39", selected_runtimes)
 
     def test_oracle_reports_wrong_present_balance_seed_for_account_query_case(self) -> None:
         manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
