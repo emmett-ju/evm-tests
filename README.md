@@ -25,11 +25,14 @@ python -m adapter.cli scan-upstream-memory --template-output suites/templates/up
 python -m adapter.cli generate-memory-manifest --template suites/templates/upstream_memory_templates.json --output suites/manifests/upstream_memory_mapped.json
 python -m adapter.cli scan-upstream-call-context --template-output suites/templates/upstream_call_context_templates.json --inventory-output suites/templates/upstream_call_context_inventory.json
 python -m adapter.cli generate-call-context-manifest --template suites/templates/upstream_call_context_templates.json --output suites/manifests/upstream_call_context_mapped.json
+python -m adapter.cli scan-upstream-tx-context --template-output suites/templates/upstream_tx_context_templates.json --inventory-output suites/templates/upstream_tx_context_inventory.json
+python -m adapter.cli generate-tx-context-manifest --template suites/templates/upstream_tx_context_templates.json --output suites/manifests/upstream_tx_context_mapped.json
 ```
 
 `scan-upstream-storage` 会直接扫描 upstream `execution-specs` 的 `test_storage.py`，把可自动映射的 case 生成到本地模板，把当前不能自动承接的 case 写到 inventory 并带过滤原因。
 `scan-upstream-memory` 对 `test_memory.py` 做同样的自动分类，当前优先承接可直接通过 storage 观察结果的 `MLOAD/MSTORE/MSTORE8/MSIZE` 子集。
 `scan-upstream-call-context` 当前优先承接可直接通过 storage 与运行时上下文断言的 `ADDRESS/CALLER/CALLVALUE/CALLDATASIZE/CALLDATALOAD` 子集；更复杂的 `CALLDATACOPY/RETURNDATA*` 仍先进入 inventory。
+`scan-upstream-tx-context` 当前先承接可直接通过运行时发送者语义断言的 `ORIGIN`；`GASPRICE/BLOBHASH` 先进入 inventory，因为它们还需要额外的 fee/blob 交易策略。
 
 For real-chain runs, create a local `.env` file from `.env.example`:
 

@@ -119,6 +119,8 @@ class MockBackend:
                     storage["0x00"] = "0x" + target_address[2:].lower().rjust(64, "0")
                 elif code == "0x3360005500":
                     storage["0x00"] = "0x" + self.admin_account[2:].lower().rjust(64, "0")
+                elif code == "0x3260005500":
+                    storage["0x00"] = "0x" + self.admin_account[2:].lower().rjust(64, "0")
                 elif code == "0x3660005500":
                     calldata_hex = data[2:] if data.startswith("0x") else data
                     storage["0x00"] = "0x" + hex(len(calldata_hex) // 2)[2:].rjust(64, "0")

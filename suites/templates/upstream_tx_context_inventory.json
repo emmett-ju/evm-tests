@@ -1,0 +1,45 @@
+{
+  "name": "upstream-tx-context-auto-inventory",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_tx_context.py",
+  "entries": [
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_tx_context.py::test_blobhash[blob_present=no_blobs]",
+      "case_id": "upstream.benchmark.tx_context.blobhash.no_blobs.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires blob transaction construction and BLOBHASH environment not yet mapped"
+      ],
+      "source": "blobhash"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_tx_context.py::test_blobhash[blob_present=one_blob]",
+      "case_id": "upstream.benchmark.tx_context.blobhash.one_blob.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires blob transaction construction and BLOBHASH environment not yet mapped"
+      ],
+      "source": "blobhash"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_tx_context.py::test_call_frame_context_ops[opcode=GASPRICE]",
+      "case_id": "upstream.benchmark.tx_context.gasprice.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires dynamic gas-price capture policy not yet mapped"
+      ],
+      "source": "zero_param"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_tx_context.py::test_call_frame_context_ops[opcode=ORIGIN]",
+      "case_id": "upstream.benchmark.tx_context.origin.success",
+      "admitted": true,
+      "mode": "origin",
+      "reasons": [],
+      "source": "zero_param"
+    }
+  ]
+}

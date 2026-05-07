@@ -24,8 +24,8 @@ class ResultOracle:
             return node
         if node.endswith("_word"):
             base_key = node.removesuffix("_word")
-            address = self._resolve_placeholder_value(base_key, context)
-            return self._address_to_word(address)
+            value = self._resolve_placeholder_value(base_key, context)
+            return self._hex_to_word(value)
         return self._resolve_placeholder_value(node, context)
 
     def _resolve_placeholder_value(self, placeholder: str, context: dict[str, Any]) -> Any:
@@ -33,12 +33,12 @@ class ResultOracle:
             raise ValueError(f"unknown expected placeholder: {placeholder}")
         return context[placeholder]
 
-    def _address_to_word(self, address: Any) -> str:
-        if not isinstance(address, str) or not address.startswith("0x"):
-            raise ValueError(f"cannot convert placeholder value to address word: {address!r}")
-        normalized = address[2:].lower()
-        if len(normalized) != 40:
-            raise ValueError(f"expected 20-byte address for word conversion, got: {address}")
+    def _hex_to_word(self, value: Any) -> str:
+        if not isinstance(value, str) or not value.startswith("0x"):
+            raise ValueError(f"cannot convert placeholder value to 32-byte word: {value!r}")
+        normalized = value[2:].lower()
+        if len(normalized) > 64:
+            raise ValueError(f"expected value that fits in 32 bytes for word conversion, got: {value}")
         return "0x" + normalized.rjust(64, "0")
 
     def _compare_node(

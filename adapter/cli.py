@@ -19,6 +19,10 @@ from adapter.oracle import ResultOracle
 from adapter.profile import load_chain_profile
 from adapter.report import write_report
 from adapter.selector import TestSelector
+from adapter.tx_context_generator import (
+    generate_upstream_tx_context_manifest,
+    generate_upstream_tx_context_templates,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -74,6 +78,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_call_context.add_argument("--template-output", required=True)
     scan_call_context.add_argument("--inventory-output")
+
+    generate_tx_context = subparsers.add_parser("generate-tx-context-manifest")
+    generate_tx_context.add_argument("--template", default="suites/templates/upstream_tx_context_templates.json")
+    generate_tx_context.add_argument("--output", required=True)
+
+    scan_tx_context = subparsers.add_parser("scan-upstream-tx-context")
+    scan_tx_context.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/benchmark/compute/instruction/test_tx_context.py",
+    )
+    scan_tx_context.add_argument("--template-output", required=True)
+    scan_tx_context.add_argument("--inventory-output")
 
     return parser
 
@@ -218,6 +234,25 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "scan-upstream-call-context":
         templates = generate_upstream_call_context_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-tx-context-manifest":
+        manifest = generate_upstream_tx_context_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-tx-context":
+        templates = generate_upstream_tx_context_templates(
             repo_root=Path.cwd(),
             source_path=args.source,
             output_path=args.template_output,

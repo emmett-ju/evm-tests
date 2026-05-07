@@ -1,0 +1,19 @@
+{
+  "name": "upstream-tx-context-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_tx_context.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.tx_context.origin.success",
+      "description": "Mapped from execution-specs ORIGIN onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-tx-context-origin",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_tx_context.py::test_call_frame_context_ops[opcode=ORIGIN]",
+      "notes": [
+        "Upstream intent: benchmark ORIGIN in an external-call frame.",
+        "RPC mapping: runtime writes ORIGIN to storage slot0 after deployment, then the harness asserts it against the active admin sender resolved at runtime.",
+        "Admitted because the sender address is known from the chain profile and observable without block-level control."
+      ],
+      "mode": "origin"
+    }
+  ]
+}
