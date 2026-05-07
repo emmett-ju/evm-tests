@@ -185,7 +185,8 @@ class MockBackend:
             storage_address = last_contract_address
         observed: dict[str, Any] = {}
         if "balance" in case.expected:
-            observed["balance"] = self._address_state(contracts, balance_address).get("balance")
+            raw_balance = self._address_state(contracts, balance_address).get("balance", ZERO_STORAGE_WORD)
+            observed["balance"] = self._word_to_quantity(raw_balance)
         if "code" in case.expected:
             observed["code"] = self._address_state(contracts, code_address).get("code")
         if "storage" in case.expected:
@@ -210,6 +211,12 @@ class MockBackend:
         if len(normalized) > 64:
             raise ValueError(f"hex word too large for mock balance/storage: {value}")
         return "0x" + normalized.rjust(64, "0")
+
+    def _word_to_quantity(self, value: str) -> str:
+        if not isinstance(value, str) or not value.startswith("0x"):
+            raise ValueError(f"unsupported hex quantity literal: {value!r}")
+        normalized = value[2:].lower().lstrip("0")
+        return "0x0" if not normalized else f"0x{normalized}"
 
     def _decode_address_word(self, value: str) -> str:
         if not isinstance(value, str) or not value.startswith("0x"):

@@ -406,6 +406,33 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertEqual(generated["cases"][0]["family"], "state/account-query")
 
+    def test_account_query_checked_in_artifacts_match_generated_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_template_path = Path(tmpdir) / "upstream_account_query_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_account_query_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_account_query_mapped.json"
+            generate_upstream_account_query_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
+            generate_upstream_account_query_manifest(
+                repo_root=ROOT,
+                template_path=generated_template_path,
+                output_path=manifest_path,
+            )
+            checked_in_pairs = [
+                (generated_template_path, ROOT / "suites/templates/upstream_account_query_templates.json"),
+                (inventory_path, ROOT / "suites/templates/upstream_account_query_inventory.json"),
+                (manifest_path, ROOT / "suites/manifests/upstream_account_query_mapped.json"),
+            ]
+            for generated_path, checked_in_path in checked_in_pairs:
+                self.assertEqual(
+                    generated_path.read_text(),
+                    checked_in_path.read_text(),
+                    f"{checked_in_path.name} byte drift",
+                )
+
     def test_storage_templates_load(self) -> None:
         templates = load_storage_templates(ROOT / "suites/templates/upstream_storage_templates.json")
         self.assertEqual(len(templates), 17)
