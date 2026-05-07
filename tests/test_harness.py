@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 import json
 import os
 from pathlib import Path
@@ -273,18 +274,117 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertEqual(generated, checked_in)
 
+    def _assert_account_query_parity_contract(
+        self,
+        *,
+        templates_payload: dict[str, object],
+        inventory_payload: dict[str, object],
+        manifest_payload: dict[str, object] | None = None,
+    ) -> None:
+        checked_in_templates_path = ROOT / "suites/templates/upstream_account_query_templates.json"
+        checked_in_inventory_path = ROOT / "suites/templates/upstream_account_query_inventory.json"
+        checked_in_templates = json.loads(checked_in_templates_path.read_text())
+        checked_in_inventory = json.loads(checked_in_inventory_path.read_text())
+
+        self.assertEqual(templates_payload, checked_in_templates, "account-query template JSON drift")
+        self.assertEqual(inventory_payload, checked_in_inventory, "account-query inventory JSON drift")
+
+        self.assertEqual(templates_payload["name"], "upstream-account-query-mapping-templates")
+        self.assertEqual(inventory_payload["name"], "upstream-account-query-auto-inventory")
+        self.assertEqual(inventory_payload["family"], "account-query")
+
+        entries = inventory_payload["entries"]
+        case_ids = [entry["case_id"] for entry in entries]
+        upstream_refs = [entry["upstream_ref"] for entry in entries]
+        self.assertEqual(upstream_refs, sorted(upstream_refs), "account-query upstream_ref ordering drifted")
+        self.assertEqual(len(case_ids), 40)
+        self.assertEqual(len(case_ids), len(set(case_ids)))
+
+        admitted = [entry for entry in entries if entry["admitted"]]
+        blocked = [entry for entry in entries if not entry["admitted"]]
+        self.assertEqual(len(admitted), 5, "account-query admitted count drifted")
+        self.assertEqual(len(blocked), 35, "account-query blocked count drifted")
+
+        admitted_case_ids = [entry["case_id"] for entry in admitted]
+        self.assertEqual(
+            admitted_case_ids,
+            [
+                "upstream.benchmark.account_query.codesize.success",
+                "upstream.benchmark.account_query.balance.cold.present_accounts.success",
+                "upstream.benchmark.account_query.balance.cold.absent_accounts.success",
+                "upstream.benchmark.account_query.selfbalance.contract_balance_0.success",
+                "upstream.benchmark.account_query.selfbalance.contract_balance_1.success",
+            ],
+        )
+        self.assertEqual(
+            {entry["mode"] for entry in admitted},
+            {
+                "codesize",
+                "balance_cold_present_accounts",
+                "balance_cold_absent_accounts",
+                "selfbalance_contract_balance_0",
+                "selfbalance_contract_balance_1",
+            },
+        )
+
+        blocked_reason_counts = Counter(
+            reason
+            for entry in blocked
+            for reason in entry["reasons"]
+        )
+        self.assertEqual(
+            blocked_reason_counts,
+            Counter(
+                {
+                    "requires byte-range code-copy observation not yet mapped": 30,
+                    "requires external-account code-copy fixtures and byte-range observation not yet mapped": 5,
+                }
+            ),
+            "account-query blocked-reason ledger drifted",
+        )
+        self.assertEqual(
+            Counter(entry["source"] for entry in blocked),
+            Counter({"codecopy": 10, "codecopy_benchmark": 20, "extcodecopy_warm": 5}),
+            "account-query blocked source-family counts drifted",
+        )
+        self.assertTrue(all(entry["mode"] is None for entry in blocked))
+
+        template_case_ids = [case["case_id"] for case in templates_payload["cases"]]
+        self.assertEqual(template_case_ids, admitted_case_ids)
+
+        if manifest_payload is not None:
+            checked_in_manifest_path = ROOT / "suites/manifests/upstream_account_query_mapped.json"
+            checked_in_manifest = json.loads(checked_in_manifest_path.read_text())
+            self.assertEqual(manifest_payload, checked_in_manifest, "account-query manifest JSON drift")
+            manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
+            self.assertEqual(manifest_case_ids, admitted_case_ids)
+            self.assertEqual(len(manifest_payload["cases"]), 5)
+            self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/account-query"})
+            self.assertFalse(
+                any("codecopy" in case_id or "extcodecopy" in case_id for case_id in manifest_case_ids),
+                "blocked account-query neighbors leaked into manifest",
+            )
+
     def test_account_query_manifest_generator_matches_checked_in_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            generated_path = Path(tmpdir) / "upstream_account_query_mapped.json"
+            generated_template_path = Path(tmpdir) / "upstream_account_query_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_account_query_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_account_query_mapped.json"
+            templates = generate_upstream_account_query_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
             generated = generate_upstream_account_query_manifest(
                 repo_root=ROOT,
-                template_path=ROOT / "suites/templates/upstream_account_query_templates.json",
-                output_path=generated_path,
+                template_path=generated_template_path,
+                output_path=manifest_path,
             )
-            checked_in = json.loads(
-                (ROOT / "suites/manifests/upstream_account_query_mapped.json").read_text()
+            self._assert_account_query_parity_contract(
+                templates_payload=templates,
+                inventory_payload=json.loads(inventory_path.read_text()),
+                manifest_payload=generated,
             )
-            self.assertEqual(generated, checked_in)
             self.assertEqual(generated["cases"][0]["family"], "state/account-query")
 
     def test_storage_templates_load(self) -> None:
@@ -376,37 +476,9 @@ class HarnessTests(unittest.TestCase):
                 output_path=generated_path,
                 inventory_path=inventory_path,
             )
-            checked_in = json.loads(
-                (ROOT / "suites/templates/upstream_account_query_templates.json").read_text()
-            )
-            self.assertEqual(generated, checked_in)
-            inventory = json.loads(inventory_path.read_text())
-            checked_in_inventory = json.loads(
-                (ROOT / "suites/templates/upstream_account_query_inventory.json").read_text()
-            )
-            self.assertEqual(inventory, checked_in_inventory)
-            self.assertEqual(inventory["name"], "upstream-account-query-auto-inventory")
-            self.assertEqual(inventory["family"], "account-query")
-            admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
-            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
-            self.assertEqual(len(admitted), 5)
-            self.assertEqual(len(blocked), 35)
-            self.assertEqual([entry["case_id"] for entry in admitted], [
-                "upstream.benchmark.account_query.codesize.success",
-                "upstream.benchmark.account_query.balance.cold.present_accounts.success",
-                "upstream.benchmark.account_query.balance.cold.absent_accounts.success",
-                "upstream.benchmark.account_query.selfbalance.contract_balance_0.success",
-                "upstream.benchmark.account_query.selfbalance.contract_balance_1.success",
-            ])
-            case_ids = [entry["case_id"] for entry in inventory["entries"]]
-            self.assertEqual(len(case_ids), len(set(case_ids)))
-            blocked_reasons = {reason for entry in blocked for reason in entry["reasons"]}
-            self.assertEqual(
-                blocked_reasons,
-                {
-                    "requires byte-range code-copy observation not yet mapped",
-                    "requires external-account code-copy fixtures and byte-range observation not yet mapped",
-                },
+            self._assert_account_query_parity_contract(
+                templates_payload=generated,
+                inventory_payload=json.loads(inventory_path.read_text()),
             )
 
     def test_account_query_template_scanner_fails_loudly_on_missing_function(self) -> None:
@@ -784,16 +856,32 @@ class HarnessTests(unittest.TestCase):
 
     def test_cli_generate_account_query_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
-            output_path = Path(tmpdir) / "generated.json"
+            template_output_path = Path(tmpdir) / "templates.json"
+            inventory_output_path = Path(tmpdir) / "inventory.json"
+            manifest_output_path = Path(tmpdir) / "generated.json"
+            templates = generate_upstream_account_query_templates(
+                repo_root=ROOT,
+                output_path=template_output_path,
+                inventory_path=inventory_output_path,
+            )
             self.assertEqual(
-                main(["generate-account-query-manifest", "--output", str(output_path)]),
+                main(
+                    [
+                        "generate-account-query-manifest",
+                        "--template",
+                        str(template_output_path),
+                        "--output",
+                        str(manifest_output_path),
+                    ]
+                ),
                 0,
             )
-            generated = json.loads(output_path.read_text())
-            checked_in = json.loads(
-                (ROOT / "suites/manifests/upstream_account_query_mapped.json").read_text()
+            generated = json.loads(manifest_output_path.read_text())
+            self._assert_account_query_parity_contract(
+                templates_payload=templates,
+                inventory_payload=json.loads(inventory_output_path.read_text()),
+                manifest_payload=generated,
             )
-            self.assertEqual(generated, checked_in)
             self.assertEqual(generated["name"], "upstream-account-query-mapped")
             self.assertEqual(len(generated["cases"]), 5)
             self.assertEqual(generated["cases"][0]["family"], "state/account-query")
@@ -884,11 +972,10 @@ class HarnessTests(unittest.TestCase):
             )
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
-            self.assertEqual(generated["name"], "upstream-account-query-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 5)
-            self.assertEqual(inventory["name"], "upstream-account-query-auto-inventory")
-            self.assertEqual(inventory["family"], "account-query")
-            self.assertEqual(len(inventory["entries"]), 40)
+            self._assert_account_query_parity_contract(
+                templates_payload=generated,
+                inventory_payload=inventory,
+            )
 
     def test_cli_scan_upstream_tx_context_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1075,10 +1162,12 @@ class HarnessTests(unittest.TestCase):
                 0,
             )
             inventory = json.loads(inventory_path.read_text())
-            self.assertEqual(inventory["name"], "upstream-account-query-auto-inventory")
-            self.assertEqual(inventory["family"], "account-query")
-            self.assertEqual(len(inventory["entries"]), 40)
-            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 5)
+            self._assert_account_query_parity_contract(
+                templates_payload=json.loads(
+                    (ROOT / "suites/templates/upstream_account_query_templates.json").read_text()
+                ),
+                inventory_payload=inventory,
+            )
 
     def test_cli_scan_upstream_tx_context_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1181,6 +1270,13 @@ class HarnessTests(unittest.TestCase):
                 generated = json.loads(generated_path.read_text())
                 checked_in = json.loads(checked_in_path.read_text())
                 self.assertEqual(generated, checked_in, checked_in_path.name)
+                if checked_in_path.name == "upstream_account_query_inventory.json":
+                    self._assert_account_query_parity_contract(
+                        templates_payload=json.loads(
+                            (ROOT / "suites/templates/upstream_account_query_templates.json").read_text()
+                        ),
+                        inventory_payload=generated,
+                    )
 
     def test_inventory_summary_aggregates_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

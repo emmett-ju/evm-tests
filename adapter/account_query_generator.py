@@ -96,7 +96,7 @@ ACCOUNT_QUERY_MODE_SPECS: dict[AccountQueryTemplateMode, dict[str, str]] = {
         "notes": json.dumps(
             [
                 "Upstream intent: benchmark BALANCE over cold absent target accounts.",
-                "RPC mapping: deploy a BALANCE probe contract, query a deterministic sentinel address through calldata, and persist the resulting word into storage slot0.",
+                "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
                 "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented.",
             ]
         ),
@@ -107,7 +107,7 @@ ACCOUNT_QUERY_MODE_SPECS: dict[AccountQueryTemplateMode, dict[str, str]] = {
         "notes": json.dumps(
             [
                 "Upstream intent: benchmark BALANCE over cold present target accounts.",
-                "RPC mapping: fund a deterministic external target account, query it through a BALANCE probe contract via calldata, and persist the resulting word into storage slot0.",
+                "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
                 "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented.",
             ]
         ),
