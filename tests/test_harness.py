@@ -23,6 +23,7 @@ from adapter.memory_generator import (
     load_memory_templates,
 )
 from adapter.account_query_generator import (
+    generate_upstream_account_query_manifest,
     generate_upstream_account_query_templates,
     load_account_query_templates,
 )
@@ -193,6 +194,23 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
+    def test_selector_allows_upstream_mapped_account_query_cases(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(
+            [case.case_id for case in selected],
+            [
+                "upstream.benchmark.account_query.codesize.success",
+                "upstream.benchmark.account_query.balance.cold.present_accounts.success",
+                "upstream.benchmark.account_query.balance.cold.absent_accounts.success",
+                "upstream.benchmark.account_query.selfbalance.contract_balance_0.success",
+                "upstream.benchmark.account_query.selfbalance.contract_balance_1.success",
+            ],
+        )
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
     def test_manifest_resolves_execution_specs_ref(self) -> None:
         manifest = load_manifest(ROOT / "suites/manifests/upstream_smoke.json")
         head = (
@@ -254,6 +272,20 @@ class HarnessTests(unittest.TestCase):
                 (ROOT / "suites/manifests/upstream_call_context_mapped.json").read_text()
             )
             self.assertEqual(generated, checked_in)
+
+    def test_account_query_manifest_generator_matches_checked_in_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_account_query_mapped.json"
+            generated = generate_upstream_account_query_manifest(
+                repo_root=ROOT,
+                template_path=ROOT / "suites/templates/upstream_account_query_templates.json",
+                output_path=generated_path,
+            )
+            checked_in = json.loads(
+                (ROOT / "suites/manifests/upstream_account_query_mapped.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            self.assertEqual(generated["cases"][0]["family"], "state/account-query")
 
     def test_storage_templates_load(self) -> None:
         templates = load_storage_templates(ROOT / "suites/templates/upstream_storage_templates.json")
@@ -749,6 +781,22 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             self.assertEqual(generated["name"], "upstream-memory-mapped")
             self.assertEqual(len(generated["cases"]), 5)
+
+    def test_cli_generate_account_query_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "generated.json"
+            self.assertEqual(
+                main(["generate-account-query-manifest", "--output", str(output_path)]),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            checked_in = json.loads(
+                (ROOT / "suites/manifests/upstream_account_query_mapped.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            self.assertEqual(generated["name"], "upstream-account-query-mapped")
+            self.assertEqual(len(generated["cases"]), 5)
+            self.assertEqual(generated["cases"][0]["family"], "state/account-query")
 
     def test_cli_scan_upstream_memory_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

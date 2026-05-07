@@ -5,7 +5,10 @@ import json
 from pathlib import Path
 
 from adapter.bootstrap import StateBootstrapper
-from adapter.account_query_generator import generate_upstream_account_query_templates
+from adapter.account_query_generator import (
+    generate_upstream_account_query_manifest,
+    generate_upstream_account_query_templates,
+)
 from adapter.call_context_generator import (
     generate_upstream_call_context_manifest,
     generate_upstream_call_context_templates,
@@ -109,6 +112,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_account_query.add_argument("--template-output")
     scan_account_query.add_argument("--inventory-output", required=True)
+
+    generate_account_query = subparsers.add_parser("generate-account-query-manifest")
+    generate_account_query.add_argument("--template", default="suites/templates/upstream_account_query_templates.json")
+    generate_account_query.add_argument("--output", required=True)
 
     generate_memory = subparsers.add_parser("generate-memory-manifest")
     generate_memory.add_argument("--template", default="suites/templates/upstream_memory_templates.json")
@@ -321,6 +328,15 @@ def main(argv: list[str] | None = None) -> int:
             inventory_path=args.inventory_output,
         )
         print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-account-query-manifest":
+        manifest = generate_upstream_account_query_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
         return 0
 
     if args.command == "generate-memory-manifest":

@@ -6,13 +6,26 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Literal
 
+from adapter.generator import deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
+from adapter.manifest import resolve_execution_specs_ref
 
 
 BLOCKED_CODECOPY_REASON = "requires byte-range code-copy observation not yet mapped"
 BLOCKED_EXTCODECOPY_REASON = (
     "requires external-account code-copy fixtures and byte-range observation not yet mapped"
 )
+
+ABSENT_TARGET_ADDRESS = "0x10000000000000000000000000000000000000a1"
+PRESENT_TARGET_ADDRESS = "0x20000000000000000000000000000000000000b2"
+PRESENT_TARGET_FUNDING_VALUE = "0x2a"
+SELFBALANCE_RUNTIME = "0x4760005500"
+CODESIZE_RUNTIME = "0x3860005500"
+BALANCE_RUNTIME = "0x5f353160005500"
+WORD_00 = "0x0000000000000000000000000000000000000000000000000000000000000000"
+WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
+WORD_05 = "0x0000000000000000000000000000000000000000000000000000000000000005"
+WORD_2A = "0x000000000000000000000000000000000000000000000000000000000000002a"
 
 AccountQueryTemplateMode = Literal[
     "selfbalance_contract_balance_0",
@@ -83,7 +96,7 @@ ACCOUNT_QUERY_MODE_SPECS: dict[AccountQueryTemplateMode, dict[str, str]] = {
         "notes": json.dumps(
             [
                 "Upstream intent: benchmark BALANCE over cold absent target accounts.",
-                "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
+                "RPC mapping: deploy a BALANCE probe contract, query a deterministic sentinel address through calldata, and persist the resulting word into storage slot0.",
                 "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented.",
             ]
         ),
@@ -94,7 +107,7 @@ ACCOUNT_QUERY_MODE_SPECS: dict[AccountQueryTemplateMode, dict[str, str]] = {
         "notes": json.dumps(
             [
                 "Upstream intent: benchmark BALANCE over cold present target accounts.",
-                "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
+                "RPC mapping: fund a deterministic external target account, query it through a BALANCE probe contract via calldata, and persist the resulting word into storage slot0.",
                 "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented.",
             ]
         ),
@@ -146,20 +159,46 @@ def generate_upstream_account_query_templates(
     return payload
 
 
+def generate_upstream_account_query_manifest(
+    *,
+    repo_root: str | Path,
+    output_path: str | Path,
+    template_path: str | Path | None = None,
+    suite_version: str = "0.1.0",
+    chain_profile_version: str = "1",
+) -> dict[str, Any]:
+    repo_root_path = Path(repo_root).resolve()
+    output = Path(output_path).resolve()
+    template_file = (
+        Path(template_path).resolve()
+        if template_path is not None
+        else repo_root_path / "suites" / "templates" / "upstream_account_query_templates.json"
+    )
+    templates = load_account_query_templates(template_file)
+    execution_specs_ref = resolve_execution_specs_ref(
+        repo_root_path / "suites" / "manifests" / "upstream_account_query_mapped.json",
+        "submodule-pending",
+    )
+    manifest = {
+        "name": "upstream-account-query-mapped",
+        "version": "1",
+        "execution_specs_ref": execution_specs_ref,
+        "suite_version": suite_version,
+        "chain_profile_version": chain_profile_version,
+        "cases": [render_account_query_case(template) for template in templates],
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(manifest, indent=2) + "\n")
+    return manifest
+
+
 def load_account_query_templates(path: str | Path) -> tuple[AccountQueryMappingTemplate, ...]:
     template_path = Path(path)
     data = json.loads(template_path.read_text())
-    return tuple(
-        AccountQueryMappingTemplate(
-            case_id=entry["case_id"],
-            description=entry["description"],
-            namespace_seed=entry["namespace_seed"],
-            upstream_ref=entry["upstream_ref"],
-            notes=list(entry["notes"]),
-            mode=entry["mode"],
-        )
-        for entry in data["cases"]
-    )
+    entries = data.get("cases")
+    if not isinstance(entries, list):
+        raise ValueError("account query template payload must contain a list 'cases'")
+    return tuple(_load_account_query_template_entry(entry, index=index) for index, entry in enumerate(entries))
 
 
 def scan_account_query_cases(
@@ -184,9 +223,156 @@ def scan_account_query_cases(
     return templates, tuple(inventory)
 
 
+def render_account_query_case(template: AccountQueryMappingTemplate) -> dict[str, Any]:
+    if template.mode == "selfbalance_contract_balance_0":
+        return build_account_query_case(
+            template,
+            steps=[
+                deploy_account_query_contract_step(
+                    runtime_code=SELFBALANCE_RUNTIME,
+                    value="0x0",
+                ),
+                wait_receipt_step(),
+                invoke_contract_step(data_hex="0x"),
+                wait_receipt_step(),
+            ],
+            expected={"storage": {"0x00": WORD_00}},
+        )
+    if template.mode == "selfbalance_contract_balance_1":
+        return build_account_query_case(
+            template,
+            steps=[
+                deploy_account_query_contract_step(
+                    runtime_code=SELFBALANCE_RUNTIME,
+                    value="0x1",
+                ),
+                wait_receipt_step(),
+                invoke_contract_step(data_hex="0x"),
+                wait_receipt_step(),
+            ],
+            expected={"storage": {"0x00": WORD_01}},
+        )
+    if template.mode == "codesize":
+        return build_account_query_case(
+            template,
+            steps=[
+                deploy_account_query_contract_step(
+                    runtime_code=CODESIZE_RUNTIME,
+                ),
+                wait_receipt_step(),
+                invoke_contract_step(data_hex="0x"),
+                wait_receipt_step(),
+            ],
+            expected={"storage": {"0x00": WORD_05}},
+        )
+    if template.mode == "balance_cold_absent_accounts":
+        return build_account_query_case(
+            template,
+            steps=[
+                deploy_account_query_contract_step(
+                    runtime_code=BALANCE_RUNTIME,
+                ),
+                wait_receipt_step(),
+                invoke_contract_step(data_hex=_address_to_word(ABSENT_TARGET_ADDRESS)),
+                wait_receipt_step(),
+            ],
+            expected={"storage": {"0x00": WORD_00}},
+        )
+    if template.mode == "balance_cold_present_accounts":
+        return build_account_query_case(
+            template,
+            steps=[
+                {
+                    "action": "transfer_native",
+                    "to": PRESENT_TARGET_ADDRESS,
+                    "value": PRESENT_TARGET_FUNDING_VALUE,
+                    "gas": "0x5208",
+                },
+                wait_receipt_step(),
+                deploy_account_query_contract_step(
+                    runtime_code=BALANCE_RUNTIME,
+                ),
+                wait_receipt_step(),
+                invoke_contract_step(data_hex=_address_to_word(PRESENT_TARGET_ADDRESS)),
+                wait_receipt_step(),
+            ],
+            expected={"storage": {"0x00": WORD_2A}},
+        )
+    raise ValueError(f"unsupported account-query mapping mode: {template.mode}")
+
+
+def build_account_query_case(
+    template: AccountQueryMappingTemplate,
+    *,
+    steps: list[dict[str, Any]],
+    expected: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "kind": "upstream_mapped",
+        "case_id": template.case_id,
+        "family": "state/account-query",
+        "description": template.description,
+        "namespace_seed": template.namespace_seed,
+        "upstream_ref": template.upstream_ref,
+        "notes": template.notes,
+        "observe": {"storage_address": "$last_contract"},
+        "filters": {},
+        "steps": steps,
+        "expected": expected,
+    }
+
+
+def deploy_account_query_contract_step(
+    *,
+    runtime_code: str,
+    value: str = "0x0",
+    gas: str = "0x186a0",
+) -> dict[str, Any]:
+    return {
+        "action": "deploy_contract",
+        "bytecode_init": _build_init_code(runtime_code),
+        "bytecode_runtime": runtime_code,
+        "value": value,
+        "gas": gas,
+    }
+
+
+def _load_account_query_template_entry(entry: object, *, index: int) -> AccountQueryMappingTemplate:
+    if not isinstance(entry, dict):
+        raise ValueError(f"account query template entry {index} must be an object")
+    required_fields = (
+        "case_id",
+        "description",
+        "namespace_seed",
+        "upstream_ref",
+        "notes",
+        "mode",
+    )
+    for field in required_fields:
+        if field not in entry:
+            raise ValueError(f"account query template entry {index} missing required field: {field}")
+    mode = entry["mode"]
+    if mode not in ACCOUNT_QUERY_MODE_SPECS:
+        raise ValueError(f"unsupported account query template mode: {mode}")
+    notes = entry["notes"]
+    if not isinstance(notes, list) or not all(isinstance(note, str) for note in notes):
+        raise ValueError(f"account query template entry {index} field 'notes' must be a list of strings")
+    return AccountQueryMappingTemplate(
+        case_id=str(entry["case_id"]),
+        description=str(entry["description"]),
+        namespace_seed=str(entry["namespace_seed"]),
+        upstream_ref=str(entry["upstream_ref"]),
+        notes=list(notes),
+        mode=mode,
+    )
+
+
 def _scan_selfbalance_cases(text: str) -> list[AutoAccountQueryInventoryEntry]:
     block = _extract_decorator_region(text, function_name="test_selfbalance")
-    values = [_parse_int_literal(value) for value in _extract_param_values_from_block(block, "contract_balance", function_name="test_selfbalance")]
+    values = [
+        _parse_int_literal(value)
+        for value in _extract_param_values_from_block(block, "contract_balance", function_name="test_selfbalance")
+    ]
     results: list[AutoAccountQueryInventoryEntry] = []
     for contract_balance in values:
         mode, namespace = _resolve_selfbalance_mode(contract_balance)
@@ -238,7 +424,7 @@ def _scan_codecopy_cases(text: str) -> list[AutoAccountQueryInventoryEntry]:
     ]
     results: list[AutoAccountQueryInventoryEntry] = []
     for fixed_src_dst in fixed_src_dst_values:
-        for ratio_value, ratio_label in ratio_entries:
+        for _ratio_value, ratio_label in ratio_entries:
             ratio_slug = _slugify_label(ratio_label)
             fixed_slug = "fixed" if fixed_src_dst else "dynamic"
             results.append(
@@ -379,6 +565,53 @@ def _inventory_entry_to_template(entry: AutoAccountQueryInventoryEntry) -> Accou
         upstream_ref=entry.upstream_ref,
         notes=json.loads(spec["notes"]),
         mode=entry.mode,
+    )
+
+
+def _build_init_code(runtime_code: str) -> str:
+    runtime_hex = runtime_code.removeprefix("0x")
+    runtime_bytes = bytes.fromhex(runtime_hex)
+    length = len(runtime_bytes)
+    if length == 0:
+        raise ValueError("runtime_code must not be empty")
+    if length > 0xFF:
+        raise ValueError("runtime_code too long for PUSH1 init helper")
+    return f"0x60{length:02x}600c60003960{length:02x}6000f3{runtime_hex}"
+
+
+def _address_to_word(address: str) -> str:
+    if not address.startswith("0x") or len(address) != 42:
+        raise ValueError(f"unsupported address literal: {address}")
+    return "0x" + address[2:].lower().rjust(64, "0")
+
+
+def _load_account_query_template_entry(entry: object, *, index: int) -> AccountQueryMappingTemplate:
+    if not isinstance(entry, dict):
+        raise ValueError(f"account query template entry {index} must be an object")
+    required_fields = (
+        "case_id",
+        "description",
+        "namespace_seed",
+        "upstream_ref",
+        "notes",
+        "mode",
+    )
+    for field in required_fields:
+        if field not in entry:
+            raise ValueError(f"account query template entry {index} missing required field: {field}")
+    mode = entry["mode"]
+    if mode not in ACCOUNT_QUERY_MODE_SPECS:
+        raise ValueError(f"unsupported account query template mode: {mode}")
+    notes = entry["notes"]
+    if not isinstance(notes, list) or not all(isinstance(note, str) for note in notes):
+        raise ValueError(f"account query template entry {index} field 'notes' must be a list of strings")
+    return AccountQueryMappingTemplate(
+        case_id=str(entry["case_id"]),
+        description=str(entry["description"]),
+        namespace_seed=str(entry["namespace_seed"]),
+        upstream_ref=str(entry["upstream_ref"]),
+        notes=list(notes),
+        mode=mode,
     )
 
 

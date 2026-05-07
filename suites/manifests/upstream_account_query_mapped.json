@@ -1,0 +1,255 @@
+{
+  "name": "upstream-account-query-mapped",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.account_query.codesize.success",
+      "family": "state/account-query",
+      "description": "Admitted execution-specs CODESIZE benchmark variant.",
+      "namespace_seed": "upstream-account-query-codesize",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codesize",
+      "notes": [
+        "Upstream intent: benchmark CODESIZE on the currently executing account.",
+        "Admitted because deployed runtime bytecode size is directly observable from the deployed contract code.",
+        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f33860005500",
+          "bytecode_runtime": "0x3860005500",
+          "value": "0x0",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000005"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.account_query.balance.cold.present_accounts.success",
+      "family": "state/account-query",
+      "description": "Admitted execution-specs BALANCE cold-account benchmark variant against present target accounts.",
+      "namespace_seed": "upstream-account-query-balance-cold-present-accounts",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_ext_account_query_cold[absent_accounts=False-opcode=BALANCE]",
+      "notes": [
+        "Upstream intent: benchmark BALANCE over cold present target accounts.",
+        "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
+        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "transfer_native",
+          "to": "0x20000000000000000000000000000000000000b2",
+          "value": "0x2a",
+          "gas": "0x5208"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6007600c60003960076000f35f353160005500",
+          "bytecode_runtime": "0x5f353160005500",
+          "value": "0x0",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x00000000000000000000000020000000000000000000000000000000000000b2",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.account_query.balance.cold.absent_accounts.success",
+      "family": "state/account-query",
+      "description": "Admitted execution-specs BALANCE cold-account benchmark variant against absent target accounts.",
+      "namespace_seed": "upstream-account-query-balance-cold-absent-accounts",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_ext_account_query_cold[absent_accounts=True-opcode=BALANCE]",
+      "notes": [
+        "Upstream intent: benchmark BALANCE over cold absent target accounts.",
+        "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
+        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6007600c60003960076000f35f353160005500",
+          "bytecode_runtime": "0x5f353160005500",
+          "value": "0x0",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x00000000000000000000000010000000000000000000000000000000000000a1",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.account_query.selfbalance.contract_balance_0.success",
+      "family": "state/account-query",
+      "description": "Admitted execution-specs SELFBALANCE benchmark variant with zero contract balance.",
+      "namespace_seed": "upstream-account-query-selfbalance-balance-0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_selfbalance[contract_balance=0]",
+      "notes": [
+        "Upstream intent: benchmark SELFBALANCE on the currently executing account with zero balance.",
+        "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control.",
+        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f34760005500",
+          "bytecode_runtime": "0x4760005500",
+          "value": "0x0",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.account_query.selfbalance.contract_balance_1.success",
+      "family": "state/account-query",
+      "description": "Admitted execution-specs SELFBALANCE benchmark variant with non-zero contract balance.",
+      "namespace_seed": "upstream-account-query-selfbalance-balance-1",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_selfbalance[contract_balance=1]",
+      "notes": [
+        "Upstream intent: benchmark SELFBALANCE on the currently executing account with a funded balance.",
+        "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control.",
+        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f34760005500",
+          "bytecode_runtime": "0x4760005500",
+          "value": "0x1",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      }
+    }
+  ]
+}
