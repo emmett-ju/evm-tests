@@ -1056,9 +1056,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(families["alpha"]["blocked_reasons"], {"requires precise gas fixture": 1})
             self.assertEqual(families["beta"]["blocked_reasons"], {"requires block environment control": 1})
 
-    def test_inventory_summary_aggregates_checked_in_first_family_inventories(self) -> None:
-        summary = summarize_inventory_dir(ROOT / "suites/templates")
-
+    def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
             {"families": 9, "cases": 292, "admitted": 32, "blocked": 260},
@@ -1066,9 +1064,15 @@ class HarnessTests(unittest.TestCase):
 
         families = {item["family"]: item for item in summary["families"]}
         self.assertEqual(
-            {family: {"total": item["total"], "admitted": item["admitted"], "blocked": item["blocked"]}
-             for family, item in families.items()
-             if family in {"arithmetic", "bitwise", "comparison", "stack", "control-flow"}},
+            {
+                family: {
+                    "total": item["total"],
+                    "admitted": item["admitted"],
+                    "blocked": item["blocked"],
+                }
+                for family, item in families.items()
+                if family in {"arithmetic", "bitwise", "comparison", "stack", "control-flow"}
+            },
             {
                 "arithmetic": {"total": 65, "admitted": 0, "blocked": 65},
                 "bitwise": {"total": 12, "admitted": 0, "blocked": 12},
@@ -1077,6 +1081,10 @@ class HarnessTests(unittest.TestCase):
                 "control-flow": {"total": 7, "admitted": 0, "blocked": 7},
             },
         )
+
+    def test_inventory_summary_aggregates_checked_in_first_family_inventories(self) -> None:
+        summary = summarize_inventory_dir(ROOT / "suites/templates")
+        self._assert_checked_in_first_family_inventory_summary(summary)
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1113,6 +1121,25 @@ class HarnessTests(unittest.TestCase):
             summary = json.loads(output_path.read_text())
             self.assertEqual(summary["totals"], {"families": 1, "cases": 1, "admitted": 1, "blocked": 0})
             self.assertEqual(summary["families"][0]["family"], "alpha")
+
+    def test_cli_summarize_upstream_inventory_matches_checked_in_first_family_inventories(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "summary.json"
+            self.assertEqual(
+                main(
+                    [
+                        "summarize-upstream-inventory",
+                        "--inventory-dir",
+                        str(ROOT / "suites/templates"),
+                        "--output",
+                        str(output_path),
+                    ]
+                ),
+                0,
+            )
+            summary = json.loads(output_path.read_text())
+            self._assert_checked_in_first_family_inventory_summary(summary)
+            self.assertEqual(summary, summarize_inventory_dir(ROOT / "suites/templates"))
 
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
