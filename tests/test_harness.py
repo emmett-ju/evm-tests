@@ -27,6 +27,7 @@ from adapter.call_context_generator import (
     generate_upstream_call_context_templates,
     load_call_context_templates,
 )
+from adapter.inventory import summarize_inventory_dir, write_inventory_payload
 from adapter.tx_context_generator import (
     generate_upstream_tx_context_manifest,
     generate_upstream_tx_context_templates,
@@ -472,6 +473,172 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(generated["name"], "upstream-tx-context-mapping-templates")
             self.assertEqual(len(generated["cases"]), 1)
             self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
+
+    def test_cli_scan_upstream_storage_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-storage",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-storage-auto-inventory")
+            self.assertEqual(inventory["family"], "storage")
+            self.assertEqual(len(inventory["entries"]), 17)
+
+    def test_cli_scan_upstream_memory_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-memory",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-memory-auto-inventory")
+            self.assertEqual(inventory["family"], "memory")
+            self.assertGreater(len(inventory["entries"]), 5)
+
+    def test_cli_scan_upstream_call_context_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-call-context",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-call-context-auto-inventory")
+            self.assertEqual(inventory["family"], "call-context")
+            self.assertGreater(len(inventory["entries"]), 9)
+
+    def test_cli_scan_upstream_tx_context_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-tx-context",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-tx-context-auto-inventory")
+            self.assertEqual(inventory["family"], "tx-context")
+            self.assertGreater(len(inventory["entries"]), 1)
+
+    def test_cli_scan_upstream_storage_requires_inventory_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            with self.assertRaises(SystemExit):
+                main(
+                    [
+                        "scan-upstream-storage",
+                        "--template-output",
+                        str(output_path),
+                    ]
+                )
+
+    def test_inventory_summary_aggregates_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            write_inventory_payload(
+                tmp_path / "upstream_alpha_inventory.json",
+                family="alpha",
+                name="upstream-alpha-auto-inventory",
+                source="alpha.py",
+                entries=[
+                    {
+                        "upstream_ref": "alpha::test_ok",
+                        "case_id": "alpha.ok",
+                        "admitted": True,
+                        "reasons": [],
+                        "source": "unit",
+                    },
+                    {
+                        "upstream_ref": "alpha::test_blocked",
+                        "case_id": "alpha.blocked",
+                        "admitted": False,
+                        "reasons": ["requires precise gas fixture"],
+                        "source": "unit",
+                    },
+                ],
+            )
+            write_inventory_payload(
+                tmp_path / "upstream_beta_inventory.json",
+                family="beta",
+                name="upstream-beta-auto-inventory",
+                source="beta.py",
+                entries=[
+                    {
+                        "upstream_ref": "beta::test_blocked",
+                        "case_id": "beta.blocked",
+                        "admitted": False,
+                        "reasons": ["requires block environment control"],
+                        "source": "unit",
+                    }
+                ],
+            )
+            summary = summarize_inventory_dir(tmp_path)
+            self.assertEqual(summary["totals"], {"families": 2, "cases": 3, "admitted": 1, "blocked": 2})
+            families = {item["family"]: item for item in summary["families"]}
+            self.assertEqual(families["alpha"]["blocked_reasons"], {"requires precise gas fixture": 1})
+            self.assertEqual(families["beta"]["blocked_reasons"], {"requires block environment control": 1})
+
+    def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            inventory_dir = tmp_path / "inventories"
+            output_path = tmp_path / "summary.json"
+            write_inventory_payload(
+                inventory_dir / "upstream_alpha_inventory.json",
+                family="alpha",
+                name="upstream-alpha-auto-inventory",
+                source="alpha.py",
+                entries=[
+                    {
+                        "upstream_ref": "alpha::test_ok",
+                        "case_id": "alpha.ok",
+                        "admitted": True,
+                        "reasons": [],
+                        "source": "unit",
+                    }
+                ],
+            )
+            self.assertEqual(
+                main(
+                    [
+                        "summarize-upstream-inventory",
+                        "--inventory-dir",
+                        str(inventory_dir),
+                        "--output",
+                        str(output_path),
+                    ]
+                ),
+                0,
+            )
+            summary = json.loads(output_path.read_text())
+            self.assertEqual(summary["totals"], {"families": 1, "cases": 1, "admitted": 1, "blocked": 0})
+            self.assertEqual(summary["families"][0]["family"], "alpha")
 
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

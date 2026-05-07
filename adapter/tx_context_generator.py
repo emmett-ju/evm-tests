@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from adapter.generator import build_case, deploy_contract_step, invoke_contract_step, wait_receipt_step
+from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
 
 
@@ -55,9 +56,11 @@ def generate_upstream_tx_context_templates(
     *,
     repo_root: str | Path,
     source_path: str | Path | None = None,
-    output_path: str | Path,
+    output_path: str | Path | None = None,
     inventory_path: str | Path | None = None,
 ) -> dict[str, Any]:
+    if output_path is None and inventory_path is None:
+        raise ValueError("at least one of output_path or inventory_path is required")
     repo_root_path = Path(repo_root).resolve()
     source = (
         Path(source_path).resolve()
@@ -71,19 +74,18 @@ def generate_upstream_tx_context_templates(
         "source": str(source.relative_to(repo_root_path)) if source.is_relative_to(repo_root_path) else str(source),
         "cases": [asdict(template) for template in templates],
     }
-    output = Path(output_path).resolve()
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(payload, indent=2) + "\n")
+    if output_path is not None:
+        output = Path(output_path).resolve()
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(payload, indent=2) + "\n")
     if inventory_path is not None:
-        inventory_payload = {
-            "name": "upstream-tx-context-auto-inventory",
-            "version": "1",
-            "source": payload["source"],
-            "entries": [asdict(entry) for entry in inventory],
-        }
-        inventory_file = Path(inventory_path).resolve()
-        inventory_file.parent.mkdir(parents=True, exist_ok=True)
-        inventory_file.write_text(json.dumps(inventory_payload, indent=2) + "\n")
+        write_inventory_payload(
+            inventory_path,
+            family="tx-context",
+            name="upstream-tx-context-auto-inventory",
+            source=payload["source"],
+            entries=inventory,
+        )
     return payload
 
 

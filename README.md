@@ -12,11 +12,12 @@ This repository contains a Python 3.12 harness for running selected execution-la
 
 - 项目接手说明：`docs/project-handoff.md`
 - upstream 迁移计划：`docs/upstream-execution-specs-migration-plan.md`
+- Phase 0 inventory 设计：`docs/phase0-inventory-design.md`
 
 ## Quick Start
 
 ```bash
-python -m pytest
+python3 -m unittest discover -s tests -v
 python -m adapter.cli list --manifest suites/manifests/upstream_smoke.json
 python -m adapter.cli bootstrap --profile profiles/mock.toml --state-dir .state
 python -m adapter.cli run --profile profiles/mock.toml --manifest suites/manifests/custom_storage_smoke.json --state-dir .state

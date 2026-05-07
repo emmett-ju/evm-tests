@@ -12,6 +12,7 @@ from adapter.call_context_generator import (
 from adapter.env import load_dotenv
 from adapter.executor import JsonRpcBackend, MockBackend, RpcExecutor, result_from_execution
 from adapter.generator import generate_upstream_storage_manifest, generate_upstream_storage_templates
+from adapter.inventory import summarize_inventory_dir, write_json
 from adapter.manifest import load_manifest
 from adapter.memory_generator import generate_upstream_memory_manifest, generate_upstream_memory_templates
 from adapter.models import Report
@@ -52,8 +53,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--source",
         default="third_party/execution-specs/tests/benchmark/compute/instruction/test_storage.py",
     )
-    scan.add_argument("--template-output", required=True)
-    scan.add_argument("--inventory-output")
+    scan.add_argument("--template-output")
+    scan.add_argument("--inventory-output", required=True)
 
     generate_memory = subparsers.add_parser("generate-memory-manifest")
     generate_memory.add_argument("--template", default="suites/templates/upstream_memory_templates.json")
@@ -64,8 +65,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--source",
         default="third_party/execution-specs/tests/benchmark/compute/instruction/test_memory.py",
     )
-    scan_memory.add_argument("--template-output", required=True)
-    scan_memory.add_argument("--inventory-output")
+    scan_memory.add_argument("--template-output")
+    scan_memory.add_argument("--inventory-output", required=True)
 
     generate_call_context = subparsers.add_parser("generate-call-context-manifest")
     generate_call_context.add_argument("--template", default="suites/templates/upstream_call_context_templates.json")
@@ -76,8 +77,8 @@ def build_parser() -> argparse.ArgumentParser:
         "--source",
         default="third_party/execution-specs/tests/benchmark/compute/instruction/test_call_context.py",
     )
-    scan_call_context.add_argument("--template-output", required=True)
-    scan_call_context.add_argument("--inventory-output")
+    scan_call_context.add_argument("--template-output")
+    scan_call_context.add_argument("--inventory-output", required=True)
 
     generate_tx_context = subparsers.add_parser("generate-tx-context-manifest")
     generate_tx_context.add_argument("--template", default="suites/templates/upstream_tx_context_templates.json")
@@ -88,8 +89,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--source",
         default="third_party/execution-specs/tests/benchmark/compute/instruction/test_tx_context.py",
     )
-    scan_tx_context.add_argument("--template-output", required=True)
-    scan_tx_context.add_argument("--inventory-output")
+    scan_tx_context.add_argument("--template-output")
+    scan_tx_context.add_argument("--inventory-output", required=True)
+
+    summarize_inventory = subparsers.add_parser("summarize-upstream-inventory")
+    summarize_inventory.add_argument("--inventory-dir", default="suites/templates")
+    summarize_inventory.add_argument("--output", required=True)
 
     return parser
 
@@ -259,6 +264,12 @@ def main(argv: list[str] | None = None) -> int:
             inventory_path=args.inventory_output,
         )
         print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "summarize-upstream-inventory":
+        summary = summarize_inventory_dir(args.inventory_dir)
+        write_json(args.output, summary)
+        print(json.dumps(summary, indent=2, sort_keys=True))
         return 0
 
     parser.error(f"unsupported command: {args.command}")
