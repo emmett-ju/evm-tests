@@ -22,6 +22,11 @@ from adapter.memory_generator import (
     generate_upstream_memory_templates,
     load_memory_templates,
 )
+from adapter.call_context_generator import (
+    generate_upstream_call_context_manifest,
+    generate_upstream_call_context_templates,
+    load_call_context_templates,
+)
 from adapter.oracle import ResultOracle
 from adapter.profile import describe_admin_key_source, load_chain_profile
 from adapter.selector import TestSelector
@@ -141,6 +146,27 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
+    def test_selector_allows_upstream_mapped_call_context_case(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_call_context_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(
+            [case.case_id for case in selected],
+            [
+                "upstream.benchmark.call_context.address.success",
+                "upstream.benchmark.call_context.caller.success",
+                "upstream.benchmark.call_context.calldataload.calldata_size_32.nonzero.success",
+                "upstream.benchmark.call_context.calldataload.calldata_size_0.zero.success",
+                "upstream.benchmark.call_context.calldatasize.calldata_size_32.nonzero.success",
+                "upstream.benchmark.call_context.calldatasize.calldata_size_0.zero.success",
+                "upstream.benchmark.call_context.calldatasize.calldata_size_32.zero.success",
+                "upstream.benchmark.call_context.callvalue.origin.zero.success",
+                "upstream.benchmark.call_context.callvalue.origin.nonzero.success",
+            ],
+        )
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
     def test_manifest_resolves_execution_specs_ref(self) -> None:
         manifest = load_manifest(ROOT / "suites/manifests/upstream_smoke.json")
         head = (
@@ -190,6 +216,19 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertEqual(generated, checked_in)
 
+    def test_call_context_manifest_generator_matches_checked_in_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_call_context_mapped.json"
+            generated = generate_upstream_call_context_manifest(
+                repo_root=ROOT,
+                template_path=ROOT / "suites/templates/upstream_call_context_templates.json",
+                output_path=generated_path,
+            )
+            checked_in = json.loads(
+                (ROOT / "suites/manifests/upstream_call_context_mapped.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+
     def test_storage_templates_load(self) -> None:
         templates = load_storage_templates(ROOT / "suites/templates/upstream_storage_templates.json")
         self.assertEqual(len(templates), 17)
@@ -199,6 +238,11 @@ class HarnessTests(unittest.TestCase):
         templates = load_memory_templates(ROOT / "suites/templates/upstream_memory_templates.json")
         self.assertEqual(len(templates), 5)
         self.assertEqual(templates[0].mode, "mstore_offset0_uninitialized_mem0")
+
+    def test_call_context_templates_load(self) -> None:
+        templates = load_call_context_templates(ROOT / "suites/templates/upstream_call_context_templates.json")
+        self.assertEqual(len(templates), 9)
+        self.assertEqual(templates[0].mode, "address")
 
     def test_storage_template_scanner_matches_checked_in_template(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -234,6 +278,25 @@ class HarnessTests(unittest.TestCase):
             admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
             self.assertEqual(len(admitted), 5)
+            self.assertGreater(len(blocked), 0)
+
+    def test_call_context_template_scanner_matches_checked_in_template(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_call_context_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_call_context_inventory.json"
+            generated = generate_upstream_call_context_templates(
+                repo_root=ROOT,
+                output_path=generated_path,
+                inventory_path=inventory_path,
+            )
+            checked_in = json.loads(
+                (ROOT / "suites/templates/upstream_call_context_templates.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            inventory = json.loads(inventory_path.read_text())
+            admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
+            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
+            self.assertEqual(len(admitted), 9)
             self.assertGreater(len(blocked), 0)
 
     def test_cli_generate_storage_manifest_writes_expected_output(self) -> None:
@@ -302,6 +365,40 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(generated["cases"]), 5)
             self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
 
+    def test_cli_generate_call_context_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "generated.json"
+            self.assertEqual(
+                main(["generate-call-context-manifest", "--output", str(output_path)]),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            self.assertEqual(generated["name"], "upstream-call-context-mapped")
+            self.assertEqual(len(generated["cases"]), 9)
+            self.assertEqual(generated["cases"][0]["expected"]["storage"]["0x00"], "$last_contract_word")
+
+    def test_cli_scan_upstream_call_context_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-call-context",
+                        "--template-output",
+                        str(output_path),
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(generated["name"], "upstream-call-context-mapping-templates")
+            self.assertEqual(len(generated["cases"]), 9)
+            self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
+
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -320,6 +417,30 @@ class HarnessTests(unittest.TestCase):
             {"storage": {"0x00": "0x02"}},
         )
         self.assertEqual(diffs, ["storage.0x00: expected '0x01', got '0x02'"])
+
+    def test_oracle_resolves_runtime_address_placeholders(self) -> None:
+        diffs = ResultOracle().compare(
+            {"storage": {"0x00": "$last_contract_word", "0x01": "$admin_account_word"}},
+            {
+                "storage": {
+                    "0x00": "0x000000000000000000000000cccccccccccccccccccccccccccccccccccccccc",
+                    "0x01": "0x000000000000000000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                }
+            },
+            {
+                "$last_contract": "0xcccccccccccccccccccccccccccccccccccccccc",
+                "$admin_account": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            },
+        )
+        self.assertEqual(diffs, [])
+
+    def test_oracle_rejects_unknown_placeholders(self) -> None:
+        with self.assertRaises(ValueError):
+            ResultOracle().compare(
+                {"storage": {"0x00": "$missing_word"}},
+                {"storage": {"0x00": "0x00"}},
+                {},
+            )
 
     def test_cli_run_writes_report_and_is_repeatable(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -626,6 +747,60 @@ class HarnessTests(unittest.TestCase):
                 },
                 "upstream.benchmark.memory.msize.mem_size_1.success": {
                     "0x00": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                },
+            }
+            for result in report["results"]:
+                self.assertIn(result["case_id"], expected_storage)
+                for slot, value in expected_storage[result["case_id"]].items():
+                    self.assertEqual(result["observed"]["storage"][slot], value)
+                self.assertIs(result["success"], True)
+
+    def test_mock_backend_runs_upstream_mapped_call_context_case(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_call_context_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 9)
+            expected_storage = {
+                "upstream.benchmark.call_context.address.success": {
+                    "0x00": "0x000000000000000000000000cccccccccccccccccccccccccccccccccccccccc",
+                },
+                "upstream.benchmark.call_context.caller.success": {
+                    "0x00": "0x000000000000000000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                },
+                "upstream.benchmark.call_context.calldatasize.calldata_size_0.zero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.call_context.calldatasize.calldata_size_32.nonzero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                },
+                "upstream.benchmark.call_context.calldatasize.calldata_size_32.zero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                },
+                "upstream.benchmark.call_context.calldataload.calldata_size_0.zero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.call_context.calldataload.calldata_size_32.nonzero.success": {
+                    "0x00": "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+                },
+                "upstream.benchmark.call_context.callvalue.origin.nonzero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+                "upstream.benchmark.call_context.callvalue.origin.zero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
                 },
             }
             for result in report["results"]:

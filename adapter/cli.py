@@ -5,6 +5,10 @@ import json
 from pathlib import Path
 
 from adapter.bootstrap import StateBootstrapper
+from adapter.call_context_generator import (
+    generate_upstream_call_context_manifest,
+    generate_upstream_call_context_templates,
+)
 from adapter.env import load_dotenv
 from adapter.executor import JsonRpcBackend, MockBackend, RpcExecutor, result_from_execution
 from adapter.generator import generate_upstream_storage_manifest, generate_upstream_storage_templates
@@ -59,6 +63,18 @@ def build_parser() -> argparse.ArgumentParser:
     scan_memory.add_argument("--template-output", required=True)
     scan_memory.add_argument("--inventory-output")
 
+    generate_call_context = subparsers.add_parser("generate-call-context-manifest")
+    generate_call_context.add_argument("--template", default="suites/templates/upstream_call_context_templates.json")
+    generate_call_context.add_argument("--output", required=True)
+
+    scan_call_context = subparsers.add_parser("scan-upstream-call-context")
+    scan_call_context.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/benchmark/compute/instruction/test_call_context.py",
+    )
+    scan_call_context.add_argument("--template-output", required=True)
+    scan_call_context.add_argument("--inventory-output")
+
     return parser
 
 
@@ -108,15 +124,19 @@ def main(argv: list[str] | None = None) -> int:
         selected_cases, decisions = selector.select(manifest)
         bootstrapper = StateBootstrapper(profile, args.state_dir)
         bootstrapper.bootstrap_global()
-        backend = MockBackend() if profile.backend == "mock" else JsonRpcBackend(profile)
+        backend = (
+            MockBackend(admin_account=profile.admin_account)
+            if profile.backend == "mock"
+            else JsonRpcBackend(profile)
+        )
         executor = RpcExecutor(backend)
         oracle = ResultOracle()
         results = []
         for case in selected_cases:
             namespace = bootstrapper.prepare_case_namespace(case).namespace
-            tx_hashes, observed = executor.run_case(case, namespace)
-            diffs = oracle.compare(case.expected, observed)
-            results.append(result_from_execution(case, namespace, tx_hashes, observed, diffs))
+            tx_hashes, observed, context = executor.run_case(case, namespace)
+            diffs = oracle.compare(case.expected, observed, context)
+            results.append(result_from_execution(case, namespace, tx_hashes, context, observed, diffs))
         report = Report(
             manifest=manifest.name,
             execution_specs_ref=manifest.execution_specs_ref,
@@ -179,6 +199,25 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "scan-upstream-memory":
         templates = generate_upstream_memory_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-call-context-manifest":
+        manifest = generate_upstream_call_context_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-call-context":
+        templates = generate_upstream_call_context_templates(
             repo_root=Path.cwd(),
             source_path=args.source,
             output_path=args.template_output,

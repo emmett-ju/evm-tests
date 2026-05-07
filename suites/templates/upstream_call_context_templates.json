@@ -1,0 +1,115 @@
+{
+  "name": "upstream-call-context-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_call_context.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.call_context.address.success",
+      "description": "Mapped from execution-specs ADDRESS onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-address",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_call_frame_context_ops[opcode=ADDRESS]",
+      "notes": [
+        "Upstream intent: benchmark ADDRESS in an external-call frame.",
+        "RPC mapping: runtime writes ADDRESS to storage slot0 after deployment, then the harness asserts it against the deployed contract address resolved at runtime.",
+        "Admitted because the final contract address is observable from the deployment receipt and can be resolved via placeholders without genesis control."
+      ],
+      "mode": "address"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.caller.success",
+      "description": "Mapped from execution-specs CALLER onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-caller",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_call_frame_context_ops[opcode=CALLER]",
+      "notes": [
+        "Upstream intent: benchmark CALLER in an external-call frame.",
+        "RPC mapping: runtime writes CALLER to storage slot0 after deployment, then the harness asserts it against the admin sender address resolved at runtime.",
+        "Admitted because the sender address is known from the active chain profile and can be resolved via placeholders."
+      ],
+      "mode": "caller"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_32.nonzero.success",
+      "description": "Mapped from execution-specs CALLDATALOAD with 32 bytes of non-zero calldata onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldataload-32-nonzero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=False-calldata_size=32]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATALOAD at offset 0 with 32 bytes of deterministic calldata.",
+        "RPC mapping: runtime CALLDATALOADs offset 0 and stores the resulting word into storage slot0.",
+        "Admitted because the loaded word is directly observable in storage."
+      ],
+      "mode": "calldataload_32_nonzero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_0.zero.success",
+      "description": "Mapped from execution-specs CALLDATALOAD with empty calldata onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldataload-0-zero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=True-calldata_size=0]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATALOAD at offset 0 with empty calldata.",
+        "RPC mapping: runtime CALLDATALOADs offset 0 and stores the resulting word into storage slot0.",
+        "Admitted because the resulting zero word is directly observable in storage."
+      ],
+      "mode": "calldataload_0_zero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_32.nonzero.success",
+      "description": "Mapped from execution-specs CALLDATASIZE with 32 non-zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldatasize-32-nonzero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=False-calldata_size=32]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATASIZE with 32 bytes of non-zero calldata.",
+        "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using a 32-byte deterministic payload.",
+        "Admitted because the resulting size word is directly observable in storage."
+      ],
+      "mode": "calldatasize_32_nonzero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_0.zero.success",
+      "description": "Mapped from execution-specs CALLDATASIZE with zero calldata onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldatasize-0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=True-calldata_size=0]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATASIZE with empty calldata.",
+        "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using an empty call payload.",
+        "Admitted because the resulting size word is directly observable in storage."
+      ],
+      "mode": "calldatasize_0_zero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_32.zero.success",
+      "description": "Mapped from execution-specs CALLDATASIZE with 32 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldatasize-32-zero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=True-calldata_size=32]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATASIZE with 32 bytes of zero calldata.",
+        "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using a 32-byte zero payload.",
+        "Admitted because the resulting size word is directly observable in storage."
+      ],
+      "mode": "calldatasize_32_zero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.callvalue.origin.zero.success",
+      "description": "Mapped from execution-specs CALLVALUE with zero value onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-callvalue-zero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_callvalue_from_origin[non_zero_value=False]",
+      "notes": [
+        "Upstream intent: benchmark CALLVALUE for a zero-value origin transaction.",
+        "RPC mapping: runtime writes CALLVALUE to storage slot0; the invoke step sends value 0x0.",
+        "Admitted because the final value word is directly observable in storage."
+      ],
+      "mode": "callvalue_zero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.callvalue.origin.nonzero.success",
+      "description": "Mapped from execution-specs CALLVALUE with non-zero value onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-callvalue-one",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_callvalue_from_origin[non_zero_value=True]",
+      "notes": [
+        "Upstream intent: benchmark CALLVALUE for a non-zero origin transaction.",
+        "RPC mapping: runtime writes CALLVALUE to storage slot0; the invoke step sends value 0x1.",
+        "Admitted because the final value word is directly observable in storage."
+      ],
+      "mode": "callvalue_one"
+    }
+  ]
+}

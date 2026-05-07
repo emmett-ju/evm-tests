@@ -14,18 +14,28 @@ ZERO_STORAGE_WORD = "0x000000000000000000000000000000000000000000000000000000000
 WORD_20 = "0x0000000000000000000000000000000000000000000000000000000000000020"
 WORD_2A = "0x000000000000000000000000000000000000000000000000000000000000002a"
 WORD_2A_BYTE_AT_31 = "0x2a00000000000000000000000000000000000000000000000000000000000000"
+CALLDATA_WORD_PATTERN = "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
 
 
 class Backend(Protocol):
-    def execute_case(self, case: TestCase, namespace: str) -> tuple[list[str], dict[str, Any]]:
+    def execute_case(
+        self,
+        case: TestCase,
+        namespace: str,
+    ) -> tuple[list[str], dict[str, Any], dict[str, Any]]:
         ...
 
 
 @dataclass(slots=True)
 class MockBackend:
+    admin_account: str = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     state: dict[str, dict[str, Any]] = field(default_factory=dict)
 
-    def execute_case(self, case: TestCase, namespace: str) -> tuple[list[str], dict[str, Any]]:
+    def execute_case(
+        self,
+        case: TestCase,
+        namespace: str,
+    ) -> tuple[list[str], dict[str, Any], dict[str, Any]]:
         namespace_state = self.state.setdefault(namespace, {})
         contracts = namespace_state.setdefault("contracts", {})
         tx_hashes: list[str] = []
@@ -100,6 +110,24 @@ class MockBackend:
                     storage["0x00"] = ZERO_STORAGE_WORD
                 elif code == "0x5f515960005500":
                     storage["0x00"] = WORD_20
+                elif code == "0x3460005500":
+                    value = step.get("value", "0x0")
+                    storage["0x00"] = "0x" + value.removeprefix("0x").rjust(64, "0")
+                elif code == "0x3060005500":
+                    if not target_address.startswith("0x"):
+                        raise ValueError(f"invalid target address for ADDRESS mock path: {target_address!r}")
+                    storage["0x00"] = "0x" + target_address[2:].lower().rjust(64, "0")
+                elif code == "0x3360005500":
+                    storage["0x00"] = "0x" + self.admin_account[2:].lower().rjust(64, "0")
+                elif code == "0x3660005500":
+                    calldata_hex = data[2:] if data.startswith("0x") else data
+                    storage["0x00"] = "0x" + hex(len(calldata_hex) // 2)[2:].rjust(64, "0")
+                elif code == "0x5f3560005500":
+                    calldata_hex = data[2:] if data.startswith("0x") else data
+                    if not calldata_hex:
+                        storage["0x00"] = ZERO_STORAGE_WORD
+                    else:
+                        storage["0x00"] = "0x" + calldata_hex[:64].ljust(64, "0")
                 else:
                     raise ValueError(f"unsupported mock contract code path: {code}")
             elif action == "wait_receipt":
@@ -107,13 +135,18 @@ class MockBackend:
             else:
                 raise ValueError(f"unsupported mock action: {action}")
         observed = self._mock_observe(case, contracts, last_receipt, last_contract_address)
+        context = {
+            "$admin_account": self.admin_account,
+        }
+        if last_contract_address is not None:
+            context["$last_contract"] = last_contract_address
         if "receipt_status" in case.expected:
             observed["receipt_status"] = None if last_receipt is None else last_receipt.get("status")
         if "receipt_contract_address" in case.expected:
             observed["receipt_contract_address"] = (
                 None if last_receipt is None else last_receipt.get("contractAddress")
             )
-        return tx_hashes, observed
+        return tx_hashes, observed, context
 
     def _mock_observe(
         self,
@@ -156,7 +189,11 @@ class JsonRpcBackend:
         self.profile = profile
         self.request_id = 0
 
-    def execute_case(self, case: TestCase, namespace: str) -> tuple[list[str], dict[str, Any]]:
+    def execute_case(
+        self,
+        case: TestCase,
+        namespace: str,
+    ) -> tuple[list[str], dict[str, Any], dict[str, Any]]:
         tx_hashes: list[str] = []
         last_receipt: dict[str, Any] | None = None
         last_contract_address: str | None = None
@@ -215,7 +252,12 @@ class JsonRpcBackend:
             else:
                 raise ValueError(f"unsupported jsonrpc action: {action}")
         observed = self._observe(case, last_receipt, last_contract_address)
-        return tx_hashes, observed
+        context = {
+            "$admin_account": self.profile.admin_account,
+        }
+        if last_contract_address is not None:
+            context["$last_contract"] = last_contract_address
+        return tx_hashes, observed, context
 
     def _observe(
         self,
@@ -335,7 +377,11 @@ class RpcExecutor:
     def __init__(self, backend: Backend) -> None:
         self.backend = backend
 
-    def run_case(self, case: TestCase, namespace: str) -> tuple[list[str], dict[str, Any]]:
+    def run_case(
+        self,
+        case: TestCase,
+        namespace: str,
+    ) -> tuple[list[str], dict[str, Any], dict[str, Any]]:
         return self.backend.execute_case(case, namespace)
 
 
@@ -343,6 +389,7 @@ def result_from_execution(
     case: TestCase,
     namespace: str,
     tx_hashes: list[str],
+    context: dict[str, Any],
     observed: dict[str, Any],
     diffs: list[str],
 ) -> ExecutionResult:
@@ -351,6 +398,7 @@ def result_from_execution(
         namespace=namespace,
         success=not diffs,
         tx_hashes=tx_hashes,
+        context=context,
         observed=observed,
         expected=case.expected,
         diffs=diffs,

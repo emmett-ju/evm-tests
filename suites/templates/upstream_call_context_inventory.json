@@ -1,0 +1,199 @@
+{
+  "name": "upstream-call-context-auto-inventory",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_call_context.py",
+  "entries": [
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_call_frame_context_ops[opcode=ADDRESS]",
+      "case_id": "upstream.benchmark.call_context.address.success",
+      "admitted": true,
+      "mode": "address",
+      "reasons": [],
+      "source": "zero_param"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_call_frame_context_ops[opcode=CALLER]",
+      "case_id": "upstream.benchmark.call_context.caller.success",
+      "admitted": true,
+      "mode": "caller",
+      "reasons": [],
+      "source": "zero_param"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_call_frame_context_ops[opcode=]",
+      "case_id": "upstream.benchmark.call_context..success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "unsupported zero-parameter call-context opcode"
+      ],
+      "source": "zero_param"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=False-calldata_size=0]",
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_0.nonzero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldataload matrix not yet mapped"
+      ],
+      "source": "calldataload"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=False-calldata_size=1024]",
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_1024.nonzero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldataload matrix not yet mapped"
+      ],
+      "source": "calldataload"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=False-calldata_size=256]",
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_256.nonzero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldataload matrix not yet mapped"
+      ],
+      "source": "calldataload"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=False-calldata_size=32]",
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_32.nonzero.success",
+      "admitted": true,
+      "mode": "calldataload_32_nonzero",
+      "reasons": [],
+      "source": "calldataload"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=True-calldata_size=0]",
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_0.zero.success",
+      "admitted": true,
+      "mode": "calldataload_0_zero",
+      "reasons": [],
+      "source": "calldataload"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=True-calldata_size=1024]",
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_1024.zero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldataload matrix not yet mapped"
+      ],
+      "source": "calldataload"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=True-calldata_size=256]",
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_256.zero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldataload matrix not yet mapped"
+      ],
+      "source": "calldataload"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=True-calldata_size=32]",
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_32.zero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldataload matrix not yet mapped"
+      ],
+      "source": "calldataload"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=False-calldata_size=0]",
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_0.nonzero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldata-size matrix not yet mapped"
+      ],
+      "source": "calldatasize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=False-calldata_size=1024]",
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_1024.nonzero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldata-size matrix not yet mapped"
+      ],
+      "source": "calldatasize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=False-calldata_size=256]",
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_256.nonzero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldata-size matrix not yet mapped"
+      ],
+      "source": "calldatasize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=False-calldata_size=32]",
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_32.nonzero.success",
+      "admitted": true,
+      "mode": "calldatasize_32_nonzero",
+      "reasons": [],
+      "source": "calldatasize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=True-calldata_size=0]",
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_0.zero.success",
+      "admitted": true,
+      "mode": "calldatasize_0_zero",
+      "reasons": [],
+      "source": "calldatasize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=True-calldata_size=1024]",
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_1024.zero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldata-size matrix not yet mapped"
+      ],
+      "source": "calldatasize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=True-calldata_size=256]",
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_256.zero.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broader calldata-size matrix not yet mapped"
+      ],
+      "source": "calldatasize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=True-calldata_size=32]",
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_32.zero.success",
+      "admitted": true,
+      "mode": "calldatasize_32_zero",
+      "reasons": [],
+      "source": "calldatasize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_callvalue_from_origin[non_zero_value=False]",
+      "case_id": "upstream.benchmark.call_context.callvalue.origin.zero.success",
+      "admitted": true,
+      "mode": "callvalue_zero",
+      "reasons": [],
+      "source": "callvalue_origin"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_callvalue_from_origin[non_zero_value=True]",
+      "case_id": "upstream.benchmark.call_context.callvalue.origin.nonzero.success",
+      "admitted": true,
+      "mode": "callvalue_one",
+      "reasons": [],
+      "source": "callvalue_origin"
+    }
+  ]
+}

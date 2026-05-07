@@ -107,6 +107,7 @@ class ExecutionResult:
     namespace: str
     success: bool
     tx_hashes: list[str]
+    context: dict[str, Any]
     observed: dict[str, Any]
     expected: dict[str, Any]
     diffs: list[str]
