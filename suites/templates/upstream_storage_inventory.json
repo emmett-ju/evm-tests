@@ -1,0 +1,143 @@
+{
+  "name": "upstream-storage-auto-inventory",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_storage.py",
+  "entries": [
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSLOAD]",
+      "case_id": "upstream.benchmark.storage.read.present_slots.success",
+      "admitted": true,
+      "mode": "read_present",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE new value, out of gas]",
+      "case_id": "upstream.benchmark.storage.write_new_value.present_slots.out_of_gas",
+      "admitted": true,
+      "mode": "write_new_value_present_oog",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE new value, revert]",
+      "case_id": "upstream.benchmark.storage.write_new_value.present_slots.revert",
+      "admitted": true,
+      "mode": "write_new_value_present_revert",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE new value]",
+      "case_id": "upstream.benchmark.storage.write_new_value.present_slots.success",
+      "admitted": true,
+      "mode": "write_new_value_present",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE same value, out of gas]",
+      "case_id": "upstream.benchmark.storage.write_same_value.present_slots.out_of_gas",
+      "admitted": true,
+      "mode": "write_same_value_present_oog",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE same value, revert]",
+      "case_id": "upstream.benchmark.storage.write_same_value.present_slots.revert",
+      "admitted": true,
+      "mode": "write_same_value_present_revert",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE same value]",
+      "case_id": "upstream.benchmark.storage.write_same_value.present_slots.success",
+      "admitted": true,
+      "mode": "write_same_value_present",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSLOAD]",
+      "case_id": "upstream.benchmark.storage.read.absent_slots.success",
+      "admitted": true,
+      "mode": "read_absent",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE new value, out of gas]",
+      "case_id": "upstream.benchmark.storage.write_new_value.absent_slots.out_of_gas",
+      "admitted": true,
+      "mode": "write_new_value_absent_oog",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE new value, revert]",
+      "case_id": "upstream.benchmark.storage.write_new_value.absent_slots.revert",
+      "admitted": true,
+      "mode": "write_new_value_absent_revert",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE new value]",
+      "case_id": "upstream.benchmark.storage.write_new_value.absent_slots.success",
+      "admitted": true,
+      "mode": "write_new_value_absent",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE same value, out of gas]",
+      "case_id": "upstream.benchmark.storage.write_same_value.absent_slots.out_of_gas",
+      "admitted": true,
+      "mode": "write_same_value_absent_oog",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE same value, revert]",
+      "case_id": "upstream.benchmark.storage.write_same_value.absent_slots.revert",
+      "admitted": true,
+      "mode": "write_same_value_absent_revert",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE same value]",
+      "case_id": "upstream.benchmark.storage.write_same_value.absent_slots.success",
+      "admitted": true,
+      "mode": "write_same_value_absent",
+      "reasons": [],
+      "source": "cold"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_warm[storage_action=READ]",
+      "case_id": "upstream.benchmark.storage.warm.read.present_slots.success",
+      "admitted": true,
+      "mode": "warm_read_present",
+      "reasons": [],
+      "source": "warm"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_warm[storage_action=WRITE_NEW_VALUE]",
+      "case_id": "upstream.benchmark.storage.warm.write_new_value.present_slots.success",
+      "admitted": true,
+      "mode": "warm_write_new_present",
+      "reasons": [],
+      "source": "warm"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_warm[storage_action=WRITE_SAME_VALUE]",
+      "case_id": "upstream.benchmark.storage.warm.write_same_value.present_slots.success",
+      "admitted": true,
+      "mode": "warm_write_same_present",
+      "reasons": [],
+      "source": "warm"
+    }
+  ]
+}

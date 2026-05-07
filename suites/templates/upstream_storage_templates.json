@@ -1,58 +1,10 @@
 {
   "name": "upstream-storage-mapping-templates",
   "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_storage.py",
   "cases": [
     {
-      "case_id": "upstream.benchmark.storage.write_new_value.absent_slots.success",
-      "mode": "write_new_value_absent",
-      "description": "Mapped from execution-specs SSTORE new value success path onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-storage-write-new-value-absent-success",
-      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE new value]",
-      "notes": [
-        "Upstream intent: cold SSTORE to an absent slot, writing a new non-zero value with successful completion.",
-        "RPC mapping: deploy a minimal storage contract, invoke it once with calldata 0x2a, then assert slot0 on-chain.",
-        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
-      ]
-    },
-    {
-      "case_id": "upstream.benchmark.storage.write_same_value.absent_slots.success",
-      "mode": "write_same_value_absent",
-      "description": "Mapped from execution-specs SSTORE same value cold path on an absent slot onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-storage-write-same-value-absent-success",
-      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE same value]",
-      "notes": [
-        "Upstream intent: cold SSTORE to an absent slot, using the same benchmark write shape with successful completion.",
-        "RPC mapping: deploy a minimal storage contract, invoke it once with calldata 0x01, then assert slot0 on-chain.",
-        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
-      ]
-    },
-    {
-      "case_id": "upstream.benchmark.storage.write_same_value.present_slots.success",
-      "mode": "write_same_value_present",
-      "description": "Mapped from execution-specs SSTORE same value success path onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-storage-write-same-value-present-success",
-      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE same value]",
-      "notes": [
-        "Upstream intent: cold SSTORE to a present slot, writing back the same value with successful completion.",
-        "RPC mapping: deploy a minimal storage contract, write 0x2a once to establish present storage, then write 0x2a again and assert slot0 remains unchanged.",
-        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
-      ]
-    },
-    {
-      "case_id": "upstream.benchmark.storage.write_new_value.present_slots.success",
-      "mode": "write_new_value_present",
-      "description": "Mapped from execution-specs SSTORE new value cold path on a present slot onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-storage-write-new-value-present-success",
-      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE new value]",
-      "notes": [
-        "Upstream intent: cold SSTORE to a present slot, writing a new non-zero value with successful completion.",
-        "RPC mapping: deploy a contract whose constructor initializes slot0=0x01, then invoke runtime that writes 0xff and assert slot0 changes.",
-        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
-      ]
-    },
-    {
       "case_id": "upstream.benchmark.storage.read.present_slots.success",
-      "mode": "read_present",
       "description": "Mapped from execution-specs SLOAD success path onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-storage-read-present-success",
       "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSLOAD]",
@@ -60,11 +12,83 @@
         "Upstream intent: cold SLOAD from a present slot with successful completion.",
         "RPC mapping: deploy a contract whose constructor initializes slot0=0x2a, then invoke runtime that SLOADs slot0 and SSTOREs the read value into slot1.",
         "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
-      ]
+      ],
+      "mode": "read_present"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_new_value.present_slots.out_of_gas",
+      "description": "Mapped from execution-specs SSTORE new value out-of-gas path on a present slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-new-value-present-oog",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE new value, out of gas]",
+      "notes": [
+        "Upstream intent: cold SSTORE to a present slot, writing a new non-zero value before the transaction runs out of gas.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x01, invoke it with calldata 0xffff...ffff and low gas, then assert receipt failure and unchanged storage.",
+        "Admitted because final receipt status and rolled-back storage are directly observable over RPC without reproducing upstream gas benchmarking internals."
+      ],
+      "mode": "write_new_value_present_oog"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_new_value.present_slots.revert",
+      "description": "Mapped from execution-specs SSTORE new value revert path on a present slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-new-value-present-revert",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE new value, revert]",
+      "notes": [
+        "Upstream intent: cold SSTORE to a present slot, writing a new non-zero value before the transaction reverts.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x01 and whose runtime writes then REVERTs, invoke it with calldata 0xffff...ffff, then assert receipt failure and unchanged storage.",
+        "Admitted because final receipt status and rolled-back storage are directly observable over RPC without reproducing upstream gas benchmarking internals."
+      ],
+      "mode": "write_new_value_present_revert"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_new_value.present_slots.success",
+      "description": "Mapped from execution-specs SSTORE new value cold path on a present slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-new-value-present-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE new value]",
+      "notes": [
+        "Upstream intent: cold SSTORE to a present slot, writing a new non-zero value with successful completion.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x01, then invoke runtime that writes 0xffff...ffff and assert slot0 changes.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "mode": "write_new_value_present"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_same_value.present_slots.out_of_gas",
+      "description": "Mapped from execution-specs SSTORE same value out-of-gas path on a present slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-same-value-present-oog",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE same value, out of gas]",
+      "notes": [
+        "Upstream intent: cold SSTORE to a present slot, writing back the same value before the transaction runs out of gas.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x01, invoke it with calldata 0x01 and low gas, then assert receipt failure and unchanged storage.",
+        "Admitted because final receipt status and rolled-back storage are directly observable over RPC without reproducing upstream gas benchmarking internals."
+      ],
+      "mode": "write_same_value_present_oog"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_same_value.present_slots.revert",
+      "description": "Mapped from execution-specs SSTORE same value revert path on a present slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-same-value-present-revert",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE same value, revert]",
+      "notes": [
+        "Upstream intent: cold SSTORE to a present slot, writing back the same value before the transaction reverts.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x01 and whose runtime writes then REVERTs, invoke it with calldata 0x01, then assert receipt failure and unchanged storage.",
+        "Admitted because final receipt status and rolled-back storage are directly observable over RPC without reproducing upstream gas benchmarking internals."
+      ],
+      "mode": "write_same_value_present_revert"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_same_value.present_slots.success",
+      "description": "Mapped from execution-specs SSTORE same value success path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-same-value-present-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=False-SSTORE same value]",
+      "notes": [
+        "Upstream intent: cold SSTORE to a present slot, writing back the same value with successful completion.",
+        "RPC mapping: deploy a minimal storage contract, write 0x2a once to establish present storage, then write 0x2a again and assert slot0 remains unchanged.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "mode": "write_same_value_present"
     },
     {
       "case_id": "upstream.benchmark.storage.read.absent_slots.success",
-      "mode": "read_absent",
       "description": "Mapped from execution-specs SLOAD cold path on an absent slot onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-storage-read-absent-success",
       "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSLOAD]",
@@ -72,11 +96,83 @@
         "Upstream intent: cold SLOAD from an absent slot with successful completion.",
         "RPC mapping: deploy a contract with a runtime SLOAD/SSTORE mirror and assert the read value remains zero in storage.",
         "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
-      ]
+      ],
+      "mode": "read_absent"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_new_value.absent_slots.out_of_gas",
+      "description": "Mapped from execution-specs SSTORE new value out-of-gas path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-new-value-absent-oog",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE new value, out of gas]",
+      "notes": [
+        "Upstream intent: cold SSTORE to an absent slot, writing a new non-zero value before the transaction runs out of gas.",
+        "RPC mapping: deploy a minimal storage contract, invoke it once with low gas so execution fails during storage write, then assert receipt failure and unchanged storage.",
+        "Admitted because final receipt status and rolled-back storage are directly observable over RPC without reproducing upstream gas benchmarking internals."
+      ],
+      "mode": "write_new_value_absent_oog"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_new_value.absent_slots.revert",
+      "description": "Mapped from execution-specs SSTORE new value revert path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-new-value-absent-revert",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE new value, revert]",
+      "notes": [
+        "Upstream intent: cold SSTORE to an absent slot, writing a new non-zero value before the transaction reverts.",
+        "RPC mapping: deploy a minimal storage contract whose runtime writes slot0 then REVERTs, invoke it once with calldata 0x2a, then assert receipt failure and unchanged storage.",
+        "Admitted because final receipt status and rolled-back storage are directly observable over RPC without reproducing upstream gas benchmarking internals."
+      ],
+      "mode": "write_new_value_absent_revert"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_new_value.absent_slots.success",
+      "description": "Mapped from execution-specs SSTORE new value success path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-new-value-absent-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE new value]",
+      "notes": [
+        "Upstream intent: cold SSTORE to an absent slot, writing a new non-zero value with successful completion.",
+        "RPC mapping: deploy a minimal storage contract, invoke it once with calldata 0x2a, then assert slot0 on-chain.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "mode": "write_new_value_absent"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_same_value.absent_slots.out_of_gas",
+      "description": "Mapped from execution-specs SSTORE same value out-of-gas path on an absent slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-same-value-absent-oog",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE same value, out of gas]",
+      "notes": [
+        "Upstream intent: cold SSTORE to an absent slot, using the benchmark write shape before the transaction runs out of gas.",
+        "RPC mapping: deploy a minimal storage contract, invoke it once with low gas so execution fails during storage write, then assert receipt failure and unchanged storage.",
+        "Admitted because final receipt status and rolled-back storage are directly observable over RPC without reproducing upstream gas benchmarking internals."
+      ],
+      "mode": "write_same_value_absent_oog"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_same_value.absent_slots.revert",
+      "description": "Mapped from execution-specs SSTORE same value revert path on an absent slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-same-value-absent-revert",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE same value, revert]",
+      "notes": [
+        "Upstream intent: cold SSTORE to an absent slot, using the benchmark write shape before the transaction reverts.",
+        "RPC mapping: deploy a minimal storage contract whose runtime writes slot0 then REVERTs, invoke it once with calldata 0x01, then assert receipt failure and unchanged storage.",
+        "Admitted because final receipt status and rolled-back storage are directly observable over RPC without reproducing upstream gas benchmarking internals."
+      ],
+      "mode": "write_same_value_absent_revert"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.write_same_value.absent_slots.success",
+      "description": "Mapped from execution-specs SSTORE same value cold path on an absent slot onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-write-same-value-absent-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_cold[absent_slots=True-SSTORE same value]",
+      "notes": [
+        "Upstream intent: cold SSTORE to an absent slot, using the same benchmark write shape with successful completion.",
+        "RPC mapping: deploy a minimal storage contract, invoke it once with calldata 0x01, then assert slot0 on-chain.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "mode": "write_same_value_absent"
     },
     {
       "case_id": "upstream.benchmark.storage.warm.read.present_slots.success",
-      "mode": "warm_read_present",
       "description": "Mapped from execution-specs warm SLOAD success path onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-storage-warm-read-present-success",
       "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_warm[storage_action=READ]",
@@ -84,23 +180,11 @@
         "Upstream intent: warm SLOAD from a present slot in a looping execution contract.",
         "RPC mapping: deploy a contract whose constructor initializes slot0=0x2a, then invoke runtime that mirrors the read-then-write shape and assert storage state.",
         "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
-      ]
-    },
-    {
-      "case_id": "upstream.benchmark.storage.warm.write_same_value.present_slots.success",
-      "mode": "warm_write_same_present",
-      "description": "Mapped from execution-specs warm SSTORE same value success path onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-storage-warm-write-same-present-success",
-      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_warm[storage_action=WRITE_SAME_VALUE]",
-      "notes": [
-        "Upstream intent: warm SSTORE to a present slot, writing the same value in a looping execution contract.",
-        "RPC mapping: deploy a contract whose constructor initializes slot0=0x2a, then invoke runtime that preserves the stored value and assert slot0 remains unchanged.",
-        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
-      ]
+      ],
+      "mode": "warm_read_present"
     },
     {
       "case_id": "upstream.benchmark.storage.warm.write_new_value.present_slots.success",
-      "mode": "warm_write_new_present",
       "description": "Mapped from execution-specs warm SSTORE new value success path onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-storage-warm-write-new-present-success",
       "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_warm[storage_action=WRITE_NEW_VALUE]",
@@ -108,7 +192,20 @@
         "Upstream intent: warm SSTORE to a present slot, writing a new value in a looping execution contract.",
         "RPC mapping: deploy a contract whose constructor initializes slot0=0x2a, then invoke runtime that writes a different nonzero value and assert slot0 becomes 0x2b.",
         "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
-      ]
+      ],
+      "mode": "warm_write_new_present"
+    },
+    {
+      "case_id": "upstream.benchmark.storage.warm.write_same_value.present_slots.success",
+      "description": "Mapped from execution-specs warm SSTORE same value success path onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-storage-warm-write-same-present-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_storage.py::test_storage_access_warm[storage_action=WRITE_SAME_VALUE]",
+      "notes": [
+        "Upstream intent: warm SSTORE to a present slot, writing the same value in a looping execution contract.",
+        "RPC mapping: deploy a contract whose constructor initializes slot0=0x2a, then invoke runtime that preserves the stored value and assert slot0 remains unchanged.",
+        "Admitted because the truth source is final storage state; excluded upstream gas-benchmark accounting is intentionally not reproduced."
+      ],
+      "mode": "warm_write_same_present"
     }
   ]
 }

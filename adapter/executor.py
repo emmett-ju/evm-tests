@@ -10,6 +10,8 @@ from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
 from adapter.signer import load_private_key, private_key_to_address, sign_type_2_transaction
 
+ZERO_STORAGE_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
+
 
 class Backend(Protocol):
     def execute_case(self, case: TestCase, namespace: str) -> tuple[list[str], dict[str, Any]]:
@@ -68,24 +70,21 @@ class MockBackend:
                     raise ValueError("invoke_contract requires a concrete target contract address")
                 tx_hash = f"0xmock{idx:02x}{len(case.family):04x}"
                 tx_hashes.append(tx_hash)
-                last_receipt = {"transactionHash": tx_hash, "status": "0x1"}
+                receipt_status = step.get("expected_receipt_status", "0x1")
+                last_receipt = {"transactionHash": tx_hash, "status": receipt_status}
                 contract_state = self._address_state(contracts, target_address)
                 data = step.get("data", "0x")
-                storage = contract_state.setdefault("storage", {})
                 code = contract_state.get("code")
-                if code == "0x60003560005500":
+                if receipt_status == "0x0":
+                    continue
+                storage = contract_state.setdefault("storage", {})
+                if code in {"0x60003560005500", "0x60003560005560006000fd"}:
                     padded = data[2:] if data.startswith("0x") else data
                     storage["0x00"] = "0x" + padded.rjust(64, "0")
                 elif code == "0x60005460005500":
-                    storage["0x00"] = storage.get(
-                        "0x00",
-                        "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    )
+                    storage["0x00"] = storage.get("0x00", ZERO_STORAGE_WORD)
                 elif code == "0x60005460015500":
-                    storage["0x01"] = storage.get(
-                        "0x00",
-                        "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    )
+                    storage["0x01"] = storage.get("0x00", ZERO_STORAGE_WORD)
                 elif code == "0x602b60005500":
                     storage["0x00"] = "0x000000000000000000000000000000000000000000000000000000000000002b"
                 else:
@@ -127,7 +126,7 @@ class MockBackend:
             observed["storage"] = {}
             storage = self._address_state(contracts, storage_address).get("storage", {})
             for slot in case.expected["storage"]:
-                observed["storage"][slot] = storage.get(slot)
+                observed["storage"][slot] = storage.get(slot, ZERO_STORAGE_WORD)
         return observed
 
     def _address_state(

@@ -19,8 +19,11 @@ python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/mani
 python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_deploy_smoke.json --state-dir .state
 python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_storage_smoke.json --state-dir .state
 python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/upstream_storage_mapped.json --state-dir .state
+python -m adapter.cli scan-upstream-storage --template-output suites/templates/upstream_storage_templates.json --inventory-output suites/templates/upstream_storage_inventory.json
 python -m adapter.cli generate-storage-manifest --template suites/templates/upstream_storage_templates.json --output suites/manifests/upstream_storage_mapped.json
 ```
+
+`scan-upstream-storage` 会直接扫描 upstream `execution-specs` 的 `test_storage.py`，把可自动映射的 case 生成到本地模板，把当前不能自动承接的 case 写到 inventory 并带过滤原因。
 
 For real-chain runs, create a local `.env` file from `.env.example`:
 

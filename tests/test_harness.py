@@ -11,7 +11,11 @@ from adapter.bootstrap import StateBootstrapper
 from adapter.cli import main
 from adapter.env import load_dotenv
 from adapter.executor import JsonRpcBackend
-from adapter.generator import generate_upstream_storage_manifest, load_storage_templates
+from adapter.generator import (
+    generate_upstream_storage_manifest,
+    generate_upstream_storage_templates,
+    load_storage_templates,
+)
 from adapter.manifest import load_manifest
 from adapter.oracle import ResultOracle
 from adapter.profile import describe_admin_key_source, load_chain_profile
@@ -93,15 +97,23 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(
             [case.case_id for case in selected],
             [
-                "upstream.benchmark.storage.write_new_value.absent_slots.success",
-                "upstream.benchmark.storage.write_same_value.absent_slots.success",
-                "upstream.benchmark.storage.write_same_value.present_slots.success",
-                "upstream.benchmark.storage.write_new_value.present_slots.success",
                 "upstream.benchmark.storage.read.present_slots.success",
+                "upstream.benchmark.storage.write_new_value.present_slots.out_of_gas",
+                "upstream.benchmark.storage.write_new_value.present_slots.revert",
+                "upstream.benchmark.storage.write_new_value.present_slots.success",
+                "upstream.benchmark.storage.write_same_value.present_slots.out_of_gas",
+                "upstream.benchmark.storage.write_same_value.present_slots.revert",
+                "upstream.benchmark.storage.write_same_value.present_slots.success",
                 "upstream.benchmark.storage.read.absent_slots.success",
+                "upstream.benchmark.storage.write_new_value.absent_slots.out_of_gas",
+                "upstream.benchmark.storage.write_new_value.absent_slots.revert",
+                "upstream.benchmark.storage.write_new_value.absent_slots.success",
+                "upstream.benchmark.storage.write_same_value.absent_slots.out_of_gas",
+                "upstream.benchmark.storage.write_same_value.absent_slots.revert",
+                "upstream.benchmark.storage.write_same_value.absent_slots.success",
                 "upstream.benchmark.storage.warm.read.present_slots.success",
-                "upstream.benchmark.storage.warm.write_same_value.present_slots.success",
                 "upstream.benchmark.storage.warm.write_new_value.present_slots.success",
+                "upstream.benchmark.storage.warm.write_same_value.present_slots.success",
             ],
         )
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
@@ -145,8 +157,25 @@ class HarnessTests(unittest.TestCase):
 
     def test_storage_templates_load(self) -> None:
         templates = load_storage_templates(ROOT / "suites/templates/upstream_storage_templates.json")
-        self.assertEqual(len(templates), 9)
-        self.assertEqual(templates[0].mode, "write_new_value_absent")
+        self.assertEqual(len(templates), 17)
+        self.assertEqual(templates[0].mode, "read_present")
+
+    def test_storage_template_scanner_matches_checked_in_template(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_storage_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_storage_inventory.json"
+            generated = generate_upstream_storage_templates(
+                repo_root=ROOT,
+                output_path=generated_path,
+                inventory_path=inventory_path,
+            )
+            checked_in = json.loads(
+                (ROOT / "suites/templates/upstream_storage_templates.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            inventory = json.loads(inventory_path.read_text())
+            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
+            self.assertEqual(blocked, [])
 
     def test_cli_generate_storage_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -157,7 +186,29 @@ class HarnessTests(unittest.TestCase):
             )
             generated = json.loads(output_path.read_text())
             self.assertEqual(generated["name"], "upstream-storage-mapped")
-            self.assertEqual(len(generated["cases"]), 9)
+            self.assertEqual(len(generated["cases"]), 17)
+
+    def test_cli_scan_upstream_storage_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-storage",
+                        "--template-output",
+                        str(output_path),
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(generated["name"], "upstream-storage-mapping-templates")
+            self.assertEqual(len(generated["cases"]), 17)
+            self.assertEqual(len(inventory["entries"]), len(generated["cases"]))
 
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -377,16 +428,40 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 9)
+            self.assertEqual(len(report["results"]), 17)
             expected_storage = {
+                "upstream.benchmark.storage.write_new_value.absent_slots.out_of_gas": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.storage.write_new_value.absent_slots.revert": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
                 "upstream.benchmark.storage.write_new_value.absent_slots.success": {
                     "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                },
+                "upstream.benchmark.storage.write_same_value.absent_slots.out_of_gas": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.storage.write_same_value.absent_slots.revert": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
                 },
                 "upstream.benchmark.storage.write_same_value.absent_slots.success": {
                     "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
                 },
+                "upstream.benchmark.storage.write_same_value.present_slots.out_of_gas": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+                "upstream.benchmark.storage.write_same_value.present_slots.revert": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
                 "upstream.benchmark.storage.write_same_value.present_slots.success": {
                     "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                },
+                "upstream.benchmark.storage.write_new_value.present_slots.out_of_gas": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+                "upstream.benchmark.storage.write_new_value.present_slots.revert": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
                 },
                 "upstream.benchmark.storage.write_new_value.present_slots.success": {
                     "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
@@ -416,6 +491,10 @@ class HarnessTests(unittest.TestCase):
                 )
                 for slot, value in expected_storage[result["case_id"]].items():
                     self.assertEqual(result["observed"]["storage"][slot], value)
+                if result["case_id"].endswith(".revert") or result["case_id"].endswith(".out_of_gas"):
+                    self.assertEqual(result["observed"]["receipt_status"], "0x0")
+                else:
+                    self.assertEqual(result["observed"].get("receipt_status"), result["expected"].get("receipt_status"))
                 self.assertIs(result["success"], True)
 
 

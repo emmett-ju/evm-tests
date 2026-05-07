@@ -7,7 +7,7 @@ from pathlib import Path
 from adapter.bootstrap import StateBootstrapper
 from adapter.env import load_dotenv
 from adapter.executor import JsonRpcBackend, MockBackend, RpcExecutor, result_from_execution
-from adapter.generator import generate_upstream_storage_manifest
+from adapter.generator import generate_upstream_storage_manifest, generate_upstream_storage_templates
 from adapter.manifest import load_manifest
 from adapter.models import Report
 from adapter.oracle import ResultOracle
@@ -37,6 +37,14 @@ def build_parser() -> argparse.ArgumentParser:
     generate = subparsers.add_parser("generate-storage-manifest")
     generate.add_argument("--template", default="suites/templates/upstream_storage_templates.json")
     generate.add_argument("--output", required=True)
+
+    scan = subparsers.add_parser("scan-upstream-storage")
+    scan.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/benchmark/compute/instruction/test_storage.py",
+    )
+    scan.add_argument("--template-output", required=True)
+    scan.add_argument("--inventory-output")
 
     return parser
 
@@ -135,6 +143,16 @@ def main(argv: list[str] | None = None) -> int:
             output_path=args.output,
         )
         print(json.dumps(manifest, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-storage":
+        templates = generate_upstream_storage_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
         return 0
 
     parser.error(f"unsupported command: {args.command}")

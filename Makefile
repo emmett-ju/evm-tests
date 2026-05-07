@@ -5,8 +5,9 @@ REPORT ?= reports/latest.json
 MANIFEST ?= suites/manifests/custom_storage_smoke.json
 UPSTREAM_MANIFEST ?= suites/manifests/upstream_storage_mapped.json
 UPSTREAM_TEMPLATE ?= suites/templates/upstream_storage_templates.json
+UPSTREAM_INVENTORY ?= suites/templates/upstream_storage_inventory.json
 
-.PHONY: help test test-mock test-juchain test-upstream-storage bootstrap list generate-storage-manifest
+.PHONY: help test test-mock test-juchain test-upstream-storage bootstrap list scan-upstream-storage generate-storage-manifest
 
 help:
 	@printf '%s\n' \
@@ -17,6 +18,7 @@ help:
 		'  make test-upstream-storage   - run the upstream-mapped storage manifest' \
 		'  make bootstrap               - bootstrap profile state' \
 		'  make list                    - list cases in the default manifest' \
+		'  make scan-upstream-storage   - rescan execution-specs storage cases into local templates' \
 		'  make generate-storage-manifest - regenerate suites/manifests/upstream_storage_mapped.json'
 
 test:
@@ -36,6 +38,9 @@ bootstrap:
 
 list:
 	$(PYTHON) -m adapter.cli list --manifest $(MANIFEST)
+
+scan-upstream-storage:
+	$(PYTHON) -m adapter.cli scan-upstream-storage --template-output $(UPSTREAM_TEMPLATE) --inventory-output $(UPSTREAM_INVENTORY)
 
 generate-storage-manifest:
 	$(PYTHON) -m adapter.cli generate-storage-manifest --template $(UPSTREAM_TEMPLATE) --output $(UPSTREAM_MANIFEST)
