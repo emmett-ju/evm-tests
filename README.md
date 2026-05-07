@@ -8,6 +8,11 @@ This repository contains a Python 3.12 harness for running selected execution-la
 - `adapter/`: local chain profiles, selectors, bootstrap logic, RPC executors, oracles, and CLI.
 - `suites/`: local manifests for upstream-mapped cases and chain-specific cases.
 
+## Docs
+
+- 项目接手说明：`docs/project-handoff.md`
+- upstream 迁移计划：`docs/upstream-execution-specs-migration-plan.md`
+
 ## Quick Start
 
 ```bash
