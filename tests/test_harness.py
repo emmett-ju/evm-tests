@@ -1056,6 +1056,28 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(families["alpha"]["blocked_reasons"], {"requires precise gas fixture": 1})
             self.assertEqual(families["beta"]["blocked_reasons"], {"requires block environment control": 1})
 
+    def test_inventory_summary_aggregates_checked_in_first_family_inventories(self) -> None:
+        summary = summarize_inventory_dir(ROOT / "suites/templates")
+
+        self.assertEqual(
+            summary["totals"],
+            {"families": 9, "cases": 292, "admitted": 32, "blocked": 260},
+        )
+
+        families = {item["family"]: item for item in summary["families"]}
+        self.assertEqual(
+            {family: {"total": item["total"], "admitted": item["admitted"], "blocked": item["blocked"]}
+             for family, item in families.items()
+             if family in {"arithmetic", "bitwise", "comparison", "stack", "control-flow"}},
+            {
+                "arithmetic": {"total": 65, "admitted": 0, "blocked": 65},
+                "bitwise": {"total": 12, "admitted": 0, "blocked": 12},
+                "comparison": {"total": 6, "admitted": 0, "blocked": 6},
+                "stack": {"total": 65, "admitted": 0, "blocked": 65},
+                "control-flow": {"total": 7, "admitted": 0, "blocked": 7},
+            },
+        )
+
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
