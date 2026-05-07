@@ -10,7 +10,7 @@ import unittest
 from adapter.bootstrap import StateBootstrapper
 from adapter.cli import main
 from adapter.env import load_dotenv
-from adapter.executor import JsonRpcBackend
+from adapter.executor import JsonRpcBackend, MockBackend
 from adapter.generator import (
     generate_upstream_storage_manifest,
     generate_upstream_storage_templates,
@@ -1735,6 +1735,121 @@ class HarnessTests(unittest.TestCase):
                 for slot, value in expected_storage[result["case_id"]].items():
                     self.assertEqual(result["observed"]["storage"][slot], value)
                 self.assertIs(result["success"], True)
+
+    def test_mock_backend_runs_upstream_mapped_account_query_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_account_query_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 5)
+            expected_storage = {
+                "upstream.benchmark.account_query.codesize.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000005",
+                },
+                "upstream.benchmark.account_query.balance.cold.present_accounts.success": {
+                    "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                },
+                "upstream.benchmark.account_query.balance.cold.absent_accounts.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.account_query.selfbalance.contract_balance_0.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.account_query.selfbalance.contract_balance_1.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+            }
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertEqual(set(observed_by_case), set(expected_storage))
+            self.assertNotIn("upstream.benchmark.account_query.codecopy", "\n".join(observed_by_case))
+            self.assertNotIn("upstream.benchmark.account_query.extcodecopy", "\n".join(observed_by_case))
+            for case_id, expected_slots in expected_storage.items():
+                result = observed_by_case[case_id]
+                self.assertEqual(result["observed"]["storage"], expected_slots)
+                self.assertEqual(result["expected"]["storage"], expected_slots)
+                self.assertEqual(result["diffs"], [])
+                self.assertTrue(result["tx_hashes"])
+                self.assertIs(result["success"], True)
+
+    def test_cli_run_mock_upstream_account_query_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_account_query_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-account-query-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 5)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result["observed"]["storage"]["0x00"] for result in report["results"]}
+            self.assertEqual(
+                observed_by_case,
+                {
+                    "upstream.benchmark.account_query.codesize.success": "0x0000000000000000000000000000000000000000000000000000000000000005",
+                    "upstream.benchmark.account_query.balance.cold.present_accounts.success": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                    "upstream.benchmark.account_query.balance.cold.absent_accounts.success": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "upstream.benchmark.account_query.selfbalance.contract_balance_0.success": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "upstream.benchmark.account_query.selfbalance.contract_balance_1.success": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+            )
+
+    def test_mock_backend_rejects_unsupported_account_query_runtime_code_path(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
+        broken_case = manifest.cases[0]
+        broken_case.steps[0]["bytecode_runtime"] = "0xdeadbeef"
+        broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
+        with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
+            backend.execute_case(broken_case, "negative-unsupported-account-query-runtime")
+
+    def test_oracle_reports_wrong_present_balance_seed_for_account_query_case(self) -> None:
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
+        present_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.account_query.balance.cold.present_accounts.success"
+        )
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        tx_hashes, observed, context = backend.execute_case(present_case, "negative-present-balance-seed")
+        self.assertTrue(tx_hashes)
+        diffs = ResultOracle().compare(
+            {"storage": {"0x00": "0x000000000000000000000000000000000000000000000000000000000000002b"}},
+            observed,
+            context,
+        )
+        self.assertEqual(
+            diffs,
+            [
+                "storage.0x00: expected '0x000000000000000000000000000000000000000000000000000000000000002b', got '0x000000000000000000000000000000000000000000000000000000000000002a'"
+            ],
+        )
 
     def test_tx_context_manifest_generator_matches_checked_in_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -11,10 +11,15 @@ from adapter.profile import describe_admin_key_source
 from adapter.signer import load_private_key, private_key_to_address, sign_type_2_transaction
 
 ZERO_STORAGE_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
+WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
+WORD_05 = "0x0000000000000000000000000000000000000000000000000000000000000005"
 WORD_20 = "0x0000000000000000000000000000000000000000000000000000000000000020"
 WORD_2A = "0x000000000000000000000000000000000000000000000000000000000000002a"
 WORD_2A_BYTE_AT_31 = "0x2a00000000000000000000000000000000000000000000000000000000000000"
 CALLDATA_WORD_PATTERN = "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+SELFBALANCE_RUNTIME = "0x4760005500"
+CODESIZE_RUNTIME = "0x3860005500"
+BALANCE_RUNTIME = "0x5f353160005500"
 
 
 class Backend(Protocol):
@@ -41,6 +46,8 @@ class MockBackend:
         tx_hashes: list[str] = []
         last_receipt: dict[str, Any] | None = None
         last_contract_address: str | None = None
+        admin_state = self._address_state(contracts, self.admin_account)
+        admin_state.setdefault("balance", ZERO_STORAGE_WORD)
         for idx, step in enumerate(case.steps):
             action = step["action"]
             if action == "set_storage":
@@ -51,7 +58,7 @@ class MockBackend:
                 tx_hashes.append(f"0xmock{idx:02x}{len(namespace):04x}")
             elif action == "set_balance":
                 target_address = case.observe.get("balance_address", case.observe.get("address", "default"))
-                self._address_state(contracts, target_address)["balance"] = step["value"]
+                self._address_state(contracts, target_address)["balance"] = self._hex_to_word(step["value"])
                 tx_hashes.append(f"0xmock{idx:02x}{len(case.case_id):04x}")
             elif action == "set_code":
                 target_address = case.observe.get("code_address", case.observe.get("address", "default"))
@@ -60,6 +67,8 @@ class MockBackend:
             elif action == "transfer_native":
                 tx_hash = f"0xmock{idx:02x}{len(case.namespace_seed):04x}"
                 tx_hashes.append(tx_hash)
+                recipient_state = self._address_state(contracts, step["to"])
+                recipient_state["balance"] = self._hex_to_word(step["value"])
                 last_receipt = {"transactionHash": tx_hash, "status": "0x1"}
             elif action == "deploy_contract":
                 tx_hash = f"0xmock{idx:02x}{len(case.case_id):04x}"
@@ -73,6 +82,7 @@ class MockBackend:
                 }
                 contract_state = self._address_state(contracts, contract_address)
                 contract_state["code"] = step["bytecode_runtime"]
+                contract_state["balance"] = self._hex_to_word(step.get("value", "0x0"))
                 if "initial_storage" in step:
                     contract_state["storage"] = dict(step["initial_storage"])
             elif action == "invoke_contract":
@@ -112,7 +122,7 @@ class MockBackend:
                     storage["0x00"] = WORD_20
                 elif code == "0x3460005500":
                     value = step.get("value", "0x0")
-                    storage["0x00"] = "0x" + value.removeprefix("0x").rjust(64, "0")
+                    storage["0x00"] = self._hex_to_word(value)
                 elif code == "0x3060005500":
                     if not target_address.startswith("0x"):
                         raise ValueError(f"invalid target address for ADDRESS mock path: {target_address!r}")
@@ -130,6 +140,14 @@ class MockBackend:
                         storage["0x00"] = ZERO_STORAGE_WORD
                     else:
                         storage["0x00"] = "0x" + calldata_hex[:64].ljust(64, "0")
+                elif code == SELFBALANCE_RUNTIME:
+                    storage["0x00"] = contract_state.get("balance", ZERO_STORAGE_WORD)
+                elif code == CODESIZE_RUNTIME:
+                    storage["0x00"] = WORD_05
+                elif code == BALANCE_RUNTIME:
+                    query_address = self._decode_address_word(data)
+                    query_state = self._address_state(contracts, query_address)
+                    storage["0x00"] = query_state.get("balance", ZERO_STORAGE_WORD)
                 else:
                     raise ValueError(f"unsupported mock contract code path: {code}")
             elif action == "wait_receipt":
@@ -184,6 +202,24 @@ class MockBackend:
     ) -> dict[str, Any]:
         key = address or "default"
         return contracts.setdefault(key, {})
+
+    def _hex_to_word(self, value: str) -> str:
+        if not isinstance(value, str) or not value.startswith("0x"):
+            raise ValueError(f"unsupported hex word literal: {value!r}")
+        normalized = value[2:].lower()
+        if len(normalized) > 64:
+            raise ValueError(f"hex word too large for mock balance/storage: {value}")
+        return "0x" + normalized.rjust(64, "0")
+
+    def _decode_address_word(self, value: str) -> str:
+        if not isinstance(value, str) or not value.startswith("0x"):
+            raise ValueError(f"BALANCE mock path requires hex calldata word, got: {value!r}")
+        normalized = value[2:].lower()
+        if len(normalized) != 64:
+            raise ValueError(
+                f"BALANCE mock path requires 32-byte calldata word, got {len(normalized) // 2} bytes"
+            )
+        return "0x" + normalized[-40:]
 
 
 class JsonRpcBackend:
