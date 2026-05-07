@@ -624,6 +624,56 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(inventory["entries"]), 6)
             self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
 
+    def test_cli_scan_upstream_stack_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-stack",
+                        "--template-output",
+                        str(output_path),
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(generated["name"], "upstream-stack-mapping-templates")
+            self.assertEqual(generated["cases"], [])
+            self.assertEqual(inventory["name"], "upstream-stack-auto-inventory")
+            self.assertEqual(inventory["family"], "stack")
+            self.assertEqual(len(inventory["entries"]), 65)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+
+    def test_cli_scan_upstream_control_flow_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-control-flow",
+                        "--template-output",
+                        str(output_path),
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(generated["name"], "upstream-control-flow-mapping-templates")
+            self.assertEqual(generated["cases"], [])
+            self.assertEqual(inventory["name"], "upstream-control-flow-auto-inventory")
+            self.assertEqual(inventory["family"], "control-flow")
+            self.assertEqual(len(inventory["entries"]), 7)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+
     def test_cli_generate_memory_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "generated.json"
@@ -800,6 +850,44 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(inventory["entries"]), 6)
             self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
 
+    def test_cli_scan_upstream_stack_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-stack",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-stack-auto-inventory")
+            self.assertEqual(inventory["family"], "stack")
+            self.assertEqual(len(inventory["entries"]), 65)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+
+    def test_cli_scan_upstream_control_flow_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-control-flow",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-control-flow-auto-inventory")
+            self.assertEqual(inventory["family"], "control-flow")
+            self.assertEqual(len(inventory["entries"]), 7)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+
     def test_cli_scan_upstream_memory_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             inventory_path = Path(tmpdir) / "inventory.json"
@@ -865,6 +953,62 @@ class HarnessTests(unittest.TestCase):
                         str(output_path),
                     ]
                 )
+
+    def test_cli_scan_upstream_stack_requires_inventory_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            with self.assertRaises(SystemExit):
+                main(
+                    [
+                        "scan-upstream-stack",
+                        "--template-output",
+                        str(output_path),
+                    ]
+                )
+
+    def test_cli_scan_upstream_control_flow_requires_inventory_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            with self.assertRaises(SystemExit):
+                main(
+                    [
+                        "scan-upstream-control-flow",
+                        "--template-output",
+                        str(output_path),
+                    ]
+                )
+
+    def test_first_family_inventory_snapshots_match_checked_in_json(self) -> None:
+        families = [
+            (
+                generate_upstream_arithmetic_templates,
+                ROOT / "suites/templates/upstream_arithmetic_inventory.json",
+            ),
+            (
+                generate_upstream_bitwise_templates,
+                ROOT / "suites/templates/upstream_bitwise_inventory.json",
+            ),
+            (
+                generate_upstream_comparison_templates,
+                ROOT / "suites/templates/upstream_comparison_inventory.json",
+            ),
+            (
+                generate_upstream_stack_templates,
+                ROOT / "suites/templates/upstream_stack_inventory.json",
+            ),
+            (
+                generate_upstream_control_flow_templates,
+                ROOT / "suites/templates/upstream_control_flow_inventory.json",
+            ),
+        ]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            for generator, checked_in_path in families:
+                generated_path = tmp_path / checked_in_path.name
+                generator(repo_root=ROOT, inventory_path=generated_path)
+                generated = json.loads(generated_path.read_text())
+                checked_in = json.loads(checked_in_path.read_text())
+                self.assertEqual(generated, checked_in, checked_in_path.name)
 
     def test_inventory_summary_aggregates_files(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

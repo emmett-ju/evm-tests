@@ -12,7 +12,9 @@ from adapter.call_context_generator import (
 from adapter.arithmetic_generator import generate_upstream_arithmetic_templates
 from adapter.bitwise_generator import generate_upstream_bitwise_templates
 from adapter.comparison_generator import generate_upstream_comparison_templates
+from adapter.control_flow_generator import generate_upstream_control_flow_templates
 from adapter.env import load_dotenv
+from adapter.stack_generator import generate_upstream_stack_templates
 from adapter.executor import JsonRpcBackend, MockBackend, RpcExecutor, result_from_execution
 from adapter.generator import generate_upstream_storage_manifest, generate_upstream_storage_templates
 from adapter.inventory import summarize_inventory_dir, write_json
@@ -82,6 +84,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_comparison.add_argument("--template-output")
     scan_comparison.add_argument("--inventory-output", required=True)
+
+    scan_stack = subparsers.add_parser("scan-upstream-stack")
+    scan_stack.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/benchmark/compute/instruction/test_stack.py",
+    )
+    scan_stack.add_argument("--template-output")
+    scan_stack.add_argument("--inventory-output", required=True)
+
+    scan_control_flow = subparsers.add_parser("scan-upstream-control-flow")
+    scan_control_flow.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/benchmark/compute/instruction/test_control_flow.py",
+    )
+    scan_control_flow.add_argument("--template-output")
+    scan_control_flow.add_argument("--inventory-output", required=True)
 
     generate_memory = subparsers.add_parser("generate-memory-manifest")
     generate_memory.add_argument("--template", default="suites/templates/upstream_memory_templates.json")
@@ -258,6 +276,26 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "scan-upstream-comparison":
         templates = generate_upstream_comparison_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-stack":
+        templates = generate_upstream_stack_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-control-flow":
+        templates = generate_upstream_control_flow_templates(
             repo_root=Path.cwd(),
             source_path=args.source,
             output_path=args.template_output,

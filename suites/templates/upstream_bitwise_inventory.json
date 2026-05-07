@@ -1,0 +1,128 @@
+{
+  "name": "upstream-bitwise-auto-inventory",
+  "version": "1",
+  "family": "bitwise",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_bitwise.py",
+  "entries": [
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=AND]",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.and",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_bitwise"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=BYTE]",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.byte",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_bitwise"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=OR]",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.or",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_bitwise"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=SAR]",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.sar",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_bitwise"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=SHL]",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.shl",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_bitwise"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=SHR]",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.shr",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_bitwise"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=XOR]",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.xor",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_bitwise"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_clz_diff",
+      "case_id": "upstream.benchmark.bitwise.test_clz_diff",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_clz_diff"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_clz_same",
+      "case_id": "upstream.benchmark.bitwise.test_clz_same",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_clz_same"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_not_op",
+      "case_id": "upstream.benchmark.bitwise.test_not_op",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_not_op"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_shifts[opcode=SAR]",
+      "case_id": "upstream.benchmark.bitwise.test_shifts.sar",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_shifts"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_shifts[opcode=SHR]",
+      "case_id": "upstream.benchmark.bitwise.test_shifts.shr",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires bitwise benchmark mapping support not yet mapped"
+      ],
+      "source": "test_shifts"
+    }
+  ]
+}

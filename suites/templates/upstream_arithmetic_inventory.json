@@ -1,0 +1,658 @@
+{
+  "name": "upstream-arithmetic-auto-inventory",
+  "version": "1",
+  "family": "arithmetic",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_arithmetic.py",
+  "entries": [
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=ADD-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.add.base.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=ADDMOD-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.addmod.base.arity_3",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=DIV-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.div.base.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=DIV-variant=variant_1]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.div.variant_1.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=EXP-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.exp.base.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MOD-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mod.base.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MUL-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mul.base.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MULMOD-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mulmod.base.arity_3",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SDIV-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sdiv.base.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SDIV-variant=variant_1]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sdiv.variant_1.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SIGNEXTEND-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.signextend.base.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SMOD-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.smod.base.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SUB-variant=base]",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sub.base.arity_2",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=11]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_11",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=136279841]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_136279841",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=13]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_13",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=3]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_3",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=5]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_5",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=7]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_7",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=11]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_11",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=136279841]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_136279841",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=13]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_13",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=3]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_3",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=5]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_5",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=7]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_7",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=11]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_11",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=136279841]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_136279841",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=13]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_13",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=3]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_3",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=5]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_5",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=7]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_7",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=11]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_11",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=136279841]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_136279841",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=13]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_13",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=3]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_3",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=5]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_5",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=7]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_7",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=11]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_11",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=136279841]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_136279841",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=13]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_13",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=3]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_3",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=5]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_5",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=7]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_7",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=11]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_11",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=136279841]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_136279841",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=13]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_13",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=3]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_3",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=5]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_5",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=7]",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_7",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_exp_bench_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=127]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_127",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=191]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_191",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=255]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_255",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=63]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_63",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=127]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_127",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=191]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_191",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=255]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_255",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=63]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_63",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=127]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_127",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=191]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_191",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=255]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_255",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=63]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_63",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=127]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_127",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=191]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_191",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=255]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_255",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod_arithmetic"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=63]",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_63",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arithmetic benchmark mapping support not yet mapped"
+      ],
+      "source": "test_mod_arithmetic"
+    }
+  ]
+}

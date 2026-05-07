@@ -1,0 +1,68 @@
+{
+  "name": "upstream-comparison-auto-inventory",
+  "version": "1",
+  "family": "comparison",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_comparison.py",
+  "entries": [
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=EQ]",
+      "case_id": "upstream.benchmark.comparison.test_comparison.eq",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires comparison benchmark mapping support not yet mapped"
+      ],
+      "source": "test_comparison"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=GT]",
+      "case_id": "upstream.benchmark.comparison.test_comparison.gt",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires comparison benchmark mapping support not yet mapped"
+      ],
+      "source": "test_comparison"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=LT]",
+      "case_id": "upstream.benchmark.comparison.test_comparison.lt",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires comparison benchmark mapping support not yet mapped"
+      ],
+      "source": "test_comparison"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=SGT]",
+      "case_id": "upstream.benchmark.comparison.test_comparison.sgt",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires comparison benchmark mapping support not yet mapped"
+      ],
+      "source": "test_comparison"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=SLT]",
+      "case_id": "upstream.benchmark.comparison.test_comparison.slt",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires comparison benchmark mapping support not yet mapped"
+      ],
+      "source": "test_comparison"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_iszero",
+      "case_id": "upstream.benchmark.comparison.test_iszero",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires comparison benchmark mapping support not yet mapped"
+      ],
+      "source": "test_iszero"
+    }
+  ]
+}
