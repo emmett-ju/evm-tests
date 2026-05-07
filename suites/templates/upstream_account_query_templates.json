@@ -1,0 +1,67 @@
+{
+  "name": "upstream-account-query-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_account_query.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.account_query.codesize.success",
+      "description": "Admitted execution-specs CODESIZE benchmark variant.",
+      "namespace_seed": "upstream-account-query-codesize",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codesize",
+      "notes": [
+        "Upstream intent: benchmark CODESIZE on the currently executing account.",
+        "Admitted because deployed runtime bytecode size is directly observable from the deployed contract code.",
+        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+      ],
+      "mode": "codesize"
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.balance.cold.present_accounts.success",
+      "description": "Admitted execution-specs BALANCE cold-account benchmark variant against present target accounts.",
+      "namespace_seed": "upstream-account-query-balance-cold-present-accounts",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_ext_account_query_cold[absent_accounts=False-opcode=BALANCE]",
+      "notes": [
+        "Upstream intent: benchmark BALANCE over cold present target accounts.",
+        "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
+        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+      ],
+      "mode": "balance_cold_present_accounts"
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.balance.cold.absent_accounts.success",
+      "description": "Admitted execution-specs BALANCE cold-account benchmark variant against absent target accounts.",
+      "namespace_seed": "upstream-account-query-balance-cold-absent-accounts",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_ext_account_query_cold[absent_accounts=True-opcode=BALANCE]",
+      "notes": [
+        "Upstream intent: benchmark BALANCE over cold absent target accounts.",
+        "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
+        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+      ],
+      "mode": "balance_cold_absent_accounts"
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.selfbalance.contract_balance_0.success",
+      "description": "Admitted execution-specs SELFBALANCE benchmark variant with zero contract balance.",
+      "namespace_seed": "upstream-account-query-selfbalance-balance-0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_selfbalance[contract_balance=0]",
+      "notes": [
+        "Upstream intent: benchmark SELFBALANCE on the currently executing account with zero balance.",
+        "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control.",
+        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+      ],
+      "mode": "selfbalance_contract_balance_0"
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.selfbalance.contract_balance_1.success",
+      "description": "Admitted execution-specs SELFBALANCE benchmark variant with non-zero contract balance.",
+      "namespace_seed": "upstream-account-query-selfbalance-balance-1",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_selfbalance[contract_balance=1]",
+      "notes": [
+        "Upstream intent: benchmark SELFBALANCE on the currently executing account with a funded balance.",
+        "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control.",
+        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+      ],
+      "mode": "selfbalance_contract_balance_1"
+    }
+  ]
+}

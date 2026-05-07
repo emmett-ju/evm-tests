@@ -22,6 +22,10 @@ from adapter.memory_generator import (
     generate_upstream_memory_templates,
     load_memory_templates,
 )
+from adapter.account_query_generator import (
+    generate_upstream_account_query_templates,
+    load_account_query_templates,
+)
 from adapter.call_context_generator import (
     generate_upstream_call_context_manifest,
     generate_upstream_call_context_templates,
@@ -266,6 +270,11 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(len(templates), 9)
         self.assertEqual(templates[0].mode, "address")
 
+    def test_account_query_templates_load(self) -> None:
+        templates = load_account_query_templates(ROOT / "suites/templates/upstream_account_query_templates.json")
+        self.assertEqual(len(templates), 5)
+        self.assertEqual(templates[0].mode, "codesize")
+
     def test_tx_context_templates_load(self) -> None:
         templates = load_tx_context_templates(ROOT / "suites/templates/upstream_tx_context_templates.json")
         self.assertEqual(len(templates), 1)
@@ -325,6 +334,62 @@ class HarnessTests(unittest.TestCase):
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
             self.assertEqual(len(admitted), 9)
             self.assertGreater(len(blocked), 0)
+
+    def test_account_query_template_scanner_writes_expected_inventory_and_templates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_account_query_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_account_query_inventory.json"
+            generated = generate_upstream_account_query_templates(
+                repo_root=ROOT,
+                output_path=generated_path,
+                inventory_path=inventory_path,
+            )
+            checked_in = json.loads(
+                (ROOT / "suites/templates/upstream_account_query_templates.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            inventory = json.loads(inventory_path.read_text())
+            checked_in_inventory = json.loads(
+                (ROOT / "suites/templates/upstream_account_query_inventory.json").read_text()
+            )
+            self.assertEqual(inventory, checked_in_inventory)
+            self.assertEqual(inventory["name"], "upstream-account-query-auto-inventory")
+            self.assertEqual(inventory["family"], "account-query")
+            admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
+            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
+            self.assertEqual(len(admitted), 5)
+            self.assertEqual(len(blocked), 35)
+            self.assertEqual([entry["case_id"] for entry in admitted], [
+                "upstream.benchmark.account_query.codesize.success",
+                "upstream.benchmark.account_query.balance.cold.present_accounts.success",
+                "upstream.benchmark.account_query.balance.cold.absent_accounts.success",
+                "upstream.benchmark.account_query.selfbalance.contract_balance_0.success",
+                "upstream.benchmark.account_query.selfbalance.contract_balance_1.success",
+            ])
+            case_ids = [entry["case_id"] for entry in inventory["entries"]]
+            self.assertEqual(len(case_ids), len(set(case_ids)))
+            blocked_reasons = {reason for entry in blocked for reason in entry["reasons"]}
+            self.assertEqual(
+                blocked_reasons,
+                {
+                    "requires byte-range code-copy observation not yet mapped",
+                    "requires external-account code-copy fixtures and byte-range observation not yet mapped",
+                },
+            )
+
+    def test_account_query_template_scanner_fails_loudly_on_missing_function(self) -> None:
+        source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_account_query.py"
+        original = source.read_text()
+        broken = original.replace("def test_selfbalance(", "def test_selfbalance_removed(", 1)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            broken_path = Path(tmpdir) / "test_account_query_broken.py"
+            broken_path.write_text(broken)
+            with self.assertRaisesRegex(ValueError, "could not find benchmark function test_selfbalance"):
+                generate_upstream_account_query_templates(
+                    repo_root=ROOT,
+                    source_path=broken_path,
+                    inventory_path=Path(tmpdir) / "inventory.json",
+                )
 
     def test_tx_context_template_scanner_matches_checked_in_template(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -753,6 +818,30 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(generated["cases"]), 9)
             self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
 
+    def test_cli_scan_upstream_account_query_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-account-query",
+                        "--template-output",
+                        str(output_path),
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(generated["name"], "upstream-account-query-mapping-templates")
+            self.assertEqual(len(generated["cases"]), 5)
+            self.assertEqual(inventory["name"], "upstream-account-query-auto-inventory")
+            self.assertEqual(inventory["family"], "account-query")
+            self.assertEqual(len(inventory["entries"]), 40)
+
     def test_cli_scan_upstream_tx_context_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "templates.json"
@@ -924,6 +1013,25 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["family"], "call-context")
             self.assertGreater(len(inventory["entries"]), 9)
 
+    def test_cli_scan_upstream_account_query_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-account-query",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-account-query-auto-inventory")
+            self.assertEqual(inventory["family"], "account-query")
+            self.assertEqual(len(inventory["entries"]), 40)
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 5)
+
     def test_cli_scan_upstream_tx_context_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             inventory_path = Path(tmpdir) / "inventory.json"
@@ -978,6 +1086,18 @@ class HarnessTests(unittest.TestCase):
                     ]
                 )
 
+    def test_cli_scan_upstream_account_query_requires_inventory_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            with self.assertRaises(SystemExit):
+                main(
+                    [
+                        "scan-upstream-account-query",
+                        "--template-output",
+                        str(output_path),
+                    ]
+                )
+
     def test_first_family_inventory_snapshots_match_checked_in_json(self) -> None:
         families = [
             (
@@ -999,6 +1119,10 @@ class HarnessTests(unittest.TestCase):
             (
                 generate_upstream_control_flow_templates,
                 ROOT / "suites/templates/upstream_control_flow_inventory.json",
+            ),
+            (
+                generate_upstream_account_query_templates,
+                ROOT / "suites/templates/upstream_account_query_inventory.json",
             ),
         ]
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1059,7 +1183,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 9, "cases": 292, "admitted": 32, "blocked": 260},
+            {"families": 10, "cases": 332, "admitted": 37, "blocked": 295},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -1071,7 +1195,7 @@ class HarnessTests(unittest.TestCase):
                     "blocked": item["blocked"],
                 }
                 for family, item in families.items()
-                if family in {"arithmetic", "bitwise", "comparison", "stack", "control-flow"}
+                if family in {"arithmetic", "bitwise", "comparison", "stack", "control-flow", "account-query"}
             },
             {
                 "arithmetic": {"total": 65, "admitted": 0, "blocked": 65},
@@ -1079,6 +1203,7 @@ class HarnessTests(unittest.TestCase):
                 "comparison": {"total": 6, "admitted": 0, "blocked": 6},
                 "stack": {"total": 65, "admitted": 0, "blocked": 65},
                 "control-flow": {"total": 7, "admitted": 0, "blocked": 7},
+                "account-query": {"total": 40, "admitted": 5, "blocked": 35},
             },
         )
 

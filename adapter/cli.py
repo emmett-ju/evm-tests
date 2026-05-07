@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from adapter.bootstrap import StateBootstrapper
+from adapter.account_query_generator import generate_upstream_account_query_templates
 from adapter.call_context_generator import (
     generate_upstream_call_context_manifest,
     generate_upstream_call_context_templates,
@@ -100,6 +101,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_control_flow.add_argument("--template-output")
     scan_control_flow.add_argument("--inventory-output", required=True)
+
+    scan_account_query = subparsers.add_parser("scan-upstream-account-query")
+    scan_account_query.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/benchmark/compute/instruction/test_account_query.py",
+    )
+    scan_account_query.add_argument("--template-output")
+    scan_account_query.add_argument("--inventory-output", required=True)
 
     generate_memory = subparsers.add_parser("generate-memory-manifest")
     generate_memory.add_argument("--template", default="suites/templates/upstream_memory_templates.json")
@@ -296,6 +305,16 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "scan-upstream-control-flow":
         templates = generate_upstream_control_flow_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-account-query":
+        templates = generate_upstream_account_query_templates(
             repo_root=Path.cwd(),
             source_path=args.source,
             output_path=args.template_output,
