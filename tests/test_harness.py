@@ -17,6 +17,11 @@ from adapter.generator import (
     load_storage_templates,
 )
 from adapter.manifest import load_manifest
+from adapter.memory_generator import (
+    generate_upstream_memory_manifest,
+    generate_upstream_memory_templates,
+    load_memory_templates,
+)
 from adapter.oracle import ResultOracle
 from adapter.profile import describe_admin_key_source, load_chain_profile
 from adapter.selector import TestSelector
@@ -119,6 +124,23 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
+    def test_selector_allows_upstream_mapped_memory_case(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_memory_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(
+            [case.case_id for case in selected],
+            [
+                "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success",
+                "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_0.success",
+                "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_32.success",
+                "upstream.benchmark.memory.msize.mem_size_0.success",
+                "upstream.benchmark.memory.msize.mem_size_1.success",
+            ],
+        )
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
     def test_manifest_resolves_execution_specs_ref(self) -> None:
         manifest = load_manifest(ROOT / "suites/manifests/upstream_smoke.json")
         head = (
@@ -155,10 +177,28 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertEqual(generated["execution_specs_ref"], head)
 
+    def test_memory_manifest_generator_matches_checked_in_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_memory_mapped.json"
+            generated = generate_upstream_memory_manifest(
+                repo_root=ROOT,
+                template_path=ROOT / "suites/templates/upstream_memory_templates.json",
+                output_path=generated_path,
+            )
+            checked_in = json.loads(
+                (ROOT / "suites/manifests/upstream_memory_mapped.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+
     def test_storage_templates_load(self) -> None:
         templates = load_storage_templates(ROOT / "suites/templates/upstream_storage_templates.json")
         self.assertEqual(len(templates), 17)
         self.assertEqual(templates[0].mode, "read_present")
+
+    def test_memory_templates_load(self) -> None:
+        templates = load_memory_templates(ROOT / "suites/templates/upstream_memory_templates.json")
+        self.assertEqual(len(templates), 5)
+        self.assertEqual(templates[0].mode, "mstore_offset0_uninitialized_mem0")
 
     def test_storage_template_scanner_matches_checked_in_template(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -176,6 +216,25 @@ class HarnessTests(unittest.TestCase):
             inventory = json.loads(inventory_path.read_text())
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
             self.assertEqual(blocked, [])
+
+    def test_memory_template_scanner_matches_checked_in_template(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_memory_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_memory_inventory.json"
+            generated = generate_upstream_memory_templates(
+                repo_root=ROOT,
+                output_path=generated_path,
+                inventory_path=inventory_path,
+            )
+            checked_in = json.loads(
+                (ROOT / "suites/templates/upstream_memory_templates.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            inventory = json.loads(inventory_path.read_text())
+            admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
+            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
+            self.assertEqual(len(admitted), 5)
+            self.assertGreater(len(blocked), 0)
 
     def test_cli_generate_storage_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -209,6 +268,39 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(generated["name"], "upstream-storage-mapping-templates")
             self.assertEqual(len(generated["cases"]), 17)
             self.assertEqual(len(inventory["entries"]), len(generated["cases"]))
+
+    def test_cli_generate_memory_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "generated.json"
+            self.assertEqual(
+                main(["generate-memory-manifest", "--output", str(output_path)]),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            self.assertEqual(generated["name"], "upstream-memory-mapped")
+            self.assertEqual(len(generated["cases"]), 5)
+
+    def test_cli_scan_upstream_memory_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-memory",
+                        "--template-output",
+                        str(output_path),
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(generated["name"], "upstream-memory-mapping-templates")
+            self.assertEqual(len(generated["cases"]), 5)
+            self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
 
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -495,6 +587,51 @@ class HarnessTests(unittest.TestCase):
                     self.assertEqual(result["observed"]["receipt_status"], "0x0")
                 else:
                     self.assertEqual(result["observed"].get("receipt_status"), result["expected"].get("receipt_status"))
+                self.assertIs(result["success"], True)
+
+    def test_mock_backend_runs_upstream_mapped_memory_case(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_memory_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 5)
+            expected_storage = {
+                "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_0.success": {
+                    "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                },
+                "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success": {
+                    "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                },
+                "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_32.success": {
+                    "0x00": "0x2a00000000000000000000000000000000000000000000000000000000000000",
+                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                },
+                "upstream.benchmark.memory.msize.mem_size_0.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.memory.msize.mem_size_1.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                },
+            }
+            for result in report["results"]:
+                self.assertIn(result["case_id"], expected_storage)
+                for slot, value in expected_storage[result["case_id"]].items():
+                    self.assertEqual(result["observed"]["storage"][slot], value)
                 self.assertIs(result["success"], True)
 
 

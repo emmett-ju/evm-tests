@@ -1,0 +1,947 @@
+{
+  "name": "upstream-memory-auto-inventory",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_memory.py",
+  "entries": [
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success",
+      "admitted": true,
+      "mode": "mstore_offset0_uninitialized_mem0",
+      "reasons": [],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=1-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=1-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=1-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=31-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=31-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=31-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_0.success",
+      "admitted": true,
+      "mode": "mload_offset0_initialized_mem0",
+      "reasons": [],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=0-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=0-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=1-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=1-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=1-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=31-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=31-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=31-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_0.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=0-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=0-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=1-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=1-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=1-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=31-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=31-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=31-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=0-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=0-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=1-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=1-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=1-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=31-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=31-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=31-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_1024.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=0-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=0-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=1-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=1-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=1-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=31-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=31-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=31-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=0-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=0-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=1-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=1-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=1-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=31-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=31-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=31-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_10240.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=0-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=0-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=1-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=1-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=1-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=31-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=31-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=31-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=0-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=0-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=1-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=1-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=1-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=31-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=31-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=31-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_256.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=0-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=0-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=1-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=1-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=1-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=31-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=31-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=31-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=0-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=0-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=1-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=1-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=1-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=31-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=31-opcode=MSTORE8]",
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_32.success",
+      "admitted": true,
+      "mode": "mstore8_offset31_initialized_mem32",
+      "reasons": [],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=31-opcode=MSTORE]",
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_32.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+      ],
+      "source": "memory_access"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=0]",
+      "case_id": "upstream.benchmark.memory.msize.mem_size_0.success",
+      "admitted": true,
+      "mode": "msize_mem0",
+      "reasons": [],
+      "source": "msize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=1000000]",
+      "case_id": "upstream.benchmark.memory.msize.mem_size_1000000.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broad memory-expansion benchmark coverage not yet mapped"
+      ],
+      "source": "msize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=100000]",
+      "case_id": "upstream.benchmark.memory.msize.mem_size_100000.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broad memory-expansion benchmark coverage not yet mapped"
+      ],
+      "source": "msize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=1000]",
+      "case_id": "upstream.benchmark.memory.msize.mem_size_1000.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires broad memory-expansion benchmark coverage not yet mapped"
+      ],
+      "source": "msize"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=1]",
+      "case_id": "upstream.benchmark.memory.msize.mem_size_1.success",
+      "admitted": true,
+      "mode": "msize_mem1",
+      "reasons": [],
+      "source": "msize"
+    }
+  ]
+}

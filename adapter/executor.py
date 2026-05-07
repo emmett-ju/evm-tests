@@ -11,6 +11,9 @@ from adapter.profile import describe_admin_key_source
 from adapter.signer import load_private_key, private_key_to_address, sign_type_2_transaction
 
 ZERO_STORAGE_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
+WORD_20 = "0x0000000000000000000000000000000000000000000000000000000000000020"
+WORD_2A = "0x000000000000000000000000000000000000000000000000000000000000002a"
+WORD_2A_BYTE_AT_31 = "0x2a00000000000000000000000000000000000000000000000000000000000000"
 
 
 class Backend(Protocol):
@@ -87,6 +90,16 @@ class MockBackend:
                     storage["0x01"] = storage.get("0x00", ZERO_STORAGE_WORD)
                 elif code == "0x602b60005500":
                     storage["0x00"] = "0x000000000000000000000000000000000000000000000000000000000000002b"
+                elif code == "0x602a600052600051600055595560015500":
+                    storage["0x00"] = WORD_2A
+                    storage["0x01"] = WORD_20
+                elif code == "0x602a601f53602051600055595960015500":
+                    storage["0x00"] = WORD_2A_BYTE_AT_31
+                    storage["0x01"] = WORD_20
+                elif code == "0x5960005500":
+                    storage["0x00"] = ZERO_STORAGE_WORD
+                elif code == "0x5f515960005500":
+                    storage["0x00"] = WORD_20
                 else:
                     raise ValueError(f"unsupported mock contract code path: {code}")
             elif action == "wait_receipt":

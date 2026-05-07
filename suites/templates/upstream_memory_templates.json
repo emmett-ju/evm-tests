@@ -1,0 +1,67 @@
+{
+  "name": "upstream-memory-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_memory.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE at offset 0 on fresh memory onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset0-uninitialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE on untouched memory.",
+        "RPC mapping: runtime writes a known word at offset 0, then persists that word and MSIZE into storage.",
+        "Admitted because final storage captures the semantic write result directly."
+      ],
+      "mode": "mstore_offset0_uninitialized_mem0"
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with initialized memory onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset0-initialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=0-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD after writing a known word at offset 0.",
+        "RPC mapping: runtime writes 0x2a into memory, reads it back with MLOAD, then persists the loaded word and MSIZE into storage.",
+        "Admitted because final storage captures the semantic result directly; gas benchmarking is intentionally excluded."
+      ],
+      "mode": "mload_offset0_initialized_mem0"
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with initialized memory onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset31-initialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=31-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at a word boundary edge after memory expansion.",
+        "RPC mapping: runtime writes byte 0x2a at offset 31, then loads the containing word and stores it together with MSIZE into storage.",
+        "Admitted because the byte placement is visible in final storage."
+      ],
+      "mode": "mstore8_offset31_initialized_mem32"
+    },
+    {
+      "case_id": "upstream.benchmark.memory.msize.mem_size_0.success",
+      "description": "Mapped from execution-specs MSIZE with fresh memory onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-msize-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=0]",
+      "notes": [
+        "Upstream intent: benchmark MSIZE without prior memory expansion.",
+        "RPC mapping: runtime records MSIZE directly into storage slot0.",
+        "Admitted because the semantic result is directly observable on-chain."
+      ],
+      "mode": "msize_mem0"
+    },
+    {
+      "case_id": "upstream.benchmark.memory.msize.mem_size_1.success",
+      "description": "Mapped from execution-specs MSIZE after a minimal memory touch onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-msize-mem1",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=1]",
+      "notes": [
+        "Upstream intent: benchmark MSIZE after memory has been expanded slightly.",
+        "RPC mapping: runtime touches memory with MLOAD and persists the resulting MSIZE into storage slot0.",
+        "Admitted because the semantic result is directly observable on-chain."
+      ],
+      "mode": "msize_mem1"
+    }
+  ]
+}

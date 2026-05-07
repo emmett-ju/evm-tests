@@ -21,9 +21,12 @@ python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/mani
 python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/upstream_storage_mapped.json --state-dir .state
 python -m adapter.cli scan-upstream-storage --template-output suites/templates/upstream_storage_templates.json --inventory-output suites/templates/upstream_storage_inventory.json
 python -m adapter.cli generate-storage-manifest --template suites/templates/upstream_storage_templates.json --output suites/manifests/upstream_storage_mapped.json
+python -m adapter.cli scan-upstream-memory --template-output suites/templates/upstream_memory_templates.json --inventory-output suites/templates/upstream_memory_inventory.json
+python -m adapter.cli generate-memory-manifest --template suites/templates/upstream_memory_templates.json --output suites/manifests/upstream_memory_mapped.json
 ```
 
 `scan-upstream-storage` 会直接扫描 upstream `execution-specs` 的 `test_storage.py`，把可自动映射的 case 生成到本地模板，把当前不能自动承接的 case 写到 inventory 并带过滤原因。
+`scan-upstream-memory` 对 `test_memory.py` 做同样的自动分类，当前优先承接可直接通过 storage 观察结果的 `MLOAD/MSTORE/MSTORE8/MSIZE` 子集。
 
 For real-chain runs, create a local `.env` file from `.env.example`:
 
