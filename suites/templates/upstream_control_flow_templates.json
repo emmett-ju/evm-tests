@@ -1,0 +1,91 @@
+{
+  "name": "upstream-control-flow-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_control_flow.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.control_flow.test_gas_op",
+      "description": "Admitted execution-specs GAS benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-gas",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_gas_op",
+      "notes": [
+        "Upstream intent: benchmark GAS in a control-flow workload.",
+        "RPC mapping: runtime executes GAS, reduces it to a boolean non-zero signal, and stores the result in slot0.",
+        "Admitted because final storage truthfully captures that the GAS opcode executed without relying on upstream gas-accounting internals."
+      ],
+      "mode": "gas"
+    },
+    {
+      "case_id": "upstream.benchmark.control_flow.test_jump_benchmark",
+      "description": "Admitted execution-specs PC-relative JUMP benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-jump-pc-relative",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jump_benchmark",
+      "notes": [
+        "Upstream intent: benchmark JUMP where the destination is derived relative to PC.",
+        "RPC mapping: runtime computes a destination from PC plus a fixed offset, jumps to the matching JUMPDEST, and stores 1 in slot0 after landing.",
+        "Admitted because final storage truthfully captures the relative-control-flow outcome without depending on upstream filler machinery."
+      ],
+      "mode": "jump_pc_relative"
+    },
+    {
+      "case_id": "upstream.benchmark.control_flow.test_jumpdests",
+      "description": "Admitted execution-specs JUMPDEST benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-jumpdest",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumpdests",
+      "notes": [
+        "Upstream intent: benchmark JUMPDEST in a control-flow workload.",
+        "RPC mapping: runtime begins on a JUMPDEST and stores 1 in slot0 after executing the reachable destination path.",
+        "Admitted because final storage truthfully captures that the JUMPDEST path executed without depending on upstream gas-accounting internals."
+      ],
+      "mode": "jumpdest"
+    },
+    {
+      "case_id": "upstream.benchmark.control_flow.test_jumpi_fallthrough",
+      "description": "Admitted execution-specs JUMPI fallthrough benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-jumpi-fallthrough",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumpi_fallthrough",
+      "notes": [
+        "Upstream intent: benchmark JUMPI with a false condition so execution falls through.",
+        "RPC mapping: runtime executes JUMPI with a zero condition, stores 0 on the fallthrough path, and reserves a distinct taken branch that would store 1.",
+        "Admitted because final storage truthfully captures branch direction without requiring trace-level observability."
+      ],
+      "mode": "jumpi_fallthrough"
+    },
+    {
+      "case_id": "upstream.benchmark.control_flow.test_jumpis",
+      "description": "Admitted execution-specs JUMPI taken benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-jumpi-taken",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumpis",
+      "notes": [
+        "Upstream intent: benchmark JUMPI with a truthy NUMBER condition so the branch is taken.",
+        "RPC mapping: runtime executes NUMBER then JUMPI, lands on a JUMPDEST-backed taken branch, and stores 1 in slot0 after the jump succeeds.",
+        "Admitted because final storage truthfully captures branch direction on real execution paths without block-control fixtures."
+      ],
+      "mode": "jumpi_taken"
+    },
+    {
+      "case_id": "upstream.benchmark.control_flow.test_jumps",
+      "description": "Admitted execution-specs JUMP benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-jump",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumps",
+      "notes": [
+        "Upstream intent: benchmark JUMP through an explicit destination.",
+        "RPC mapping: runtime performs an unconditional jump to a JUMPDEST and stores 1 in slot0 only after the jump lands successfully.",
+        "Admitted because final storage truthfully distinguishes successful control transfer from fallthrough or invalid jump behavior."
+      ],
+      "mode": "jump"
+    },
+    {
+      "case_id": "upstream.benchmark.control_flow.test_pc_op",
+      "description": "Admitted execution-specs PC benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-pc",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_pc_op",
+      "notes": [
+        "Upstream intent: benchmark PC in a control-flow workload.",
+        "RPC mapping: runtime executes PC at byte offset 0, checks the pushed value against the expected location, and stores the boolean result in slot0.",
+        "Admitted because final storage truthfully captures the PC opcode outcome without reproducing upstream gas benchmarking internals."
+      ],
+      "mode": "pc"
+    }
+  ]
+}

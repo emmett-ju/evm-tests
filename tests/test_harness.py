@@ -43,7 +43,11 @@ from adapter.block_context_generator import generate_upstream_block_context_temp
 from adapter.arithmetic_generator import generate_upstream_arithmetic_templates
 from adapter.bitwise_generator import generate_upstream_bitwise_templates
 from adapter.comparison_generator import generate_upstream_comparison_templates
-from adapter.control_flow_generator import generate_upstream_control_flow_templates
+from adapter.control_flow_generator import (
+    generate_upstream_control_flow_manifest,
+    generate_upstream_control_flow_templates,
+    load_control_flow_templates,
+)
 from adapter.log_generator import generate_upstream_log_templates
 from adapter.inventory import summarize_inventory_dir, write_inventory_payload
 from adapter.keccak_generator import generate_upstream_keccak_templates
@@ -717,7 +721,7 @@ class HarnessTests(unittest.TestCase):
                     inventory_path=Path(tmpdir) / "inventory.json",
                 )
 
-    def test_control_flow_template_scanner_writes_blocked_inventory_only(self) -> None:
+    def test_control_flow_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_control_flow_templates.json"
             inventory_path = Path(tmpdir) / "upstream_control_flow_inventory.json"
@@ -727,12 +731,28 @@ class HarnessTests(unittest.TestCase):
                 inventory_path=inventory_path,
             )
             self.assertEqual(generated["name"], "upstream-control-flow-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 7)
+            templates = load_control_flow_templates(generated_path)
+            self.assertEqual(len(templates), 7)
+            self.assertEqual(
+                [template.mode for template in templates],
+                [
+                    "gas",
+                    "jump_pc_relative",
+                    "jumpdest",
+                    "jumpi_fallthrough",
+                    "jumpi_taken",
+                    "jump",
+                    "pc",
+                ],
+            )
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(inventory["name"], "upstream-control-flow-auto-inventory")
             self.assertEqual(inventory["family"], "control-flow")
             self.assertEqual(len(inventory["entries"]), 7)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
+            self.assertEqual(len(admitted), 7)
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
             case_ids = [entry["case_id"] for entry in inventory["entries"]]
             self.assertEqual(len(case_ids), len(set(case_ids)))
             self.assertEqual(
@@ -749,8 +769,6 @@ class HarnessTests(unittest.TestCase):
                     ]
                 ),
             )
-            for entry in inventory["entries"]:
-                self.assertIn("not yet mapped", " ".join(entry["reasons"]))
 
     def test_control_flow_template_scanner_fails_loudly_on_missing_function(self) -> None:
         source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_control_flow.py"
@@ -1104,11 +1122,74 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-control-flow-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 7)
             self.assertEqual(inventory["name"], "upstream-control-flow-auto-inventory")
             self.assertEqual(inventory["family"], "control-flow")
             self.assertEqual(len(inventory["entries"]), 7)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 7)
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
+
+    def test_control_flow_manifest_generator_matches_checked_in_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_template_path = Path(tmpdir) / "upstream_control_flow_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_control_flow_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_control_flow_mapped.json"
+            templates = generate_upstream_control_flow_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
+            generated = generate_upstream_control_flow_manifest(
+                repo_root=ROOT,
+                template_path=generated_template_path,
+                output_path=manifest_path,
+            )
+            checked_in_manifest = json.loads(
+                (ROOT / "suites/manifests/upstream_control_flow_mapped.json").read_text()
+            )
+            self.assertEqual(generated, checked_in_manifest)
+            self.assertEqual(
+                generated,
+                json.loads(manifest_path.read_text()),
+            )
+            self.assertEqual(generated["name"], "upstream-control-flow-mapped")
+            self.assertEqual(len(generated["cases"]), 7)
+            self.assertEqual({case["family"] for case in generated["cases"]}, {"state/control-flow"})
+            self.assertEqual(
+                [case["case_id"] for case in generated["cases"]],
+                [case["case_id"] for case in templates["cases"]],
+            )
+
+    def test_cli_generate_control_flow_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_output_path = Path(tmpdir) / "templates.json"
+            inventory_output_path = Path(tmpdir) / "inventory.json"
+            manifest_output_path = Path(tmpdir) / "generated.json"
+            generate_upstream_control_flow_templates(
+                repo_root=ROOT,
+                output_path=template_output_path,
+                inventory_path=inventory_output_path,
+            )
+            self.assertEqual(
+                main(
+                    [
+                        "generate-control-flow-manifest",
+                        "--template",
+                        str(template_output_path),
+                        "--output",
+                        str(manifest_output_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(manifest_output_path.read_text())
+            checked_in = json.loads(
+                (ROOT / "suites/manifests/upstream_control_flow_mapped.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            self.assertEqual(generated["name"], "upstream-control-flow-mapped")
+            self.assertEqual(len(generated["cases"]), 7)
+            self.assertEqual(generated["cases"][0]["family"], "state/control-flow")
 
     def test_cli_generate_memory_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1393,7 +1474,8 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["name"], "upstream-control-flow-auto-inventory")
             self.assertEqual(inventory["family"], "control-flow")
             self.assertEqual(len(inventory["entries"]), 7)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 7)
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
 
     def test_cli_scan_upstream_block_context_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1750,7 +1832,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 284, "blocked": 329},
+            {"families": 14, "cases": 613, "admitted": 291, "blocked": 322},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -1771,7 +1853,7 @@ class HarnessTests(unittest.TestCase):
                 "bitwise": {"total": 12, "admitted": 9, "blocked": 3},
                 "comparison": {"total": 6, "admitted": 6, "blocked": 0},
                 "stack": {"total": 65, "admitted": 65, "blocked": 0},
-                "control-flow": {"total": 7, "admitted": 0, "blocked": 7},
+                "control-flow": {"total": 7, "admitted": 7, "blocked": 0},
                 "account-query": {"total": 40, "admitted": 5, "blocked": 35},
                 "block-context": {"total": 13, "admitted": 0, "blocked": 13},
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},

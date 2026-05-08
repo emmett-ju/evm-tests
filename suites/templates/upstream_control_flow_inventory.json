@@ -7,71 +7,57 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_gas_op",
       "case_id": "upstream.benchmark.control_flow.test_gas_op",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires control-flow benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "gas",
+      "reasons": [],
       "source": "test_gas_op"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jump_benchmark",
       "case_id": "upstream.benchmark.control_flow.test_jump_benchmark",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires control-flow benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "jump_pc_relative",
+      "reasons": [],
       "source": "test_jump_benchmark"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumpdests",
       "case_id": "upstream.benchmark.control_flow.test_jumpdests",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires control-flow benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "jumpdest",
+      "reasons": [],
       "source": "test_jumpdests"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumpi_fallthrough",
       "case_id": "upstream.benchmark.control_flow.test_jumpi_fallthrough",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires control-flow benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "jumpi_fallthrough",
+      "reasons": [],
       "source": "test_jumpi_fallthrough"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumpis",
       "case_id": "upstream.benchmark.control_flow.test_jumpis",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires control-flow benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "jumpi_taken",
+      "reasons": [],
       "source": "test_jumpis"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumps",
       "case_id": "upstream.benchmark.control_flow.test_jumps",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires control-flow benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "jump",
+      "reasons": [],
       "source": "test_jumps"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_pc_op",
       "case_id": "upstream.benchmark.control_flow.test_pc_op",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires control-flow benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "pc",
+      "reasons": [],
       "source": "test_pc_op"
     }
   ]

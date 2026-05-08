@@ -26,7 +26,10 @@ from adapter.comparison_generator import (
     generate_upstream_comparison_manifest,
     generate_upstream_comparison_templates,
 )
-from adapter.control_flow_generator import generate_upstream_control_flow_templates
+from adapter.control_flow_generator import (
+    generate_upstream_control_flow_manifest,
+    generate_upstream_control_flow_templates,
+)
 from adapter.log_generator import generate_upstream_log_templates
 from adapter.keccak_generator import generate_upstream_keccak_templates
 from adapter.system_generator import generate_upstream_system_templates
@@ -216,6 +219,10 @@ def build_parser() -> argparse.ArgumentParser:
     generate_stack = subparsers.add_parser("generate-stack-manifest")
     generate_stack.add_argument("--template", default="suites/templates/upstream_stack_templates.json")
     generate_stack.add_argument("--output", required=True)
+
+    generate_control_flow = subparsers.add_parser("generate-control-flow-manifest")
+    generate_control_flow.add_argument("--template", default="suites/templates/upstream_control_flow_templates.json")
+    generate_control_flow.add_argument("--output", required=True)
 
     summarize_inventory = subparsers.add_parser("summarize-upstream-inventory")
     summarize_inventory.add_argument("--inventory-dir", default="suites/templates")
@@ -529,6 +536,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "generate-stack-manifest":
         manifest = generate_upstream_stack_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-control-flow-manifest":
+        manifest = generate_upstream_control_flow_manifest(
             repo_root=Path.cwd(),
             template_path=args.template,
             output_path=args.output,

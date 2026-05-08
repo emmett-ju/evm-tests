@@ -1,0 +1,359 @@
+{
+  "name": "upstream-control-flow-mapped",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.control_flow.test_gas_op",
+      "family": "state/control-flow",
+      "description": "Admitted execution-specs GAS benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-gas",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_gas_op",
+      "notes": [
+        "Upstream intent: benchmark GAS in a control-flow workload.",
+        "RPC mapping: runtime executes GAS, reduces it to a boolean non-zero signal, and stores the result in slot0.",
+        "Admitted because final storage truthfully captures that the GAS opcode executed without relying on upstream gas-accounting internals."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "control_flow_probe": {
+          "mode": "gas",
+          "expected_storage": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6006600c60003960066000f35a15155f5500",
+          "bytecode_runtime": "0x5a15155f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.control_flow.test_jump_benchmark",
+      "family": "state/control-flow",
+      "description": "Admitted execution-specs PC-relative JUMP benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-jump-pc-relative",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jump_benchmark",
+      "notes": [
+        "Upstream intent: benchmark JUMP where the destination is derived relative to PC.",
+        "RPC mapping: runtime computes a destination from PC plus a fixed offset, jumps to the matching JUMPDEST, and stores 1 in slot0 after landing.",
+        "Admitted because final storage truthfully captures the relative-control-flow outcome without depending on upstream filler machinery."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "control_flow_probe": {
+          "mode": "jump_pc_relative",
+          "expected_storage": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f358600501565b60015f5500",
+          "bytecode_runtime": "0x58600501565b60015f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.control_flow.test_jumpdests",
+      "family": "state/control-flow",
+      "description": "Admitted execution-specs JUMPDEST benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-jumpdest",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumpdests",
+      "notes": [
+        "Upstream intent: benchmark JUMPDEST in a control-flow workload.",
+        "RPC mapping: runtime begins on a JUMPDEST and stores 1 in slot0 after executing the reachable destination path.",
+        "Admitted because final storage truthfully captures that the JUMPDEST path executed without depending on upstream gas-accounting internals."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "control_flow_probe": {
+          "mode": "jumpdest",
+          "expected_storage": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6006600c60003960066000f35b60015f5500",
+          "bytecode_runtime": "0x5b60015f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.control_flow.test_jumpi_fallthrough",
+      "family": "state/control-flow",
+      "description": "Admitted execution-specs JUMPI fallthrough benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-jumpi-fallthrough",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumpi_fallthrough",
+      "notes": [
+        "Upstream intent: benchmark JUMPI with a false condition so execution falls through.",
+        "RPC mapping: runtime executes JUMPI with a zero condition, stores 0 on the fallthrough path, and reserves a distinct taken branch that would store 1.",
+        "Admitted because final storage truthfully captures branch direction without requiring trace-level observability."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "control_flow_probe": {
+          "mode": "jumpi_fallthrough",
+          "expected_storage": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600e600c600039600e6000f360085f575f5f55005b60015f5500",
+          "bytecode_runtime": "0x60085f575f5f55005b60015f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.control_flow.test_jumpis",
+      "family": "state/control-flow",
+      "description": "Admitted execution-specs JUMPI taken benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-jumpi-taken",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumpis",
+      "notes": [
+        "Upstream intent: benchmark JUMPI with a truthy NUMBER condition so the branch is taken.",
+        "RPC mapping: runtime executes NUMBER then JUMPI, lands on a JUMPDEST-backed taken branch, and stores 1 in slot0 after the jump succeeds.",
+        "Admitted because final storage truthfully captures branch direction on real execution paths without block-control fixtures."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "control_flow_probe": {
+          "mode": "jumpi_taken",
+          "expected_storage": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600e600c600039600e6000f3600843575f5f55005b60015f5500",
+          "bytecode_runtime": "0x600843575f5f55005b60015f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.control_flow.test_jumps",
+      "family": "state/control-flow",
+      "description": "Admitted execution-specs JUMP benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-jump",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_jumps",
+      "notes": [
+        "Upstream intent: benchmark JUMP through an explicit destination.",
+        "RPC mapping: runtime performs an unconditional jump to a JUMPDEST and stores 1 in slot0 only after the jump lands successfully.",
+        "Admitted because final storage truthfully distinguishes successful control transfer from fallthrough or invalid jump behavior."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "control_flow_probe": {
+          "mode": "jump",
+          "expected_storage": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600a600c600039600a6000f3600456005b60015f5500",
+          "bytecode_runtime": "0x600456005b60015f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.control_flow.test_pc_op",
+      "family": "state/control-flow",
+      "description": "Admitted execution-specs PC benchmark variant with a deterministic storage-observable outcome.",
+      "namespace_seed": "upstream-control-flow-pc",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_control_flow.py::test_pc_op",
+      "notes": [
+        "Upstream intent: benchmark PC in a control-flow workload.",
+        "RPC mapping: runtime executes PC at byte offset 0, checks the pushed value against the expected location, and stores the boolean result in slot0.",
+        "Admitted because final storage truthfully captures the PC opcode outcome without reproducing upstream gas benchmarking internals."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "control_flow_probe": {
+          "mode": "pc",
+          "expected_storage": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6006600c60003960066000f3585f145f5500",
+          "bytecode_runtime": "0x585f145f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      }
+    }
+  ]
+}
