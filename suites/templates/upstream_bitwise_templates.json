@@ -1,0 +1,158 @@
+{
+  "name": "upstream-bitwise-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_bitwise.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.and",
+      "description": "Mapped from execution-specs AND onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-and",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=AND]",
+      "notes": [
+        "Upstream intent: benchmark AND with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_bitwise",
+      "opcode": "AND",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.byte",
+      "description": "Mapped from execution-specs BYTE onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-byte",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=BYTE]",
+      "notes": [
+        "Upstream intent: benchmark BYTE with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_bitwise",
+      "opcode": "BYTE",
+      "args": [
+        31,
+        115792089237316195423570985008687907853269984665640564039457584007908834671663
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.or",
+      "description": "Mapped from execution-specs OR onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-or",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=OR]",
+      "notes": [
+        "Upstream intent: benchmark OR with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_bitwise",
+      "opcode": "OR",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.sar",
+      "description": "Mapped from execution-specs SAR onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-sar",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=SAR]",
+      "notes": [
+        "Upstream intent: benchmark SAR with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_bitwise",
+      "opcode": "SAR",
+      "args": [
+        1,
+        115792089237316195423570985008687907853269984665640564039457584007908834671663
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.shl",
+      "description": "Mapped from execution-specs SHL onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-shl",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=SHL]",
+      "notes": [
+        "Upstream intent: benchmark SHL with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_bitwise",
+      "opcode": "SHL",
+      "args": [
+        1,
+        115792089237316195423570985008687907853269984665640564039457584007908834671663
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.shr",
+      "description": "Mapped from execution-specs SHR onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-shr",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=SHR]",
+      "notes": [
+        "Upstream intent: benchmark SHR with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_bitwise",
+      "opcode": "SHR",
+      "args": [
+        1,
+        115792089237316195423570985008687907853269984665640564039457584007908834671663
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.xor",
+      "description": "Mapped from execution-specs XOR onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-xor",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=XOR]",
+      "notes": [
+        "Upstream intent: benchmark XOR with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_bitwise",
+      "opcode": "XOR",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.bitwise.test_clz_same.clz",
+      "description": "Mapped from execution-specs CLZ onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-clz",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_clz_same",
+      "notes": [
+        "Upstream intent: benchmark CLZ with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_clz_same",
+      "opcode": "CLZ",
+      "args": [
+        248
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.bitwise.test_not_op.not",
+      "description": "Mapped from execution-specs NOT onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-not",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_not_op",
+      "notes": [
+        "Upstream intent: benchmark NOT with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_not_op",
+      "opcode": "NOT",
+      "args": [
+        0
+      ]
+    }
+  ]
+}

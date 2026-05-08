@@ -577,7 +577,7 @@ class HarnessTests(unittest.TestCase):
                 Counter({"requires blob transaction construction and BLOBHASH environment not yet mapped": 2}),
             )
 
-    def test_arithmetic_template_scanner_writes_blocked_inventory_only(self) -> None:
+    def test_arithmetic_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_arithmetic_templates.json"
             inventory_path = Path(tmpdir) / "upstream_arithmetic_inventory.json"
@@ -587,18 +587,16 @@ class HarnessTests(unittest.TestCase):
                 inventory_path=inventory_path,
             )
             self.assertEqual(generated["name"], "upstream-arithmetic-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 65)
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(inventory["name"], "upstream-arithmetic-auto-inventory")
             self.assertEqual(inventory["family"], "arithmetic")
             self.assertEqual(len(inventory["entries"]), 65)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
             case_ids = [entry["case_id"] for entry in inventory["entries"]]
             self.assertEqual(len(case_ids), len(set(case_ids)))
-            for entry in inventory["entries"]:
-                self.assertIn("not yet mapped", " ".join(entry["reasons"]))
 
-    def test_bitwise_template_scanner_writes_blocked_inventory_only(self) -> None:
+    def test_bitwise_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_bitwise_templates.json"
             inventory_path = Path(tmpdir) / "upstream_bitwise_inventory.json"
@@ -608,18 +606,16 @@ class HarnessTests(unittest.TestCase):
                 inventory_path=inventory_path,
             )
             self.assertEqual(generated["name"], "upstream-bitwise-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 9)
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(inventory["name"], "upstream-bitwise-auto-inventory")
             self.assertEqual(inventory["family"], "bitwise")
             self.assertEqual(len(inventory["entries"]), 12)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 9)
             case_ids = [entry["case_id"] for entry in inventory["entries"]]
             self.assertEqual(len(case_ids), len(set(case_ids)))
-            for entry in inventory["entries"]:
-                self.assertIn("not yet mapped", " ".join(entry["reasons"]))
 
-    def test_comparison_template_scanner_writes_blocked_inventory_only(self) -> None:
+    def test_comparison_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_comparison_templates.json"
             inventory_path = Path(tmpdir) / "upstream_comparison_inventory.json"
@@ -629,18 +625,16 @@ class HarnessTests(unittest.TestCase):
                 inventory_path=inventory_path,
             )
             self.assertEqual(generated["name"], "upstream-comparison-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 6)
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(inventory["name"], "upstream-comparison-auto-inventory")
             self.assertEqual(inventory["family"], "comparison")
             self.assertEqual(len(inventory["entries"]), 6)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
             case_ids = [entry["case_id"] for entry in inventory["entries"]]
             self.assertEqual(len(case_ids), len(set(case_ids)))
-            for entry in inventory["entries"]:
-                self.assertIn("not yet mapped", " ".join(entry["reasons"]))
 
-    def test_stack_template_scanner_writes_blocked_inventory_only(self) -> None:
+    def test_stack_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_stack_templates.json"
             inventory_path = Path(tmpdir) / "upstream_stack_inventory.json"
@@ -649,41 +643,49 @@ class HarnessTests(unittest.TestCase):
                 output_path=generated_path,
                 inventory_path=inventory_path,
             )
+            checked_in_templates = json.loads(
+                (ROOT / "suites/templates/upstream_stack_templates.json").read_text()
+            )
+            checked_in_inventory = json.loads(
+                (ROOT / "suites/templates/upstream_stack_inventory.json").read_text()
+            )
+            self.assertEqual(generated, checked_in_templates)
             self.assertEqual(generated["name"], "upstream-stack-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 65)
             inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory, checked_in_inventory)
             self.assertEqual(inventory["name"], "upstream-stack-auto-inventory")
             self.assertEqual(inventory["family"], "stack")
             self.assertEqual(len(inventory["entries"]), 65)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+
+            admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
+            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
+            self.assertEqual(len(admitted), 65)
+            self.assertEqual(blocked, [])
+            self.assertEqual([case["case_id"] for case in generated["cases"]], [entry["case_id"] for entry in admitted])
+
             case_ids = [entry["case_id"] for entry in inventory["entries"]]
             self.assertEqual(len(case_ids), len(set(case_ids)))
-            self.assertIn(
-                "upstream.benchmark.stack.test_push.push0",
-                case_ids,
+            self.assertEqual(
+                Counter(entry["source"] for entry in inventory["entries"]),
+                Counter({"test_push": 33, "test_dup": 16, "test_swap": 16}),
             )
-            self.assertIn(
-                "upstream.benchmark.stack.test_push.push32",
-                case_ids,
+            self.assertEqual(
+                Counter(entry["mode"] for entry in inventory["entries"]),
+                Counter({"test_push": 33, "test_dup": 16, "test_swap": 16}),
             )
-            self.assertIn(
-                "upstream.benchmark.stack.test_dup.dup1",
-                case_ids,
+            self.assertEqual({tuple(entry["reasons"]) for entry in inventory["entries"]}, {()})
+            self.assertEqual(
+                {
+                    "upstream.benchmark.stack.test_push.push0",
+                    "upstream.benchmark.stack.test_push.push32",
+                    "upstream.benchmark.stack.test_dup.dup1",
+                    "upstream.benchmark.stack.test_dup.dup16",
+                    "upstream.benchmark.stack.test_swap.swap1",
+                    "upstream.benchmark.stack.test_swap.swap16",
+                }.issubset(case_ids),
+                True,
             )
-            self.assertIn(
-                "upstream.benchmark.stack.test_dup.dup16",
-                case_ids,
-            )
-            self.assertIn(
-                "upstream.benchmark.stack.test_swap.swap1",
-                case_ids,
-            )
-            self.assertIn(
-                "upstream.benchmark.stack.test_swap.swap16",
-                case_ids,
-            )
-            for entry in inventory["entries"]:
-                self.assertIn("not yet mapped", " ".join(entry["reasons"]))
 
     def test_stack_template_scanner_fails_loudly_on_missing_param_block(self) -> None:
         source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_stack.py"
@@ -940,11 +942,11 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-arithmetic-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 65)
             self.assertEqual(inventory["name"], "upstream-arithmetic-auto-inventory")
             self.assertEqual(inventory["family"], "arithmetic")
             self.assertEqual(len(inventory["entries"]), 65)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
 
     def test_cli_scan_upstream_bitwise_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -965,11 +967,11 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-bitwise-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 9)
             self.assertEqual(inventory["name"], "upstream-bitwise-auto-inventory")
             self.assertEqual(inventory["family"], "bitwise")
             self.assertEqual(len(inventory["entries"]), 12)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 9)
 
     def test_cli_scan_upstream_comparison_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1015,11 +1017,12 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-stack-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 65)
             self.assertEqual(inventory["name"], "upstream-stack-auto-inventory")
             self.assertEqual(inventory["family"], "stack")
             self.assertEqual(len(inventory["entries"]), 65)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 65)
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
 
     def test_cli_scan_upstream_control_flow_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1252,7 +1255,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["name"], "upstream-arithmetic-auto-inventory")
             self.assertEqual(inventory["family"], "arithmetic")
             self.assertEqual(len(inventory["entries"]), 65)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
 
     def test_cli_scan_upstream_bitwise_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1271,7 +1274,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["name"], "upstream-bitwise-auto-inventory")
             self.assertEqual(inventory["family"], "bitwise")
             self.assertEqual(len(inventory["entries"]), 12)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 9)
 
     def test_cli_scan_upstream_comparison_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1290,7 +1293,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["name"], "upstream-comparison-auto-inventory")
             self.assertEqual(inventory["family"], "comparison")
             self.assertEqual(len(inventory["entries"]), 6)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
 
     def test_cli_scan_upstream_stack_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1309,7 +1312,8 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["name"], "upstream-stack-auto-inventory")
             self.assertEqual(inventory["family"], "stack")
             self.assertEqual(len(inventory["entries"]), 65)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 65)
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
 
     def test_cli_scan_upstream_control_flow_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1685,7 +1689,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 139, "blocked": 474},
+            {"families": 14, "cases": 613, "admitted": 284, "blocked": 329},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -1702,10 +1706,10 @@ class HarnessTests(unittest.TestCase):
                 if family in {"arithmetic", "bitwise", "comparison", "stack", "control-flow", "account-query", "block-context", "call-context", "log", "keccak", "system", "tx-context", "memory"}
             },
             {
-                "arithmetic": {"total": 65, "admitted": 0, "blocked": 65},
-                "bitwise": {"total": 12, "admitted": 0, "blocked": 12},
-                "comparison": {"total": 6, "admitted": 0, "blocked": 6},
-                "stack": {"total": 65, "admitted": 0, "blocked": 65},
+                "arithmetic": {"total": 65, "admitted": 65, "blocked": 0},
+                "bitwise": {"total": 12, "admitted": 9, "blocked": 3},
+                "comparison": {"total": 6, "admitted": 6, "blocked": 0},
+                "stack": {"total": 65, "admitted": 65, "blocked": 0},
                 "control-flow": {"total": 7, "admitted": 0, "blocked": 7},
                 "account-query": {"total": 40, "admitted": 5, "blocked": 35},
                 "block-context": {"total": 13, "admitted": 0, "blocked": 13},
@@ -1743,11 +1747,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 134, "blocked": 439},
+                {"families": 13, "cases": 573, "admitted": 205, "blocked": 368},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 139, "blocked": 474},
+                {"families": 14, "cases": 613, "admitted": 219, "blocked": 394},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -1818,11 +1822,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 138, "blocked": 474},
+                {"families": 14, "cases": 612, "admitted": 218, "blocked": 394},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 139, "blocked": 474},
+                {"families": 14, "cases": 613, "admitted": 219, "blocked": 394},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -1842,7 +1846,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 138, "blocked": 474},
+                {"families": 14, "cases": 612, "admitted": 218, "blocked": 394},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(

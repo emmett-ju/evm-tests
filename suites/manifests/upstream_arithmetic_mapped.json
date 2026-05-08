@@ -1,0 +1,3529 @@
+{
+  "name": "upstream-arithmetic-mapped",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.add.base.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs ADD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-add",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=ADD-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark ADD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "ADD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            52435875175126190479447740508185965837690552500527637822603658699938581184513
+          ],
+          "expected_result": 52435875175126190479447740508185965837690552500527637822603658699934286216240
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f015f5500",
+          "bytecode_runtime": "0x7f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f015f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x73eda753299d7d483339d80809a1d80553bda402fffe5bfefffffffdfffffc30"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.addmod.base.arity_3",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs ADDMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-addmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=ADDMOD-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark ADDMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "ADDMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            52435875175126190479447740508185965837690552500527637822603658699938581184513,
+            340282366920938463463374607431768211507
+          ],
+          "expected_result": 78950464770961784664867330664735834607
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6058600c60003960586000f37001000000000000000000000000000000337f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f085f5500",
+          "bytecode_runtime": "0x7001000000000000000000000000000000337f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f085f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000003b654e71b59e669ccb79f66414c201ef"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.div.base.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs DIV onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-div",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=DIV-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark DIV with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "DIV",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            340282366920938463463374607431768211507
+          ],
+          "expected_result": 340282366920938463463374607431768211404
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6037600c60003960376000f37001000000000000000000000000000000337ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f045f5500",
+          "bytecode_runtime": "0x7001000000000000000000000000000000337ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f045f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000000ffffffffffffffffffffffffffffffcc"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.div.variant_1.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs DIV onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-div",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=DIV-variant=variant_1]",
+      "notes": [
+        "Upstream intent: benchmark DIV with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "DIV",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            18446744073709551667
+          ],
+          "expected_result": 6277101735386680746481388710239804827450231801162399349204
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x602f600c600039602f6000f3680100000000000000337ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f045f5500",
+          "bytecode_runtime": "0x680100000000000000337ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f045f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000ffffffffffffffcd0000000000000a28fffffffffffdf9d4"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.exp.base.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=EXP-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            115792089237316195423570985008687907853269984665640564039457584007913129639935
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007913129639935
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0a5f5500",
+          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mod.base.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MOD-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark MOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            52435875175126190479447740508185965837690552500527637822603658699938581184513
+          ],
+          "expected_result": 10920338887063814464675503992315976177888879664585288394250266608031672302637
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f065f5500",
+          "bytecode_runtime": "0x7f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f065f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x1824b159acc5056f998c4fefecbc4ff55884b7fa0003480200000000fffffc2d"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mul.base.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MUL onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mul",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MUL-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark MUL with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MUL",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            52435875175126190479447740508185965837690552500527637822603658699938581184513
+          ],
+          "expected_result": 47222399586898114639024721065200110434251622869730314852791649009693074914351
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f025f5500",
+          "bytecode_runtime": "0x7f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f025f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x6866ee55fabb076c769cb14de998efa86942b48e0642e7d2000003cffffffc2f"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mulmod.base.arity_3",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MULMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mulmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MULMOD-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark MULMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MULMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            52435875175126190479447740508185965837690552500527637822603658699938581184513,
+            340282366920938463463374607431768211507
+          ],
+          "expected_result": 27972094400011932474497699032867167107
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6058600c60003960586000f37001000000000000000000000000000000337f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f095f5500",
+          "bytecode_runtime": "0x7001000000000000000000000000000000337f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f095f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000000150b3abb5960fc45b8f115b083c25b83"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sdiv.base.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs SDIV onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-sdiv",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SDIV-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark SDIV with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "SDIV",
+          "args": [
+            57896044618658097711785492504343953926634992332820282019728792003952269851695,
+            115792089237316195423570985008687907852929702298719625575994209400481361428429
+          ],
+          "expected_result": 115792089237316195423570985008687907853099843482180094807725896704197245534234
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37ffffffffffffffffffffffffffffffffeffffffffffffffffffffffffffffffcd7f7ffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f055f5500",
+          "bytecode_runtime": "0x7ffffffffffffffffffffffffffffffffeffffffffffffffffffffffffffffffcd7f7ffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f055f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffffffffffffffffffff8000000000000000000000000000001a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sdiv.variant_1.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs SDIV onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-sdiv",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SDIV-variant=variant_1]",
+      "notes": [
+        "Upstream intent: benchmark SDIV with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "SDIV",
+          "args": [
+            57896044618658097711785492504343953926634992332820282019728792003952269851695,
+            115792089237316195423570985008687907853269984665640564039439137263839420088269
+          ],
+          "expected_result": 115792089237316195420432434140994567480029290310520661625732468107331929965334
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37ffffffffffffffffffffffffffffffffffffffffffffffffeffffffffffffffcd7f7ffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f055f5500",
+          "bytecode_runtime": "0x7ffffffffffffffffffffffffffffffffffffffffffffffffeffffffffffffffcd7f7ffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f055f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffff80000000000000197ffffffffffffaeb8000000000010316"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.signextend.base.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs SIGNEXTEND onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-signextend",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SIGNEXTEND-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark SIGNEXTEND with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "SIGNEXTEND",
+          "args": [
+            3,
+            4292532954
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007913127205594
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f363ffdadada60030b5f5500",
+          "bytecode_runtime": "0x63ffdadada60030b5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdadada"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.smod.base.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs SMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-smod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SMOD-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark SMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "SMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            52435875175126190479447740508185965837690552500527637822603658699938581184513
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007908834671663
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f075f5500",
+          "bytecode_runtime": "0x7f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f075f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sub.base.arity_2",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs SUB onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-sub",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SUB-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark SUB with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "SUB",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            52435875175126190479447740508185965837690552500527637822603658699938581184513
+          ],
+          "expected_result": 63356214062190004944123244500501942015579432165112926216853925307970253487150
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f035f5500",
+          "bytecode_runtime": "0x7f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f035f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x8c1258acd66282b7ccc627f7f65e27faac425bfd0001a400fffffffffffffc2e"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_11",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            11,
+            11
+          ],
+          "expected_result": 285311670611
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600b600b0a5f5500",
+          "bytecode_runtime": "0x600b600b0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000426de69953"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_136279841",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            136279841,
+            11
+          ],
+          "expected_result": 64170280914254271033255695756383842866627913648194024533069669906710123035233
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f3600b63081f77210a5f5500",
+          "bytecode_runtime": "0x600b63081f77210a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x8ddf178695bd0c187ee723b9e41e1c88bc6d7c24959162cc13becd3a0a9cba61"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_13",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            13,
+            11
+          ],
+          "expected_result": 1792160394037
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600b600d0a5f5500",
+          "bytecode_runtime": "0x600b600d0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000001a145156b35"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_3",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            3,
+            11
+          ],
+          "expected_result": 177147
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600b60030a5f5500",
+          "bytecode_runtime": "0x600b60030a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000002b3fb"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_5",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            5,
+            11
+          ],
+          "expected_result": 48828125
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600b60050a5f5500",
+          "bytecode_runtime": "0x600b60050a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000002e90edd"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_7",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            7,
+            11
+          ],
+          "expected_result": 1977326743
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600b60070a5f5500",
+          "bytecode_runtime": "0x600b60070a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000075db9c97"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_11",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            11,
+            13
+          ],
+          "expected_result": 34522712143931
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600d600b0a5f5500",
+          "bytecode_runtime": "0x600d600b0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000000000000000000000000001f65f1fe783b"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_136279841",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            136279841,
+            13
+          ],
+          "expected_result": 84023641407743573944324807650069248530246603958701471996488566129046531851425
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f3600d63081f77210a5f5500",
+          "bytecode_runtime": "0x600d63081f77210a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xb9c3b21b20a846e02a30289662374d58ea175c80caa0b893d991892f87afc4a1"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_13",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            13,
+            13
+          ],
+          "expected_result": 302875106592253
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600d600d0a5f5500",
+          "bytecode_runtime": "0x600d600d0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000113769b23c5fd"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_3",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            3,
+            13
+          ],
+          "expected_result": 1594323
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600d60030a5f5500",
+          "bytecode_runtime": "0x600d60030a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000000000000000000000000000000001853d3"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_5",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            5,
+            13
+          ],
+          "expected_result": 1220703125
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600d60050a5f5500",
+          "bytecode_runtime": "0x600d60050a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000048c27395"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_7",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            7,
+            13
+          ],
+          "expected_result": 96889010407
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600d60070a5f5500",
+          "bytecode_runtime": "0x600d60070a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000168f08f8e7"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_11",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            11,
+            136279841
+          ],
+          "expected_result": 71842168779874964124294222039065866367031919823762698983602496617948158064779
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f363081f7721600b0a5f5500",
+          "bytecode_runtime": "0x63081f7721600b0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x9ed539ff2b9cbff9f10c13084c011b644ee69ecaee55b5d6fa218b434893788b"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_136279841",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            136279841,
+            136279841
+          ],
+          "expected_result": 74566503105965581196875293065926861211925904211172855502659985030772837350177
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600e600c600039600e6000f363081f772163081f77210a5f5500",
+          "bytecode_runtime": "0x63081f772163081f77210a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xa4db25278f1ac8bd8fec05b43ea388b256315565c4baa6078c2a6102a6f87b21"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_13",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            13,
+            136279841
+          ],
+          "expected_result": 27632848399456751457468431057906291549710477342765541262623670418798540221069
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f363081f7721600d0a5f5500",
+          "bytecode_runtime": "0x63081f7721600d0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x3d17a350715a101b40d3cc9c9956f7d4ccbe4a547f45dcf7317c19b09ad7ea8d"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_3",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            3,
+            136279841
+          ],
+          "expected_result": 24300776775997774984500385004035758600165917399043679706105894258669662306179
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f363081f772160030a5f5500",
+          "bytecode_runtime": "0x63081f772160030a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x35b9c092d712c14def8b0b7f20cb2bb1a61a96dff794f79080376fa202ccff83"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_5",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            5,
+            136279841
+          ],
+          "expected_result": 466326266271029104930998286008213022854352523959017504007244804890297688453
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f363081f772160050a5f5500",
+          "bytecode_runtime": "0x63081f772160050a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0107ee6a8d00f7b1a6d69496de40ff9d226df08683f44e1f070bd2d99534e185"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_7",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            7,
+            136279841
+          ],
+          "expected_result": 23416748179097142765719689943730552313052651762056437114441672743996335355143
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f363081f772160070a5f5500",
+          "bytecode_runtime": "0x63081f772160070a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x33c568e7c003ab00057744de7a1e213d9da6e81af88ee7467508ad1941dc7507"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_11",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            11,
+            3
+          ],
+          "expected_result": 1331
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f36003600b0a5f5500",
+          "bytecode_runtime": "0x6003600b0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000533"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_136279841",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            136279841,
+            3
+          ],
+          "expected_result": 2531015790204619080020321
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f3600363081f77210a5f5500",
+          "bytecode_runtime": "0x600363081f77210a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000217f6a4131eb8eadf3161"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_13",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            13,
+            3
+          ],
+          "expected_result": 2197
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f36003600d0a5f5500",
+          "bytecode_runtime": "0x6003600d0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000895"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_3",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            3,
+            3
+          ],
+          "expected_result": 27
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600360030a5f5500",
+          "bytecode_runtime": "0x600360030a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000001b"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_5",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            5,
+            3
+          ],
+          "expected_result": 125
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600360050a5f5500",
+          "bytecode_runtime": "0x600360050a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000007d"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_7",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            7,
+            3
+          ],
+          "expected_result": 343
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600360070a5f5500",
+          "bytecode_runtime": "0x600360070a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000157"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_11",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            11,
+            5
+          ],
+          "expected_result": 161051
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f36005600b0a5f5500",
+          "bytecode_runtime": "0x6005600b0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000002751b"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_136279841",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            136279841,
+            5
+          ],
+          "expected_result": 47006518963176016216332985827636403895201
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f3600563081f77210a5f5500",
+          "bytecode_runtime": "0x600563081f77210a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000008a23c63ec94668718ca404aff85a4dfba1"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_13",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            13,
+            5
+          ],
+          "expected_result": 371293
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f36005600d0a5f5500",
+          "bytecode_runtime": "0x6005600d0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000005aa5d"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_3",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            3,
+            5
+          ],
+          "expected_result": 243
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600560030a5f5500",
+          "bytecode_runtime": "0x600560030a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000000000000000000000000000000000000f3"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_5",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            5,
+            5
+          ],
+          "expected_result": 3125
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600560050a5f5500",
+          "bytecode_runtime": "0x600560050a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000c35"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_7",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            7,
+            5
+          ],
+          "expected_result": 16807
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600560070a5f5500",
+          "bytecode_runtime": "0x600560070a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000000000000000000000000000000000041a7"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_11",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            11,
+            7
+          ],
+          "expected_result": 19487171
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f36007600b0a5f5500",
+          "bytecode_runtime": "0x6007600b0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000000000000000000000000000000012959c3"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_136279841",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            136279841,
+            7
+          ],
+          "expected_result": 873014239416021598220368431569389584163129001363729536481
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f3600763081f77210a5f5500",
+          "bytecode_runtime": "0x600763081f77210a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000239ab1a6886bd0e6d7725b1f818d7b6269e45acd0b4fd5e1"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_13",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            13,
+            7
+          ],
+          "expected_result": 62748517
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f36007600d0a5f5500",
+          "bytecode_runtime": "0x6007600d0a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000003bd7765"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_3",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            3,
+            7
+          ],
+          "expected_result": 2187
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600760030a5f5500",
+          "bytecode_runtime": "0x600760030a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000088b"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_5",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            5,
+            7
+          ],
+          "expected_result": 78125
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600760050a5f5500",
+          "bytecode_runtime": "0x600760050a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000001312d"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_7",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "EXP",
+          "args": [
+            7,
+            7
+          ],
+          "expected_result": 823543
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3600760070a5f5500",
+          "bytecode_runtime": "0x600760070a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000000000000000000000000000000000c90f7"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_127",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=127]",
+      "notes": [
+        "Upstream intent: benchmark MOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            170141183460469231731687303715884105727
+          ],
+          "expected_result": 3
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6036600c60003960366000f36f7fffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff065f5500",
+          "bytecode_runtime": "0x6f7fffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff065f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000003"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_191",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=191]",
+      "notes": [
+        "Upstream intent: benchmark MOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            3138550867693340381917894711603833208051177722232017256447
+          ],
+          "expected_result": 36893488147419103231
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x603e600c600039603e6000f3777fffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff065f5500",
+          "bytecode_runtime": "0x777fffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff065f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000001ffffffffffffffff"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_255",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=255]",
+      "notes": [
+        "Upstream intent: benchmark MOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            57896044618658097711785492504343953926634992332820282019728792003956564819967
+          ],
+          "expected_result": 1
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff065f5500",
+          "bytecode_runtime": "0x7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff065f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_63",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=63]",
+      "notes": [
+        "Upstream intent: benchmark MOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            9223372036854775807
+          ],
+          "expected_result": 15
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x602e600c600039602e6000f3677fffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff065f5500",
+          "bytecode_runtime": "0x677fffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff065f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000000f"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_127",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs SMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-smod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=127]",
+      "notes": [
+        "Upstream intent: benchmark SMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "SMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            170141183460469231731687303715884105727
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007913129639935
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6036600c60003960366000f36f7fffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff075f5500",
+          "bytecode_runtime": "0x6f7fffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff075f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_191",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs SMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-smod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=191]",
+      "notes": [
+        "Upstream intent: benchmark SMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "SMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            3138550867693340381917894711603833208051177722232017256447
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007913129639935
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x603e600c600039603e6000f3777fffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff075f5500",
+          "bytecode_runtime": "0x777fffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff075f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_255",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs SMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-smod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=255]",
+      "notes": [
+        "Upstream intent: benchmark SMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "SMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            57896044618658097711785492504343953926634992332820282019728792003956564819967
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007913129639935
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff075f5500",
+          "bytecode_runtime": "0x7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff075f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_63",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs SMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-smod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=63]",
+      "notes": [
+        "Upstream intent: benchmark SMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "SMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            9223372036854775807
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007913129639935
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x602e600c600039602e6000f3677fffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff075f5500",
+          "bytecode_runtime": "0x677fffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff075f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_127",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs ADDMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-addmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=127]",
+      "notes": [
+        "Upstream intent: benchmark ADDMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "ADDMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            115792089237316195423570985008687907853269984665640564039457584007913129639934,
+            170141183460469231731687303715884105727
+          ],
+          "expected_result": 5
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6057600c60003960576000f36f7fffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff085f5500",
+          "bytecode_runtime": "0x6f7fffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff085f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000005"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_191",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs ADDMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-addmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=191]",
+      "notes": [
+        "Upstream intent: benchmark ADDMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "ADDMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            115792089237316195423570985008687907853269984665640564039457584007913129639934,
+            3138550867693340381917894711603833208051177722232017256447
+          ],
+          "expected_result": 73786976294838206461
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x605f600c600039605f6000f3777fffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff085f5500",
+          "bytecode_runtime": "0x777fffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff085f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000003fffffffffffffffd"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_255",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs ADDMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-addmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=255]",
+      "notes": [
+        "Upstream intent: benchmark ADDMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "ADDMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            115792089237316195423570985008687907853269984665640564039457584007913129639934,
+            57896044618658097711785492504343953926634992332820282019728792003956564819967
+          ],
+          "expected_result": 1
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6067600c60003960676000f37f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff085f5500",
+          "bytecode_runtime": "0x7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff085f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_63",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs ADDMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-addmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=63]",
+      "notes": [
+        "Upstream intent: benchmark ADDMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "ADDMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            115792089237316195423570985008687907853269984665640564039457584007913129639934,
+            9223372036854775807
+          ],
+          "expected_result": 29
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x604f600c600039604f6000f3677fffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff085f5500",
+          "bytecode_runtime": "0x677fffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff085f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000001d"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_127",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MULMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mulmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=127]",
+      "notes": [
+        "Upstream intent: benchmark MULMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MULMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            115792089237316195423570985008687907853269984665640564039457584007913129639934,
+            170141183460469231731687303715884105727
+          ],
+          "expected_result": 6
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6057600c60003960576000f36f7fffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff095f5500",
+          "bytecode_runtime": "0x6f7fffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff095f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000006"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_191",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MULMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mulmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=191]",
+      "notes": [
+        "Upstream intent: benchmark MULMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MULMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            115792089237316195423570985008687907853269984665640564039457584007913129639934,
+            3138550867693340381917894711603833208051177722232017256447
+          ],
+          "expected_result": 1361129467683753853742817965284815536130
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x605f600c600039605f6000f3777fffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff095f5500",
+          "bytecode_runtime": "0x777fffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff095f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000003fffffffffffffffa0000000000000002"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_255",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MULMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mulmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=255]",
+      "notes": [
+        "Upstream intent: benchmark MULMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MULMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            115792089237316195423570985008687907853269984665640564039457584007913129639934,
+            57896044618658097711785492504343953926634992332820282019728792003956564819967
+          ],
+          "expected_result": 0
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6067600c60003960676000f37f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff095f5500",
+          "bytecode_runtime": "0x7f7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff095f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_63",
+      "family": "state/arithmetic",
+      "description": "Mapped from execution-specs MULMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mulmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=63]",
+      "notes": [
+        "Upstream intent: benchmark MULMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "arithmetic_probe": {
+          "opcode": "MULMOD",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007913129639935,
+            115792089237316195423570985008687907853269984665640564039457584007913129639934,
+            9223372036854775807
+          ],
+          "expected_result": 210
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x604f600c600039604f6000f3677fffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff095f5500",
+          "bytecode_runtime": "0x677fffffffffffffff7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff095f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000000000000000000000000000000000000d2"
+        }
+      }
+    }
+  ]
+}

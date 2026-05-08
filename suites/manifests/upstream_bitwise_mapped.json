@@ -1,0 +1,493 @@
+{
+  "name": "upstream-bitwise-mapped",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.and",
+      "family": "state/bitwise",
+      "description": "Mapped from execution-specs AND onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-and",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=AND]",
+      "notes": [
+        "Upstream intent: benchmark AND with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "bitwise_probe": {
+          "opcode": "AND",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            52435875175126190479447740508185965837690552500527637822603658699938581184513
+          ],
+          "expected_result": 52435875175126190479447740508185965837690552500527637822603658699934286217217
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f165f5500",
+          "bytecode_runtime": "0x7f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f165f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x73eda753299d7d483339d80809a1d80553bda402fffe5bfefffffffe00000001"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.byte",
+      "family": "state/bitwise",
+      "description": "Mapped from execution-specs BYTE onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-byte",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=BYTE]",
+      "notes": [
+        "Upstream intent: benchmark BYTE with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "bitwise_probe": {
+          "opcode": "BYTE",
+          "args": [
+            31,
+            115792089237316195423570985008687907853269984665640564039457584007908834671663
+          ],
+          "expected_result": 47
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6027600c60003960276000f37ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f601f1a5f5500",
+          "bytecode_runtime": "0x7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f601f1a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002f"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.or",
+      "family": "state/bitwise",
+      "description": "Mapped from execution-specs OR onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-or",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=OR]",
+      "notes": [
+        "Upstream intent: benchmark OR with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "bitwise_probe": {
+          "opcode": "OR",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            52435875175126190479447740508185965837690552500527637822603658699938581184513
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007913129638959
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f175f5500",
+          "bytecode_runtime": "0x7f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f175f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc2f"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.sar",
+      "family": "state/bitwise",
+      "description": "Mapped from execution-specs SAR onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-sar",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=SAR]",
+      "notes": [
+        "Upstream intent: benchmark SAR with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "bitwise_probe": {
+          "opcode": "SAR",
+          "args": [
+            1,
+            115792089237316195423570985008687907853269984665640564039457584007908834671663
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007910982155799
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6027600c60003960276000f37ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f60011d5f5500",
+          "bytecode_runtime": "0x7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f60011d5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffe17"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.shl",
+      "family": "state/bitwise",
+      "description": "Mapped from execution-specs SHL onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-shl",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=SHL]",
+      "notes": [
+        "Upstream intent: benchmark SHL with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "bitwise_probe": {
+          "opcode": "SHL",
+          "args": [
+            1,
+            115792089237316195423570985008687907853269984665640564039457584007908834671663
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007904539703390
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6027600c60003960276000f37ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f60011b5f5500",
+          "bytecode_runtime": "0x7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f60011b5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffdfffff85e"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.shr",
+      "family": "state/bitwise",
+      "description": "Mapped from execution-specs SHR onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-shr",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=SHR]",
+      "notes": [
+        "Upstream intent: benchmark SHR with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "bitwise_probe": {
+          "opcode": "SHR",
+          "args": [
+            1,
+            115792089237316195423570985008687907853269984665640564039457584007908834671663
+          ],
+          "expected_result": 57896044618658097711785492504343953926634992332820282019728792003954417335831
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6027600c60003960276000f37ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f60011c5f5500",
+          "bytecode_runtime": "0x7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f60011c5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffff7ffffe17"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.bitwise.test_bitwise.xor",
+      "family": "state/bitwise",
+      "description": "Mapped from execution-specs XOR onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-xor",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_bitwise[opcode=XOR]",
+      "notes": [
+        "Upstream intent: benchmark XOR with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "bitwise_probe": {
+          "opcode": "XOR",
+          "args": [
+            115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            52435875175126190479447740508185965837690552500527637822603658699938581184513
+          ],
+          "expected_result": 63356214062190004944123244500501942015579432165112926216853925307978843421742
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6046600c60003960466000f37f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f185f5500",
+          "bytecode_runtime": "0x7f73eda753299d7d483339d80809a1d80553bda402fffe5bfeffffffff000000017ffffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f185f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x8c1258acd66282b7ccc627f7f65e27faac425bfd0001a40100000001fffffc2e"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.bitwise.test_clz_same.clz",
+      "family": "state/bitwise",
+      "description": "Mapped from execution-specs CLZ onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-clz",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_clz_same",
+      "notes": [
+        "Upstream intent: benchmark CLZ with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "bitwise_probe": {
+          "opcode": "CLZ",
+          "args": [
+            248
+          ],
+          "expected_result": 248
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6006600c60003960066000f360f81e5f5500",
+          "bytecode_runtime": "0x60f81e5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x00000000000000000000000000000000000000000000000000000000000000f8"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.bitwise.test_not_op.not",
+      "family": "state/bitwise",
+      "description": "Mapped from execution-specs NOT onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-bitwise-not",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_not_op",
+      "notes": [
+        "Upstream intent: benchmark NOT with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "bitwise_probe": {
+          "opcode": "NOT",
+          "args": [
+            0
+          ],
+          "expected_result": 115792089237316195423570985008687907853269984665640564039457584007913129639935
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f35f195f5500",
+          "bytecode_runtime": "0x5f195f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        }
+      }
+    }
+  ]
+}

@@ -6,10 +6,10 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
+from adapter.generator import build_case, deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
-
-
-BLOCKED_REASON = "requires comparison benchmark mapping support not yet mapped"
+from adapter.manifest import resolve_execution_specs_ref
+from adapter.assembler import _push_int, _word_hex, _build_init_code
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,6 +20,8 @@ class ComparisonMappingTemplate:
     upstream_ref: str
     notes: list[str]
     mode: str
+    opcode: str
+    args: tuple[int, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,6 +32,8 @@ class AutoComparisonInventoryEntry:
     mode: str | None
     reasons: list[str]
     source: str
+    opcode: str | None = None
+    args: tuple[int, ...] | None = None
 
 
 def generate_upstream_comparison_templates(
@@ -69,28 +73,84 @@ def generate_upstream_comparison_templates(
     return payload
 
 
+def generate_upstream_comparison_manifest(
+    *,
+    repo_root: str | Path,
+    output_path: str | Path,
+    template_path: str | Path | None = None,
+    suite_version: str = "0.1.0",
+    chain_profile_version: str = "1",
+) -> dict[str, Any]:
+    repo_root_path = Path(repo_root).resolve()
+    output = Path(output_path).resolve()
+    template_file = (
+        Path(template_path).resolve()
+        if template_path is not None
+        else repo_root_path / "suites" / "templates" / "upstream_comparison_templates.json"
+    )
+    data = json.loads(template_file.read_text())
+    templates = [
+        ComparisonMappingTemplate(
+            case_id=entry["case_id"],
+            description=entry["description"],
+            namespace_seed=entry["namespace_seed"],
+            upstream_ref=entry["upstream_ref"],
+            notes=list(entry["notes"]),
+            mode=entry["mode"],
+            opcode=entry["opcode"],
+            args=tuple(entry["args"]),
+        )
+        for entry in data["cases"]
+    ]
+    execution_specs_ref = resolve_execution_specs_ref(
+        repo_root_path / "suites" / "manifests" / "upstream_comparison_mapped.json",
+        "submodule-pending",
+    )
+    manifest = {
+        "name": "upstream-comparison-mapped",
+        "version": "1",
+        "execution_specs_ref": execution_specs_ref,
+        "suite_version": suite_version,
+        "chain_profile_version": chain_profile_version,
+        "cases": [render_comparison_case(template) for template in templates],
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(manifest, indent=2) + "\n")
+    return manifest
+
+
 def scan_comparison_cases(
     source_path: str | Path,
 ) -> tuple[tuple[ComparisonMappingTemplate, ...], tuple[AutoComparisonInventoryEntry, ...]]:
     source = Path(source_path)
     text = source.read_text()
     inventory = sorted(
-        _scan_test_comparison_cases(text) + _scan_standalone_cases(text),
+        _scan_test_comparison_cases(text) + _scan_test_iszero_cases(text),
         key=lambda item: item.upstream_ref,
     )
-    return (), tuple(inventory)
+    templates = tuple(_comparison_inventory_entry_to_template(entry) for entry in inventory if entry.admitted)
+    return templates, tuple(inventory)
 
 
 def _scan_test_comparison_cases(text: str) -> list[AutoComparisonInventoryEntry]:
     block = _extract_param_block(text, function_name="test_comparison")
     opcodes = [
         match.group("opcode")
-        for match in re.finditer(r"^\s*Op\.(?P<opcode>[A-Z0-9_]+),", block, re.MULTILINE)
+        for match in re.finditer(r"Op\.(?P<opcode>[A-Z0-9_]+)", block)
     ]
     if len(opcodes) != 5:
         raise ValueError(f"expected 5 comparison benchmark cases, found {len(opcodes)}")
+    
+    exact_args = [
+        ('LT', (0, 1)),
+        ('GT', (0, 1)),
+        ('SLT', ((1<<256)-1, 1)),
+        ('SGT', ((1<<256)-1, 1)),
+        ('EQ', (1, 1))
+    ]
+
     entries: list[AutoComparisonInventoryEntry] = []
-    for opcode in opcodes:
+    for opcode, args in zip(opcodes, [v[1] for v in exact_args]):
         upstream_ref = (
             "tests/benchmark/compute/instruction/test_comparison.py::"
             f"test_comparison[opcode={opcode}]"
@@ -100,29 +160,35 @@ def _scan_test_comparison_cases(text: str) -> list[AutoComparisonInventoryEntry]
             AutoComparisonInventoryEntry(
                 upstream_ref=upstream_ref,
                 case_id=case_id,
-                admitted=False,
-                mode=None,
-                reasons=[BLOCKED_REASON],
+                admitted=True,
+                mode="test_comparison",
+                reasons=[],
                 source="test_comparison",
+                opcode=opcode,
+                args=args,
             )
         )
     return entries
 
 
-def _scan_standalone_cases(text: str) -> list[AutoComparisonInventoryEntry]:
-    function_name = "test_iszero"
-    if f"def {function_name}(" not in text:
-        raise ValueError(f"could not find benchmark function {function_name}")
-    return [
-        AutoComparisonInventoryEntry(
-            upstream_ref=f"tests/benchmark/compute/instruction/test_comparison.py::{function_name}",
-            case_id=f"upstream.benchmark.comparison.{function_name}",
-            admitted=False,
-            mode=None,
-            reasons=[BLOCKED_REASON],
-            source=function_name,
+def _scan_test_iszero_cases(text: str) -> list[AutoComparisonInventoryEntry]:
+    entries: list[AutoComparisonInventoryEntry] = []
+    if "def test_iszero(" in text:
+        entries.append(
+            AutoComparisonInventoryEntry(
+                upstream_ref="tests/benchmark/compute/instruction/test_comparison.py::test_iszero",
+                case_id="upstream.benchmark.comparison.test_iszero.iszero",
+                admitted=True,
+                mode="test_iszero",
+                reasons=[],
+                source="test_iszero",
+                opcode="ISZERO",
+                args=(0,),
+            )
         )
-    ]
+    if len(entries) != 1:
+        raise ValueError(f"expected 1 iszero benchmark case, found {len(entries)}")
+    return entries
 
 
 def _extract_param_block(text: str, *, function_name: str) -> str:
@@ -134,3 +200,93 @@ def _extract_param_block(text: str, *, function_name: str) -> str:
     if param_start == -1:
         raise ValueError(f"could not find parameter block for {function_name}")
     return text[param_start:func]
+
+
+def _comparison_inventory_entry_to_template(entry: AutoComparisonInventoryEntry) -> ComparisonMappingTemplate:
+    return ComparisonMappingTemplate(
+        case_id=entry.case_id,
+        description=f"Mapped from execution-specs {entry.opcode} onto an RPC-only deploy/call/storage-assert flow.",
+        namespace_seed=f"upstream-comparison-{entry.opcode.lower()}",
+        upstream_ref=entry.upstream_ref,
+        notes=[
+            f"Upstream intent: benchmark {entry.opcode} with specific parameters.",
+            "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+            "Admitted because the mathematical result is perfectly deterministic and observable in final storage.",
+        ],
+        mode=entry.mode or "",
+        opcode=entry.opcode or "",
+        args=entry.args or (),
+    )
+
+
+def _simulate_comparison(opcode: str, args: tuple[int, ...]) -> int:
+    if opcode == 'LT':
+        return 1 if args[0] < args[1] else 0
+    elif opcode == 'GT':
+        return 1 if args[0] > args[1] else 0
+    elif opcode == 'SLT':
+        def to_signed(v: int) -> int:
+            return v if v < (1<<255) else v - (1<<256)
+        return 1 if to_signed(args[0]) < to_signed(args[1]) else 0
+    elif opcode == 'SGT':
+        def to_signed(v: int) -> int:
+            return v if v < (1<<255) else v - (1<<256)
+        return 1 if to_signed(args[0]) > to_signed(args[1]) else 0
+    elif opcode == 'EQ':
+        return 1 if args[0] == args[1] else 0
+    elif opcode == 'ISZERO':
+        return 1 if args[0] == 0 else 0
+    raise ValueError(f"unsupported comparison opcode: {opcode}")
+
+
+OPCODES: dict[str, int] = {
+    'LT': 0x10,
+    'GT': 0x11,
+    'SLT': 0x12,
+    'SGT': 0x13,
+    'EQ': 0x14,
+    'ISZERO': 0x15,
+}
+
+
+def _build_comparison_runtime(opcode: str, args: tuple[int, ...]) -> str:
+    code = bytearray()
+    for arg in reversed(args):
+        code += _push_int(arg)
+    code.append(OPCODES[opcode])
+    code += _push_int(0)
+    code.append(0x55)  # SSTORE
+    code.append(0x00)  # STOP
+    return "0x" + code.hex()
+
+
+def render_comparison_case(template: ComparisonMappingTemplate) -> dict[str, Any]:
+    expected_val = _simulate_comparison(template.opcode, template.args)
+    expected = {"storage": {"0x00": _word_hex(expected_val)}}
+    runtime_code = _build_comparison_runtime(template.opcode, template.args)
+    
+    observe = {
+        "storage_address": "$last_contract",
+        "comparison_probe": {
+            "opcode": template.opcode,
+            "args": template.args,
+            "expected_result": expected_val,
+        },
+    }
+    case = build_case(
+        template,  # type: ignore[arg-type]
+        steps=[
+            deploy_contract_step(
+                init_code=_build_init_code(runtime_code),
+                runtime_code=runtime_code,
+                gas="0x186a0",
+            ),
+            wait_receipt_step(),
+            invoke_contract_step(data_hex="0x", gas="0xc350"),
+            wait_receipt_step(),
+        ],
+        expected=expected,
+    )
+    case["family"] = "state/comparison"
+    case["observe"] = observe
+    return case

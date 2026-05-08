@@ -1,0 +1,1122 @@
+{
+  "name": "upstream-arithmetic-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_arithmetic.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.add.base.arity_2",
+      "description": "Mapped from execution-specs ADD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-add",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=ADD-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark ADD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "ADD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.addmod.base.arity_3",
+      "description": "Mapped from execution-specs ADDMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-addmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=ADDMOD-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark ADDMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "ADDMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513,
+        340282366920938463463374607431768211507
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.div.base.arity_2",
+      "description": "Mapped from execution-specs DIV onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-div",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=DIV-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark DIV with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "DIV",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        340282366920938463463374607431768211507
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.div.variant_1.arity_2",
+      "description": "Mapped from execution-specs DIV onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-div",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=DIV-variant=variant_1]",
+      "notes": [
+        "Upstream intent: benchmark DIV with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "DIV",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        18446744073709551667
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.exp.base.arity_2",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=EXP-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639935
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mod.base.arity_2",
+      "description": "Mapped from execution-specs MOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MOD-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark MOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "MOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mul.base.arity_2",
+      "description": "Mapped from execution-specs MUL onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mul",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MUL-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark MUL with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "MUL",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mulmod.base.arity_3",
+      "description": "Mapped from execution-specs MULMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mulmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MULMOD-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark MULMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "MULMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513,
+        340282366920938463463374607431768211507
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sdiv.base.arity_2",
+      "description": "Mapped from execution-specs SDIV onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-sdiv",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SDIV-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark SDIV with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "SDIV",
+      "args": [
+        57896044618658097711785492504343953926634992332820282019728792003952269851695,
+        115792089237316195423570985008687907852929702298719625575994209400481361428429
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sdiv.variant_1.arity_2",
+      "description": "Mapped from execution-specs SDIV onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-sdiv",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SDIV-variant=variant_1]",
+      "notes": [
+        "Upstream intent: benchmark SDIV with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "SDIV",
+      "args": [
+        57896044618658097711785492504343953926634992332820282019728792003952269851695,
+        115792089237316195423570985008687907853269984665640564039439137263839420088269
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.signextend.base.arity_2",
+      "description": "Mapped from execution-specs SIGNEXTEND onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-signextend",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SIGNEXTEND-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark SIGNEXTEND with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "SIGNEXTEND",
+      "args": [
+        3,
+        4292532954
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.smod.base.arity_2",
+      "description": "Mapped from execution-specs SMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-smod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SMOD-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark SMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "SMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sub.base.arity_2",
+      "description": "Mapped from execution-specs SUB onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-sub",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SUB-variant=base]",
+      "notes": [
+        "Upstream intent: benchmark SUB with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_arithmetic",
+      "opcode": "SUB",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_11",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        11
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_136279841",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        11
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_13",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        11
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_3",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        11
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_5",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        11
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_7",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        11
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_11",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        13
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_136279841",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        13
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_13",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        13
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_3",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        13
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_5",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        13
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_7",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        13
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_11",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        136279841
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_136279841",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        136279841
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_13",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        136279841
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_3",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        136279841
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_5",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        136279841
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_7",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        136279841
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_11",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        3
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_136279841",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        3
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_13",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        3
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_3",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        3
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_5",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        3
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_7",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        3
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_11",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        5
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_136279841",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        5
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_13",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        5
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_3",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        5
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_5",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        5
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_7",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        5
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_11",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=11]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        7
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_136279841",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=136279841]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        7
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_13",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=13]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        7
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_3",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=3]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        7
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_5",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=5]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        7
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_7",
+      "description": "Mapped from execution-specs EXP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-exp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=7]",
+      "notes": [
+        "Upstream intent: benchmark EXP with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        7
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_127",
+      "description": "Mapped from execution-specs MOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=127]",
+      "notes": [
+        "Upstream intent: benchmark MOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod",
+      "opcode": "MOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        170141183460469231731687303715884105727
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_191",
+      "description": "Mapped from execution-specs MOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=191]",
+      "notes": [
+        "Upstream intent: benchmark MOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod",
+      "opcode": "MOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        3138550867693340381917894711603833208051177722232017256447
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_255",
+      "description": "Mapped from execution-specs MOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=255]",
+      "notes": [
+        "Upstream intent: benchmark MOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod",
+      "opcode": "MOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        57896044618658097711785492504343953926634992332820282019728792003956564819967
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_63",
+      "description": "Mapped from execution-specs MOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=63]",
+      "notes": [
+        "Upstream intent: benchmark MOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod",
+      "opcode": "MOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        9223372036854775807
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_127",
+      "description": "Mapped from execution-specs SMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-smod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=127]",
+      "notes": [
+        "Upstream intent: benchmark SMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod",
+      "opcode": "SMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        170141183460469231731687303715884105727
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_191",
+      "description": "Mapped from execution-specs SMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-smod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=191]",
+      "notes": [
+        "Upstream intent: benchmark SMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod",
+      "opcode": "SMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        3138550867693340381917894711603833208051177722232017256447
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_255",
+      "description": "Mapped from execution-specs SMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-smod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=255]",
+      "notes": [
+        "Upstream intent: benchmark SMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod",
+      "opcode": "SMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        57896044618658097711785492504343953926634992332820282019728792003956564819967
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_63",
+      "description": "Mapped from execution-specs SMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-smod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=63]",
+      "notes": [
+        "Upstream intent: benchmark SMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod",
+      "opcode": "SMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        9223372036854775807
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_127",
+      "description": "Mapped from execution-specs ADDMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-addmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=127]",
+      "notes": [
+        "Upstream intent: benchmark ADDMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod_arithmetic",
+      "opcode": "ADDMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        170141183460469231731687303715884105727
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_191",
+      "description": "Mapped from execution-specs ADDMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-addmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=191]",
+      "notes": [
+        "Upstream intent: benchmark ADDMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod_arithmetic",
+      "opcode": "ADDMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        3138550867693340381917894711603833208051177722232017256447
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_255",
+      "description": "Mapped from execution-specs ADDMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-addmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=255]",
+      "notes": [
+        "Upstream intent: benchmark ADDMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod_arithmetic",
+      "opcode": "ADDMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        57896044618658097711785492504343953926634992332820282019728792003956564819967
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_63",
+      "description": "Mapped from execution-specs ADDMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-addmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=63]",
+      "notes": [
+        "Upstream intent: benchmark ADDMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod_arithmetic",
+      "opcode": "ADDMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        9223372036854775807
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_127",
+      "description": "Mapped from execution-specs MULMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mulmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=127]",
+      "notes": [
+        "Upstream intent: benchmark MULMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod_arithmetic",
+      "opcode": "MULMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        170141183460469231731687303715884105727
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_191",
+      "description": "Mapped from execution-specs MULMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mulmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=191]",
+      "notes": [
+        "Upstream intent: benchmark MULMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod_arithmetic",
+      "opcode": "MULMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        3138550867693340381917894711603833208051177722232017256447
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_255",
+      "description": "Mapped from execution-specs MULMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mulmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=255]",
+      "notes": [
+        "Upstream intent: benchmark MULMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod_arithmetic",
+      "opcode": "MULMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        57896044618658097711785492504343953926634992332820282019728792003956564819967
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_63",
+      "description": "Mapped from execution-specs MULMOD onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-arithmetic-mulmod",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=63]",
+      "notes": [
+        "Upstream intent: benchmark MULMOD with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_mod_arithmetic",
+      "opcode": "MULMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        9223372036854775807
+      ]
+    }
+  ]
+}

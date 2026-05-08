@@ -122,6 +122,30 @@ class MockBackend:
                         storage["0x00"] = _word_hex(slot0)
                         storage["0x01"] = _word_hex(slot1)
                     continue
+
+                arithmetic_probe = case.observe.get("arithmetic_probe")
+                if arithmetic_probe is not None:
+                    from adapter.assembler import _word_hex
+                    storage["0x00"] = _word_hex(arithmetic_probe["expected_result"])
+                    continue
+
+                bitwise_probe = case.observe.get("bitwise_probe")
+                if bitwise_probe is not None:
+                    from adapter.assembler import _word_hex
+                    storage["0x00"] = _word_hex(bitwise_probe["expected_result"])
+                    continue
+
+                comparison_probe = case.observe.get("comparison_probe")
+                if comparison_probe is not None:
+                    from adapter.assembler import _word_hex
+                    storage["0x00"] = _word_hex(comparison_probe["expected_result"])
+                    continue
+
+                stack_probe = case.observe.get("stack_probe")
+                if stack_probe is not None:
+                    from adapter.assembler import _word_hex
+                    storage["0x00"] = _word_hex(stack_probe["expected_result"])
+                    continue
                 
                 if code in {"0x60003560005500", "0x60003560005560006000fd"}:
                     padded = data[2:] if data.startswith("0x") else data

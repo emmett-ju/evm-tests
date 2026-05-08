@@ -1,0 +1,108 @@
+{
+  "name": "upstream-comparison-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_comparison.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.comparison.test_comparison.eq",
+      "description": "Mapped from execution-specs EQ onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-comparison-eq",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=EQ]",
+      "notes": [
+        "Upstream intent: benchmark EQ with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_comparison",
+      "opcode": "EQ",
+      "args": [
+        1,
+        1
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.comparison.test_comparison.gt",
+      "description": "Mapped from execution-specs GT onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-comparison-gt",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=GT]",
+      "notes": [
+        "Upstream intent: benchmark GT with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_comparison",
+      "opcode": "GT",
+      "args": [
+        0,
+        1
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.comparison.test_comparison.lt",
+      "description": "Mapped from execution-specs LT onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-comparison-lt",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=LT]",
+      "notes": [
+        "Upstream intent: benchmark LT with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_comparison",
+      "opcode": "LT",
+      "args": [
+        0,
+        1
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.comparison.test_comparison.sgt",
+      "description": "Mapped from execution-specs SGT onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-comparison-sgt",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=SGT]",
+      "notes": [
+        "Upstream intent: benchmark SGT with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_comparison",
+      "opcode": "SGT",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        1
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.comparison.test_comparison.slt",
+      "description": "Mapped from execution-specs SLT onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-comparison-slt",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=SLT]",
+      "notes": [
+        "Upstream intent: benchmark SLT with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_comparison",
+      "opcode": "SLT",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        1
+      ]
+    },
+    {
+      "case_id": "upstream.benchmark.comparison.test_iszero.iszero",
+      "description": "Mapped from execution-specs ISZERO onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-comparison-iszero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_iszero",
+      "notes": [
+        "Upstream intent: benchmark ISZERO with specific parameters.",
+        "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
+        "Admitted because the mathematical result is perfectly deterministic and observable in final storage."
+      ],
+      "mode": "test_iszero",
+      "opcode": "ISZERO",
+      "args": [
+        0
+      ]
+    }
+  ]
+}

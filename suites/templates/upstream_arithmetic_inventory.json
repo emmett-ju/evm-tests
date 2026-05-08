@@ -7,652 +7,857 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=ADD-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.add.base.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "ADD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=ADDMOD-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.addmod.base.arity_3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "ADDMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513,
+        340282366920938463463374607431768211507
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=DIV-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.div.base.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "DIV",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        340282366920938463463374607431768211507
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=DIV-variant=variant_1]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.div.variant_1.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "DIV",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        18446744073709551667
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=EXP-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.exp.base.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639935
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MOD-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mod.base.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "MOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MUL-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mul.base.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "MUL",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=MULMOD-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.mulmod.base.arity_3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "MULMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513,
+        340282366920938463463374607431768211507
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SDIV-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sdiv.base.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "SDIV",
+      "args": [
+        57896044618658097711785492504343953926634992332820282019728792003952269851695,
+        115792089237316195423570985008687907852929702298719625575994209400481361428429
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SDIV-variant=variant_1]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sdiv.variant_1.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "SDIV",
+      "args": [
+        57896044618658097711785492504343953926634992332820282019728792003952269851695,
+        115792089237316195423570985008687907853269984665640564039439137263839420088269
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SIGNEXTEND-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.signextend.base.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "SIGNEXTEND",
+      "args": [
+        3,
+        4292532954
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SMOD-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.smod.base.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "SMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_arithmetic[opcode=SUB-variant=base]",
       "case_id": "upstream.benchmark.arithmetic.test_arithmetic.sub.base.arity_2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_arithmetic"
+      "admitted": true,
+      "mode": "test_arithmetic",
+      "reasons": [],
+      "source": "test_arithmetic",
+      "opcode": "SUB",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007908834671663,
+        52435875175126190479447740508185965837690552500527637822603658699938581184513
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=11]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_11",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        11
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=136279841]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_136279841",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        11
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=13]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_13",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        11
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=3]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        11
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=5]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_5",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        11
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=11-base=7]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_11.base_7",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        11
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=11]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_11",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        13
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=136279841]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_136279841",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        13
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=13]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_13",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        13
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=3]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        13
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=5]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_5",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        13
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=13-base=7]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_13.base_7",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        13
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=11]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_11",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        136279841
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=136279841]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_136279841",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        136279841
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=13]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_13",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        136279841
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=3]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        136279841
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=5]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_5",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        136279841
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=136279841-base=7]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_7",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        136279841
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=11]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_11",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        3
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=136279841]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_136279841",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        3
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=13]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_13",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        3
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=3]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        3
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=5]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_5",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        3
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=3-base=7]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_7",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        3
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=11]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_11",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        5
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=136279841]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_136279841",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        5
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=13]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_13",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        5
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=3]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        5
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=5]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_5",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        5
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=5-base=7]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_7",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        5
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=11]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_11",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        11,
+        7
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=136279841]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_136279841",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        136279841,
+        7
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=13]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_13",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        13,
+        7
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=3]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        3,
+        7
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=5]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_5",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        5,
+        7
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_exp_bench_arithmetic[exp=7-base=7]",
       "case_id": "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_7.base_7",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_exp_bench_arithmetic"
+      "admitted": true,
+      "mode": "test_exp_bench_arithmetic",
+      "reasons": [],
+      "source": "test_exp_bench_arithmetic",
+      "opcode": "EXP",
+      "args": [
+        7,
+        7
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=127]",
       "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_127",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod"
+      "admitted": true,
+      "mode": "test_mod",
+      "reasons": [],
+      "source": "test_mod",
+      "opcode": "MOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        170141183460469231731687303715884105727
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=191]",
       "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_191",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod"
+      "admitted": true,
+      "mode": "test_mod",
+      "reasons": [],
+      "source": "test_mod",
+      "opcode": "MOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        3138550867693340381917894711603833208051177722232017256447
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=255]",
       "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_255",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod"
+      "admitted": true,
+      "mode": "test_mod",
+      "reasons": [],
+      "source": "test_mod",
+      "opcode": "MOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        57896044618658097711785492504343953926634992332820282019728792003956564819967
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=MOD-mod_bits=63]",
       "case_id": "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_63",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod"
+      "admitted": true,
+      "mode": "test_mod",
+      "reasons": [],
+      "source": "test_mod",
+      "opcode": "MOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        9223372036854775807
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=127]",
       "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_127",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod"
+      "admitted": true,
+      "mode": "test_mod",
+      "reasons": [],
+      "source": "test_mod",
+      "opcode": "SMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        170141183460469231731687303715884105727
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=191]",
       "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_191",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod"
+      "admitted": true,
+      "mode": "test_mod",
+      "reasons": [],
+      "source": "test_mod",
+      "opcode": "SMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        3138550867693340381917894711603833208051177722232017256447
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=255]",
       "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_255",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod"
+      "admitted": true,
+      "mode": "test_mod",
+      "reasons": [],
+      "source": "test_mod",
+      "opcode": "SMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        57896044618658097711785492504343953926634992332820282019728792003956564819967
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod[opcode=SMOD-mod_bits=63]",
       "case_id": "upstream.benchmark.arithmetic.test_mod.smod.mod_bits_63",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod"
+      "admitted": true,
+      "mode": "test_mod",
+      "reasons": [],
+      "source": "test_mod",
+      "opcode": "SMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        9223372036854775807
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=127]",
       "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_127",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod_arithmetic"
+      "admitted": true,
+      "mode": "test_mod_arithmetic",
+      "reasons": [],
+      "source": "test_mod_arithmetic",
+      "opcode": "ADDMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        170141183460469231731687303715884105727
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=191]",
       "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_191",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod_arithmetic"
+      "admitted": true,
+      "mode": "test_mod_arithmetic",
+      "reasons": [],
+      "source": "test_mod_arithmetic",
+      "opcode": "ADDMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        3138550867693340381917894711603833208051177722232017256447
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=255]",
       "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_255",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod_arithmetic"
+      "admitted": true,
+      "mode": "test_mod_arithmetic",
+      "reasons": [],
+      "source": "test_mod_arithmetic",
+      "opcode": "ADDMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        57896044618658097711785492504343953926634992332820282019728792003956564819967
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=ADDMOD-mod_bits=63]",
       "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.addmod.mod_bits_63",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod_arithmetic"
+      "admitted": true,
+      "mode": "test_mod_arithmetic",
+      "reasons": [],
+      "source": "test_mod_arithmetic",
+      "opcode": "ADDMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        9223372036854775807
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=127]",
       "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_127",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod_arithmetic"
+      "admitted": true,
+      "mode": "test_mod_arithmetic",
+      "reasons": [],
+      "source": "test_mod_arithmetic",
+      "opcode": "MULMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        170141183460469231731687303715884105727
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=191]",
       "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_191",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod_arithmetic"
+      "admitted": true,
+      "mode": "test_mod_arithmetic",
+      "reasons": [],
+      "source": "test_mod_arithmetic",
+      "opcode": "MULMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        3138550867693340381917894711603833208051177722232017256447
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=255]",
       "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_255",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod_arithmetic"
+      "admitted": true,
+      "mode": "test_mod_arithmetic",
+      "reasons": [],
+      "source": "test_mod_arithmetic",
+      "opcode": "MULMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        57896044618658097711785492504343953926634992332820282019728792003956564819967
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_arithmetic.py::test_mod_arithmetic[opcode=MULMOD-mod_bits=63]",
       "case_id": "upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_63",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arithmetic benchmark mapping support not yet mapped"
-      ],
-      "source": "test_mod_arithmetic"
+      "admitted": true,
+      "mode": "test_mod_arithmetic",
+      "reasons": [],
+      "source": "test_mod_arithmetic",
+      "opcode": "MULMOD",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        115792089237316195423570985008687907853269984665640564039457584007913129639934,
+        9223372036854775807
+      ]
     }
   ]
 }

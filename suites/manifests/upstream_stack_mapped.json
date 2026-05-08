@@ -1,0 +1,3259 @@
+{
+  "name": "upstream-stack-mapped",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup10",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP10 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup10",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP10]",
+      "notes": [
+        "Upstream intent: benchmark DUP10.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP10",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600f600c600039600f6000f3602a5f5f5f5f5f5f5f5f5f895f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f895f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup11",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP11 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup11",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP11]",
+      "notes": [
+        "Upstream intent: benchmark DUP11.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP11",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6010600c60003960106000f3602a5f5f5f5f5f5f5f5f5f5f8a5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f8a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup12",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP12 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup12",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP12]",
+      "notes": [
+        "Upstream intent: benchmark DUP12.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP12",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6011600c60003960116000f3602a5f5f5f5f5f5f5f5f5f5f5f8b5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f8b5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup13",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP13 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup13",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP13]",
+      "notes": [
+        "Upstream intent: benchmark DUP13.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP13",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6012600c60003960126000f3602a5f5f5f5f5f5f5f5f5f5f5f5f8c5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f5f8c5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup14",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP14 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup14",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP14]",
+      "notes": [
+        "Upstream intent: benchmark DUP14.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP14",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6013600c60003960136000f3602a5f5f5f5f5f5f5f5f5f5f5f5f5f8d5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f5f5f8d5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup15",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP15 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup15",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP15]",
+      "notes": [
+        "Upstream intent: benchmark DUP15.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP15",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6014600c60003960146000f3602a5f5f5f5f5f5f5f5f5f5f5f5f5f5f8e5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f5f5f5f8e5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup16",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP16 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup16",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP16]",
+      "notes": [
+        "Upstream intent: benchmark DUP16.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP16",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6015600c60003960156000f3602a5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f8f5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f8f5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup1",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP1 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup1",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP1]",
+      "notes": [
+        "Upstream intent: benchmark DUP1.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP1",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6006600c60003960066000f3602a805f5500",
+          "bytecode_runtime": "0x602a805f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup2",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP2 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup2",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP2]",
+      "notes": [
+        "Upstream intent: benchmark DUP2.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP2",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6007600c60003960076000f3602a5f815f5500",
+          "bytecode_runtime": "0x602a5f815f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup3",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP3 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup3",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP3]",
+      "notes": [
+        "Upstream intent: benchmark DUP3.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP3",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3602a5f5f825f5500",
+          "bytecode_runtime": "0x602a5f5f825f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup4",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP4 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup4",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP4]",
+      "notes": [
+        "Upstream intent: benchmark DUP4.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP4",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6009600c60003960096000f3602a5f5f5f835f5500",
+          "bytecode_runtime": "0x602a5f5f5f835f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup5",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP5 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup5",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP5]",
+      "notes": [
+        "Upstream intent: benchmark DUP5.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP5",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600a600c600039600a6000f3602a5f5f5f5f845f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f845f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup6",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP6 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup6",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP6]",
+      "notes": [
+        "Upstream intent: benchmark DUP6.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP6",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f3602a5f5f5f5f5f855f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f855f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup7",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP7 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup7",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP7]",
+      "notes": [
+        "Upstream intent: benchmark DUP7.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP7",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600c600c600039600c6000f3602a5f5f5f5f5f5f865f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f865f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup8",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP8 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup8",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP8]",
+      "notes": [
+        "Upstream intent: benchmark DUP8.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP8",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600d600c600039600d6000f3602a5f5f5f5f5f5f5f875f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f875f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_dup.dup9",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs DUP9 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-dup9",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP9]",
+      "notes": [
+        "Upstream intent: benchmark DUP9.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "DUP9",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600e600c600039600e6000f3602a5f5f5f5f5f5f5f5f885f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f885f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push0",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH0]",
+      "notes": [
+        "Upstream intent: benchmark PUSH0.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH0",
+          "expected_result": 0
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push10",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH10 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push10",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH10]",
+      "notes": [
+        "Upstream intent: benchmark PUSH10.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH10",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push11",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH11 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push11",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH11]",
+      "notes": [
+        "Upstream intent: benchmark PUSH11.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH11",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push12",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH12 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push12",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH12]",
+      "notes": [
+        "Upstream intent: benchmark PUSH12.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH12",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push13",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH13 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push13",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH13]",
+      "notes": [
+        "Upstream intent: benchmark PUSH13.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH13",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push14",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH14 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push14",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH14]",
+      "notes": [
+        "Upstream intent: benchmark PUSH14.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH14",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push15",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH15 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push15",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH15]",
+      "notes": [
+        "Upstream intent: benchmark PUSH15.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH15",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push16",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH16 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push16",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH16]",
+      "notes": [
+        "Upstream intent: benchmark PUSH16.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH16",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push17",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH17 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push17",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH17]",
+      "notes": [
+        "Upstream intent: benchmark PUSH17.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH17",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push18",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH18 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push18",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH18]",
+      "notes": [
+        "Upstream intent: benchmark PUSH18.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH18",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push19",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH19 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push19",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH19]",
+      "notes": [
+        "Upstream intent: benchmark PUSH19.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH19",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push1",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH1 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push1",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH1]",
+      "notes": [
+        "Upstream intent: benchmark PUSH1.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH1",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push20",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH20 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push20",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH20]",
+      "notes": [
+        "Upstream intent: benchmark PUSH20.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH20",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push21",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH21 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push21",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH21]",
+      "notes": [
+        "Upstream intent: benchmark PUSH21.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH21",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push22",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH22 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push22",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH22]",
+      "notes": [
+        "Upstream intent: benchmark PUSH22.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH22",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push23",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH23 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push23",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH23]",
+      "notes": [
+        "Upstream intent: benchmark PUSH23.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH23",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push24",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH24 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push24",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH24]",
+      "notes": [
+        "Upstream intent: benchmark PUSH24.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH24",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push25",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH25 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push25",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH25]",
+      "notes": [
+        "Upstream intent: benchmark PUSH25.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH25",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push26",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH26 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push26",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH26]",
+      "notes": [
+        "Upstream intent: benchmark PUSH26.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH26",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push27",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH27 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push27",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH27]",
+      "notes": [
+        "Upstream intent: benchmark PUSH27.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH27",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push28",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH28 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push28",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH28]",
+      "notes": [
+        "Upstream intent: benchmark PUSH28.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH28",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push29",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH29 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push29",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH29]",
+      "notes": [
+        "Upstream intent: benchmark PUSH29.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH29",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push2",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH2 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push2",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH2]",
+      "notes": [
+        "Upstream intent: benchmark PUSH2.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH2",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push30",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH30 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push30",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH30]",
+      "notes": [
+        "Upstream intent: benchmark PUSH30.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH30",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push31",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH31 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push31",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH31]",
+      "notes": [
+        "Upstream intent: benchmark PUSH31.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH31",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push32",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH32]",
+      "notes": [
+        "Upstream intent: benchmark PUSH32.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH32",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push3",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH3 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push3",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH3]",
+      "notes": [
+        "Upstream intent: benchmark PUSH3.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH3",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push4",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH4 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push4",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH4]",
+      "notes": [
+        "Upstream intent: benchmark PUSH4.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH4",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push5",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH5 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push5",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH5]",
+      "notes": [
+        "Upstream intent: benchmark PUSH5.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH5",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push6",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH6 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push6",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH6]",
+      "notes": [
+        "Upstream intent: benchmark PUSH6.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH6",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push7",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH7 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push7",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH7]",
+      "notes": [
+        "Upstream intent: benchmark PUSH7.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH7",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push8",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH8 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push8",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH8]",
+      "notes": [
+        "Upstream intent: benchmark PUSH8.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH8",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_push.push9",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs PUSH9 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-push9",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH9]",
+      "notes": [
+        "Upstream intent: benchmark PUSH9.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "PUSH9",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6005600c60003960056000f3602a5f5500",
+          "bytecode_runtime": "0x602a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap10",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP10 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap10",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP10]",
+      "notes": [
+        "Upstream intent: benchmark SWAP10.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP10",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6010600c60003960106000f3602a5f5f5f5f5f5f5f5f5f5f995f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f995f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap11",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP11 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap11",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP11]",
+      "notes": [
+        "Upstream intent: benchmark SWAP11.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP11",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6011600c60003960116000f3602a5f5f5f5f5f5f5f5f5f5f5f9a5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f9a5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap12",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP12 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap12",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP12]",
+      "notes": [
+        "Upstream intent: benchmark SWAP12.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP12",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6012600c60003960126000f3602a5f5f5f5f5f5f5f5f5f5f5f5f9b5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f5f9b5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap13",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP13 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap13",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP13]",
+      "notes": [
+        "Upstream intent: benchmark SWAP13.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP13",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6013600c60003960136000f3602a5f5f5f5f5f5f5f5f5f5f5f5f5f9c5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f5f5f9c5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap14",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP14 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap14",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP14]",
+      "notes": [
+        "Upstream intent: benchmark SWAP14.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP14",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6014600c60003960146000f3602a5f5f5f5f5f5f5f5f5f5f5f5f5f5f9d5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f5f5f5f9d5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap15",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP15 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap15",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP15]",
+      "notes": [
+        "Upstream intent: benchmark SWAP15.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP15",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6015600c60003960156000f3602a5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f9e5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f9e5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap16",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP16 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap16",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP16]",
+      "notes": [
+        "Upstream intent: benchmark SWAP16.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP16",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6016600c60003960166000f3602a5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f9f5f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f9f5f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap1",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP1 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap1",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP1]",
+      "notes": [
+        "Upstream intent: benchmark SWAP1.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP1",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6007600c60003960076000f3602a5f905f5500",
+          "bytecode_runtime": "0x602a5f905f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap2",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP2 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap2",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP2]",
+      "notes": [
+        "Upstream intent: benchmark SWAP2.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP2",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6008600c60003960086000f3602a5f5f915f5500",
+          "bytecode_runtime": "0x602a5f5f915f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap3",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP3 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap3",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP3]",
+      "notes": [
+        "Upstream intent: benchmark SWAP3.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP3",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6009600c60003960096000f3602a5f5f5f925f5500",
+          "bytecode_runtime": "0x602a5f5f5f925f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap4",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP4 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap4",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP4]",
+      "notes": [
+        "Upstream intent: benchmark SWAP4.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP4",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600a600c600039600a6000f3602a5f5f5f5f935f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f935f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap5",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP5 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap5",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP5]",
+      "notes": [
+        "Upstream intent: benchmark SWAP5.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP5",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f3602a5f5f5f5f5f945f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f945f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap6",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP6 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap6",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP6]",
+      "notes": [
+        "Upstream intent: benchmark SWAP6.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP6",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600c600c600039600c6000f3602a5f5f5f5f5f5f955f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f955f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap7",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP7 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap7",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP7]",
+      "notes": [
+        "Upstream intent: benchmark SWAP7.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP7",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600d600c600039600d6000f3602a5f5f5f5f5f5f5f965f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f965f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap8",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP8 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap8",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP8]",
+      "notes": [
+        "Upstream intent: benchmark SWAP8.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP8",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600e600c600039600e6000f3602a5f5f5f5f5f5f5f5f975f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f975f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.stack.test_swap.swap9",
+      "family": "state/stack",
+      "description": "Mapped from execution-specs SWAP9 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-stack-swap9",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP9]",
+      "notes": [
+        "Upstream intent: benchmark SWAP9.",
+        "RPC mapping: runtime setups stack, executes the opcode, and writes the top item to storage slot0.",
+        "Admitted because stack operations are perfectly deterministic and observable in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "stack_probe": {
+          "opcode": "SWAP9",
+          "expected_result": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600f600c600039600f6000f3602a5f5f5f5f5f5f5f5f5f985f5500",
+          "bytecode_runtime": "0x602a5f5f5f5f5f5f5f5f5f985f5500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+        }
+      }
+    }
+  ]
+}

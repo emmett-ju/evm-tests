@@ -7,62 +7,79 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=EQ]",
       "case_id": "upstream.benchmark.comparison.test_comparison.eq",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires comparison benchmark mapping support not yet mapped"
-      ],
-      "source": "test_comparison"
+      "admitted": true,
+      "mode": "test_comparison",
+      "reasons": [],
+      "source": "test_comparison",
+      "opcode": "EQ",
+      "args": [
+        1,
+        1
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=GT]",
       "case_id": "upstream.benchmark.comparison.test_comparison.gt",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires comparison benchmark mapping support not yet mapped"
-      ],
-      "source": "test_comparison"
+      "admitted": true,
+      "mode": "test_comparison",
+      "reasons": [],
+      "source": "test_comparison",
+      "opcode": "GT",
+      "args": [
+        0,
+        1
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=LT]",
       "case_id": "upstream.benchmark.comparison.test_comparison.lt",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires comparison benchmark mapping support not yet mapped"
-      ],
-      "source": "test_comparison"
+      "admitted": true,
+      "mode": "test_comparison",
+      "reasons": [],
+      "source": "test_comparison",
+      "opcode": "LT",
+      "args": [
+        0,
+        1
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=SGT]",
       "case_id": "upstream.benchmark.comparison.test_comparison.sgt",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires comparison benchmark mapping support not yet mapped"
-      ],
-      "source": "test_comparison"
+      "admitted": true,
+      "mode": "test_comparison",
+      "reasons": [],
+      "source": "test_comparison",
+      "opcode": "SGT",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        1
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_comparison[opcode=SLT]",
       "case_id": "upstream.benchmark.comparison.test_comparison.slt",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires comparison benchmark mapping support not yet mapped"
-      ],
-      "source": "test_comparison"
+      "admitted": true,
+      "mode": "test_comparison",
+      "reasons": [],
+      "source": "test_comparison",
+      "opcode": "SLT",
+      "args": [
+        115792089237316195423570985008687907853269984665640564039457584007913129639935,
+        1
+      ]
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_comparison.py::test_iszero",
-      "case_id": "upstream.benchmark.comparison.test_iszero",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires comparison benchmark mapping support not yet mapped"
-      ],
-      "source": "test_iszero"
+      "case_id": "upstream.benchmark.comparison.test_iszero.iszero",
+      "admitted": true,
+      "mode": "test_iszero",
+      "reasons": [],
+      "source": "test_iszero",
+      "opcode": "ISZERO",
+      "args": [
+        0
+      ]
     }
   ]
 }

@@ -7,652 +7,587 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP10]",
       "case_id": "upstream.benchmark.stack.test_dup.dup10",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP10"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP11]",
       "case_id": "upstream.benchmark.stack.test_dup.dup11",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP11"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP12]",
       "case_id": "upstream.benchmark.stack.test_dup.dup12",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP12"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP13]",
       "case_id": "upstream.benchmark.stack.test_dup.dup13",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP13"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP14]",
       "case_id": "upstream.benchmark.stack.test_dup.dup14",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP14"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP15]",
       "case_id": "upstream.benchmark.stack.test_dup.dup15",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP15"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP16]",
       "case_id": "upstream.benchmark.stack.test_dup.dup16",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP16"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP1]",
       "case_id": "upstream.benchmark.stack.test_dup.dup1",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP1"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP2]",
       "case_id": "upstream.benchmark.stack.test_dup.dup2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP2"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP3]",
       "case_id": "upstream.benchmark.stack.test_dup.dup3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP3"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP4]",
       "case_id": "upstream.benchmark.stack.test_dup.dup4",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP4"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP5]",
       "case_id": "upstream.benchmark.stack.test_dup.dup5",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP5"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP6]",
       "case_id": "upstream.benchmark.stack.test_dup.dup6",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP6"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP7]",
       "case_id": "upstream.benchmark.stack.test_dup.dup7",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP7"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP8]",
       "case_id": "upstream.benchmark.stack.test_dup.dup8",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP8"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_dup[opcode=DUP9]",
       "case_id": "upstream.benchmark.stack.test_dup.dup9",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_dup"
+      "admitted": true,
+      "mode": "test_dup",
+      "reasons": [],
+      "source": "test_dup",
+      "opcode": "DUP9"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH0]",
       "case_id": "upstream.benchmark.stack.test_push.push0",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH0"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH10]",
       "case_id": "upstream.benchmark.stack.test_push.push10",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH10"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH11]",
       "case_id": "upstream.benchmark.stack.test_push.push11",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH11"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH12]",
       "case_id": "upstream.benchmark.stack.test_push.push12",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH12"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH13]",
       "case_id": "upstream.benchmark.stack.test_push.push13",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH13"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH14]",
       "case_id": "upstream.benchmark.stack.test_push.push14",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH14"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH15]",
       "case_id": "upstream.benchmark.stack.test_push.push15",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH15"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH16]",
       "case_id": "upstream.benchmark.stack.test_push.push16",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH16"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH17]",
       "case_id": "upstream.benchmark.stack.test_push.push17",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH17"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH18]",
       "case_id": "upstream.benchmark.stack.test_push.push18",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH18"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH19]",
       "case_id": "upstream.benchmark.stack.test_push.push19",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH19"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH1]",
       "case_id": "upstream.benchmark.stack.test_push.push1",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH1"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH20]",
       "case_id": "upstream.benchmark.stack.test_push.push20",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH20"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH21]",
       "case_id": "upstream.benchmark.stack.test_push.push21",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH21"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH22]",
       "case_id": "upstream.benchmark.stack.test_push.push22",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH22"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH23]",
       "case_id": "upstream.benchmark.stack.test_push.push23",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH23"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH24]",
       "case_id": "upstream.benchmark.stack.test_push.push24",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH24"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH25]",
       "case_id": "upstream.benchmark.stack.test_push.push25",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH25"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH26]",
       "case_id": "upstream.benchmark.stack.test_push.push26",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH26"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH27]",
       "case_id": "upstream.benchmark.stack.test_push.push27",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH27"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH28]",
       "case_id": "upstream.benchmark.stack.test_push.push28",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH28"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH29]",
       "case_id": "upstream.benchmark.stack.test_push.push29",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH29"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH2]",
       "case_id": "upstream.benchmark.stack.test_push.push2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH2"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH30]",
       "case_id": "upstream.benchmark.stack.test_push.push30",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH30"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH31]",
       "case_id": "upstream.benchmark.stack.test_push.push31",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH31"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH32]",
       "case_id": "upstream.benchmark.stack.test_push.push32",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH32"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH3]",
       "case_id": "upstream.benchmark.stack.test_push.push3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH3"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH4]",
       "case_id": "upstream.benchmark.stack.test_push.push4",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH4"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH5]",
       "case_id": "upstream.benchmark.stack.test_push.push5",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH5"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH6]",
       "case_id": "upstream.benchmark.stack.test_push.push6",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH6"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH7]",
       "case_id": "upstream.benchmark.stack.test_push.push7",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH7"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH8]",
       "case_id": "upstream.benchmark.stack.test_push.push8",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH8"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_push[opcode=PUSH9]",
       "case_id": "upstream.benchmark.stack.test_push.push9",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_push"
+      "admitted": true,
+      "mode": "test_push",
+      "reasons": [],
+      "source": "test_push",
+      "opcode": "PUSH9"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP10]",
       "case_id": "upstream.benchmark.stack.test_swap.swap10",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP10"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP11]",
       "case_id": "upstream.benchmark.stack.test_swap.swap11",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP11"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP12]",
       "case_id": "upstream.benchmark.stack.test_swap.swap12",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP12"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP13]",
       "case_id": "upstream.benchmark.stack.test_swap.swap13",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP13"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP14]",
       "case_id": "upstream.benchmark.stack.test_swap.swap14",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP14"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP15]",
       "case_id": "upstream.benchmark.stack.test_swap.swap15",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP15"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP16]",
       "case_id": "upstream.benchmark.stack.test_swap.swap16",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP16"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP1]",
       "case_id": "upstream.benchmark.stack.test_swap.swap1",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP1"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP2]",
       "case_id": "upstream.benchmark.stack.test_swap.swap2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP2"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP3]",
       "case_id": "upstream.benchmark.stack.test_swap.swap3",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP3"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP4]",
       "case_id": "upstream.benchmark.stack.test_swap.swap4",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP4"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP5]",
       "case_id": "upstream.benchmark.stack.test_swap.swap5",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP5"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP6]",
       "case_id": "upstream.benchmark.stack.test_swap.swap6",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP6"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP7]",
       "case_id": "upstream.benchmark.stack.test_swap.swap7",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP7"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP8]",
       "case_id": "upstream.benchmark.stack.test_swap.swap8",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP8"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_stack.py::test_swap[opcode=SWAP9]",
       "case_id": "upstream.benchmark.stack.test_swap.swap9",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires stack benchmark mapping support not yet mapped"
-      ],
-      "source": "test_swap"
+      "admitted": true,
+      "mode": "test_swap",
+      "reasons": [],
+      "source": "test_swap",
+      "opcode": "SWAP9"
     }
   ]
 }

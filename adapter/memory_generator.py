@@ -9,6 +9,7 @@ from typing import Any, Literal
 from adapter.generator import build_case, deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
+from adapter.assembler import _build_init_code, _push_int, _word_hex
 
 MemoryTemplateMode = Literal[
     "memory_access",
@@ -423,28 +424,6 @@ def _build_msize_runtime(mem_size: int) -> str:
     return "0x" + code.hex()
 
 
-def _build_init_code(runtime_code: str) -> str:
-    runtime_hex = runtime_code.removeprefix("0x")
-    runtime_bytes = bytes.fromhex(runtime_hex)
-    length = len(runtime_bytes)
-    if length == 0:
-        raise ValueError("runtime_code must not be empty")
-    if length > 0xFF:
-        raise ValueError("runtime_code too long for PUSH1 init helper")
-    return f"0x60{length:02x}600c60003960{length:02x}6000f3{runtime_hex}"
-
-
-def _push_int(value: int) -> bytes:
-    if value < 0:
-        raise ValueError("push literal must be non-negative")
-    if value == 0:
-        return bytes([0x5F])
-    raw = value.to_bytes((value.bit_length() + 7) // 8, "big")
-    if len(raw) > 32:
-        raise ValueError(f"push literal too large: {value}")
-    return bytes([0x5F + len(raw)]) + raw
-
-
 def _simulate_memory_access_case(
     opcode: str,
     offset: int,
@@ -499,10 +478,6 @@ class _MemoryState:
 
     def msize(self) -> int:
         return len(self._memory)
-
-
-def _word_hex(value: int) -> str:
-    return "0x" + value.to_bytes(32, "big").hex()
 
 
 def _memory_gas_hex(size_hint: int) -> str:

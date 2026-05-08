@@ -14,15 +14,27 @@ from adapter.call_context_generator import (
     generate_upstream_call_context_templates,
 )
 from adapter.block_context_generator import generate_upstream_block_context_templates
-from adapter.arithmetic_generator import generate_upstream_arithmetic_templates
-from adapter.bitwise_generator import generate_upstream_bitwise_templates
-from adapter.comparison_generator import generate_upstream_comparison_templates
+from adapter.arithmetic_generator import (
+    generate_upstream_arithmetic_manifest,
+    generate_upstream_arithmetic_templates,
+)
+from adapter.bitwise_generator import (
+    generate_upstream_bitwise_manifest,
+    generate_upstream_bitwise_templates,
+)
+from adapter.comparison_generator import (
+    generate_upstream_comparison_manifest,
+    generate_upstream_comparison_templates,
+)
 from adapter.control_flow_generator import generate_upstream_control_flow_templates
 from adapter.log_generator import generate_upstream_log_templates
 from adapter.keccak_generator import generate_upstream_keccak_templates
 from adapter.system_generator import generate_upstream_system_templates
 from adapter.env import load_dotenv
-from adapter.stack_generator import generate_upstream_stack_templates
+from adapter.stack_generator import (
+    generate_upstream_stack_manifest,
+    generate_upstream_stack_templates,
+)
 from adapter.executor import JsonRpcBackend, MockBackend, RpcExecutor, result_from_execution
 from adapter.generator import generate_upstream_storage_manifest, generate_upstream_storage_templates
 from adapter.inventory import summarize_inventory_dir, write_json
@@ -188,6 +200,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_tx_context.add_argument("--template-output")
     scan_tx_context.add_argument("--inventory-output", required=True)
+
+    generate_arithmetic = subparsers.add_parser("generate-arithmetic-manifest")
+    generate_arithmetic.add_argument("--template", default="suites/templates/upstream_arithmetic_templates.json")
+    generate_arithmetic.add_argument("--output", required=True)
+
+    generate_bitwise = subparsers.add_parser("generate-bitwise-manifest")
+    generate_bitwise.add_argument("--template", default="suites/templates/upstream_bitwise_templates.json")
+    generate_bitwise.add_argument("--output", required=True)
+
+    generate_comparison = subparsers.add_parser("generate-comparison-manifest")
+    generate_comparison.add_argument("--template", default="suites/templates/upstream_comparison_templates.json")
+    generate_comparison.add_argument("--output", required=True)
+
+    generate_stack = subparsers.add_parser("generate-stack-manifest")
+    generate_stack.add_argument("--template", default="suites/templates/upstream_stack_templates.json")
+    generate_stack.add_argument("--output", required=True)
 
     summarize_inventory = subparsers.add_parser("summarize-upstream-inventory")
     summarize_inventory.add_argument("--inventory-dir", default="suites/templates")
@@ -470,6 +498,42 @@ def main(argv: list[str] | None = None) -> int:
             inventory_path=args.inventory_output,
         )
         print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-arithmetic-manifest":
+        manifest = generate_upstream_arithmetic_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-bitwise-manifest":
+        manifest = generate_upstream_bitwise_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-comparison-manifest":
+        manifest = generate_upstream_comparison_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-stack-manifest":
+        manifest = generate_upstream_stack_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
         return 0
 
     if args.command == "summarize-upstream-inventory":
