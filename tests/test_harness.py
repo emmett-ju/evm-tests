@@ -263,6 +263,30 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(deploy_steps), 1)
             self.assertIn(deploy_steps[0]["bytecode_runtime"], allowed_runtimes)
 
+    def test_selector_allows_upstream_mapped_control_flow_cases(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_control_flow_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(
+            [case.case_id for case in selected],
+            [
+                "upstream.benchmark.control_flow.test_gas_op",
+                "upstream.benchmark.control_flow.test_jump_benchmark",
+                "upstream.benchmark.control_flow.test_jumpdests",
+                "upstream.benchmark.control_flow.test_jumpi_fallthrough",
+                "upstream.benchmark.control_flow.test_jumpis",
+                "upstream.benchmark.control_flow.test_jumps",
+                "upstream.benchmark.control_flow.test_pc_op",
+            ],
+        )
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual({case.family for case in selected}, {"state/control-flow"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+        self.assertEqual(
+            {case.observe["control_flow_probe"]["mode"] for case in selected},
+            {"gas", "pc", "jump", "jump_pc_relative", "jumpi_fallthrough", "jumpi_taken", "jumpdest"},
+        )
+
     def test_manifest_resolves_execution_specs_ref(self) -> None:
         manifest = load_manifest(ROOT / "suites/manifests/upstream_smoke.json")
         head = (
@@ -2466,6 +2490,83 @@ class HarnessTests(unittest.TestCase):
                 self.assertEqual(result["diffs"], [])
                 self.assertIs(result["success"], True)
 
+    def test_mock_backend_runs_upstream_mapped_control_flow_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_control_flow_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 7)
+
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            expected_storage = {
+                "upstream.benchmark.control_flow.test_gas_op": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+                "upstream.benchmark.control_flow.test_pc_op": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+                "upstream.benchmark.control_flow.test_jumps": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+                "upstream.benchmark.control_flow.test_jump_benchmark": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+                "upstream.benchmark.control_flow.test_jumpi_fallthrough": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.control_flow.test_jumpis": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+                "upstream.benchmark.control_flow.test_jumpdests": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+            }
+            self.assertEqual(set(observed_by_case), set(expected_storage))
+            self.assertEqual(
+                {result["observed"]["storage"]["0x00"] for result in report["results"]},
+                {
+                    "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+            )
+            self.assertEqual(
+                {result["context"]["$last_contract"] for result in report["results"]},
+                {"0xcccccccccccccccccccccccccccccccccccccccc"},
+            )
+            for case_id, expected_slots in expected_storage.items():
+                result = observed_by_case[case_id]
+                self.assertEqual(result["observed"]["storage"], expected_slots)
+                self.assertEqual(result["expected"]["storage"], expected_slots)
+                self.assertEqual(result["diffs"], [])
+                self.assertTrue(result["tx_hashes"])
+                self.assertIs(result["success"], True)
+
+            jumpi_fallthrough = observed_by_case["upstream.benchmark.control_flow.test_jumpi_fallthrough"]
+            diffs = ResultOracle().compare(
+                {"storage": {"0x00": "0x0000000000000000000000000000000000000000000000000000000000000001"}},
+                jumpi_fallthrough["observed"],
+                jumpi_fallthrough["context"],
+            )
+            self.assertEqual(
+                diffs,
+                [
+                    "storage.0x00: expected '0x0000000000000000000000000000000000000000000000000000000000000001', got '0x0000000000000000000000000000000000000000000000000000000000000000'"
+                ],
+            )
+
     def test_mock_backend_runs_upstream_mapped_call_context_case(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -2601,6 +2702,52 @@ class HarnessTests(unittest.TestCase):
                 self.assertTrue(result["tx_hashes"])
                 self.assertIs(result["success"], True)
 
+    def test_cli_run_mock_upstream_control_flow_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_control_flow_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-control-flow-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 7)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertEqual(
+                {case_id: result["observed"]["storage"]["0x00"] for case_id, result in observed_by_case.items()},
+                {
+                    "upstream.benchmark.control_flow.test_gas_op": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.control_flow.test_jump_benchmark": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.control_flow.test_jumpdests": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.control_flow.test_jumpi_fallthrough": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "upstream.benchmark.control_flow.test_jumpis": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.control_flow.test_jumps": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.control_flow.test_pc_op": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.control_flow.test_jump_benchmark"]["observed"],
+                observed_by_case["upstream.benchmark.control_flow.test_jump_benchmark"]["expected"],
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.control_flow.test_jumpi_fallthrough"]["observed"],
+                observed_by_case["upstream.benchmark.control_flow.test_jumpi_fallthrough"]["expected"],
+            )
+
     def test_cli_run_mock_upstream_account_query_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -2676,6 +2823,17 @@ class HarnessTests(unittest.TestCase):
                     "upstream.benchmark.stack.test_swap.swap16": "0x000000000000000000000000000000000000000000000000000000000000002a",
                 },
             )
+
+    def test_mock_backend_rejects_unsupported_control_flow_runtime_code_path(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_control_flow_mapped.json")
+        broken_case = next(
+            case for case in manifest.cases if case.case_id == "upstream.benchmark.control_flow.test_jumps"
+        )
+        broken_case.steps[0]["bytecode_runtime"] = "0xdeadbeef"
+        broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
+        with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
+            backend.execute_case(broken_case, "negative-unsupported-control-flow-runtime")
 
     def test_mock_backend_rejects_unsupported_account_query_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")

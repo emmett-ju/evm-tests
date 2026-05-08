@@ -6,6 +6,15 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
+from adapter.control_flow_generator import (
+    _build_gas_runtime,
+    _build_jump_runtime,
+    _build_jump_pc_relative_runtime,
+    _build_jumpdest_runtime,
+    _build_jumpi_fallthrough_runtime,
+    _build_jumpi_taken_runtime,
+    _build_pc_runtime,
+)
 from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
 from adapter.signer import load_private_key, private_key_to_address, sign_type_2_transaction
@@ -15,6 +24,7 @@ WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
 WORD_05 = "0x0000000000000000000000000000000000000000000000000000000000000005"
 WORD_20 = "0x0000000000000000000000000000000000000000000000000000000000000020"
 WORD_2A = "0x000000000000000000000000000000000000000000000000000000000000002a"
+WORD_400 = "0x0000000000000000000000000000000000000000000000000000000000000400"
 WORD_2A_BYTE_AT_31 = "0x2a00000000000000000000000000000000000000000000000000000000000000"
 CALLDATA_WORD_PATTERN = "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
 SELFBALANCE_RUNTIME = "0x4760005500"
@@ -150,6 +160,12 @@ class MockBackend:
                     if code != expected_runtime:
                         raise ValueError(f"unsupported mock contract code path: {code}")
                     storage["0x00"] = _word_hex(stack_probe["expected_result"])
+                    continue
+
+                control_flow_probe = case.observe.get("control_flow_probe")
+                if control_flow_probe is not None:
+                    mode = control_flow_probe.get("mode")
+                    storage["0x00"] = self._simulate_control_flow_probe(mode, code)
                     continue
                 
                 if code in {"0x60003560005500", "0x60003560005560006000fd"}:
@@ -290,6 +306,23 @@ class MockBackend:
                 f"BALANCE mock path requires 32-byte calldata word, got {len(normalized) // 2} bytes"
             )
         return "0x" + normalized[-40:]
+
+    def _simulate_control_flow_probe(self, mode: Any, code: Any) -> str:
+        expected_runtimes = {
+            "gas": (_build_gas_runtime(), WORD_01),
+            "pc": (_build_pc_runtime(), WORD_01),
+            "jump": (_build_jump_runtime(), WORD_01),
+            "jump_pc_relative": (_build_jump_pc_relative_runtime(), WORD_01),
+            "jumpi_fallthrough": (_build_jumpi_fallthrough_runtime(), ZERO_STORAGE_WORD),
+            "jumpi_taken": (_build_jumpi_taken_runtime(), WORD_01),
+            "jumpdest": (_build_jumpdest_runtime(), WORD_01),
+        }
+        if mode not in expected_runtimes:
+            raise ValueError(f"missing control-flow probe mode: {mode!r}")
+        expected_runtime, expected_storage = expected_runtimes[mode]
+        if code != expected_runtime:
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        return expected_storage
 
 
 class JsonRpcBackend:
