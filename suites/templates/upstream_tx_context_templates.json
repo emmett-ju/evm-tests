@@ -4,6 +4,18 @@
   "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_tx_context.py",
   "cases": [
     {
+      "case_id": "upstream.benchmark.tx_context.gasprice.success",
+      "description": "Mapped from execution-specs GASPRICE onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-tx-context-gasprice",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_tx_context.py::test_call_frame_context_ops[opcode=GASPRICE]",
+      "notes": [
+        "Upstream intent: benchmark GASPRICE in an external-call frame.",
+        "RPC mapping: runtime writes GASPRICE to storage slot0 after deployment, then the harness asserts it against the effective gas price observed on the invoke receipt.",
+        "Admitted because the invoke transaction receipt exposes the effective gas price truthfully on both mock and jsonrpc backends without block-environment control."
+      ],
+      "mode": "gasprice"
+    },
+    {
       "case_id": "upstream.benchmark.tx_context.origin.success",
       "description": "Mapped from execution-specs ORIGIN onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-tx-context-origin",

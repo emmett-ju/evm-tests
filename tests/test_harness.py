@@ -39,12 +39,16 @@ from adapter.call_context_generator import (
     generate_upstream_call_context_templates,
     load_call_context_templates,
 )
+from adapter.block_context_generator import generate_upstream_block_context_templates
 from adapter.arithmetic_generator import generate_upstream_arithmetic_templates
 from adapter.bitwise_generator import generate_upstream_bitwise_templates
 from adapter.comparison_generator import generate_upstream_comparison_templates
 from adapter.control_flow_generator import generate_upstream_control_flow_templates
+from adapter.log_generator import generate_upstream_log_templates
 from adapter.inventory import summarize_inventory_dir, write_inventory_payload
+from adapter.keccak_generator import generate_upstream_keccak_templates
 from adapter.stack_generator import generate_upstream_stack_templates
+from adapter.system_generator import generate_upstream_system_templates
 from adapter.tx_context_generator import (
     generate_upstream_tx_context_manifest,
     generate_upstream_tx_context_templates,
@@ -156,16 +160,10 @@ class HarnessTests(unittest.TestCase):
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_memory_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
-        self.assertEqual(
-            [case.case_id for case in selected],
-            [
-                "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success",
-                "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_0.success",
-                "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_32.success",
-                "upstream.benchmark.memory.msize.mem_size_0.success",
-                "upstream.benchmark.memory.msize.mem_size_1.success",
-            ],
-        )
+        self.assertEqual(len(selected), 95)
+        selected_ids = [case.case_id for case in selected]
+        self.assertIn("upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success", selected_ids)
+        self.assertIn("upstream.benchmark.memory.msize.mem_size_1.success", selected_ids)
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
@@ -178,10 +176,21 @@ class HarnessTests(unittest.TestCase):
             [
                 "upstream.benchmark.call_context.address.success",
                 "upstream.benchmark.call_context.caller.success",
+                "upstream.benchmark.call_context.calldataload.calldata_size_0.nonzero.success",
+                "upstream.benchmark.call_context.calldataload.calldata_size_1024.nonzero.success",
+                "upstream.benchmark.call_context.calldataload.calldata_size_256.nonzero.success",
                 "upstream.benchmark.call_context.calldataload.calldata_size_32.nonzero.success",
                 "upstream.benchmark.call_context.calldataload.calldata_size_0.zero.success",
+                "upstream.benchmark.call_context.calldataload.calldata_size_1024.zero.success",
+                "upstream.benchmark.call_context.calldataload.calldata_size_256.zero.success",
+                "upstream.benchmark.call_context.calldataload.calldata_size_32.zero.success",
+                "upstream.benchmark.call_context.calldatasize.calldata_size_0.nonzero.success",
+                "upstream.benchmark.call_context.calldatasize.calldata_size_1024.nonzero.success",
+                "upstream.benchmark.call_context.calldatasize.calldata_size_256.nonzero.success",
                 "upstream.benchmark.call_context.calldatasize.calldata_size_32.nonzero.success",
                 "upstream.benchmark.call_context.calldatasize.calldata_size_0.zero.success",
+                "upstream.benchmark.call_context.calldatasize.calldata_size_1024.zero.success",
+                "upstream.benchmark.call_context.calldatasize.calldata_size_256.zero.success",
                 "upstream.benchmark.call_context.calldatasize.calldata_size_32.zero.success",
                 "upstream.benchmark.call_context.callvalue.origin.zero.success",
                 "upstream.benchmark.call_context.callvalue.origin.nonzero.success",
@@ -196,7 +205,10 @@ class HarnessTests(unittest.TestCase):
         selected, decisions = TestSelector(profile).select(manifest)
         self.assertEqual(
             [case.case_id for case in selected],
-            ["upstream.benchmark.tx_context.origin.success"],
+            [
+                "upstream.benchmark.tx_context.gasprice.success",
+                "upstream.benchmark.tx_context.origin.success",
+            ],
         )
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
@@ -440,12 +452,12 @@ class HarnessTests(unittest.TestCase):
 
     def test_memory_templates_load(self) -> None:
         templates = load_memory_templates(ROOT / "suites/templates/upstream_memory_templates.json")
-        self.assertEqual(len(templates), 5)
-        self.assertEqual(templates[0].mode, "mstore_offset0_uninitialized_mem0")
+        self.assertEqual(len(templates), 95)
+        self.assertEqual(templates[0].mode, "memory_access")
 
     def test_call_context_templates_load(self) -> None:
         templates = load_call_context_templates(ROOT / "suites/templates/upstream_call_context_templates.json")
-        self.assertEqual(len(templates), 9)
+        self.assertEqual(len(templates), 20)
         self.assertEqual(templates[0].mode, "address")
 
     def test_account_query_templates_load(self) -> None:
@@ -455,8 +467,8 @@ class HarnessTests(unittest.TestCase):
 
     def test_tx_context_templates_load(self) -> None:
         templates = load_tx_context_templates(ROOT / "suites/templates/upstream_tx_context_templates.json")
-        self.assertEqual(len(templates), 1)
-        self.assertEqual(templates[0].mode, "origin")
+        self.assertEqual(len(templates), 2)
+        self.assertEqual({template.mode for template in templates}, {"origin", "gasprice"})
 
     def test_storage_template_scanner_matches_checked_in_template(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -491,7 +503,7 @@ class HarnessTests(unittest.TestCase):
             inventory = json.loads(inventory_path.read_text())
             admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
-            self.assertEqual(len(admitted), 5)
+            self.assertEqual(len(admitted), 95)
             self.assertGreater(len(blocked), 0)
 
     def test_call_context_template_scanner_matches_checked_in_template(self) -> None:
@@ -510,8 +522,8 @@ class HarnessTests(unittest.TestCase):
             inventory = json.loads(inventory_path.read_text())
             admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
-            self.assertEqual(len(admitted), 9)
-            self.assertGreater(len(blocked), 0)
+            self.assertEqual(len(admitted), 20)
+            self.assertEqual(blocked, [])
 
     def test_account_query_template_scanner_writes_expected_inventory_and_templates(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -557,8 +569,13 @@ class HarnessTests(unittest.TestCase):
             inventory = json.loads(inventory_path.read_text())
             admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
-            self.assertEqual(len(admitted), 1)
-            self.assertEqual(len(blocked), 3)
+            self.assertEqual(len(admitted), 2)
+            self.assertEqual(len(blocked), 2)
+            blocked_reasons = Counter(reason for entry in blocked for reason in entry["reasons"])
+            self.assertEqual(
+                blocked_reasons,
+                Counter({"requires blob transaction construction and BLOBHASH environment not yet mapped": 2}),
+            )
 
     def test_arithmetic_template_scanner_writes_blocked_inventory_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -731,6 +748,146 @@ class HarnessTests(unittest.TestCase):
                     inventory_path=Path(tmpdir) / "inventory.json",
                 )
 
+    def test_block_context_template_scanner_writes_blocked_inventory_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_block_context_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_block_context_inventory.json"
+            generated = generate_upstream_block_context_templates(
+                repo_root=ROOT,
+                output_path=generated_path,
+                inventory_path=inventory_path,
+            )
+            self.assertEqual(generated["name"], "upstream-block-context-mapping-templates")
+            self.assertEqual(generated["cases"], [])
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-block-context-auto-inventory")
+            self.assertEqual(inventory["family"], "block-context")
+            self.assertEqual(len(inventory["entries"]), 13)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            case_ids = [entry["case_id"] for entry in inventory["entries"]]
+            self.assertEqual(len(case_ids), len(set(case_ids)))
+            self.assertIn("upstream.benchmark.block_context.test_block_context_ops.coinbase", case_ids)
+            self.assertIn("upstream.benchmark.block_context.test_blockhash.random", case_ids)
+
+    def test_block_context_template_scanner_fails_loudly_on_missing_function(self) -> None:
+        source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_block_context.py"
+        original = source.read_text()
+        broken = original.replace("def test_blockhash(", "def test_blockhash_removed(", 1)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            broken_path = Path(tmpdir) / "test_block_context_broken.py"
+            broken_path.write_text(broken)
+            with self.assertRaisesRegex(ValueError, "could not find benchmark function test_blockhash"):
+                generate_upstream_block_context_templates(
+                    repo_root=ROOT,
+                    source_path=broken_path,
+                    inventory_path=Path(tmpdir) / "inventory.json",
+                )
+
+    def test_log_template_scanner_writes_blocked_inventory_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_log_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_log_inventory.json"
+            generated = generate_upstream_log_templates(
+                repo_root=ROOT,
+                output_path=generated_path,
+                inventory_path=inventory_path,
+            )
+            self.assertEqual(generated["name"], "upstream-log-mapping-templates")
+            self.assertEqual(generated["cases"], [])
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-log-auto-inventory")
+            self.assertEqual(inventory["family"], "log")
+            self.assertEqual(len(inventory["entries"]), 140)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            case_ids = [entry["case_id"] for entry in inventory["entries"]]
+            self.assertEqual(len(case_ids), len(set(case_ids)))
+            self.assertIn("upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true", case_ids)
+            self.assertIn("upstream.benchmark.log.test_log_benchmark.log4.mem_size_1024.log_size_1024", case_ids)
+
+    def test_log_template_scanner_fails_loudly_on_missing_function(self) -> None:
+        source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_log.py"
+        original = source.read_text()
+        broken = original.replace("def test_log_benchmark(", "def test_log_benchmark_removed(", 1)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            broken_path = Path(tmpdir) / "test_log_broken.py"
+            broken_path.write_text(broken)
+            with self.assertRaisesRegex(ValueError, "could not find benchmark function test_log_benchmark"):
+                generate_upstream_log_templates(
+                    repo_root=ROOT,
+                    source_path=broken_path,
+                    inventory_path=Path(tmpdir) / "inventory.json",
+                )
+
+    def test_keccak_template_scanner_writes_blocked_inventory_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_keccak_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_keccak_inventory.json"
+            generated = generate_upstream_keccak_templates(
+                repo_root=ROOT,
+                output_path=generated_path,
+                inventory_path=inventory_path,
+            )
+            self.assertEqual(generated["name"], "upstream-keccak-mapping-templates")
+            self.assertEqual(generated["cases"], [])
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-keccak-auto-inventory")
+            self.assertEqual(inventory["family"], "keccak")
+            self.assertEqual(len(inventory["entries"]), 35)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            case_ids = [entry["case_id"] for entry in inventory["entries"]]
+            self.assertEqual(len(case_ids), len(set(case_ids)))
+            self.assertIn("upstream.benchmark.keccak.test_keccak_max_permutations", case_ids)
+            self.assertIn("upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_1024.msg_size_1024", case_ids)
+
+    def test_keccak_template_scanner_fails_loudly_on_missing_function(self) -> None:
+        source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_keccak.py"
+        original = source.read_text()
+        broken = original.replace("def test_keccak_diff_mem_msg_sizes(", "def test_keccak_diff_mem_msg_sizes_removed(", 1)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            broken_path = Path(tmpdir) / "test_keccak_broken.py"
+            broken_path.write_text(broken)
+            with self.assertRaisesRegex(ValueError, "could not find benchmark function test_keccak_diff_mem_msg_sizes"):
+                generate_upstream_keccak_templates(
+                    repo_root=ROOT,
+                    source_path=broken_path,
+                    inventory_path=Path(tmpdir) / "inventory.json",
+                )
+
+    def test_system_template_scanner_writes_blocked_inventory_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_system_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_system_inventory.json"
+            generated = generate_upstream_system_templates(
+                repo_root=ROOT,
+                output_path=generated_path,
+                inventory_path=inventory_path,
+            )
+            self.assertEqual(generated["name"], "upstream-system-mapping-templates")
+            self.assertEqual(generated["cases"], [])
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-system-auto-inventory")
+            self.assertEqual(inventory["family"], "system")
+            self.assertEqual(len(inventory["entries"]), 46)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            case_ids = [entry["case_id"] for entry in inventory["entries"]]
+            self.assertEqual(len(case_ids), len(set(case_ids)))
+            self.assertIn("upstream.benchmark.system.test_create.create.max_code_size_with_non_zero_data", case_ids)
+            self.assertIn("upstream.benchmark.system.test_selfdestruct_initcode.value_bearing_true", case_ids)
+
+    def test_system_template_scanner_fails_loudly_on_missing_function(self) -> None:
+        source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_system.py"
+        original = source.read_text()
+        broken = original.replace("def test_selfdestruct_initcode(", "def test_selfdestruct_initcode_removed(", 1)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            broken_path = Path(tmpdir) / "test_system_broken.py"
+            broken_path.write_text(broken)
+            with self.assertRaisesRegex(ValueError, "could not find benchmark function test_selfdestruct_initcode"):
+                generate_upstream_system_templates(
+                    repo_root=ROOT,
+                    source_path=broken_path,
+                    inventory_path=Path(tmpdir) / "inventory.json",
+                )
+
     def test_cli_generate_storage_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "generated.json"
@@ -898,7 +1055,7 @@ class HarnessTests(unittest.TestCase):
             )
             generated = json.loads(output_path.read_text())
             self.assertEqual(generated["name"], "upstream-memory-mapped")
-            self.assertEqual(len(generated["cases"]), 5)
+            self.assertEqual(len(generated["cases"]), 95)
 
     def test_cli_generate_account_query_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -951,7 +1108,7 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-memory-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 5)
+            self.assertEqual(len(generated["cases"]), 95)
             self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
 
     def test_cli_generate_call_context_manifest_writes_expected_output(self) -> None:
@@ -963,7 +1120,7 @@ class HarnessTests(unittest.TestCase):
             )
             generated = json.loads(output_path.read_text())
             self.assertEqual(generated["name"], "upstream-call-context-mapped")
-            self.assertEqual(len(generated["cases"]), 9)
+            self.assertEqual(len(generated["cases"]), 20)
             self.assertEqual(generated["cases"][0]["expected"]["storage"]["0x00"], "$last_contract_word")
 
     def test_cli_generate_tx_context_manifest_writes_expected_output(self) -> None:
@@ -975,8 +1132,15 @@ class HarnessTests(unittest.TestCase):
             )
             generated = json.loads(output_path.read_text())
             self.assertEqual(generated["name"], "upstream-tx-context-mapped")
-            self.assertEqual(len(generated["cases"]), 1)
-            self.assertEqual(generated["cases"][0]["expected"]["storage"]["0x00"], "$admin_account_word")
+            self.assertEqual(len(generated["cases"]), 2)
+            expected_by_case = {case["case_id"]: case["expected"]["storage"]["0x00"] for case in generated["cases"]}
+            self.assertEqual(
+                expected_by_case,
+                {
+                    "upstream.benchmark.tx_context.gasprice.success": "$gas_price_word",
+                    "upstream.benchmark.tx_context.origin.success": "$admin_account_word",
+                },
+            )
 
     def test_cli_scan_upstream_call_context_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -997,8 +1161,8 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-call-context-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 9)
-            self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
+            self.assertEqual(len(generated["cases"]), 20)
+            self.assertEqual(len(inventory["entries"]), len(generated["cases"]))
 
     def test_cli_scan_upstream_account_query_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1042,8 +1206,16 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-tx-context-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 1)
+            self.assertEqual(len(generated["cases"]), 2)
             self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
+            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
+            self.assertEqual(len(blocked), 2)
+            self.assertTrue(
+                all(
+                    entry["reasons"] == ["requires blob transaction construction and BLOBHASH environment not yet mapped"]
+                    for entry in blocked
+                )
+            )
 
     def test_cli_scan_upstream_storage_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1158,6 +1330,82 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(inventory["entries"]), 7)
             self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
 
+    def test_cli_scan_upstream_block_context_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-block-context",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-block-context-auto-inventory")
+            self.assertEqual(inventory["family"], "block-context")
+            self.assertEqual(len(inventory["entries"]), 13)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+
+    def test_cli_scan_upstream_log_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-log",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-log-auto-inventory")
+            self.assertEqual(inventory["family"], "log")
+            self.assertEqual(len(inventory["entries"]), 140)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+
+    def test_cli_scan_upstream_keccak_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-keccak",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-keccak-auto-inventory")
+            self.assertEqual(inventory["family"], "keccak")
+            self.assertEqual(len(inventory["entries"]), 35)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+
+    def test_cli_scan_upstream_system_inventory_only_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-system",
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory["name"], "upstream-system-auto-inventory")
+            self.assertEqual(inventory["family"], "system")
+            self.assertEqual(len(inventory["entries"]), 46)
+            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+
     def test_cli_scan_upstream_memory_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             inventory_path = Path(tmpdir) / "inventory.json"
@@ -1269,6 +1517,54 @@ class HarnessTests(unittest.TestCase):
                     ]
                 )
 
+    def test_cli_scan_upstream_block_context_requires_inventory_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            with self.assertRaises(SystemExit):
+                main(
+                    [
+                        "scan-upstream-block-context",
+                        "--template-output",
+                        str(output_path),
+                    ]
+                )
+
+    def test_cli_scan_upstream_log_requires_inventory_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            with self.assertRaises(SystemExit):
+                main(
+                    [
+                        "scan-upstream-log",
+                        "--template-output",
+                        str(output_path),
+                    ]
+                )
+
+    def test_cli_scan_upstream_keccak_requires_inventory_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            with self.assertRaises(SystemExit):
+                main(
+                    [
+                        "scan-upstream-keccak",
+                        "--template-output",
+                        str(output_path),
+                    ]
+                )
+
+    def test_cli_scan_upstream_system_requires_inventory_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            with self.assertRaises(SystemExit):
+                main(
+                    [
+                        "scan-upstream-system",
+                        "--template-output",
+                        str(output_path),
+                    ]
+                )
+
     def test_cli_scan_upstream_account_query_requires_inventory_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "templates.json"
@@ -1302,6 +1598,22 @@ class HarnessTests(unittest.TestCase):
             (
                 generate_upstream_control_flow_templates,
                 ROOT / "suites/templates/upstream_control_flow_inventory.json",
+            ),
+            (
+                generate_upstream_block_context_templates,
+                ROOT / "suites/templates/upstream_block_context_inventory.json",
+            ),
+            (
+                generate_upstream_log_templates,
+                ROOT / "suites/templates/upstream_log_inventory.json",
+            ),
+            (
+                generate_upstream_keccak_templates,
+                ROOT / "suites/templates/upstream_keccak_inventory.json",
+            ),
+            (
+                generate_upstream_system_templates,
+                ROOT / "suites/templates/upstream_system_inventory.json",
             ),
             (
                 generate_upstream_account_query_templates,
@@ -1373,7 +1685,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 10, "cases": 332, "admitted": 37, "blocked": 295},
+            {"families": 14, "cases": 613, "admitted": 139, "blocked": 474},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -1387,7 +1699,7 @@ class HarnessTests(unittest.TestCase):
                     "blocked": item["blocked"],
                 }
                 for family, item in families.items()
-                if family in {"arithmetic", "bitwise", "comparison", "stack", "control-flow", "account-query"}
+                if family in {"arithmetic", "bitwise", "comparison", "stack", "control-flow", "account-query", "block-context", "call-context", "log", "keccak", "system", "tx-context", "memory"}
             },
             {
                 "arithmetic": {"total": 65, "admitted": 0, "blocked": 65},
@@ -1396,6 +1708,13 @@ class HarnessTests(unittest.TestCase):
                 "stack": {"total": 65, "admitted": 0, "blocked": 65},
                 "control-flow": {"total": 7, "admitted": 0, "blocked": 7},
                 "account-query": {"total": 40, "admitted": 5, "blocked": 35},
+                "block-context": {"total": 13, "admitted": 0, "blocked": 13},
+                "call-context": {"total": 20, "admitted": 20, "blocked": 0},
+                "log": {"total": 140, "admitted": 0, "blocked": 140},
+                "keccak": {"total": 35, "admitted": 0, "blocked": 35},
+                "system": {"total": 46, "admitted": 0, "blocked": 46},
+                "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
+                "memory": {"total": 143, "admitted": 95, "blocked": 48},
             },
         )
         self.assertEqual(
@@ -1424,11 +1743,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 9, "cases": 292, "admitted": 32, "blocked": 260},
+                {"families": 13, "cases": 573, "admitted": 134, "blocked": 439},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 10, "cases": 332, "admitted": 37, "blocked": 295},
+                {"families": 14, "cases": 613, "admitted": 139, "blocked": 474},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -1499,11 +1818,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 10, "cases": 331, "admitted": 36, "blocked": 295},
+                {"families": 14, "cases": 612, "admitted": 138, "blocked": 474},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 10, "cases": 332, "admitted": 37, "blocked": 295},
+                {"families": 14, "cases": 613, "admitted": 139, "blocked": 474},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -1523,7 +1842,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 10, "cases": 331, "admitted": 36, "blocked": 295},
+                {"families": 14, "cases": 612, "admitted": 138, "blocked": 474},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -1671,6 +1990,52 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(tx_hash, "0xfeedface")
         self.assertEqual(backend.calls[1][0], "eth_sendRawTransaction")
         self.assertTrue(str(backend.calls[1][1][0]).startswith("0x02"))
+
+    def test_jsonrpc_backend_records_effective_gas_price_in_context(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_tx_context_mapped.json")
+        gasprice_case = next(
+            case for case in manifest.cases if case.case_id == "upstream.benchmark.tx_context.gasprice.success"
+        )
+
+        class StubBackend(JsonRpcBackend):
+            def __init__(self, profile):
+                super().__init__(profile)
+                self.sent = 0
+
+            def _send_transaction(self, transaction: dict[str, Any]) -> str:
+                self.sent += 1
+                return f"0xtx{self.sent}"
+
+            def _wait_for_receipt(self, tx_hash: str, timeout_seconds: int = 60) -> dict[str, Any]:
+                if tx_hash == "0xtx1":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "contractAddress": "0xcccccccccccccccccccccccccccccccccccccccc",
+                        "effectiveGasPrice": "0x4a817c800",
+                    }
+                if tx_hash == "0xtx2":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "effectiveGasPrice": "0x4a817c800",
+                    }
+                raise AssertionError(tx_hash)
+
+            def _rpc(self, method: str, params: list[object]) -> object:
+                if method == "eth_getStorageAt":
+                    return "0x00000000000000000000000000000000000000000000000000000004a817c800"
+                raise AssertionError(method)
+
+        backend = StubBackend(profile)
+        tx_hashes, observed, context = backend.execute_case(gasprice_case, "tx-context-gasprice")
+        self.assertEqual(tx_hashes, ["0xtx1", "0xtx2"])
+        self.assertEqual(context["$gas_price"], "0x4a817c800")
+        self.assertEqual(
+            observed["storage"]["0x00"],
+            "0x00000000000000000000000000000000000000000000000000000004a817c800",
+        )
 
     def test_jsonrpc_backend_rejects_mismatched_admin_account(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
@@ -1876,31 +2241,34 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 5)
+            self.assertEqual(len(report["results"]), 95)
+            
+            # Spot-check a few representative cases instead of all 95
             expected_storage = {
                 "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_0.success": {
-                    "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                    "0x00": "0x000000000000000000000000000000000000000000000000000000000000002b",
                     "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
                 },
                 "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success": {
                     "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
                     "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
                 },
-                "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_32.success": {
-                    "0x00": "0x2a00000000000000000000000000000000000000000000000000000000000000",
-                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
-                },
-                "upstream.benchmark.memory.msize.mem_size_0.success": {
-                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "upstream.benchmark.memory.msize.mem_size_1000.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000420",
                 },
                 "upstream.benchmark.memory.msize.mem_size_1.success": {
-                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000040",
                 },
             }
+            
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            for case_id, expected_slots in expected_storage.items():
+                self.assertIn(case_id, observed_by_case)
+                for slot, value in expected_slots.items():
+                    self.assertEqual(observed_by_case[case_id]["observed"]["storage"][slot], value)
+            
             for result in report["results"]:
-                self.assertIn(result["case_id"], expected_storage)
-                for slot, value in expected_storage[result["case_id"]].items():
-                    self.assertEqual(result["observed"]["storage"][slot], value)
+                self.assertEqual(result["diffs"], [])
                 self.assertIs(result["success"], True)
 
     def test_mock_backend_runs_upstream_mapped_call_context_case(self) -> None:
@@ -1921,13 +2289,16 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 9)
+            self.assertEqual(len(report["results"]), 20)
             expected_storage = {
                 "upstream.benchmark.call_context.address.success": {
                     "0x00": "0x000000000000000000000000cccccccccccccccccccccccccccccccccccccccc",
                 },
                 "upstream.benchmark.call_context.caller.success": {
                     "0x00": "0x000000000000000000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                },
+                "upstream.benchmark.call_context.calldatasize.calldata_size_0.nonzero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
                 },
                 "upstream.benchmark.call_context.calldatasize.calldata_size_0.zero.success": {
                     "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -1938,11 +2309,41 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.call_context.calldatasize.calldata_size_32.zero.success": {
                     "0x00": "0x0000000000000000000000000000000000000000000000000000000000000020",
                 },
+                "upstream.benchmark.call_context.calldatasize.calldata_size_256.nonzero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000100",
+                },
+                "upstream.benchmark.call_context.calldatasize.calldata_size_256.zero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000100",
+                },
+                "upstream.benchmark.call_context.calldatasize.calldata_size_1024.nonzero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000400",
+                },
+                "upstream.benchmark.call_context.calldatasize.calldata_size_1024.zero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000400",
+                },
+                "upstream.benchmark.call_context.calldataload.calldata_size_0.nonzero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
                 "upstream.benchmark.call_context.calldataload.calldata_size_0.zero.success": {
                     "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
                 },
                 "upstream.benchmark.call_context.calldataload.calldata_size_32.nonzero.success": {
                     "0x00": "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+                },
+                "upstream.benchmark.call_context.calldataload.calldata_size_32.zero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.call_context.calldataload.calldata_size_256.nonzero.success": {
+                    "0x00": "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+                },
+                "upstream.benchmark.call_context.calldataload.calldata_size_256.zero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.call_context.calldataload.calldata_size_1024.nonzero.success": {
+                    "0x00": "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+                },
+                "upstream.benchmark.call_context.calldataload.calldata_size_1024.zero.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
                 },
                 "upstream.benchmark.call_context.callvalue.origin.nonzero.success": {
                     "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
@@ -2108,6 +2509,13 @@ class HarnessTests(unittest.TestCase):
                 (ROOT / "suites/manifests/upstream_tx_context_mapped.json").read_text()
             )
             self.assertEqual(generated, checked_in)
+            self.assertEqual(
+                [case["case_id"] for case in generated["cases"]],
+                [
+                    "upstream.benchmark.tx_context.gasprice.success",
+                    "upstream.benchmark.tx_context.origin.success",
+                ],
+            )
 
     def test_mock_backend_runs_upstream_mapped_tx_context_case(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -2127,16 +2535,54 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 1)
-            result = report["results"][0]
-            self.assertEqual(result["case_id"], "upstream.benchmark.tx_context.origin.success")
+            self.assertEqual(len(report["results"]), 2)
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+
+            origin = observed_by_case["upstream.benchmark.tx_context.origin.success"]
             self.assertEqual(
-                result["observed"]["storage"]["0x00"],
+                origin["observed"]["storage"]["0x00"],
                 "0x000000000000000000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             )
-            self.assertEqual(result["context"]["$admin_account"], "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-            self.assertIs(result["success"], True)
+            self.assertEqual(origin["context"]["$admin_account"], "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+            self.assertIs(origin["success"], True)
 
+            gasprice = observed_by_case["upstream.benchmark.tx_context.gasprice.success"]
+            self.assertEqual(
+                gasprice["observed"]["storage"]["0x00"],
+                "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+            )
+            self.assertEqual(gasprice["context"]["$gas_price"], "0x3b9aca00")
+            self.assertIs(gasprice["success"], True)
 
-if __name__ == "__main__":
-    unittest.main()
+    def test_cli_run_mock_upstream_tx_context_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_tx_context_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-tx-context-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 2)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result["observed"]["storage"]["0x00"] for result in report["results"]}
+            self.assertEqual(
+                observed_by_case,
+                {
+                    "upstream.benchmark.tx_context.origin.success": "0x000000000000000000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "upstream.benchmark.tx_context.gasprice.success": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+                },
+            )

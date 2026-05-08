@@ -4,64 +4,1524 @@
   "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_memory.py",
   "cases": [
     {
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with uninitialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset0-uninitialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 0 with offset_initialized=False and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 0 with uninitialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset0-uninitialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 0 with offset_initialized=False and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 0
+    },
+    {
       "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success",
-      "description": "Mapped from execution-specs MSTORE at offset 0 on fresh memory onto an RPC-only deploy/call/storage-assert flow.",
+      "description": "Mapped from execution-specs MSTORE at offset 0 with uninitialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-memory-mstore-offset0-uninitialized-mem0",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MSTORE]",
       "notes": [
-        "Upstream intent: benchmark MSTORE on untouched memory.",
-        "RPC mapping: runtime writes a known word at offset 0, then persists that word and MSIZE into storage.",
-        "Admitted because final storage captures the semantic write result directly."
+        "Upstream intent: benchmark MSTORE at offset 0 with offset_initialized=False and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
       ],
-      "mode": "mstore_offset0_uninitialized_mem0"
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MLOAD at offset 1 with uninitialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset1-uninitialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=1-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 1 with offset_initialized=False and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 1 with uninitialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset1-uninitialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=1-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 1 with offset_initialized=False and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE at offset 1 with uninitialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset1-uninitialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=1-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 1 with offset_initialized=False and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MLOAD at offset 31 with uninitialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset31-uninitialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=31-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 31 with offset_initialized=False and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with uninitialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset31-uninitialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=31-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 31 with offset_initialized=False and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE at offset 31 with uninitialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset31-uninitialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=31-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 31 with offset_initialized=False and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 0
     },
     {
       "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_0.success",
-      "description": "Mapped from execution-specs MLOAD at offset 0 with initialized memory onto an RPC-only deploy/call/storage-assert flow.",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with initialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-memory-mload-offset0-initialized-mem0",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=0-opcode=MLOAD]",
       "notes": [
-        "Upstream intent: benchmark MLOAD after writing a known word at offset 0.",
-        "RPC mapping: runtime writes 0x2a into memory, reads it back with MLOAD, then persists the loaded word and MSIZE into storage.",
-        "Admitted because final storage captures the semantic result directly; gas benchmarking is intentionally excluded."
+        "Upstream intent: benchmark MLOAD at offset 0 with offset_initialized=True and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
       ],
-      "mode": "mload_offset0_initialized_mem0"
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 0 with initialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset0-initialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=0-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 0 with offset_initialized=True and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE at offset 0 with initialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset0-initialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=0-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 0 with offset_initialized=True and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MLOAD at offset 1 with initialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset1-initialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=1-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 1 with offset_initialized=True and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 1 with initialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset1-initialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=1-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 1 with offset_initialized=True and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE at offset 1 with initialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset1-initialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=1-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 1 with offset_initialized=True and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MLOAD at offset 31 with initialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset31-initialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=31-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 31 with offset_initialized=True and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with initialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset31-initialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=31-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 31 with offset_initialized=True and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_0.success",
+      "description": "Mapped from execution-specs MSTORE at offset 31 with initialized memory and mem_size 0 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset31-initialized-mem0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=31-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 31 with offset_initialized=True and mem_size=0.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with uninitialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset0-uninitialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 0 with offset_initialized=False and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 0 with uninitialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset0-uninitialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=0-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 0 with offset_initialized=False and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE at offset 0 with uninitialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset0-uninitialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=0-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 0 with offset_initialized=False and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MLOAD at offset 1 with uninitialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset1-uninitialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=1-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 1 with offset_initialized=False and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 1 with uninitialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset1-uninitialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=1-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 1 with offset_initialized=False and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE at offset 1 with uninitialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset1-uninitialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=1-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 1 with offset_initialized=False and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MLOAD at offset 31 with uninitialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset31-uninitialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=31-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 31 with offset_initialized=False and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with uninitialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset31-uninitialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=31-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 31 with offset_initialized=False and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE at offset 31 with uninitialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset31-uninitialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=31-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 31 with offset_initialized=False and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with initialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset0-initialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=0-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 0 with offset_initialized=True and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 0 with initialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset0-initialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=0-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 0 with offset_initialized=True and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE at offset 0 with initialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset0-initialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=0-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 0 with offset_initialized=True and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MLOAD at offset 1 with initialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset1-initialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=1-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 1 with offset_initialized=True and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 1 with initialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset1-initialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=1-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 1 with offset_initialized=True and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE at offset 1 with initialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset1-initialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=1-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 1 with offset_initialized=True and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MLOAD at offset 31 with initialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset31-initialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=31-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 31 with offset_initialized=True and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with initialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset31-initialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=31-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 31 with offset_initialized=True and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_1024.success",
+      "description": "Mapped from execution-specs MSTORE at offset 31 with initialized memory and mem_size 1024 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset31-initialized-mem1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=31-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 31 with offset_initialized=True and mem_size=1024.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with uninitialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset0-uninitialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 0 with offset_initialized=False and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 0 with uninitialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset0-uninitialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=0-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 0 with offset_initialized=False and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE at offset 0 with uninitialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset0-uninitialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=0-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 0 with offset_initialized=False and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MLOAD at offset 1 with uninitialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset1-uninitialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=1-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 1 with offset_initialized=False and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 1 with uninitialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset1-uninitialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=1-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 1 with offset_initialized=False and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE at offset 1 with uninitialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset1-uninitialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=1-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 1 with offset_initialized=False and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MLOAD at offset 31 with uninitialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset31-uninitialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=31-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 31 with offset_initialized=False and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with uninitialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset31-uninitialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=31-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 31 with offset_initialized=False and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE at offset 31 with uninitialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset31-uninitialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=31-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 31 with offset_initialized=False and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with initialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset0-initialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=0-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 0 with offset_initialized=True and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 0 with initialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset0-initialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=0-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 0 with offset_initialized=True and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE at offset 0 with initialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset0-initialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=0-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 0 with offset_initialized=True and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MLOAD at offset 1 with initialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset1-initialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=1-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 1 with offset_initialized=True and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 1 with initialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset1-initialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=1-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 1 with offset_initialized=True and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE at offset 1 with initialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset1-initialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=1-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 1 with offset_initialized=True and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MLOAD at offset 31 with initialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset31-initialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=31-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 31 with offset_initialized=True and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with initialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset31-initialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=31-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 31 with offset_initialized=True and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_10240.success",
+      "description": "Mapped from execution-specs MSTORE at offset 31 with initialized memory and mem_size 10240 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset31-initialized-mem10240",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=31-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 31 with offset_initialized=True and mem_size=10240.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 10240
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with uninitialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset0-uninitialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 0 with offset_initialized=False and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 0 with uninitialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset0-uninitialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=0-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 0 with offset_initialized=False and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE at offset 0 with uninitialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset0-uninitialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=0-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 0 with offset_initialized=False and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MLOAD at offset 1 with uninitialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset1-uninitialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=1-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 1 with offset_initialized=False and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 1 with uninitialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset1-uninitialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=1-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 1 with offset_initialized=False and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE at offset 1 with uninitialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset1-uninitialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=1-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 1 with offset_initialized=False and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MLOAD at offset 31 with uninitialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset31-uninitialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=31-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 31 with offset_initialized=False and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with uninitialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset31-uninitialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=31-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 31 with offset_initialized=False and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE at offset 31 with uninitialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset31-uninitialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=31-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 31 with offset_initialized=False and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with initialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset0-initialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=0-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 0 with offset_initialized=True and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 0 with initialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset0-initialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=0-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 0 with offset_initialized=True and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE at offset 0 with initialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset0-initialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=0-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 0 with offset_initialized=True and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MLOAD at offset 1 with initialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset1-initialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=1-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 1 with offset_initialized=True and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 1 with initialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset1-initialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=1-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 1 with offset_initialized=True and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE at offset 1 with initialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset1-initialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=1-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 1 with offset_initialized=True and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MLOAD at offset 31 with initialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset31-initialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=31-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 31 with offset_initialized=True and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with initialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset31-initialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=31-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 31 with offset_initialized=True and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_256.success",
+      "description": "Mapped from execution-specs MSTORE at offset 31 with initialized memory and mem_size 256 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset31-initialized-mem256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=31-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 31 with offset_initialized=True and mem_size=256.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with uninitialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset0-uninitialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 0 with offset_initialized=False and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 0 with uninitialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset0-uninitialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=0-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 0 with offset_initialized=False and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE at offset 0 with uninitialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset0-uninitialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=0-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 0 with offset_initialized=False and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MLOAD at offset 1 with uninitialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset1-uninitialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=1-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 1 with offset_initialized=False and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 1 with uninitialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset1-uninitialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=1-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 1 with offset_initialized=False and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE at offset 1 with uninitialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset1-uninitialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=1-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 1 with offset_initialized=False and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MLOAD at offset 31 with uninitialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset31-uninitialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=31-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 31 with offset_initialized=False and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with uninitialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset31-uninitialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=31-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 31 with offset_initialized=False and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE at offset 31 with uninitialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset31-uninitialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=31-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 31 with offset_initialized=False and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MLOAD at offset 0 with initialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset0-initialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=0-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 0 with offset_initialized=True and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 0 with initialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset0-initialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=0-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 0 with offset_initialized=True and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE at offset 0 with initialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset0-initialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=0-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 0 with offset_initialized=True and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MLOAD at offset 1 with initialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset1-initialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=1-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 1 with offset_initialized=True and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE8 at offset 1 with initialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore8-offset1-initialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=1-opcode=MSTORE8]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE8 at offset 1 with offset_initialized=True and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE at offset 1 with initialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset1-initialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=1-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 1 with offset_initialized=True and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MLOAD at offset 31 with initialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mload-offset31-initialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=31-opcode=MLOAD]",
+      "notes": [
+        "Upstream intent: benchmark MLOAD at offset 31 with offset_initialized=True and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 32
     },
     {
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_32.success",
-      "description": "Mapped from execution-specs MSTORE8 at offset 31 with initialized memory onto an RPC-only deploy/call/storage-assert flow.",
+      "description": "Mapped from execution-specs MSTORE8 at offset 31 with initialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-memory-mstore8-offset31-initialized-mem32",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=31-opcode=MSTORE8]",
       "notes": [
-        "Upstream intent: benchmark MSTORE8 at a word boundary edge after memory expansion.",
-        "RPC mapping: runtime writes byte 0x2a at offset 31, then loads the containing word and stores it together with MSIZE into storage.",
-        "Admitted because the byte placement is visible in final storage."
+        "Upstream intent: benchmark MSTORE8 at offset 31 with offset_initialized=True and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
       ],
-      "mode": "mstore8_offset31_initialized_mem32"
+      "mode": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_32.success",
+      "description": "Mapped from execution-specs MSTORE at offset 31 with initialized memory and mem_size 32 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mstore-offset31-initialized-mem32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=31-opcode=MSTORE]",
+      "notes": [
+        "Upstream intent: benchmark MSTORE at offset 31 with offset_initialized=True and mem_size=32.",
+        "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+        "Admitted because both the operation result and the resulting memory size are directly observable in final storage."
+      ],
+      "mode": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 32
     },
     {
       "case_id": "upstream.benchmark.memory.msize.mem_size_0.success",
-      "description": "Mapped from execution-specs MSIZE with fresh memory onto an RPC-only deploy/call/storage-assert flow.",
+      "description": "Mapped from execution-specs MSIZE after expanding memory via MLOAD at offset 0 onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-memory-msize-mem0",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=0]",
       "notes": [
-        "Upstream intent: benchmark MSIZE without prior memory expansion.",
-        "RPC mapping: runtime records MSIZE directly into storage slot0.",
-        "Admitted because the semantic result is directly observable on-chain."
+        "Upstream intent: benchmark MSIZE after setup expands memory using MLOAD at offset 0.",
+        "RPC mapping: runtime performs the same memory-touch shape, then persists MSIZE into storage slot0.",
+        "Admitted because the resulting memory-size word is directly observable in final storage."
       ],
-      "mode": "msize_mem0"
+      "mode": "msize",
+      "opcode": "MSIZE",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.memory.msize.mem_size_1000000.success",
+      "description": "Mapped from execution-specs MSIZE after expanding memory via MLOAD at offset 1000000 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-msize-mem1000000",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=1000000]",
+      "notes": [
+        "Upstream intent: benchmark MSIZE after setup expands memory using MLOAD at offset 1000000.",
+        "RPC mapping: runtime performs the same memory-touch shape, then persists MSIZE into storage slot0.",
+        "Admitted because the resulting memory-size word is directly observable in final storage."
+      ],
+      "mode": "msize",
+      "opcode": "MSIZE",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1000000
+    },
+    {
+      "case_id": "upstream.benchmark.memory.msize.mem_size_100000.success",
+      "description": "Mapped from execution-specs MSIZE after expanding memory via MLOAD at offset 100000 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-msize-mem100000",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=100000]",
+      "notes": [
+        "Upstream intent: benchmark MSIZE after setup expands memory using MLOAD at offset 100000.",
+        "RPC mapping: runtime performs the same memory-touch shape, then persists MSIZE into storage slot0.",
+        "Admitted because the resulting memory-size word is directly observable in final storage."
+      ],
+      "mode": "msize",
+      "opcode": "MSIZE",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 100000
+    },
+    {
+      "case_id": "upstream.benchmark.memory.msize.mem_size_1000.success",
+      "description": "Mapped from execution-specs MSIZE after expanding memory via MLOAD at offset 1000 onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-msize-mem1000",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=1000]",
+      "notes": [
+        "Upstream intent: benchmark MSIZE after setup expands memory using MLOAD at offset 1000.",
+        "RPC mapping: runtime performs the same memory-touch shape, then persists MSIZE into storage slot0.",
+        "Admitted because the resulting memory-size word is directly observable in final storage."
+      ],
+      "mode": "msize",
+      "opcode": "MSIZE",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1000
     },
     {
       "case_id": "upstream.benchmark.memory.msize.mem_size_1.success",
-      "description": "Mapped from execution-specs MSIZE after a minimal memory touch onto an RPC-only deploy/call/storage-assert flow.",
+      "description": "Mapped from execution-specs MSIZE after expanding memory via MLOAD at offset 1 onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-memory-msize-mem1",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=1]",
       "notes": [
-        "Upstream intent: benchmark MSIZE after memory has been expanded slightly.",
-        "RPC mapping: runtime touches memory with MLOAD and persists the resulting MSIZE into storage slot0.",
-        "Admitted because the semantic result is directly observable on-chain."
+        "Upstream intent: benchmark MSIZE after setup expands memory using MLOAD at offset 1.",
+        "RPC mapping: runtime performs the same memory-touch shape, then persists MSIZE into storage slot0.",
+        "Admitted because the resulting memory-size word is directly observable in final storage."
       ],
-      "mode": "msize_mem1"
+      "mode": "msize",
+      "opcode": "MSIZE",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1
     }
   ]
 }

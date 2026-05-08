@@ -1,947 +1,2106 @@
 {
   "name": "upstream-memory-auto-inventory",
   "version": "1",
+  "family": "memory",
   "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_memory.py",
   "entries": [
     {
-      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MLOAD]",
-      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_0.success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=0-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_0.dynamic.success",
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
+        "requires unsupported memory copy observation not yet mapped"
       ],
-      "source": "memory_access"
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 0,
+      "copy_size": 0,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=0-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_0.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 0,
+      "copy_size": 0,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=1024-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_1024.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 0,
+      "copy_size": 1024,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=1024-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_1024.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 0,
+      "copy_size": 1024,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=256-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_256.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 0,
+      "copy_size": 256,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=256-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_256.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 0,
+      "copy_size": 256,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=32-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_32.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 0,
+      "copy_size": 32,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=32-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_32.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 0,
+      "copy_size": 32,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=0-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_0.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1024,
+      "copy_size": 0,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=0-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_0.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1024,
+      "copy_size": 0,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=1024-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_1024.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1024,
+      "copy_size": 1024,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=1024-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_1024.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1024,
+      "copy_size": 1024,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=256-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_256.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1024,
+      "copy_size": 256,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=256-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_256.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1024,
+      "copy_size": 256,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=32-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_32.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1024,
+      "copy_size": 32,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=32-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_32.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1024,
+      "copy_size": 32,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=0-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_0.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 10240,
+      "copy_size": 0,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=0-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_0.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 10240,
+      "copy_size": 0,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=1024-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_1024.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 10240,
+      "copy_size": 1024,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=1024-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_1024.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 10240,
+      "copy_size": 1024,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=256-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_256.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 10240,
+      "copy_size": 256,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=256-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_256.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 10240,
+      "copy_size": 256,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=32-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_32.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 10240,
+      "copy_size": 32,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=32-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_32.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 10240,
+      "copy_size": 32,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=0-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_0.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1048576,
+      "copy_size": 0,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=0-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_0.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1048576,
+      "copy_size": 0,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=1024-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_1024.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1048576,
+      "copy_size": 1024,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=1024-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_1024.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1048576,
+      "copy_size": 1024,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=256-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_256.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1048576,
+      "copy_size": 256,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=256-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_256.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1048576,
+      "copy_size": 256,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=32-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_32.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1048576,
+      "copy_size": 32,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=32-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_32.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1048576,
+      "copy_size": 32,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=0-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_0.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 256,
+      "copy_size": 0,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=0-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_0.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 256,
+      "copy_size": 0,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=1024-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_1024.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 256,
+      "copy_size": 1024,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=1024-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_1024.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 256,
+      "copy_size": 1024,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=256-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_256.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 256,
+      "copy_size": 256,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=256-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_256.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 256,
+      "copy_size": 256,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=32-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_32.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 256,
+      "copy_size": 32,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=32-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_32.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 256,
+      "copy_size": 32,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=0-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_0.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 32,
+      "copy_size": 0,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=0-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_0.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 32,
+      "copy_size": 0,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=1024-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_1024.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 32,
+      "copy_size": 1024,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=1024-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_1024.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 32,
+      "copy_size": 1024,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=256-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_256.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 32,
+      "copy_size": 256,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=256-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_256.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 32,
+      "copy_size": 256,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=32-fixed_src_dst=False]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_32.dynamic.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 32,
+      "copy_size": 32,
+      "fixed_src_dst": false
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=32-fixed_src_dst=True]",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_32.fixed.success",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires unsupported memory copy observation not yet mapped"
+      ],
+      "source": "mcopy",
+      "opcode": "MCOPY",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 32,
+      "copy_size": 32,
+      "fixed_src_dst": true
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MLOAD]",
+      "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_0.success",
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=0-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success",
       "admitted": true,
-      "mode": "mstore_offset0_uninitialized_mem0",
+      "mode": "memory_access",
       "reasons": [],
-      "source": "memory_access"
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=1-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=1-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=1-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=31-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=31-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=False-offset=31-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=0-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_0.success",
       "admitted": true,
-      "mode": "mload_offset0_initialized_mem0",
+      "mode": "memory_access",
       "reasons": [],
-      "source": "memory_access"
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=0-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=0-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=1-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=1-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=1-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=31-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=31-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=0-offset_initialized=True-offset=31-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=0-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=0-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=0-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=1-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=1-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=1-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=31-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=31-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=False-offset=31-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=0-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=0-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=0-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=1-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=1-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=1-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=31-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=31-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=1024-offset_initialized=True-offset=31-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 1024,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=0-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=0-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=0-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=1-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=1-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=1-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=31-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=31-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=False-offset=31-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=0-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=0-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=0-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=1-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=1-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=1-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=31-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=31-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=10240-offset_initialized=True-offset=31-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_10240.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 10240,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=0-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=0-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=0-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=1-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=1-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=1-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=31-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=31-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=False-offset=31-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=0-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=0-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=0-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=1-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=1-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=1-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=31-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=31-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=256-offset_initialized=True-offset=31-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 256,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=0-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_0.uninitialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=0-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_0.uninitialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=0-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": false,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=1-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_1.uninitialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=1-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_1.uninitialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=1-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_1.uninitialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": false,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=31-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_31.uninitialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=31-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.uninitialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=False-offset=31-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_31.uninitialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": false,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=0-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=0-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_0.initialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=0-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_0.initialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 0,
+      "offset_initialized": true,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=1-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_1.initialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=1-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_1.initialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=1-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_1.initialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 1,
+      "offset_initialized": true,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=31-opcode=MLOAD]",
       "case_id": "upstream.benchmark.memory.mload.offset_31.initialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MLOAD",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=31-opcode=MSTORE8]",
       "case_id": "upstream.benchmark.memory.mstore8.offset_31.initialized.mem_size_32.success",
       "admitted": true,
-      "mode": "mstore8_offset31_initialized_mem32",
+      "mode": "memory_access",
       "reasons": [],
-      "source": "memory_access"
+      "source": "memory_access",
+      "opcode": "MSTORE8",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_memory_access[mem_size=32-offset_initialized=True-offset=31-opcode=MSTORE]",
       "case_id": "upstream.benchmark.memory.mstore.offset_31.initialized.mem_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"
-      ],
-      "source": "memory_access"
+      "admitted": true,
+      "mode": "memory_access",
+      "reasons": [],
+      "source": "memory_access",
+      "opcode": "MSTORE",
+      "offset": 31,
+      "offset_initialized": true,
+      "mem_size": 32,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=0]",
       "case_id": "upstream.benchmark.memory.msize.mem_size_0.success",
       "admitted": true,
-      "mode": "msize_mem0",
+      "mode": "msize",
       "reasons": [],
-      "source": "msize"
+      "source": "msize",
+      "opcode": "MSIZE",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 0,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=1000000]",
       "case_id": "upstream.benchmark.memory.msize.mem_size_1000000.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires broad memory-expansion benchmark coverage not yet mapped"
-      ],
-      "source": "msize"
+      "admitted": true,
+      "mode": "msize",
+      "reasons": [],
+      "source": "msize",
+      "opcode": "MSIZE",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1000000,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=100000]",
       "case_id": "upstream.benchmark.memory.msize.mem_size_100000.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires broad memory-expansion benchmark coverage not yet mapped"
-      ],
-      "source": "msize"
+      "admitted": true,
+      "mode": "msize",
+      "reasons": [],
+      "source": "msize",
+      "opcode": "MSIZE",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 100000,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=1000]",
       "case_id": "upstream.benchmark.memory.msize.mem_size_1000.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires broad memory-expansion benchmark coverage not yet mapped"
-      ],
-      "source": "msize"
+      "admitted": true,
+      "mode": "msize",
+      "reasons": [],
+      "source": "msize",
+      "opcode": "MSIZE",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1000,
+      "copy_size": null,
+      "fixed_src_dst": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size=1]",
       "case_id": "upstream.benchmark.memory.msize.mem_size_1.success",
       "admitted": true,
-      "mode": "msize_mem1",
+      "mode": "msize",
       "reasons": [],
-      "source": "msize"
+      "source": "msize",
+      "opcode": "MSIZE",
+      "offset": null,
+      "offset_initialized": null,
+      "mem_size": 1,
+      "copy_size": null,
+      "fixed_src_dst": null
     }
   ]
 }

@@ -13,10 +13,14 @@ from adapter.call_context_generator import (
     generate_upstream_call_context_manifest,
     generate_upstream_call_context_templates,
 )
+from adapter.block_context_generator import generate_upstream_block_context_templates
 from adapter.arithmetic_generator import generate_upstream_arithmetic_templates
 from adapter.bitwise_generator import generate_upstream_bitwise_templates
 from adapter.comparison_generator import generate_upstream_comparison_templates
 from adapter.control_flow_generator import generate_upstream_control_flow_templates
+from adapter.log_generator import generate_upstream_log_templates
+from adapter.keccak_generator import generate_upstream_keccak_templates
+from adapter.system_generator import generate_upstream_system_templates
 from adapter.env import load_dotenv
 from adapter.stack_generator import generate_upstream_stack_templates
 from adapter.executor import JsonRpcBackend, MockBackend, RpcExecutor, result_from_execution
@@ -104,6 +108,38 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_control_flow.add_argument("--template-output")
     scan_control_flow.add_argument("--inventory-output", required=True)
+
+    scan_block_context = subparsers.add_parser("scan-upstream-block-context")
+    scan_block_context.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/benchmark/compute/instruction/test_block_context.py",
+    )
+    scan_block_context.add_argument("--template-output")
+    scan_block_context.add_argument("--inventory-output", required=True)
+
+    scan_log = subparsers.add_parser("scan-upstream-log")
+    scan_log.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/benchmark/compute/instruction/test_log.py",
+    )
+    scan_log.add_argument("--template-output")
+    scan_log.add_argument("--inventory-output", required=True)
+
+    scan_keccak = subparsers.add_parser("scan-upstream-keccak")
+    scan_keccak.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/benchmark/compute/instruction/test_keccak.py",
+    )
+    scan_keccak.add_argument("--template-output")
+    scan_keccak.add_argument("--inventory-output", required=True)
+
+    scan_system = subparsers.add_parser("scan-upstream-system")
+    scan_system.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/benchmark/compute/instruction/test_system.py",
+    )
+    scan_system.add_argument("--template-output")
+    scan_system.add_argument("--inventory-output", required=True)
 
     scan_account_query = subparsers.add_parser("scan-upstream-account-query")
     scan_account_query.add_argument(
@@ -312,6 +348,46 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "scan-upstream-control-flow":
         templates = generate_upstream_control_flow_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-block-context":
+        templates = generate_upstream_block_context_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-log":
+        templates = generate_upstream_log_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-keccak":
+        templates = generate_upstream_keccak_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-system":
+        templates = generate_upstream_system_templates(
             repo_root=Path.cwd(),
             source_path=args.source,
             output_path=args.template_output,

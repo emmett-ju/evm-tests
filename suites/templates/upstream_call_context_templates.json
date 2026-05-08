@@ -28,6 +28,42 @@
       "mode": "caller"
     },
     {
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_0.nonzero.success",
+      "description": "Mapped from execution-specs CALLDATALOAD with zero-length non-zero calldata request onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldataload-0-nonzero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=False-calldata_size=0]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATALOAD at offset 0 with the non-zero-data branch but zero effective calldata length.",
+        "RPC mapping: runtime CALLDATALOADs offset 0 and stores the resulting word into storage slot0 using an empty call payload, matching the observable calldata length semantics.",
+        "Admitted because the resulting zero word is directly observable in storage."
+      ],
+      "mode": "calldataload_0_nonzero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_1024.nonzero.success",
+      "description": "Mapped from execution-specs CALLDATALOAD with 1024 non-zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldataload-1024-nonzero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=False-calldata_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATALOAD at offset 0 with 1024 bytes of deterministic non-zero calldata.",
+        "RPC mapping: runtime CALLDATALOADs offset 0 and stores the first loaded word into storage slot0 using a 1024-byte deterministic payload.",
+        "Admitted because the first loaded word is directly observable in storage."
+      ],
+      "mode": "calldataload_1024_nonzero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_256.nonzero.success",
+      "description": "Mapped from execution-specs CALLDATALOAD with 256 non-zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldataload-256-nonzero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=False-calldata_size=256]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATALOAD at offset 0 with 256 bytes of deterministic non-zero calldata.",
+        "RPC mapping: runtime CALLDATALOADs offset 0 and stores the first loaded word into storage slot0 using a 256-byte deterministic payload.",
+        "Admitted because the first loaded word is directly observable in storage."
+      ],
+      "mode": "calldataload_256_nonzero"
+    },
+    {
       "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_32.nonzero.success",
       "description": "Mapped from execution-specs CALLDATALOAD with 32 bytes of non-zero calldata onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-call-context-calldataload-32-nonzero",
@@ -52,6 +88,78 @@
       "mode": "calldataload_0_zero"
     },
     {
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_1024.zero.success",
+      "description": "Mapped from execution-specs CALLDATALOAD with 1024 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldataload-1024-zero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=True-calldata_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATALOAD at offset 0 with 1024 zero bytes of calldata.",
+        "RPC mapping: runtime CALLDATALOADs offset 0 and stores the first loaded word into storage slot0 using a 1024-byte zero payload.",
+        "Admitted because the first loaded word is directly observable in storage."
+      ],
+      "mode": "calldataload_1024_zero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_256.zero.success",
+      "description": "Mapped from execution-specs CALLDATALOAD with 256 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldataload-256-zero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=True-calldata_size=256]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATALOAD at offset 0 with 256 zero bytes of calldata.",
+        "RPC mapping: runtime CALLDATALOADs offset 0 and stores the first loaded word into storage slot0 using a 256-byte zero payload.",
+        "Admitted because the first loaded word is directly observable in storage."
+      ],
+      "mode": "calldataload_256_zero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldataload.calldata_size_32.zero.success",
+      "description": "Mapped from execution-specs CALLDATALOAD with 32 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldataload-32-zero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldataload[zero_data=True-calldata_size=32]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATALOAD at offset 0 with 32 zero bytes of calldata.",
+        "RPC mapping: runtime CALLDATALOADs offset 0 and stores the resulting word into storage slot0 using a 32-byte zero payload.",
+        "Admitted because the loaded zero word is directly observable in storage."
+      ],
+      "mode": "calldataload_32_zero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_0.nonzero.success",
+      "description": "Mapped from execution-specs CALLDATASIZE with zero-length non-zero calldata request onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldatasize-0-nonzero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=False-calldata_size=0]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATASIZE with the non-zero-data branch but zero effective calldata length.",
+        "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using an empty call payload, matching the observable length semantics rather than the benchmark filler branch label.",
+        "Admitted because the resulting size word is directly observable in storage."
+      ],
+      "mode": "calldatasize_0_nonzero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_1024.nonzero.success",
+      "description": "Mapped from execution-specs CALLDATASIZE with 1024 non-zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldatasize-1024-nonzero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=False-calldata_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATASIZE with 1024 bytes of deterministic non-zero calldata.",
+        "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using a 1024-byte deterministic payload.",
+        "Admitted because the resulting size word is directly observable in storage."
+      ],
+      "mode": "calldatasize_1024_nonzero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_256.nonzero.success",
+      "description": "Mapped from execution-specs CALLDATASIZE with 256 non-zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldatasize-256-nonzero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=False-calldata_size=256]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATASIZE with 256 bytes of deterministic non-zero calldata.",
+        "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using a 256-byte deterministic payload.",
+        "Admitted because the resulting size word is directly observable in storage."
+      ],
+      "mode": "calldatasize_256_nonzero"
+    },
+    {
       "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_32.nonzero.success",
       "description": "Mapped from execution-specs CALLDATASIZE with 32 non-zero bytes onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-call-context-calldatasize-32-nonzero",
@@ -74,6 +182,30 @@
         "Admitted because the resulting size word is directly observable in storage."
       ],
       "mode": "calldatasize_0_zero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_1024.zero.success",
+      "description": "Mapped from execution-specs CALLDATASIZE with 1024 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldatasize-1024-zero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=True-calldata_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATASIZE with 1024 bytes of zero calldata.",
+        "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using a 1024-byte zero payload.",
+        "Admitted because the resulting size word is directly observable in storage."
+      ],
+      "mode": "calldatasize_1024_zero"
+    },
+    {
+      "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_256.zero.success",
+      "description": "Mapped from execution-specs CALLDATASIZE with 256 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-call-context-calldatasize-256-zero",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_call_context.py::test_calldatasize[zero_data=True-calldata_size=256]",
+      "notes": [
+        "Upstream intent: benchmark CALLDATASIZE with 256 bytes of zero calldata.",
+        "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using a 256-byte zero payload.",
+        "Admitted because the resulting size word is directly observable in storage."
+      ],
+      "mode": "calldatasize_256_zero"
     },
     {
       "case_id": "upstream.benchmark.call_context.calldatasize.calldata_size_32.zero.success",

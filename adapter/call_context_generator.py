@@ -39,10 +39,21 @@ CallContextTemplateMode = Literal[
     "callvalue_zero",
     "callvalue_one",
     "calldatasize_0_zero",
+    "calldatasize_0_nonzero",
     "calldatasize_32_zero",
     "calldatasize_32_nonzero",
+    "calldatasize_256_zero",
+    "calldatasize_256_nonzero",
+    "calldatasize_1024_zero",
+    "calldatasize_1024_nonzero",
     "calldataload_0_zero",
+    "calldataload_0_nonzero",
+    "calldataload_32_zero",
     "calldataload_32_nonzero",
+    "calldataload_256_zero",
+    "calldataload_256_nonzero",
+    "calldataload_1024_zero",
+    "calldataload_1024_nonzero",
 ]
 
 
@@ -122,6 +133,17 @@ CALL_CONTEXT_MODE_SPECS: dict[CallContextTemplateMode, dict[str, str]] = {
             ]
         ),
     },
+    "calldatasize_0_nonzero": {
+        "description": "Mapped from execution-specs CALLDATASIZE with zero-length non-zero calldata request onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldatasize-0-nonzero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATASIZE with the non-zero-data branch but zero effective calldata length.",
+                "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using an empty call payload, matching the observable length semantics rather than the benchmark filler branch label.",
+                "Admitted because the resulting size word is directly observable in storage.",
+            ]
+        ),
+    },
     "calldatasize_32_zero": {
         "description": "Mapped from execution-specs CALLDATASIZE with 32 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
         "namespace_seed": "upstream-call-context-calldatasize-32-zero",
@@ -144,6 +166,50 @@ CALL_CONTEXT_MODE_SPECS: dict[CallContextTemplateMode, dict[str, str]] = {
             ]
         ),
     },
+    "calldatasize_256_zero": {
+        "description": "Mapped from execution-specs CALLDATASIZE with 256 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldatasize-256-zero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATASIZE with 256 bytes of zero calldata.",
+                "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using a 256-byte zero payload.",
+                "Admitted because the resulting size word is directly observable in storage.",
+            ]
+        ),
+    },
+    "calldatasize_256_nonzero": {
+        "description": "Mapped from execution-specs CALLDATASIZE with 256 non-zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldatasize-256-nonzero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATASIZE with 256 bytes of deterministic non-zero calldata.",
+                "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using a 256-byte deterministic payload.",
+                "Admitted because the resulting size word is directly observable in storage.",
+            ]
+        ),
+    },
+    "calldatasize_1024_zero": {
+        "description": "Mapped from execution-specs CALLDATASIZE with 1024 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldatasize-1024-zero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATASIZE with 1024 bytes of zero calldata.",
+                "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using a 1024-byte zero payload.",
+                "Admitted because the resulting size word is directly observable in storage.",
+            ]
+        ),
+    },
+    "calldatasize_1024_nonzero": {
+        "description": "Mapped from execution-specs CALLDATASIZE with 1024 non-zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldatasize-1024-nonzero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATASIZE with 1024 bytes of deterministic non-zero calldata.",
+                "RPC mapping: runtime writes CALLDATASIZE to storage slot0 using a 1024-byte deterministic payload.",
+                "Admitted because the resulting size word is directly observable in storage.",
+            ]
+        ),
+    },
     "calldataload_0_zero": {
         "description": "Mapped from execution-specs CALLDATALOAD with empty calldata onto an RPC-only deploy/call/storage-assert flow.",
         "namespace_seed": "upstream-call-context-calldataload-0-zero",
@@ -155,6 +221,28 @@ CALL_CONTEXT_MODE_SPECS: dict[CallContextTemplateMode, dict[str, str]] = {
             ]
         ),
     },
+    "calldataload_0_nonzero": {
+        "description": "Mapped from execution-specs CALLDATALOAD with zero-length non-zero calldata request onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldataload-0-nonzero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATALOAD at offset 0 with the non-zero-data branch but zero effective calldata length.",
+                "RPC mapping: runtime CALLDATALOADs offset 0 and stores the resulting word into storage slot0 using an empty call payload, matching the observable calldata length semantics.",
+                "Admitted because the resulting zero word is directly observable in storage.",
+            ]
+        ),
+    },
+    "calldataload_32_zero": {
+        "description": "Mapped from execution-specs CALLDATALOAD with 32 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldataload-32-zero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATALOAD at offset 0 with 32 zero bytes of calldata.",
+                "RPC mapping: runtime CALLDATALOADs offset 0 and stores the resulting word into storage slot0 using a 32-byte zero payload.",
+                "Admitted because the loaded zero word is directly observable in storage.",
+            ]
+        ),
+    },
     "calldataload_32_nonzero": {
         "description": "Mapped from execution-specs CALLDATALOAD with 32 bytes of non-zero calldata onto an RPC-only deploy/call/storage-assert flow.",
         "namespace_seed": "upstream-call-context-calldataload-32-nonzero",
@@ -163,6 +251,50 @@ CALL_CONTEXT_MODE_SPECS: dict[CallContextTemplateMode, dict[str, str]] = {
                 "Upstream intent: benchmark CALLDATALOAD at offset 0 with 32 bytes of deterministic calldata.",
                 "RPC mapping: runtime CALLDATALOADs offset 0 and stores the resulting word into storage slot0.",
                 "Admitted because the loaded word is directly observable in storage.",
+            ]
+        ),
+    },
+    "calldataload_256_zero": {
+        "description": "Mapped from execution-specs CALLDATALOAD with 256 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldataload-256-zero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATALOAD at offset 0 with 256 zero bytes of calldata.",
+                "RPC mapping: runtime CALLDATALOADs offset 0 and stores the first loaded word into storage slot0 using a 256-byte zero payload.",
+                "Admitted because the first loaded word is directly observable in storage.",
+            ]
+        ),
+    },
+    "calldataload_256_nonzero": {
+        "description": "Mapped from execution-specs CALLDATALOAD with 256 non-zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldataload-256-nonzero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATALOAD at offset 0 with 256 bytes of deterministic non-zero calldata.",
+                "RPC mapping: runtime CALLDATALOADs offset 0 and stores the first loaded word into storage slot0 using a 256-byte deterministic payload.",
+                "Admitted because the first loaded word is directly observable in storage.",
+            ]
+        ),
+    },
+    "calldataload_1024_zero": {
+        "description": "Mapped from execution-specs CALLDATALOAD with 1024 zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldataload-1024-zero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATALOAD at offset 0 with 1024 zero bytes of calldata.",
+                "RPC mapping: runtime CALLDATALOADs offset 0 and stores the first loaded word into storage slot0 using a 1024-byte zero payload.",
+                "Admitted because the first loaded word is directly observable in storage.",
+            ]
+        ),
+    },
+    "calldataload_1024_nonzero": {
+        "description": "Mapped from execution-specs CALLDATALOAD with 1024 non-zero bytes onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-call-context-calldataload-1024-nonzero",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CALLDATALOAD at offset 0 with 1024 bytes of deterministic non-zero calldata.",
+                "RPC mapping: runtime CALLDATALOADs offset 0 and stores the first loaded word into storage slot0 using a 1024-byte deterministic payload.",
+                "Admitted because the first loaded word is directly observable in storage.",
             ]
         ),
     },
@@ -276,7 +408,14 @@ def scan_call_context_cases(
 
 
 def _scan_zero_param_cases(text: str) -> list[AutoCallContextInventoryEntry]:
-    values = _extract_param_values(text, r'@pytest\.mark\.parametrize\(\s*"opcode",\s*\[(?P<values>[^\]]+)\]\s*,?\s*\)\s*def test_call_frame_context_ops')
+    values = [
+        value
+        for value in _extract_param_values(
+            text,
+            r'@pytest\.mark\.parametrize\(\s*"opcode",\s*\[(?P<values>[^\]]+)\]\s*,?\s*\)\s*def test_call_frame_context_ops',
+        )
+        if value.strip()
+    ]
     results: list[AutoCallContextInventoryEntry] = []
     for raw in values:
         opcode = raw.split(".")[-1]
@@ -409,11 +548,21 @@ def _resolve_calldatasize_mode(
 ) -> tuple[CallContextTemplateMode | None, list[str]]:
     if calldata_size == 0 and zero_data:
         return "calldatasize_0_zero", []
+    if calldata_size == 0 and not zero_data:
+        return "calldatasize_0_nonzero", []
     if calldata_size == 32 and zero_data:
         return "calldatasize_32_zero", []
     if calldata_size == 32 and not zero_data:
         return "calldatasize_32_nonzero", []
-    return None, ["requires broader calldata-size matrix not yet mapped"]
+    if calldata_size == 256 and zero_data:
+        return "calldatasize_256_zero", []
+    if calldata_size == 256 and not zero_data:
+        return "calldatasize_256_nonzero", []
+    if calldata_size == 1024 and zero_data:
+        return "calldatasize_1024_zero", []
+    if calldata_size == 1024 and not zero_data:
+        return "calldatasize_1024_nonzero", []
+    return None, ["requires unsupported calldata-size benchmark shape"]
 
 
 def _resolve_calldataload_mode(
@@ -422,9 +571,21 @@ def _resolve_calldataload_mode(
 ) -> tuple[CallContextTemplateMode | None, list[str]]:
     if calldata_size == 0 and zero_data:
         return "calldataload_0_zero", []
+    if calldata_size == 0 and not zero_data:
+        return "calldataload_0_nonzero", []
+    if calldata_size == 32 and zero_data:
+        return "calldataload_32_zero", []
     if calldata_size == 32 and not zero_data:
         return "calldataload_32_nonzero", []
-    return None, ["requires broader calldataload matrix not yet mapped"]
+    if calldata_size == 256 and zero_data:
+        return "calldataload_256_zero", []
+    if calldata_size == 256 and not zero_data:
+        return "calldataload_256_nonzero", []
+    if calldata_size == 1024 and zero_data:
+        return "calldataload_1024_zero", []
+    if calldata_size == 1024 and not zero_data:
+        return "calldataload_1024_nonzero", []
+    return None, ["requires unsupported calldataload benchmark shape"]
 
 
 def _inventory_entry_to_template(entry: AutoCallContextInventoryEntry) -> CallContextMappingTemplate:
@@ -479,6 +640,14 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
             expected={"storage": {"0x00": CALLDATASIZE_00}},
             data_hex="0x",
         )
+    if template.mode == "calldatasize_0_nonzero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
+            expected={"storage": {"0x00": CALLDATASIZE_00}},
+            data_hex="0x",
+        )
     if template.mode == "calldatasize_32_zero":
         return _build_call_context_case(
             template,
@@ -495,6 +664,38 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
             expected={"storage": {"0x00": CALLDATASIZE_20}},
             data_hex=CALLDATA_WORD_PATTERN,
         )
+    if template.mode == "calldatasize_256_zero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
+            expected={"storage": {"0x00": CALLDATASIZE_100}},
+            data_hex="0x" + "00" * 256,
+        )
+    if template.mode == "calldatasize_256_nonzero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
+            expected={"storage": {"0x00": CALLDATASIZE_100}},
+            data_hex="0x" + bytes(i % 256 for i in range(256)).hex(),
+        )
+    if template.mode == "calldatasize_1024_zero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
+            expected={"storage": {"0x00": CALLDATASIZE_400}},
+            data_hex="0x" + "00" * 1024,
+        )
+    if template.mode == "calldatasize_1024_nonzero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
+            expected={"storage": {"0x00": CALLDATASIZE_400}},
+            data_hex="0x" + bytes(i % 256 for i in range(1024)).hex(),
+        )
     if template.mode == "calldataload_0_zero":
         return _build_call_context_case(
             template,
@@ -503,6 +704,22 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
             expected={"storage": {"0x00": CALLDATA_WORD_ZERO}},
             data_hex="0x",
         )
+    if template.mode == "calldataload_0_nonzero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
+            expected={"storage": {"0x00": CALLDATA_WORD_ZERO}},
+            data_hex="0x",
+        )
+    if template.mode == "calldataload_32_zero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
+            expected={"storage": {"0x00": CALLDATA_WORD_ZERO}},
+            data_hex="0x" + "00" * 32,
+        )
     if template.mode == "calldataload_32_nonzero":
         return _build_call_context_case(
             template,
@@ -510,6 +727,38 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
             runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
             expected={"storage": {"0x00": CALLDATA_WORD_PATTERN}},
             data_hex=CALLDATA_WORD_PATTERN,
+        )
+    if template.mode == "calldataload_256_zero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
+            expected={"storage": {"0x00": CALLDATA_WORD_ZERO}},
+            data_hex="0x" + "00" * 256,
+        )
+    if template.mode == "calldataload_256_nonzero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
+            expected={"storage": {"0x00": CALLDATA_WORD_PATTERN}},
+            data_hex="0x" + bytes(i % 256 for i in range(256)).hex(),
+        )
+    if template.mode == "calldataload_1024_zero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
+            expected={"storage": {"0x00": CALLDATA_WORD_ZERO}},
+            data_hex="0x" + "00" * 1024,
+        )
+    if template.mode == "calldataload_1024_nonzero":
+        return _build_call_context_case(
+            template,
+            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
+            runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
+            expected={"storage": {"0x00": CALLDATA_WORD_PATTERN}},
+            data_hex="0x" + bytes(i % 256 for i in range(1024)).hex(),
         )
     raise ValueError(f"unsupported call-context mapping mode: {template.mode}")
 

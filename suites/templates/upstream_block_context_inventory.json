@@ -1,0 +1,138 @@
+{
+  "name": "upstream-block-context-auto-inventory",
+  "version": "1",
+  "family": "block-context",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_block_context.py",
+  "entries": [
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=BASEFEE]",
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.basefee",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block-context benchmark mapping support not yet mapped"
+      ],
+      "source": "test_block_context_ops"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=BLOBBASEFEE]",
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.blobbasefee",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block-context benchmark mapping support not yet mapped"
+      ],
+      "source": "test_block_context_ops"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=CHAINID]",
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.chainid",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block-context benchmark mapping support not yet mapped"
+      ],
+      "source": "test_block_context_ops"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=COINBASE]",
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.coinbase",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block-context benchmark mapping support not yet mapped"
+      ],
+      "source": "test_block_context_ops"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=GASLIMIT]",
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.gaslimit",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block-context benchmark mapping support not yet mapped"
+      ],
+      "source": "test_block_context_ops"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=NUMBER]",
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.number",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block-context benchmark mapping support not yet mapped"
+      ],
+      "source": "test_block_context_ops"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=PREVRANDAO]",
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block-context benchmark mapping support not yet mapped"
+      ],
+      "source": "test_block_context_ops"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=TIMESTAMP]",
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.timestamp",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block-context benchmark mapping support not yet mapped"
+      ],
+      "source": "test_block_context_ops"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_blockhash[index=block_1]",
+      "case_id": "upstream.benchmark.block_context.test_blockhash.block_1",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block environment control"
+      ],
+      "source": "test_blockhash"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_blockhash[index=block_256]",
+      "case_id": "upstream.benchmark.block_context.test_blockhash.block_256",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block environment control"
+      ],
+      "source": "test_blockhash"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_blockhash[index=current_block]",
+      "case_id": "upstream.benchmark.block_context.test_blockhash.current_block",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block environment control"
+      ],
+      "source": "test_blockhash"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_blockhash[index=genesis]",
+      "case_id": "upstream.benchmark.block_context.test_blockhash.genesis",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block environment control"
+      ],
+      "source": "test_blockhash"
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_blockhash[index=random]",
+      "case_id": "upstream.benchmark.block_context.test_blockhash.random",
+      "admitted": false,
+      "mode": null,
+      "reasons": [
+        "requires block environment control"
+      ],
+      "source": "test_blockhash"
+    }
+  ]
+}

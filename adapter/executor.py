@@ -94,13 +94,35 @@ class MockBackend:
                 tx_hash = f"0xmock{idx:02x}{len(case.family):04x}"
                 tx_hashes.append(tx_hash)
                 receipt_status = step.get("expected_receipt_status", "0x1")
-                last_receipt = {"transactionHash": tx_hash, "status": receipt_status}
+                gas_price = step.get("gas_price") or "0x" + format(1_000_000_000, "x")
+                last_receipt = {
+                    "transactionHash": tx_hash,
+                    "status": receipt_status,
+                    "effectiveGasPrice": gas_price,
+                }
                 contract_state = self._address_state(contracts, target_address)
                 data = step.get("data", "0x")
                 code = contract_state.get("code")
                 if receipt_status == "0x0":
                     continue
                 storage = contract_state.setdefault("storage", {})
+                
+                memory_probe = case.observe.get("memory_probe")
+                if memory_probe is not None:
+                    from adapter.memory_generator import _simulate_memory_access_case, _simulate_msize_case, _word_hex
+                    if memory_probe["mode"] == "msize":
+                        storage["0x00"] = _word_hex(_simulate_msize_case(memory_probe["mem_size"]))
+                    else:
+                        slot0, slot1 = _simulate_memory_access_case(
+                            memory_probe["opcode"],
+                            memory_probe["offset"],
+                            memory_probe["offset_initialized"],
+                            memory_probe["mem_size"],
+                        )
+                        storage["0x00"] = _word_hex(slot0)
+                        storage["0x01"] = _word_hex(slot1)
+                    continue
+                
                 if code in {"0x60003560005500", "0x60003560005560006000fd"}:
                     padded = data[2:] if data.startswith("0x") else data
                     storage["0x00"] = "0x" + padded.rjust(64, "0")
@@ -120,6 +142,11 @@ class MockBackend:
                     storage["0x00"] = ZERO_STORAGE_WORD
                 elif code == "0x5f515960005500":
                     storage["0x00"] = WORD_20
+                elif code == "0x5f525f515f5200":
+                    storage["0x00"] = WORD_2A
+                    storage["0x01"] = WORD_20
+                elif code == "0x5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f":
+                    storage["0x00"] = WORD_400
                 elif code == "0x3460005500":
                     value = step.get("value", "0x0")
                     storage["0x00"] = self._hex_to_word(value)
@@ -134,6 +161,11 @@ class MockBackend:
                 elif code == "0x3660005500":
                     calldata_hex = data[2:] if data.startswith("0x") else data
                     storage["0x00"] = "0x" + hex(len(calldata_hex) // 2)[2:].rjust(64, "0")
+                elif code == "0x3a60005500":
+                    gas_price = last_receipt.get("effectiveGasPrice") if last_receipt is not None else None
+                    if gas_price is None:
+                        raise ValueError("GASPRICE mock path requires receipt effectiveGasPrice")
+                    storage["0x00"] = self._hex_to_word(gas_price)
                 elif code == "0x5f3560005500":
                     calldata_hex = data[2:] if data.startswith("0x") else data
                     if not calldata_hex:
@@ -160,6 +192,8 @@ class MockBackend:
         }
         if last_contract_address is not None:
             context["$last_contract"] = last_contract_address
+        if last_receipt is not None and last_receipt.get("effectiveGasPrice") is not None:
+            context["$gas_price"] = last_receipt["effectiveGasPrice"]
         if "receipt_status" in case.expected:
             observed["receipt_status"] = None if last_receipt is None else last_receipt.get("status")
         if "receipt_contract_address" in case.expected:
@@ -302,6 +336,8 @@ class JsonRpcBackend:
         }
         if last_contract_address is not None:
             context["$last_contract"] = last_contract_address
+        if last_receipt is not None and last_receipt.get("effectiveGasPrice") is not None:
+            context["$gas_price"] = last_receipt["effectiveGasPrice"]
         return tx_hashes, observed, context
 
     def _observe(

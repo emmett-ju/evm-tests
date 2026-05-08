@@ -13,8 +13,10 @@ from adapter.manifest import resolve_execution_specs_ref
 
 TX_CONTEXT_ORIGIN_INIT = "0x0f600c6000390f6000f33260005500"
 TX_CONTEXT_ORIGIN_RUNTIME = "0x3260005500"
+TX_CONTEXT_GASPRICE_INIT = "0x0f600c6000390f6000f33a60005500"
+TX_CONTEXT_GASPRICE_RUNTIME = "0x3a60005500"
 
-TxContextTemplateMode = Literal["origin"]
+TxContextTemplateMode = Literal["origin", "gasprice"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +48,17 @@ TX_CONTEXT_MODE_SPECS: dict[TxContextTemplateMode, dict[str, str]] = {
                 "Upstream intent: benchmark ORIGIN in an external-call frame.",
                 "RPC mapping: runtime writes ORIGIN to storage slot0 after deployment, then the harness asserts it against the active admin sender resolved at runtime.",
                 "Admitted because the sender address is known from the chain profile and observable without block-level control.",
+            ]
+        ),
+    },
+    "gasprice": {
+        "description": "Mapped from execution-specs GASPRICE onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-tx-context-gasprice",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark GASPRICE in an external-call frame.",
+                "RPC mapping: runtime writes GASPRICE to storage slot0 after deployment, then the harness asserts it against the effective gas price observed on the invoke receipt.",
+                "Admitted because the invoke transaction receipt exposes the effective gas price truthfully on both mock and jsonrpc backends without block-environment control.",
             ]
         ),
     },
@@ -232,7 +245,7 @@ def _resolve_zero_param_mode(opcode: str) -> tuple[TxContextTemplateMode | None,
     if opcode == "ORIGIN":
         return "origin", []
     if opcode == "GASPRICE":
-        return None, ["requires dynamic gas-price capture policy not yet mapped"]
+        return "gasprice", []
     return None, ["unsupported transaction-context opcode"]
 
 
@@ -263,6 +276,22 @@ def render_tx_context_case(template: TxContextMappingTemplate) -> dict[str, Any]
                 wait_receipt_step(),
             ],
             expected={"storage": {"0x00": "$admin_account_word"}},
+        )
+        case["family"] = "state/tx-context"
+        return case
+    if template.mode == "gasprice":
+        case = build_case(
+            template,  # type: ignore[arg-type]
+            steps=[
+                deploy_contract_step(
+                    init_code=TX_CONTEXT_GASPRICE_INIT,
+                    runtime_code=TX_CONTEXT_GASPRICE_RUNTIME,
+                ),
+                wait_receipt_step(),
+                invoke_contract_step(data_hex="0x"),
+                wait_receipt_step(),
+            ],
+            expected={"storage": {"0x00": "$gas_price_word"}},
         )
         case["family"] = "state/tx-context"
         return case

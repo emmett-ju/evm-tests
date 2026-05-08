@@ -92,9 +92,11 @@ upstream 通过 git submodule 接入，只读使用。
 
 这个能力是后续继续迁移调用类、交易上下文类、地址类 family 的关键基础设施。
 
-## 当前已支持的 family
+## 当前已支持或已建账的 family
 
-### storage
+### 已形成 runnable 闭环的 family
+
+#### storage
 已完成自动扫描、模板生成、manifest 生成和运行验证。
 
 当前已映射 17 个 case，覆盖：
@@ -105,7 +107,7 @@ upstream 通过 git submodule 接入，只读使用。
 - out_of_gas
 - warm/cold 的可观测子集
 
-### memory
+#### memory
 已完成自动扫描、模板生成、manifest 生成和运行验证。
 
 当前已映射 5 个 case，覆盖：
@@ -114,29 +116,59 @@ upstream 通过 git submodule 接入，只读使用。
 - `MSTORE8`
 - `MSIZE`
 
-### call-context
+#### call-context
 已完成自动扫描、模板生成、manifest 生成和运行验证。
 
-当前已映射 9 个 case，覆盖：
+当前已映射 20 个 case，覆盖：
 - `ADDRESS`
 - `CALLER`
 - `CALLVALUE`
 - `CALLDATASIZE`
 - `CALLDATALOAD`
 
-这部分迁移已经依赖运行时占位符能力。
+这部分迁移已经依赖运行时占位符能力，并已收口当前可观测的 calldata size / data-shape 矩阵。
 
-### tx-context
-已完成第一阶段自动扫描器。
+#### tx-context
+已完成第一阶段自动扫描器与最小 runnable 子集。
 
-当前已映射 1 个 case：
+当前已映射 2 个 case：
 - `ORIGIN`
+- `GASPRICE`
 
 当前进入 inventory 但尚未承接的包括：
-- `GASPRICE`
 - `BLOBHASH`
 
-它们被延后，不是因为不能做，而是因为还需要额外的 gas-price 策略和 blob 交易构造能力。
+`BLOBHASH` 仍被延后，因为它需要额外的 blob 交易构造与观测能力。
+
+#### account-query
+已完成第一批最小 runnable 子集。
+
+当前已映射 5 个 case：
+- `SELFBALANCE`
+- `CODESIZE`
+- `BALANCE`（present / absent account 变体）
+
+这部分已经具备：
+- scanner
+- checked-in inventory / template
+- manifest
+- selector
+- mock backend 执行
+- checked-in artifact parity 回归
+
+当前仍 blocked 的主要是：
+- `CODECOPY`
+- `EXTCODECOPY`
+- 相关外部代码字节观测子集
+
+### 已建立 inventory 但尚未进入 runnable 映射的 family
+- `arithmetic`
+- `bitwise`
+- `comparison`
+- `control-flow`
+- `stack`
+
+这些 family 已有 family-local scanner、checked-in inventory 和 summary 覆盖，但目前仍是 blocked-only inventory。
 
 ## 当前尚不支持的能力边界
 以下能力目前仍不在 v1 承接范围内：
@@ -184,60 +216,97 @@ python3 -m unittest discover -s tests -v
 - CLI 运行链路
 
 ## 当前进展总结
-项目已经从“手写少量 case”推进到“按 family 自动扫描并生成 runnable 子集”。
+项目已经从“手写少量 case”推进到“按 family 自动扫描、生成 inventory，并逐步把 supportable 子集转成 runnable manifest”。
 
-截至目前，已经有四个成熟或半成熟 family：
-- storage
-- memory
-- call-context
-- tx-context
+截至目前：
+- 已有 inventory 的 family 共 10 个：
+  - `storage`
+  - `memory`
+  - `call-context`
+  - `tx-context`
+  - `account-query`
+  - `arithmetic`
+  - `bitwise`
+  - `comparison`
+  - `control-flow`
+  - `stack`
+- 其中具备 runnable admitted 子集的有 5 个：
+  - `storage`
+  - `memory`
+  - `call-context`
+  - `tx-context`
+  - `account-query`
 
-其中前三个已经形成比较稳定的自动化闭环，`tx-context` 刚建立起第一阶段能力。
+里程碑状态：
+- `M001` 已完成：补齐 `arithmetic / bitwise / comparison / control-flow / stack` 的 family-local inventory 与 summary 闭环。
+- `M002` 已完成：补齐 `account-query` 第一批最小 runnable 子集（`SELFBALANCE / CODESIZE / BALANCE`），并加上 checked-in artifact parity 回归。
 
-最近几个关键提交可以作为理解演进顺序的参考：
-- `1b05017`：扩展 storage family 覆盖面。
-- `9c67ce1`：加入 memory family 自动扫描器。
-- `a969f68`：加入 call-context 自动扫描器。
-- `4335fc6`：加入 tx-context 自动扫描器。
+项目当前已经不再处于“只证明路线可行”的阶段，而是进入了：
+- 补完剩余 inventory 账本
+- 收口半完成 family
+- 批量把 blocked-only family 转成 runnable admitted 子集
 
 ## 建议的后续推进顺序
 
-### 第一优先级：account-query family
-建议优先处理 `account-query` 中可直接观察结果的子集，例如：
-- `SELFBALANCE`
-- `CODESIZE`
-- `BALANCE`
+### 第一优先级：补完剩余 inventory
+优先补上计划里还没有 inventory 的 family：
+- `keccak`
+- `log`
+- `block-context`
+- `system`
 
 原因：
-- 这类 case 仍然符合“最终状态可观测”的基本模型。
-- 与当前 executor/oracle/placeholder 机制兼容性较高。
-- 能进一步验证非 storage-only 语义的迁移方法。
+- 先把总盘子补齐，后续才能真实判断 coverage 封账进度。
+- 现在已经有稳定的 summary 路径和 checked-in inventory 约束，继续补账本成本最低。
 
-### 第二优先级：system 中的 CALL 子集
-建议接着处理 system family 里最小可表达的 external call 子集，而不是一上来处理完整 `CREATE/CREATE2/SELFDESTRUCT`。
-
-优先承接方向：
-- 单次 `CALL`
-- 单次 `STATICCALL`
-- 有明确最终 storage 断言的多合约交互
+### 第二优先级：收口已半完成 family
+重点处理：
+- `memory`
+- `call-context`
+- `tx-context`
 
 原因：
-- 这会真正打开“跨合约调用类 case”的迁移通道。
-- 当前已经具备动态地址占位符和多步执行模型，基础条件已满足。
+- 这些 family 的大量 blocked 仍是“实现缺口”，而不是能力边界。
+- 补齐它们的收益高于立刻开更复杂的 system/log 路径。
 
-### 第三优先级：GASPRICE 与更丰富的 tx-context
-等前两步稳定后，再把 `GASPRICE` 接进来。
+### 第三优先级：抽通用原语
+建议在继续扩 family 之前，逐步补强：
+- 更通用的 probe contract 生成方式
+- 更丰富的 runtime placeholder
+- receipt logs / topic / data hash 等观测面
 
-推荐做法：
-- 明确定义真实链与 mock 链的 gas-price 观察策略。
-- 把 gas-price 作为运行时上下文的一部分暴露给 oracle。
+原因：
+- 这会直接决定后续 `block-context / log / system` 的边际成本。
 
-### 第四优先级：logs / receipt 类 case
-可以开始迁移一批最终结果仍然稳定可观察的 case，例如：
-- `LOG0..LOG4` 的 receipt/log 断言
-- `contractAddress`
-- `receipt_status`
-- `code` 结果
+### 第四优先级：推进纯语义 family runnable 化
+在 inventory 已有的 family 中，优先把这些 blocked-only family 逐步转成 admitted runnable 子集：
+- `arithmetic`
+- `bitwise`
+- `comparison`
+- `control-flow`
+- `stack`
+- `keccak`（前提是先补 inventory）
+
+### 第五优先级：继续 account-query 第二批与日志/区块上下文
+`account-query` 第一批已经完成，后续重点是：
+- `EXTCODESIZE`
+- `EXTCODEHASH`
+- `CODECOPY`
+- `EXTCODECOPY`
+
+并行推进：
+- `block-context`
+- `log`
+
+### 最后：system family
+`system` 仍然是风险最高的一组，建议最后处理：
+- `CALL`
+- `STATICCALL`
+- `DELEGATECALL`
+- `CALLCODE`
+- `RETURN / REVERT`
+- `CREATE / CREATE2`
+- `SELFDESTRUCT`
 
 ## 下一位接手人需要注意的事项
 - 不要把 upstream case 手工一条条抄进 manifest；优先补 scanner。

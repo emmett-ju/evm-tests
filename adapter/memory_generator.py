@@ -10,30 +10,14 @@ from adapter.generator import build_case, deploy_contract_step, invoke_contract_
 from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
 
-
-MEM_MLOAD_INIT = "0x6012600c60003960126000f360602a600052600051600055595560015500"
-MEM_MLOAD_RUNTIME = "0x602a600052600051600055595560015500"
-MEM_MSTORE_INIT = "0x6012600c60003960126000f3602a600052600051600055595560015500"
-MEM_MSTORE_RUNTIME = "0x602a600052600051600055595560015500"
-MEM_MSTORE8_INIT = "0x6014600c60003960146000f3602a601f53602051600055595960015500"
-MEM_MSTORE8_RUNTIME = "0x602a601f53602051600055595960015500"
-MEM_MSIZE_ZERO_INIT = "0x6008600c60003960086000f35960005500"
-MEM_MSIZE_ZERO_RUNTIME = "0x5960005500"
-MEM_MSIZE_TOUCHED_INIT = "0x600f600c600039600f6000f35f515960005500"
-MEM_MSIZE_TOUCHED_RUNTIME = "0x5f515960005500"
-
-WORD_00 = "0x0000000000000000000000000000000000000000000000000000000000000000"
-WORD_20 = "0x0000000000000000000000000000000000000000000000000000000000000020"
-WORD_2A = "0x000000000000000000000000000000000000000000000000000000000000002a"
-WORD_2A_BYTE_AT_31 = "0x2a00000000000000000000000000000000000000000000000000000000000000"
-
 MemoryTemplateMode = Literal[
-    "mload_offset0_initialized_mem0",
-    "mstore_offset0_uninitialized_mem0",
-    "mstore8_offset31_initialized_mem32",
-    "msize_mem0",
-    "msize_mem1",
+    "memory_access",
+    "msize",
 ]
+
+WORD_2A = 42
+WORD_2B = 43
+BLOCKED_MCOPY_REASON = "requires unsupported memory copy observation not yet mapped"
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,6 +28,10 @@ class MemoryMappingTemplate:
     upstream_ref: str
     notes: list[str]
     mode: MemoryTemplateMode
+    opcode: str
+    offset: int | None
+    offset_initialized: bool | None
+    mem_size: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,65 +42,12 @@ class AutoMemoryInventoryEntry:
     mode: str | None
     reasons: list[str]
     source: str
-
-
-MEMORY_MODE_SPECS: dict[MemoryTemplateMode, dict[str, str]] = {
-    "mload_offset0_initialized_mem0": {
-        "description": "Mapped from execution-specs MLOAD at offset 0 with initialized memory onto an RPC-only deploy/call/storage-assert flow.",
-        "namespace_seed": "upstream-memory-mload-offset0-initialized-mem0",
-        "notes": json.dumps(
-            [
-                "Upstream intent: benchmark MLOAD after writing a known word at offset 0.",
-                "RPC mapping: runtime writes 0x2a into memory, reads it back with MLOAD, then persists the loaded word and MSIZE into storage.",
-                "Admitted because final storage captures the semantic result directly; gas benchmarking is intentionally excluded.",
-            ]
-        ),
-    },
-    "mstore_offset0_uninitialized_mem0": {
-        "description": "Mapped from execution-specs MSTORE at offset 0 on fresh memory onto an RPC-only deploy/call/storage-assert flow.",
-        "namespace_seed": "upstream-memory-mstore-offset0-uninitialized-mem0",
-        "notes": json.dumps(
-            [
-                "Upstream intent: benchmark MSTORE on untouched memory.",
-                "RPC mapping: runtime writes a known word at offset 0, then persists that word and MSIZE into storage.",
-                "Admitted because final storage captures the semantic write result directly.",
-            ]
-        ),
-    },
-    "mstore8_offset31_initialized_mem32": {
-        "description": "Mapped from execution-specs MSTORE8 at offset 31 with initialized memory onto an RPC-only deploy/call/storage-assert flow.",
-        "namespace_seed": "upstream-memory-mstore8-offset31-initialized-mem32",
-        "notes": json.dumps(
-            [
-                "Upstream intent: benchmark MSTORE8 at a word boundary edge after memory expansion.",
-                "RPC mapping: runtime writes byte 0x2a at offset 31, then loads the containing word and stores it together with MSIZE into storage.",
-                "Admitted because the byte placement is visible in final storage.",
-            ]
-        ),
-    },
-    "msize_mem0": {
-        "description": "Mapped from execution-specs MSIZE with fresh memory onto an RPC-only deploy/call/storage-assert flow.",
-        "namespace_seed": "upstream-memory-msize-mem0",
-        "notes": json.dumps(
-            [
-                "Upstream intent: benchmark MSIZE without prior memory expansion.",
-                "RPC mapping: runtime records MSIZE directly into storage slot0.",
-                "Admitted because the semantic result is directly observable on-chain.",
-            ]
-        ),
-    },
-    "msize_mem1": {
-        "description": "Mapped from execution-specs MSIZE after a minimal memory touch onto an RPC-only deploy/call/storage-assert flow.",
-        "namespace_seed": "upstream-memory-msize-mem1",
-        "notes": json.dumps(
-            [
-                "Upstream intent: benchmark MSIZE after memory has been expanded slightly.",
-                "RPC mapping: runtime touches memory with MLOAD and persists the resulting MSIZE into storage slot0.",
-                "Admitted because the semantic result is directly observable on-chain.",
-            ]
-        ),
-    },
-}
+    opcode: str | None = None
+    offset: int | None = None
+    offset_initialized: bool | None = None
+    mem_size: int | None = None
+    copy_size: int | None = None
+    fixed_src_dst: bool | None = None
 
 
 def generate_upstream_memory_templates(
@@ -124,6 +59,7 @@ def generate_upstream_memory_templates(
 ) -> dict[str, Any]:
     if output_path is None and inventory_path is None:
         raise ValueError("at least one of output_path or inventory_path is required")
+
     repo_root_path = Path(repo_root).resolve()
     source = (
         Path(source_path).resolve()
@@ -196,6 +132,10 @@ def load_memory_templates(path: str | Path) -> tuple[MemoryMappingTemplate, ...]
             upstream_ref=entry["upstream_ref"],
             notes=list(entry["notes"]),
             mode=entry["mode"],
+            opcode=entry["opcode"],
+            offset=entry["offset"],
+            offset_initialized=entry["offset_initialized"],
+            mem_size=entry["mem_size"],
         )
         for entry in data["cases"]
     )
@@ -204,75 +144,423 @@ def load_memory_templates(path: str | Path) -> tuple[MemoryMappingTemplate, ...]
 def scan_memory_cases(
     source_path: str | Path,
 ) -> tuple[tuple[MemoryMappingTemplate, ...], tuple[AutoMemoryInventoryEntry, ...]]:
-    source = Path(source_path)
-    text = source.read_text()
-    inventory = sorted(_scan_msize_cases(text) + _scan_memory_access_cases(text), key=lambda item: item.upstream_ref)
+    text = Path(source_path).read_text()
+    inventory = sorted(
+        _scan_msize_cases(text) + _scan_memory_access_cases(text) + _scan_mcopy_cases(text),
+        key=lambda item: item.upstream_ref,
+    )
     templates = tuple(
         _memory_inventory_entry_to_template(entry)
         for entry in inventory
-        if entry.admitted and entry.mode is not None
+        if entry.admitted
     )
     return templates, tuple(inventory)
 
 
 def _scan_msize_cases(text: str) -> list[AutoMemoryInventoryEntry]:
-    values = _extract_param_values(text, r'@pytest\.mark\.parametrize\("mem_size", \[(?P<values>[^\]]+)\]\)\ndef test_msize')
+    values = _extract_param_values(
+        text,
+        r'@pytest\.mark\.parametrize\("mem_size", \[(?P<values>[^\]]+)\]\)\ndef test_msize',
+    )
     results: list[AutoMemoryInventoryEntry] = []
     for raw in values:
         mem_size = _parse_int_literal(raw)
-        upstream_ref = f"tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size={mem_size}]"
-        case_id = f"upstream.benchmark.memory.msize.mem_size_{mem_size}.success"
-        admitted_mode, reasons = _resolve_msize_mode(mem_size)
         results.append(
             AutoMemoryInventoryEntry(
-                upstream_ref=upstream_ref,
-                case_id=case_id,
-                admitted=admitted_mode is not None,
-                mode=admitted_mode,
-                reasons=reasons,
+                upstream_ref=f"tests/benchmark/compute/instruction/test_memory.py::test_msize[mem_size={mem_size}]",
+                case_id=f"upstream.benchmark.memory.msize.mem_size_{mem_size}.success",
+                admitted=True,
+                mode="msize",
+                reasons=[],
                 source="msize",
+                opcode="MSIZE",
+                mem_size=mem_size,
             )
         )
     return results
 
 
 def _scan_memory_access_cases(text: str) -> list[AutoMemoryInventoryEntry]:
-    opcodes = [value.split(".")[-1] for value in _extract_param_values(text, r'@pytest\.mark\.parametrize\("opcode", \[(?P<values>[^\]]+)\]\)')]
-    offsets = [_parse_int_literal(value) for value in _extract_param_values(text, r'@pytest\.mark\.parametrize\("offset", \[(?P<values>[^\]]+)\]\)')]
-    initialized = [value == "True" for value in _extract_param_values(text, r'@pytest\.mark\.parametrize\("offset_initialized", \[(?P<values>[^\]]+)\]\)')]
-    mem_sizes = [_parse_int_literal(value) for value in _extract_param_values(text, r'@pytest\.mark\.parametrize\("mem_size", \[(?P<values>[^\]]+)\]\)\ndef test_memory_access')]
+    opcodes = [
+        value.split(".")[-1]
+        for value in _extract_param_values(text, r'@pytest\.mark\.parametrize\("opcode", \[(?P<values>[^\]]+)\]\)')
+    ]
+    offsets = [
+        _parse_int_literal(value)
+        for value in _extract_param_values(text, r'@pytest\.mark\.parametrize\("offset", \[(?P<values>[^\]]+)\]\)')
+    ]
+    initialized = [
+        value == "True"
+        for value in _extract_param_values(text, r'@pytest\.mark\.parametrize\("offset_initialized", \[(?P<values>[^\]]+)\]\)')
+    ]
+    mem_sizes = [
+        _parse_int_literal(value)
+        for value in _extract_param_values(
+            text,
+            r'@pytest\.mark\.parametrize\("mem_size", \[(?P<values>[^\]]+)\]\)\ndef test_memory_access',
+        )
+    ]
     results: list[AutoMemoryInventoryEntry] = []
     for opcode in opcodes:
         for offset in offsets:
             for offset_initialized in initialized:
                 for mem_size in mem_sizes:
-                    upstream_ref = (
-                        "tests/benchmark/compute/instruction/test_memory.py::"
-                        f"test_memory_access[mem_size={mem_size}-offset_initialized={offset_initialized}-offset={offset}-opcode={opcode}]"
-                    )
-                    case_id = (
-                        f"upstream.benchmark.memory.{opcode.lower()}.offset_{offset}."
-                        f"{'initialized' if offset_initialized else 'uninitialized'}.mem_size_{mem_size}.success"
-                    )
-                    admitted_mode, reasons = _resolve_memory_access_mode(opcode, offset, offset_initialized, mem_size)
                     results.append(
                         AutoMemoryInventoryEntry(
-                            upstream_ref=upstream_ref,
-                            case_id=case_id,
-                            admitted=admitted_mode is not None,
-                            mode=admitted_mode,
-                            reasons=reasons,
+                            upstream_ref=(
+                                "tests/benchmark/compute/instruction/test_memory.py::"
+                                f"test_memory_access[mem_size={mem_size}-offset_initialized={offset_initialized}-offset={offset}-opcode={opcode}]"
+                            ),
+                            case_id=(
+                                f"upstream.benchmark.memory.{opcode.lower()}.offset_{offset}."
+                                f"{'initialized' if offset_initialized else 'uninitialized'}.mem_size_{mem_size}.success"
+                            ),
+                            admitted=True,
+                            mode="memory_access",
+                            reasons=[],
                             source="memory_access",
+                            opcode=opcode,
+                            offset=offset,
+                            offset_initialized=offset_initialized,
+                            mem_size=mem_size,
                         )
                     )
     return results
+
+
+def _scan_mcopy_cases(text: str) -> list[AutoMemoryInventoryEntry]:
+    block = _extract_decorator_region(text, function_name="test_mcopy")
+    mem_sizes = [
+        _parse_int_literal(value)
+        for value in _extract_param_values_from_block(block, "mem_size", function_name="test_mcopy")
+    ]
+    copy_sizes = [
+        _parse_int_literal(value)
+        for value in _extract_param_values_from_block(block, "copy_size", function_name="test_mcopy")
+    ]
+    fixed_src_dst_values = [
+        _parse_bool_literal(value)
+        for value in _extract_param_values_from_block(block, "fixed_src_dst", function_name="test_mcopy")
+    ]
+    results: list[AutoMemoryInventoryEntry] = []
+    for mem_size in mem_sizes:
+        for copy_size in copy_sizes:
+            for fixed_src_dst in fixed_src_dst_values:
+                results.append(
+                    AutoMemoryInventoryEntry(
+                        upstream_ref=(
+                            "tests/benchmark/compute/instruction/test_memory.py::"
+                            f"test_mcopy[mem_size={mem_size}-copy_size={copy_size}-fixed_src_dst={fixed_src_dst}]"
+                        ),
+                        case_id=(
+                            "upstream.benchmark.memory.mcopy."
+                            f"mem_size_{mem_size}.copy_size_{copy_size}.{'fixed' if fixed_src_dst else 'dynamic'}.success"
+                        ),
+                        admitted=False,
+                        mode=None,
+                        reasons=[BLOCKED_MCOPY_REASON],
+                        source="mcopy",
+                        opcode="MCOPY",
+                        mem_size=mem_size,
+                        copy_size=copy_size,
+                        fixed_src_dst=fixed_src_dst,
+                    )
+                )
+    if len(results) != 48:
+        raise ValueError(f"expected 48 mcopy benchmark cases, found {len(results)}")
+    return results
+
+
+def _memory_inventory_entry_to_template(entry: AutoMemoryInventoryEntry) -> MemoryMappingTemplate:
+    assert entry.mode is not None and entry.opcode is not None and entry.mem_size is not None
+    if entry.mode == "msize":
+        description = (
+            "Mapped from execution-specs MSIZE after expanding memory via MLOAD at offset "
+            f"{entry.mem_size} onto an RPC-only deploy/call/storage-assert flow."
+        )
+        namespace_seed = f"upstream-memory-msize-mem{entry.mem_size}"
+        notes = [
+            f"Upstream intent: benchmark MSIZE after setup expands memory using MLOAD at offset {entry.mem_size}.",
+            "RPC mapping: runtime performs the same memory-touch shape, then persists MSIZE into storage slot0.",
+            "Admitted because the resulting memory-size word is directly observable in final storage.",
+        ]
+    else:
+        assert entry.offset is not None and entry.offset_initialized is not None
+        init_label = "initialized" if entry.offset_initialized else "uninitialized"
+        description = (
+            f"Mapped from execution-specs {entry.opcode} at offset {entry.offset} with {init_label} memory and mem_size {entry.mem_size} "
+            "onto an RPC-only deploy/call/storage-assert flow."
+        )
+        namespace_seed = (
+            f"upstream-memory-{entry.opcode.lower()}-offset{entry.offset}-{init_label}-mem{entry.mem_size}"
+        )
+        notes = [
+            f"Upstream intent: benchmark {entry.opcode} at offset {entry.offset} with offset_initialized={entry.offset_initialized} and mem_size={entry.mem_size}.",
+            "RPC mapping: runtime reproduces the benchmark setup shape, persists the observed result in slot0, and persists MSIZE in slot1.",
+            "Admitted because both the operation result and the resulting memory size are directly observable in final storage.",
+        ]
+    return MemoryMappingTemplate(
+        case_id=entry.case_id,
+        description=description,
+        namespace_seed=namespace_seed,
+        upstream_ref=entry.upstream_ref,
+        notes=notes,
+        mode=entry.mode,
+        opcode=entry.opcode,
+        offset=entry.offset,
+        offset_initialized=entry.offset_initialized,
+        mem_size=entry.mem_size,
+    )
+
+
+def render_memory_case(template: MemoryMappingTemplate) -> dict[str, Any]:
+    if template.mode == "msize":
+        expected = {"storage": {"0x00": _word_hex(_simulate_msize_case(template.mem_size))}}
+        runtime_code = _build_msize_runtime(template.mem_size)
+        invoke_gas = _memory_gas_hex(template.mem_size)
+        observe = {
+            "storage_address": "$last_contract",
+            "memory_probe": {
+                "mode": "msize",
+                "mem_size": template.mem_size,
+            },
+        }
+    else:
+        assert template.offset is not None and template.offset_initialized is not None
+        slot0, slot1 = _simulate_memory_access_case(
+            template.opcode,
+            template.offset,
+            template.offset_initialized,
+            template.mem_size,
+        )
+        expected = {"storage": {"0x00": _word_hex(slot0), "0x01": _word_hex(slot1)}}
+        runtime_code = _build_memory_access_runtime(
+            template.opcode,
+            template.offset,
+            template.offset_initialized,
+            template.mem_size,
+        )
+        invoke_gas = _memory_gas_hex(max(template.mem_size, template.offset + 32))
+        observe = {
+            "storage_address": "$last_contract",
+            "memory_probe": {
+                "mode": "memory_access",
+                "opcode": template.opcode,
+                "offset": template.offset,
+                "offset_initialized": template.offset_initialized,
+                "mem_size": template.mem_size,
+            },
+        }
+
+    case = build_case(
+        template,  # type: ignore[arg-type]
+        steps=[
+            deploy_contract_step(
+                init_code=_build_init_code(runtime_code),
+                runtime_code=runtime_code,
+                gas="0x186a0",
+            ),
+            wait_receipt_step(),
+            invoke_contract_step(data_hex="0x", gas=invoke_gas),
+            wait_receipt_step(),
+        ],
+        expected=expected,
+    )
+    case["family"] = "state/memory"
+    case["observe"] = observe
+    return case
+
+
+def _build_memory_access_runtime(opcode: str, offset: int, offset_initialized: bool, mem_size: int) -> str:
+    code = bytearray()
+    if mem_size > 0:
+        code += _push_int(1)
+        code += _push_int(mem_size - 1)
+        code.append(0x53)  # MSTORE8
+    if offset_initialized:
+        code += _push_int(WORD_2B)
+        code += _push_int(offset)
+        code.append(0x52)  # MSTORE
+    if opcode == "MLOAD":
+        code += _push_int(offset)
+        code.append(0x51)  # MLOAD
+        code += _push_int(0)
+        code.append(0x55)  # SSTORE
+    elif opcode == "MSTORE":
+        code += _push_int(WORD_2A)
+        code += _push_int(offset)
+        code.append(0x52)  # MSTORE
+        code += _push_int(offset)
+        code.append(0x51)  # MLOAD
+        code += _push_int(0)
+        code.append(0x55)  # SSTORE
+    elif opcode == "MSTORE8":
+        code += _push_int(WORD_2A)
+        code += _push_int(offset)
+        code.append(0x53)  # MSTORE8
+        code += _push_int((offset // 32) * 32)
+        code.append(0x51)  # MLOAD
+        code += _push_int(0)
+        code.append(0x55)  # SSTORE
+    else:
+        raise ValueError(f"unsupported memory opcode: {opcode}")
+    code.append(0x59)  # MSIZE
+    code += _push_int(1)
+    code.append(0x55)  # SSTORE
+    code.append(0x00)  # STOP
+    return "0x" + code.hex()
+
+
+def _build_msize_runtime(mem_size: int) -> str:
+    code = bytearray()
+    code += _push_int(mem_size)
+    code.append(0x51)  # MLOAD
+    code.append(0x50)  # POP
+    code.append(0x59)  # MSIZE
+    code += _push_int(0)
+    code.append(0x55)  # SSTORE
+    code.append(0x00)  # STOP
+    return "0x" + code.hex()
+
+
+def _build_init_code(runtime_code: str) -> str:
+    runtime_hex = runtime_code.removeprefix("0x")
+    runtime_bytes = bytes.fromhex(runtime_hex)
+    length = len(runtime_bytes)
+    if length == 0:
+        raise ValueError("runtime_code must not be empty")
+    if length > 0xFF:
+        raise ValueError("runtime_code too long for PUSH1 init helper")
+    return f"0x60{length:02x}600c60003960{length:02x}6000f3{runtime_hex}"
+
+
+def _push_int(value: int) -> bytes:
+    if value < 0:
+        raise ValueError("push literal must be non-negative")
+    if value == 0:
+        return bytes([0x5F])
+    raw = value.to_bytes((value.bit_length() + 7) // 8, "big")
+    if len(raw) > 32:
+        raise ValueError(f"push literal too large: {value}")
+    return bytes([0x5F + len(raw)]) + raw
+
+
+def _simulate_memory_access_case(
+    opcode: str,
+    offset: int,
+    offset_initialized: bool,
+    mem_size: int,
+) -> tuple[int, int]:
+    memory = _MemoryState()
+    if mem_size > 0:
+        memory.mstore8(mem_size - 1, 1)
+    if offset_initialized:
+        memory.mstore(offset, WORD_2B)
+    if opcode == "MLOAD":
+        slot0 = memory.mload(offset)
+    elif opcode == "MSTORE":
+        memory.mstore(offset, WORD_2A)
+        slot0 = memory.mload(offset)
+    elif opcode == "MSTORE8":
+        memory.mstore8(offset, WORD_2A)
+        slot0 = memory.mload((offset // 32) * 32)
+    else:
+        raise ValueError(f"unsupported memory opcode: {opcode}")
+    return slot0, memory.msize()
+
+
+def _simulate_msize_case(mem_size: int) -> int:
+    memory = _MemoryState()
+    memory.mload(mem_size)
+    return memory.msize()
+
+
+class _MemoryState:
+    def __init__(self) -> None:
+        self._memory = bytearray()
+
+    def _ensure(self, size: int) -> None:
+        if size <= len(self._memory):
+            return
+        target = ((size + 31) // 32) * 32
+        self._memory.extend(b"\x00" * (target - len(self._memory)))
+
+    def mstore8(self, offset: int, value: int) -> None:
+        self._ensure(offset + 1)
+        self._memory[offset] = value & 0xFF
+
+    def mstore(self, offset: int, value: int) -> None:
+        self._ensure(offset + 32)
+        self._memory[offset : offset + 32] = value.to_bytes(32, "big")
+
+    def mload(self, offset: int) -> int:
+        self._ensure(offset + 32)
+        return int.from_bytes(self._memory[offset : offset + 32], "big")
+
+    def msize(self) -> int:
+        return len(self._memory)
+
+
+def _word_hex(value: int) -> str:
+    return "0x" + value.to_bytes(32, "big").hex()
+
+
+def _memory_gas_hex(size_hint: int) -> str:
+    if size_hint >= 1_000_000:
+        return "0x1e8480"  # 2,000,000
+    if size_hint >= 100_000:
+        return "0x0f4240"  # 1,000,000
+    if size_hint >= 10_240:
+        return "0x061a80"  # 400,000
+    if size_hint >= 1_024:
+        return "0x030d40"  # 200,000
+    return "0xc350"  # 50,000
 
 
 def _extract_param_values(text: str, pattern: str) -> list[str]:
     match = re.search(pattern, text, re.MULTILINE)
     if not match:
         raise ValueError(f"could not match pattern: {pattern}")
-    return [value.strip() for value in match.group("values").split(",")]
+    return [value.strip() for value in match.group("values").split(",") if value.strip()]
+
+
+def _extract_decorator_region(text: str, *, function_name: str) -> str:
+    func_marker = f"def {function_name}("
+    func = text.find(func_marker)
+    if func == -1:
+        raise ValueError(f"could not find benchmark function {function_name}")
+    start = text.rfind("\n\n", 0, func)
+    if start == -1:
+        start = 0
+    else:
+        start += 2
+    return text[start:func]
+
+
+def _extract_param_block(block: str, param_name: str) -> str | None:
+    pattern = re.compile(
+        rf'@pytest\.mark\.parametrize\(\s*"{re.escape(param_name)}",\s*\[(?P<values>.*?)\]\s*,?\s*\)',
+        re.MULTILINE | re.DOTALL,
+    )
+    match = pattern.search(block)
+    if not match:
+        return None
+    return match.group("values")
+
+
+def _extract_param_values_from_block(block: str, param_name: str, *, function_name: str) -> list[str]:
+    values_block = _extract_param_block(block, param_name)
+    if values_block is None:
+        raise ValueError(f"could not find parameter block for {function_name}")
+    return [value.strip() for value in values_block.split(",") if value.strip()]
+
+
+def _parse_bool_literal(value: str) -> bool:
+    if value == "True":
+        return True
+    if value == "False":
+        return False
+    raise ValueError(f"unsupported boolean literal: {value}")
 
 
 def _parse_int_literal(value: str) -> int:
@@ -281,99 +569,3 @@ def _parse_int_literal(value: str) -> int:
         left, right = [part.strip() for part in normalized.split("*", 1)]
         return int(left) * int(right)
     return int(normalized)
-
-
-def _resolve_msize_mode(mem_size: int) -> tuple[MemoryTemplateMode | None, list[str]]:
-    if mem_size == 0:
-        return "msize_mem0", []
-    if mem_size == 1:
-        return "msize_mem1", []
-    return None, ["requires broad memory-expansion benchmark coverage not yet mapped"]
-
-
-def _resolve_memory_access_mode(
-    opcode: str,
-    offset: int,
-    offset_initialized: bool,
-    mem_size: int,
-) -> tuple[MemoryTemplateMode | None, list[str]]:
-    if opcode == "MLOAD" and offset == 0 and offset_initialized and mem_size == 0:
-        return "mload_offset0_initialized_mem0", []
-    if opcode == "MSTORE" and offset == 0 and not offset_initialized and mem_size == 0:
-        return "mstore_offset0_uninitialized_mem0", []
-    if opcode == "MSTORE8" and offset == 31 and offset_initialized and mem_size == 32:
-        return "mstore8_offset31_initialized_mem32", []
-    return None, ["requires arbitrary memory layout or gas-sensitive benchmark shape not yet mapped"]
-
-
-def _memory_inventory_entry_to_template(entry: AutoMemoryInventoryEntry) -> MemoryMappingTemplate:
-    assert entry.mode is not None
-    spec = MEMORY_MODE_SPECS[entry.mode]
-    return MemoryMappingTemplate(
-        case_id=entry.case_id,
-        description=spec["description"],
-        namespace_seed=spec["namespace_seed"],
-        upstream_ref=entry.upstream_ref,
-        notes=json.loads(spec["notes"]),
-        mode=entry.mode,
-    )
-
-
-def render_memory_case(template: MemoryMappingTemplate) -> dict[str, Any]:
-    if template.mode == "mload_offset0_initialized_mem0":
-        return _build_memory_case(
-            template,
-            init_code=MEM_MLOAD_INIT,
-            runtime_code=MEM_MLOAD_RUNTIME,
-            expected={"storage": {"0x00": WORD_2A, "0x01": WORD_20}},
-        )
-    if template.mode == "mstore_offset0_uninitialized_mem0":
-        return _build_memory_case(
-            template,
-            init_code=MEM_MSTORE_INIT,
-            runtime_code=MEM_MSTORE_RUNTIME,
-            expected={"storage": {"0x00": WORD_2A, "0x01": WORD_20}},
-        )
-    if template.mode == "mstore8_offset31_initialized_mem32":
-        return _build_memory_case(
-            template,
-            init_code=MEM_MSTORE8_INIT,
-            runtime_code=MEM_MSTORE8_RUNTIME,
-            expected={"storage": {"0x00": WORD_2A_BYTE_AT_31, "0x01": WORD_20}},
-        )
-    if template.mode == "msize_mem0":
-        return _build_memory_case(
-            template,
-            init_code=MEM_MSIZE_ZERO_INIT,
-            runtime_code=MEM_MSIZE_ZERO_RUNTIME,
-            expected={"storage": {"0x00": WORD_00}},
-        )
-    if template.mode == "msize_mem1":
-        return _build_memory_case(
-            template,
-            init_code=MEM_MSIZE_TOUCHED_INIT,
-            runtime_code=MEM_MSIZE_TOUCHED_RUNTIME,
-            expected={"storage": {"0x00": WORD_20}},
-        )
-    raise ValueError(f"unsupported memory mapping mode: {template.mode}")
-
-
-def _build_memory_case(
-    template: MemoryMappingTemplate,
-    *,
-    init_code: str,
-    runtime_code: str,
-    expected: dict[str, Any],
-) -> dict[str, Any]:
-    case = build_case(
-        template,  # type: ignore[arg-type]
-        steps=[
-            deploy_contract_step(init_code=init_code, runtime_code=runtime_code),
-            wait_receipt_step(),
-            invoke_contract_step(data_hex="0x"),
-            wait_receipt_step(),
-        ],
-        expected=expected,
-    )
-    case["family"] = "state/memory"
-    return case

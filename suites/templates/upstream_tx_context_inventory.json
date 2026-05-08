@@ -1,6 +1,7 @@
 {
   "name": "upstream-tx-context-auto-inventory",
   "version": "1",
+  "family": "tx-context",
   "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_tx_context.py",
   "entries": [
     {
@@ -26,11 +27,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_tx_context.py::test_call_frame_context_ops[opcode=GASPRICE]",
       "case_id": "upstream.benchmark.tx_context.gasprice.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires dynamic gas-price capture policy not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "gasprice",
+      "reasons": [],
       "source": "zero_param"
     },
     {
