@@ -144,6 +144,11 @@ class MockBackend:
                 stack_probe = case.observe.get("stack_probe")
                 if stack_probe is not None:
                     from adapter.assembler import _word_hex
+                    from adapter.stack_generator import _build_stack_runtime
+
+                    expected_runtime = _build_stack_runtime(stack_probe["opcode"])
+                    if code != expected_runtime:
+                        raise ValueError(f"unsupported mock contract code path: {code}")
                     storage["0x00"] = _word_hex(stack_probe["expected_result"])
                     continue
                 

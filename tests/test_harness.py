@@ -47,7 +47,10 @@ from adapter.control_flow_generator import generate_upstream_control_flow_templa
 from adapter.log_generator import generate_upstream_log_templates
 from adapter.inventory import summarize_inventory_dir, write_inventory_payload
 from adapter.keccak_generator import generate_upstream_keccak_templates
-from adapter.stack_generator import generate_upstream_stack_templates
+from adapter.stack_generator import (
+    generate_upstream_stack_manifest,
+    generate_upstream_stack_templates,
+)
 from adapter.system_generator import generate_upstream_system_templates
 from adapter.tx_context_generator import (
     generate_upstream_tx_context_manifest,
@@ -164,6 +167,19 @@ class HarnessTests(unittest.TestCase):
         selected_ids = [case.case_id for case in selected]
         self.assertIn("upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success", selected_ids)
         self.assertIn("upstream.benchmark.memory.msize.mem_size_1.success", selected_ids)
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
+    def test_selector_allows_upstream_mapped_stack_cases(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_stack_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(len(selected), 65)
+        selected_ids = [case.case_id for case in selected]
+        self.assertIn("upstream.benchmark.stack.test_push.push0", selected_ids)
+        self.assertIn("upstream.benchmark.stack.test_push.push32", selected_ids)
+        self.assertIn("upstream.benchmark.stack.test_dup.dup16", selected_ids)
+        self.assertIn("upstream.benchmark.stack.test_swap.swap16", selected_ids)
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
@@ -900,6 +916,51 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             self.assertEqual(generated["name"], "upstream-storage-mapped")
             self.assertEqual(len(generated["cases"]), 17)
+
+    def test_stack_manifest_generator_matches_checked_in_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_stack_mapped.json"
+            generated = generate_upstream_stack_manifest(
+                repo_root=ROOT,
+                template_path=ROOT / "suites/templates/upstream_stack_templates.json",
+                output_path=generated_path,
+            )
+            checked_in = json.loads(
+                (ROOT / "suites/manifests/upstream_stack_mapped.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            self.assertEqual(len(generated["cases"]), 65)
+            self.assertEqual(generated_path.read_text(), (ROOT / "suites/manifests/upstream_stack_mapped.json").read_text())
+
+    def test_cli_generate_stack_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "generated.json"
+            self.assertEqual(
+                main(["generate-stack-manifest", "--output", str(output_path)]),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            checked_in = json.loads(
+                (ROOT / "suites/manifests/upstream_stack_mapped.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            self.assertEqual(generated["name"], "upstream-stack-mapped")
+            self.assertEqual(len(generated["cases"]), 65)
+            observed_by_case = {case["case_id"]: case["expected"]["storage"]["0x00"] for case in generated["cases"]}
+            self.assertEqual(
+                {
+                    "upstream.benchmark.stack.test_push.push0": observed_by_case["upstream.benchmark.stack.test_push.push0"],
+                    "upstream.benchmark.stack.test_push.push32": observed_by_case["upstream.benchmark.stack.test_push.push32"],
+                    "upstream.benchmark.stack.test_dup.dup16": observed_by_case["upstream.benchmark.stack.test_dup.dup16"],
+                    "upstream.benchmark.stack.test_swap.swap16": observed_by_case["upstream.benchmark.stack.test_swap.swap16"],
+                },
+                {
+                    "upstream.benchmark.stack.test_push.push0": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "upstream.benchmark.stack.test_push.push32": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                    "upstream.benchmark.stack.test_dup.dup16": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                    "upstream.benchmark.stack.test_swap.swap16": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                },
+            )
 
     def test_cli_scan_upstream_storage_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -2275,6 +2336,54 @@ class HarnessTests(unittest.TestCase):
                 self.assertEqual(result["diffs"], [])
                 self.assertIs(result["success"], True)
 
+    def test_mock_backend_runs_upstream_mapped_stack_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_stack_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 65)
+
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            representative_storage = {
+                "upstream.benchmark.stack.test_push.push0": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.stack.test_push.push32": {
+                    "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                },
+                "upstream.benchmark.stack.test_dup.dup16": {
+                    "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                },
+                "upstream.benchmark.stack.test_swap.swap16": {
+                    "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                },
+            }
+            self.assertEqual(set(representative_storage).issubset(observed_by_case), True)
+            for case_id, expected_slots in representative_storage.items():
+                result = observed_by_case[case_id]
+                self.assertEqual(result["observed"]["storage"], expected_slots)
+                self.assertEqual(result["expected"]["storage"], expected_slots)
+                self.assertEqual(result["diffs"], [])
+                self.assertTrue(result["tx_hashes"])
+                self.assertIs(result["success"], True)
+
+            for result in report["results"]:
+                self.assertEqual(result["diffs"], [])
+                self.assertIs(result["success"], True)
+
     def test_mock_backend_runs_upstream_mapped_call_context_case(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -2446,6 +2555,46 @@ class HarnessTests(unittest.TestCase):
                 },
             )
 
+    def test_cli_run_mock_upstream_stack_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_stack_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-stack-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 65)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result["observed"]["storage"]["0x00"] for result in report["results"]}
+            self.assertEqual(
+                {
+                    "upstream.benchmark.stack.test_push.push0": observed_by_case["upstream.benchmark.stack.test_push.push0"],
+                    "upstream.benchmark.stack.test_push.push32": observed_by_case["upstream.benchmark.stack.test_push.push32"],
+                    "upstream.benchmark.stack.test_dup.dup16": observed_by_case["upstream.benchmark.stack.test_dup.dup16"],
+                    "upstream.benchmark.stack.test_swap.swap16": observed_by_case["upstream.benchmark.stack.test_swap.swap16"],
+                },
+                {
+                    "upstream.benchmark.stack.test_push.push0": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "upstream.benchmark.stack.test_push.push32": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                    "upstream.benchmark.stack.test_dup.dup16": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                    "upstream.benchmark.stack.test_swap.swap16": "0x000000000000000000000000000000000000000000000000000000000000002a",
+                },
+            )
+
     def test_mock_backend_rejects_unsupported_account_query_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
@@ -2454,6 +2603,15 @@ class HarnessTests(unittest.TestCase):
         broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-account-query-runtime")
+
+    def test_mock_backend_rejects_unsupported_stack_runtime_code_path(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_stack_mapped.json")
+        broken_case = next(case for case in manifest.cases if case.case_id == "upstream.benchmark.stack.test_push.push0")
+        broken_case.steps[0]["bytecode_runtime"] = "0xdeadbeef"
+        broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
+        with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
+            backend.execute_case(broken_case, "negative-unsupported-stack-runtime")
 
     def test_selector_rejects_mock_only_account_query_shortcuts_on_jsonrpc_profile(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
