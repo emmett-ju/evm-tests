@@ -48,7 +48,10 @@ from adapter.bitwise_generator import (
     generate_upstream_bitwise_manifest,
     generate_upstream_bitwise_templates,
 )
-from adapter.comparison_generator import generate_upstream_comparison_templates
+from adapter.comparison_generator import (
+    generate_upstream_comparison_manifest,
+    generate_upstream_comparison_templates,
+)
 from adapter.control_flow_generator import (
     generate_upstream_control_flow_manifest,
     generate_upstream_control_flow_templates,
@@ -210,6 +213,25 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_136279841", selected_ids)
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual({case.family for case in selected}, {"state/arithmetic"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
+    def test_selector_allows_upstream_mapped_comparison_cases(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_comparison_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(
+            [case.case_id for case in selected],
+            [
+                "upstream.benchmark.comparison.test_comparison.eq",
+                "upstream.benchmark.comparison.test_comparison.gt",
+                "upstream.benchmark.comparison.test_comparison.lt",
+                "upstream.benchmark.comparison.test_comparison.sgt",
+                "upstream.benchmark.comparison.test_comparison.slt",
+                "upstream.benchmark.comparison.test_iszero.iszero",
+            ],
+        )
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual({case.family for case in selected}, {"state/comparison"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
     def test_selector_allows_upstream_mapped_call_context_case(self) -> None:
@@ -609,6 +631,51 @@ class HarnessTests(unittest.TestCase):
             case_ids = {case["case_id"] for case in generated["cases"]}
             self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", case_ids)
             self.assertIn("upstream.benchmark.bitwise.test_shifts.sar", case_ids)
+
+    def test_comparison_manifest_generator_matches_checked_in_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_template_path = Path(tmpdir) / "upstream_comparison_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_comparison_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_comparison_mapped.json"
+            generate_upstream_comparison_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
+            generated = generate_upstream_comparison_manifest(
+                repo_root=ROOT,
+                template_path=generated_template_path,
+                output_path=manifest_path,
+            )
+            checked_in_templates = json.loads(
+                (ROOT / "suites/templates/upstream_comparison_templates.json").read_text()
+            )
+            checked_in_inventory = json.loads(
+                (ROOT / "suites/templates/upstream_comparison_inventory.json").read_text()
+            )
+            checked_in_manifest = json.loads(
+                (ROOT / "suites/manifests/upstream_comparison_mapped.json").read_text()
+            )
+            self.assertEqual(json.loads(generated_template_path.read_text()), checked_in_templates)
+            self.assertEqual(json.loads(inventory_path.read_text()), checked_in_inventory)
+            self.assertEqual(json.loads(manifest_path.read_text()), checked_in_manifest)
+            self.assertEqual(generated["name"], "upstream-comparison-mapped")
+            self.assertEqual(len(generated["cases"]), 6)
+            self.assertEqual({case["family"] for case in generated["cases"]}, {"state/comparison"})
+            self.assertEqual(
+                [case["case_id"] for case in generated["cases"]],
+                [
+                    "upstream.benchmark.comparison.test_comparison.eq",
+                    "upstream.benchmark.comparison.test_comparison.gt",
+                    "upstream.benchmark.comparison.test_comparison.lt",
+                    "upstream.benchmark.comparison.test_comparison.sgt",
+                    "upstream.benchmark.comparison.test_comparison.slt",
+                    "upstream.benchmark.comparison.test_iszero.iszero",
+                ],
+            )
+            for case in generated["cases"]:
+                self.assertIn("comparison_probe", case["observe"])
+                self.assertIn("0x00", case["expected"]["storage"])
 
     def test_keccak_checked_in_artifacts_match_generated_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1794,6 +1861,31 @@ class HarnessTests(unittest.TestCase):
                 }:
                     self.assertEqual(case["observe"]["bitwise_probe"]["mode"], "test_shifts")
                     self.assertEqual(case["family"], "state/bitwise")
+
+    def test_cli_generate_comparison_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "generated.json"
+            self.assertEqual(
+                main(["generate-comparison-manifest", "--output", str(output_path)]),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            self.assertEqual(generated["name"], "upstream-comparison-mapped")
+            self.assertEqual(len(generated["cases"]), 6)
+            observed_by_case = {case["case_id"]: case for case in generated["cases"]}
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.comparison.test_comparison.eq"]["expected"]["storage"]["0x00"],
+                "0x0000000000000000000000000000000000000000000000000000000000000001",
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.comparison.test_comparison.gt"]["expected"]["storage"]["0x00"],
+                "0x0000000000000000000000000000000000000000000000000000000000000000",
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.comparison.test_iszero.iszero"]["observe"]["comparison_probe"]["opcode"],
+                "ISZERO",
+            )
+            self.assertTrue(all(case["family"] == "state/comparison" for case in generated["cases"]))
 
     def test_cli_scan_upstream_keccak_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -3142,6 +3234,44 @@ class HarnessTests(unittest.TestCase):
                 self.assertTrue(result["success"], result["case_id"])
                 self.assertEqual(result["observed"], result["expected"], result["case_id"])
 
+    def test_mock_backend_runs_upstream_mapped_comparison_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_comparison_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 6)
+
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertEqual(
+                {case_id: result["observed"]["storage"]["0x00"] for case_id, result in observed_by_case.items()},
+                {
+                    "upstream.benchmark.comparison.test_comparison.eq": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.comparison.test_comparison.gt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "upstream.benchmark.comparison.test_comparison.lt": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.comparison.test_comparison.sgt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "upstream.benchmark.comparison.test_comparison.slt": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.comparison.test_iszero.iszero": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+            )
+            for result in report["results"]:
+                self.assertEqual(result["observed"], result["expected"], result["case_id"])
+                self.assertEqual(result["diffs"], [], result["case_id"])
+                self.assertTrue(result["tx_hashes"], result["case_id"])
+                self.assertIs(result["success"], True)
+
     def test_cli_run_mock_upstream_control_flow_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -3345,6 +3475,43 @@ class HarnessTests(unittest.TestCase):
                 },
             )
 
+    def test_cli_run_mock_upstream_comparison_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_comparison_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-comparison-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 6)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result["observed"]["storage"]["0x00"] for result in report["results"]}
+            self.assertEqual(
+                observed_by_case,
+                {
+                    "upstream.benchmark.comparison.test_comparison.eq": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.comparison.test_comparison.gt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "upstream.benchmark.comparison.test_comparison.lt": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.comparison.test_comparison.sgt": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "upstream.benchmark.comparison.test_comparison.slt": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.comparison.test_iszero.iszero": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+            )
+
     def test_cli_run_mock_upstream_stack_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -3428,6 +3595,17 @@ class HarnessTests(unittest.TestCase):
         broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-bitwise-runtime")
+
+    def test_mock_backend_rejects_unsupported_comparison_runtime_code_path(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_comparison_mapped.json")
+        broken_case = next(
+            case for case in manifest.cases if case.case_id == "upstream.benchmark.comparison.test_comparison.eq"
+        )
+        broken_case.steps[0]["bytecode_runtime"] = "0xdeadbeef"
+        broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
+        with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
+            backend.execute_case(broken_case, "negative-unsupported-comparison-runtime")
 
     def test_mock_backend_rejects_unsupported_stack_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")

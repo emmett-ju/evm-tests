@@ -165,6 +165,14 @@ class MockBackend:
                 comparison_probe = case.observe.get("comparison_probe")
                 if comparison_probe is not None:
                     from adapter.assembler import _word_hex
+                    from adapter.comparison_generator import _build_comparison_runtime
+
+                    expected_runtime = _build_comparison_runtime(
+                        comparison_probe["opcode"],
+                        tuple(comparison_probe["args"]),
+                    )
+                    if code != expected_runtime:
+                        raise ValueError(f"unsupported mock contract code path: {code}")
                     storage["0x00"] = _word_hex(comparison_probe["expected_result"])
                     continue
 
