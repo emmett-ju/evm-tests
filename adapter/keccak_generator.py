@@ -4,6 +4,7 @@ import json
 import math
 import re
 from dataclasses import asdict, dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal
 
@@ -62,6 +63,21 @@ class AutoKeccakInventoryEntry:
     mem_size: int | None = None
     msg_size: int | None = None
     witness_input_length: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class UpstreamKeccakWitnessContract:
+    benchmark_gas_limit: int
+    tx_gas_limit_cap_is_none: bool
+    intrinsic_gas: int
+    keccak_rate: int
+    iteration_start: int
+    iteration_stop: int
+    iteration_step: int
+    keccak_base_gas: int
+    keccak_per_word_gas: int
+    pop_gas: int
+    optimal_input_length: int
 
 
 KECCAK_MODE_SPECS: dict[KeccakTemplateMode, dict[str, str]] = {
@@ -178,6 +194,138 @@ def generate_upstream_keccak_manifest(
     return manifest
 
 
+@lru_cache(maxsize=1)
+def derive_upstream_keccak_witness_contract() -> UpstreamKeccakWitnessContract:
+    repo_root = Path(__file__).resolve().parents[1]
+    keccak_source = (
+        repo_root
+        / "third_party"
+        / "execution-specs"
+        / "tests"
+        / "benchmark"
+        / "compute"
+        / "instruction"
+        / "test_keccak.py"
+    )
+    benchmark_conftest = (
+        repo_root
+        / "third_party"
+        / "execution-specs"
+        / "tests"
+        / "benchmark"
+        / "conftest.py"
+    )
+    benchmark_spec = (
+        repo_root
+        / "third_party"
+        / "execution-specs"
+        / "packages"
+        / "testing"
+        / "src"
+        / "execution_testing"
+        / "specs"
+        / "benchmark.py"
+    )
+    block_types = (
+        repo_root
+        / "third_party"
+        / "execution-specs"
+        / "packages"
+        / "testing"
+        / "src"
+        / "execution_testing"
+        / "test_types"
+        / "block_types.py"
+    )
+    fork_impl = (
+        repo_root
+        / "third_party"
+        / "execution-specs"
+        / "packages"
+        / "testing"
+        / "src"
+        / "execution_testing"
+        / "forks"
+        / "forks"
+        / "forks.py"
+    )
+
+    keccak_text = keccak_source.read_text()
+    benchmark_conftest_text = benchmark_conftest.read_text()
+    benchmark_spec_text = benchmark_spec.read_text()
+    block_types_text = block_types.read_text()
+    fork_impl_text = fork_impl.read_text()
+
+    _require_function(keccak_text, "test_keccak_max_permutations")
+    _require_function(benchmark_conftest_text, "tx_gas_limit")
+
+    required_snippets = [
+        (keccak_text, "available_gas = tx_gas_limit - intrinsic_gas_calculator()", "available gas deduction"),
+        (keccak_text, "for i in range(1, 1_000_000, 32):", "max-permutations range"),
+        (keccak_text, "iteration_bytecode = Op.POP(Op.SHA3(Op.PUSH0, Op.DUP1, data_size=i))", "iteration bytecode"),
+        (keccak_text, "num_keccak_permutations = num_keccak_calls * math.ceil(i / KECCAK_RATE)", "permutation objective"),
+        (benchmark_conftest_text, "return fork.transaction_gas_limit_cap() or gas_benchmark_value", "tx gas limit fixture"),
+        (benchmark_spec_text, "gas_benchmark_value: int = Field(", "benchmark gas field"),
+        (benchmark_spec_text, "default_factory=lambda: int(Environment().gas_limit)", "benchmark gas default"),
+        (block_types_text, "DEFAULT_BLOCK_GAS_LIMIT = CURRENT_MAINNET_BLOCK_GAS_LIMIT * 2", "default block gas formula"),
+        (fork_impl_text, "return c(new_words) - c(previous_words)", "memory expansion delta"),
+        (fork_impl_text, "return (gas_costs.MEMORY_PER_WORD * w) + ((w * w) // 512)", "memory expansion body"),
+        (fork_impl_text, "if new_bytes <= previous_bytes:\n                return 0", "memory expansion guard"),
+    ]
+    for text, snippet, label in required_snippets:
+        if snippet not in text:
+            raise ValueError(f"upstream keccak witness contract missing {label}")
+
+    gas_limit_match = re.search(
+        r"CURRENT_MAINNET_BLOCK_GAS_LIMIT\s*=\s*(?P<base>[0-9_]+)\s*\nDEFAULT_BLOCK_GAS_LIMIT\s*=\s*CURRENT_MAINNET_BLOCK_GAS_LIMIT\s*\*\s*(?P<multiplier>\d+)",
+        block_types_text,
+    )
+    if not gas_limit_match:
+        raise ValueError("could not derive upstream benchmark gas limit from block_types.py")
+    benchmark_gas_limit = _parse_int_literal(gas_limit_match.group("base")) * int(gas_limit_match.group("multiplier"))
+
+    rate_match = re.search(r"KECCAK_RATE\s*=\s*(?P<rate>[0-9_]+)", keccak_text)
+    if not rate_match:
+        raise ValueError("could not derive KECCAK_RATE from upstream keccak benchmark")
+    keccak_rate = _parse_int_literal(rate_match.group("rate"))
+
+    range_match = re.search(r"for i in range\((?P<start>\d+),\s*(?P<stop>[0-9_]+),\s*(?P<step>\d+)\):", keccak_text)
+    if not range_match:
+        raise ValueError("could not derive max-permutations scan range from upstream keccak benchmark")
+    iteration_start = int(range_match.group("start"))
+    iteration_stop = _parse_int_literal(range_match.group("stop"))
+    iteration_step = int(range_match.group("step"))
+
+    contract = UpstreamKeccakWitnessContract(
+        benchmark_gas_limit=benchmark_gas_limit,
+        tx_gas_limit_cap_is_none="def transaction_gas_limit_cap(cls) -> int | None:" in fork_impl_text
+        and '"At Genesis, no transaction gas limit cap is imposed."' in fork_impl_text,
+        intrinsic_gas=KECCAK_INTRINSIC_GAS,
+        keccak_rate=keccak_rate,
+        iteration_start=iteration_start,
+        iteration_stop=iteration_stop,
+        iteration_step=iteration_step,
+        keccak_base_gas=KECCAK_BASE_GAS,
+        keccak_per_word_gas=KECCAK_PER_WORD_GAS,
+        pop_gas=POP_GAS,
+        optimal_input_length=0,
+    )
+    optimal_input_length = _compute_keccak_max_permutations_input_length_from_contract(contract)
+    return UpstreamKeccakWitnessContract(
+        benchmark_gas_limit=contract.benchmark_gas_limit,
+        tx_gas_limit_cap_is_none=contract.tx_gas_limit_cap_is_none,
+        intrinsic_gas=contract.intrinsic_gas,
+        keccak_rate=contract.keccak_rate,
+        iteration_start=contract.iteration_start,
+        iteration_stop=contract.iteration_stop,
+        iteration_step=contract.iteration_step,
+        keccak_base_gas=contract.keccak_base_gas,
+        keccak_per_word_gas=contract.keccak_per_word_gas,
+        pop_gas=contract.pop_gas,
+        optimal_input_length=optimal_input_length,
+    )
+
+
 def load_keccak_templates(path: str | Path) -> tuple[KeccakMappingTemplate, ...]:
     template_path = Path(path)
     data = json.loads(template_path.read_text())
@@ -280,15 +428,21 @@ def render_keccak_case(template: KeccakMappingTemplate) -> dict[str, Any]:
 
 
 def compute_keccak_max_permutations_input_length() -> int:
-    available_gas = KECCAK_BENCHMARK_GAS_LIMIT - KECCAK_INTRINSIC_GAS
+    return derive_upstream_keccak_witness_contract().optimal_input_length
+
+
+def _compute_keccak_max_permutations_input_length_from_contract(
+    contract: UpstreamKeccakWitnessContract,
+) -> int:
+    available_gas = contract.benchmark_gas_limit - contract.intrinsic_gas
     max_keccak_perm_per_block = 0
     optimal_input_length = 0
-    for i in range(1, 1_000_000, 32):
+    for i in range(contract.iteration_start, contract.iteration_stop, contract.iteration_step):
         words = math.ceil(i / 32)
-        iteration_gas_cost = POP_GAS + KECCAK_BASE_GAS + KECCAK_PER_WORD_GAS * words
+        iteration_gas_cost = contract.pop_gas + contract.keccak_base_gas + contract.keccak_per_word_gas * words
         available_gas_after_expansion = max(0, available_gas - _memory_expansion_cost(i))
         num_keccak_calls = available_gas_after_expansion // iteration_gas_cost
-        num_keccak_permutations = num_keccak_calls * math.ceil(i / KECCAK_RATE)
+        num_keccak_permutations = num_keccak_calls * math.ceil(i / contract.keccak_rate)
         if num_keccak_permutations > max_keccak_perm_per_block:
             max_keccak_perm_per_block = num_keccak_permutations
             optimal_input_length = i

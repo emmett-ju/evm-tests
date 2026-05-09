@@ -61,6 +61,7 @@ from adapter.log_generator import generate_upstream_log_templates
 from adapter.inventory import summarize_inventory_dir, write_inventory_payload
 from adapter.keccak_generator import (
     compute_keccak_max_permutations_input_length,
+    derive_upstream_keccak_witness_contract,
     generate_upstream_keccak_manifest,
     generate_upstream_keccak_templates,
     load_keccak_templates,
@@ -1204,10 +1205,18 @@ class HarnessTests(unittest.TestCase):
                 )
 
     def test_keccak_max_permutations_witness_contract_matches_upstream_helper(self) -> None:
-        self.assertEqual(compute_keccak_max_permutations_input_length(), 115329)
+        contract = derive_upstream_keccak_witness_contract()
+        self.assertTrue(contract.tx_gas_limit_cap_is_none)
+        self.assertEqual(contract.benchmark_gas_limit, 120000000)
+        self.assertEqual(contract.intrinsic_gas, 21000)
+        self.assertEqual(contract.keccak_rate, 136)
+        self.assertEqual((contract.iteration_start, contract.iteration_stop, contract.iteration_step), (1, 1000000, 32))
+        self.assertEqual((contract.keccak_base_gas, contract.keccak_per_word_gas, contract.pop_gas), (30, 6, 2))
+        self.assertEqual(contract.optimal_input_length, 115329)
+        self.assertEqual(compute_keccak_max_permutations_input_length(), contract.optimal_input_length)
         templates = load_keccak_templates(ROOT / "suites/templates/upstream_keccak_templates.json")
         max_case = next(template for template in templates if template.mode == "max_permutations")
-        self.assertEqual(max_case.witness_input_length, 115329)
+        self.assertEqual(max_case.witness_input_length, contract.optimal_input_length)
 
     def test_keccak_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
