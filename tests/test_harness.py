@@ -647,18 +647,17 @@ class HarnessTests(unittest.TestCase):
                 template_path=generated_template_path,
                 output_path=manifest_path,
             )
-            checked_in_templates = json.loads(
-                (ROOT / "suites/templates/upstream_comparison_templates.json").read_text()
-            )
-            checked_in_inventory = json.loads(
-                (ROOT / "suites/templates/upstream_comparison_inventory.json").read_text()
-            )
-            checked_in_manifest = json.loads(
-                (ROOT / "suites/manifests/upstream_comparison_mapped.json").read_text()
-            )
-            self.assertEqual(json.loads(generated_template_path.read_text()), checked_in_templates)
-            self.assertEqual(json.loads(inventory_path.read_text()), checked_in_inventory)
-            self.assertEqual(json.loads(manifest_path.read_text()), checked_in_manifest)
+            checked_in_pairs = [
+                (generated_template_path, ROOT / "suites/templates/upstream_comparison_templates.json"),
+                (inventory_path, ROOT / "suites/templates/upstream_comparison_inventory.json"),
+                (manifest_path, ROOT / "suites/manifests/upstream_comparison_mapped.json"),
+            ]
+            for generated_path, checked_in_path in checked_in_pairs:
+                self.assertEqual(
+                    generated_path.read_text(),
+                    checked_in_path.read_text(),
+                    f"{checked_in_path.name} byte drift",
+                )
             self.assertEqual(generated["name"], "upstream-comparison-mapped")
             self.assertEqual(len(generated["cases"]), 6)
             self.assertEqual({case["family"] for case in generated["cases"]}, {"state/comparison"})
@@ -1950,6 +1949,12 @@ class HarnessTests(unittest.TestCase):
                 0,
             )
             generated = json.loads(output_path.read_text())
+            checked_in_manifest_path = ROOT / "suites/manifests/upstream_comparison_mapped.json"
+            self.assertEqual(
+                output_path.read_text(),
+                checked_in_manifest_path.read_text(),
+                "upstream_comparison_mapped.json byte drift",
+            )
             self.assertEqual(generated["name"], "upstream-comparison-mapped")
             self.assertEqual(len(generated["cases"]), 6)
             observed_by_case = {case["case_id"]: case for case in generated["cases"]}
@@ -1964,6 +1969,17 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(
                 observed_by_case["upstream.benchmark.comparison.test_iszero.iszero"]["observe"]["comparison_probe"]["opcode"],
                 "ISZERO",
+            )
+            self.assertEqual(
+                [case["case_id"] for case in generated["cases"]],
+                [
+                    "upstream.benchmark.comparison.test_comparison.eq",
+                    "upstream.benchmark.comparison.test_comparison.gt",
+                    "upstream.benchmark.comparison.test_comparison.lt",
+                    "upstream.benchmark.comparison.test_comparison.sgt",
+                    "upstream.benchmark.comparison.test_comparison.slt",
+                    "upstream.benchmark.comparison.test_iszero.iszero",
+                ],
             )
             self.assertTrue(all(case["family"] == "state/comparison" for case in generated["cases"]))
 
