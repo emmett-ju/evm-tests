@@ -2011,15 +2011,65 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(families["alpha"]["blocked_reasons"], {"requires precise gas fixture": 1})
             self.assertEqual(families["beta"]["blocked_reasons"], {"requires block environment control": 1})
 
+    def _assert_checked_in_phase3_inventory_summary(self, summary: dict[str, object]) -> None:
+        families = {item["family"]: item for item in summary["families"]}
+        phase3_families = {
+            family: {
+                "total": item["total"],
+                "admitted": item["admitted"],
+                "blocked": item["blocked"],
+                "blocked_reasons": item["blocked_reasons"],
+            }
+            for family, item in families.items()
+            if family in {"arithmetic", "bitwise", "comparison", "stack", "control-flow", "keccak"}
+        }
+        self.assertEqual(
+            phase3_families,
+            {
+                "arithmetic": {"total": 65, "admitted": 65, "blocked": 0, "blocked_reasons": {}},
+                "bitwise": {
+                    "total": 12,
+                    "admitted": 9,
+                    "blocked": 3,
+                    "blocked_reasons": {"requires gas-sensitive benchmark shape not yet mapped": 3},
+                },
+                "comparison": {"total": 6, "admitted": 6, "blocked": 0, "blocked_reasons": {}},
+                "stack": {"total": 65, "admitted": 65, "blocked": 0, "blocked_reasons": {}},
+                "control-flow": {"total": 7, "admitted": 7, "blocked": 0, "blocked_reasons": {}},
+                "keccak": {"total": 35, "admitted": 35, "blocked": 0, "blocked_reasons": {}},
+            },
+        )
+        self.assertEqual(
+            {
+                "families": len(phase3_families),
+                "cases": sum(item["total"] for item in phase3_families.values()),
+                "admitted": sum(item["admitted"] for item in phase3_families.values()),
+                "blocked": sum(item["blocked"] for item in phase3_families.values()),
+            },
+            {"families": 6, "cases": 190, "admitted": 187, "blocked": 3},
+        )
+
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 291, "blocked": 322},
+            {"families": 14, "cases": 613, "admitted": 326, "blocked": 287},
         )
 
         families = {item["family"]: item for item in summary["families"]}
+        inventories = {item["inventory"]: item for item in summary["families"]}
         self.assertIn("account-query", families)
         self.assertEqual(families["account-query"]["inventory"], "upstream_account_query_inventory.json")
+        self.assertEqual(
+            inventories["upstream_storage_inventory.json"],
+            {
+                "family": "storage",
+                "inventory": "upstream_storage_inventory.json",
+                "total": 17,
+                "admitted": 17,
+                "blocked": 0,
+                "blocked_reasons": {},
+            },
+        )
         self.assertEqual(
             {
                 family: {
@@ -2053,6 +2103,7 @@ class HarnessTests(unittest.TestCase):
                 "requires external-account code-copy fixtures and byte-range observation not yet mapped": 5,
             },
         )
+        self._assert_checked_in_phase3_inventory_summary(summary)
 
     def test_inventory_summary_aggregates_checked_in_first_family_inventories(self) -> None:
         summary = summarize_inventory_dir(ROOT / "suites/templates")
@@ -2072,11 +2123,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 205, "blocked": 368},
+                {"families": 13, "cases": 573, "admitted": 321, "blocked": 252},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 219, "blocked": 394},
+                {"families": 14, "cases": 613, "admitted": 326, "blocked": 287},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -2147,11 +2198,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 218, "blocked": 394},
+                {"families": 14, "cases": 612, "admitted": 325, "blocked": 287},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 219, "blocked": 394},
+                {"families": 14, "cases": 613, "admitted": 326, "blocked": 287},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -2171,7 +2222,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 218, "blocked": 394},
+                {"families": 14, "cases": 612, "admitted": 325, "blocked": 287},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
