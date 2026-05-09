@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import json
 import re
 from dataclasses import asdict, dataclass
@@ -133,24 +134,12 @@ def scan_comparison_cases(
 
 
 def _scan_test_comparison_cases(text: str) -> list[AutoComparisonInventoryEntry]:
-    block = _extract_param_block(text, function_name="test_comparison")
-    opcodes = [
-        match.group("opcode")
-        for match in re.finditer(r"Op\.(?P<opcode>[A-Z0-9_]+)", block)
-    ]
-    if len(opcodes) != 5:
-        raise ValueError(f"expected 5 comparison benchmark cases, found {len(opcodes)}")
-    
-    exact_args = [
-        ('LT', (0, 1)),
-        ('GT', (0, 1)),
-        ('SLT', ((1<<256)-1, 1)),
-        ('SGT', ((1<<256)-1, 1)),
-        ('EQ', (1, 1))
-    ]
+    parsed_entries = _parse_test_comparison_param_entries(text)
+    if len(parsed_entries) != 5:
+        raise ValueError(f"expected 5 comparison benchmark cases, found {len(parsed_entries)}")
 
     entries: list[AutoComparisonInventoryEntry] = []
-    for opcode, args in zip(opcodes, [v[1] for v in exact_args]):
+    for opcode, args in parsed_entries:
         upstream_ref = (
             "tests/benchmark/compute/instruction/test_comparison.py::"
             f"test_comparison[opcode={opcode}]"
@@ -200,6 +189,89 @@ def _extract_param_block(text: str, *, function_name: str) -> str:
     if param_start == -1:
         raise ValueError(f"could not find parameter block for {function_name}")
     return text[param_start:func]
+
+
+def _parse_test_comparison_param_entries(text: str) -> list[tuple[str, tuple[int, int]]]:
+    module = ast.parse(text)
+    function = next(
+        (
+            node
+            for node in module.body
+            if isinstance(node, ast.FunctionDef) and node.name == "test_comparison"
+        ),
+        None,
+    )
+    if function is None:
+        raise ValueError("could not find benchmark function test_comparison")
+
+    param_decorator = next(
+        (
+            decorator
+            for decorator in function.decorator_list
+            if isinstance(decorator, ast.Call)
+            and isinstance(decorator.func, ast.Attribute)
+            and decorator.func.attr == "parametrize"
+            and decorator.args
+            and isinstance(decorator.args[0], ast.Constant)
+            and decorator.args[0].value == "opcode,opcode_args"
+        ),
+        None,
+    )
+    if param_decorator is None:
+        raise ValueError("could not find parameter block for test_comparison")
+    if len(param_decorator.args) < 2:
+        raise ValueError("parameter block for test_comparison is missing benchmark entries")
+
+    entries_node = param_decorator.args[1]
+    if not isinstance(entries_node, (ast.List, ast.Tuple)):
+        raise ValueError("parameter block for test_comparison must be a list or tuple literal")
+
+    entries: list[tuple[str, tuple[int, int]]] = []
+    for index, entry_node in enumerate(entries_node.elts):
+        if not isinstance(entry_node, ast.Tuple) or len(entry_node.elts) != 2:
+            raise ValueError(f"parameter block for test_comparison entry {index} must be a 2-tuple")
+        opcode_node, args_node = entry_node.elts
+        opcode = _parse_comparison_opcode(opcode_node, index=index)
+        args = _parse_comparison_args(args_node, index=index)
+        entries.append((opcode, args))
+    return entries
+
+
+def _parse_comparison_opcode(node: ast.AST, *, index: int) -> str:
+    if not isinstance(node, ast.Attribute) or not isinstance(node.value, ast.Name) or node.value.id != "Op":
+        raise ValueError(f"parameter block for test_comparison entry {index} has malformed opcode")
+    if not re.fullmatch(r"[A-Z0-9_]+", node.attr):
+        raise ValueError(f"parameter block for test_comparison entry {index} has malformed opcode name")
+    return node.attr
+
+
+def _parse_comparison_args(node: ast.AST, *, index: int) -> tuple[int, int]:
+    if not isinstance(node, ast.Tuple) or len(node.elts) != 2:
+        raise ValueError(f"parameter block for test_comparison entry {index} must define exactly two opcode_args")
+    try:
+        values = tuple(_literal_int(element) for element in node.elts)
+    except ValueError as exc:
+        raise ValueError(f"parameter block for test_comparison entry {index} has malformed opcode_args") from exc
+    return values  # type: ignore[return-value]
+
+
+def _literal_int(node: ast.AST) -> int:
+    if isinstance(node, ast.Constant) and isinstance(node.value, int):
+        return node.value
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+        return -_literal_int(node.operand)
+    if isinstance(node, ast.BinOp):
+        left = _literal_int(node.left)
+        right = _literal_int(node.right)
+        if isinstance(node.op, ast.LShift):
+            return left << right
+        if isinstance(node.op, ast.Sub):
+            return left - right
+        if isinstance(node.op, ast.Add):
+            return left + right
+        if isinstance(node.op, ast.Mult):
+            return left * right
+    raise ValueError("unsupported integer literal expression")
 
 
 def _comparison_inventory_entry_to_template(entry: AutoComparisonInventoryEntry) -> ComparisonMappingTemplate:

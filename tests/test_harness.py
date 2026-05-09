@@ -951,15 +951,58 @@ class HarnessTests(unittest.TestCase):
                 output_path=generated_path,
                 inventory_path=inventory_path,
             )
+            checked_in_templates_path = ROOT / "suites/templates/upstream_comparison_templates.json"
+            checked_in_inventory_path = ROOT / "suites/templates/upstream_comparison_inventory.json"
+            checked_in_templates = json.loads(checked_in_templates_path.read_text())
+            checked_in_inventory = json.loads(checked_in_inventory_path.read_text())
+            self.assertEqual(generated_path.read_text(), checked_in_templates_path.read_text())
             self.assertEqual(generated["name"], "upstream-comparison-mapping-templates")
             self.assertEqual(len(generated["cases"]), 6)
+            self.assertEqual(
+                [case["case_id"] for case in generated["cases"]],
+                [
+                    "upstream.benchmark.comparison.test_comparison.eq",
+                    "upstream.benchmark.comparison.test_comparison.gt",
+                    "upstream.benchmark.comparison.test_comparison.lt",
+                    "upstream.benchmark.comparison.test_comparison.sgt",
+                    "upstream.benchmark.comparison.test_comparison.slt",
+                    "upstream.benchmark.comparison.test_iszero.iszero",
+                ],
+            )
+            self.assertEqual(
+                {case["opcode"]: tuple(case["args"]) for case in generated["cases"]},
+                {
+                    "EQ": (1, 1),
+                    "GT": (0, 1),
+                    "LT": (0, 1),
+                    "SGT": ((1 << 256) - 1, 1),
+                    "SLT": ((1 << 256) - 1, 1),
+                    "ISZERO": (0,),
+                },
+            )
             inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(inventory, checked_in_inventory)
             self.assertEqual(inventory["name"], "upstream-comparison-auto-inventory")
             self.assertEqual(inventory["family"], "comparison")
             self.assertEqual(len(inventory["entries"]), 6)
             self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
             case_ids = [entry["case_id"] for entry in inventory["entries"]]
             self.assertEqual(len(case_ids), len(set(case_ids)))
+            self.assertEqual(case_ids, [case["case_id"] for case in generated["cases"]])
+
+    def test_comparison_template_scanner_fails_loudly_on_malformed_param_block(self) -> None:
+        source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_comparison.py"
+        original = source.read_text()
+        broken = original.replace("(0, 1),", "(0,),", 1)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            broken_path = Path(tmpdir) / "test_comparison_broken.py"
+            broken_path.write_text(broken)
+            with self.assertRaisesRegex(ValueError, "parameter block for test_comparison entry 0 must define exactly two opcode_args"):
+                generate_upstream_comparison_templates(
+                    repo_root=ROOT,
+                    source_path=broken_path,
+                    inventory_path=Path(tmpdir) / "inventory.json",
+                )
 
     def test_stack_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1384,6 +1427,21 @@ class HarnessTests(unittest.TestCase):
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-comparison-mapping-templates")
             self.assertEqual(len(generated["cases"]), 6)
+            self.assertEqual(
+                [case["case_id"] for case in generated["cases"]],
+                [entry["case_id"] for entry in inventory["entries"]],
+            )
+            self.assertEqual(
+                {case["opcode"]: tuple(case["args"]) for case in generated["cases"]},
+                {
+                    "EQ": (1, 1),
+                    "GT": (0, 1),
+                    "LT": (0, 1),
+                    "SGT": ((1 << 256) - 1, 1),
+                    "SLT": ((1 << 256) - 1, 1),
+                    "ISZERO": (0,),
+                },
+            )
             self.assertEqual(inventory["name"], "upstream-comparison-auto-inventory")
             self.assertEqual(inventory["family"], "comparison")
             self.assertEqual(len(inventory["entries"]), 6)
@@ -1749,6 +1807,28 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["family"], "comparison")
             self.assertEqual(len(inventory["entries"]), 6)
             self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
+            self.assertEqual(
+                [entry["case_id"] for entry in inventory["entries"]],
+                [
+                    "upstream.benchmark.comparison.test_comparison.eq",
+                    "upstream.benchmark.comparison.test_comparison.gt",
+                    "upstream.benchmark.comparison.test_comparison.lt",
+                    "upstream.benchmark.comparison.test_comparison.sgt",
+                    "upstream.benchmark.comparison.test_comparison.slt",
+                    "upstream.benchmark.comparison.test_iszero.iszero",
+                ],
+            )
+            self.assertEqual(
+                {entry["opcode"]: tuple(entry["args"]) for entry in inventory["entries"]},
+                {
+                    "EQ": (1, 1),
+                    "GT": (0, 1),
+                    "LT": (0, 1),
+                    "SGT": ((1 << 256) - 1, 1),
+                    "SLT": ((1 << 256) - 1, 1),
+                    "ISZERO": (0,),
+                },
+            )
 
     def test_cli_scan_upstream_stack_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
