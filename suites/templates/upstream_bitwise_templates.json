@@ -153,6 +153,34 @@
       "args": [
         0
       ]
+    },
+    {
+      "case_id": "upstream.benchmark.bitwise.test_shifts.sar",
+      "description": "Mapped from execution-specs SAR shift benchmark onto an RPC-only deterministic witness flow.",
+      "namespace_seed": "upstream-bitwise-shifts-sar",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_shifts[opcode=SAR]",
+      "notes": [
+        "Upstream intent: benchmark SAR inside the fixed-seed `test_shifts` benchmark shape.",
+        "RPC mapping: replay the upstream-derived finite shift schedule as a benchmark-shape witness, store the final post-schedule value in slot0, and validate the exact runtime bytes in the mock backend.",
+        "Admitted as a deterministic witness of the current benchmark shape only; it does not claim throughput parity. This witness currently replays 6134 upstream-derived shift pairs."
+      ],
+      "mode": "test_shifts",
+      "opcode": "SAR",
+      "args": []
+    },
+    {
+      "case_id": "upstream.benchmark.bitwise.test_shifts.shr",
+      "description": "Mapped from execution-specs SHR shift benchmark onto an RPC-only deterministic witness flow.",
+      "namespace_seed": "upstream-bitwise-shifts-shr",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_shifts[opcode=SHR]",
+      "notes": [
+        "Upstream intent: benchmark SHR inside the fixed-seed `test_shifts` benchmark shape.",
+        "RPC mapping: replay the upstream-derived finite shift schedule as a benchmark-shape witness, store the final post-schedule value in slot0, and validate the exact runtime bytes in the mock backend.",
+        "Admitted as a deterministic witness of the current benchmark shape only; it does not claim throughput parity. This witness currently replays 6134 upstream-derived shift pairs."
+      ],
+      "mode": "test_shifts",
+      "opcode": "SHR",
+      "args": []
     }
   ]
 }

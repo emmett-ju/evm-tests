@@ -149,6 +149,16 @@ class MockBackend:
                 bitwise_probe = case.observe.get("bitwise_probe")
                 if bitwise_probe is not None:
                     from adapter.assembler import _word_hex
+                    from adapter.bitwise_generator import _build_bitwise_runtime, _build_shift_witness_runtime
+
+                    mode = bitwise_probe.get("mode")
+                    opcode = bitwise_probe["opcode"]
+                    if mode == "test_shifts":
+                        expected_runtime = _build_shift_witness_runtime(opcode)
+                    else:
+                        expected_runtime = _build_bitwise_runtime(opcode, tuple(bitwise_probe["args"]))
+                    if code != expected_runtime:
+                        raise ValueError(f"unsupported mock contract code path: {code}")
                     storage["0x00"] = _word_hex(bitwise_probe["expected_result"])
                     continue
 

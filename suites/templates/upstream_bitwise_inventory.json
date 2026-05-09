@@ -134,26 +134,22 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_shifts[opcode=SAR]",
       "case_id": "upstream.benchmark.bitwise.test_shifts.sar",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-sensitive benchmark shape not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_shifts",
+      "reasons": [],
       "source": "test_shifts",
-      "opcode": null,
-      "args": null
+      "opcode": "SAR",
+      "args": []
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_shifts[opcode=SHR]",
       "case_id": "upstream.benchmark.bitwise.test_shifts.shr",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-sensitive benchmark shape not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_shifts",
+      "reasons": [],
       "source": "test_shifts",
-      "opcode": null,
-      "args": null
+      "opcode": "SHR",
+      "args": []
     }
   ]
 }

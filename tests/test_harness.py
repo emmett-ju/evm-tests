@@ -40,8 +40,14 @@ from adapter.call_context_generator import (
     load_call_context_templates,
 )
 from adapter.block_context_generator import generate_upstream_block_context_templates
-from adapter.arithmetic_generator import generate_upstream_arithmetic_templates
-from adapter.bitwise_generator import generate_upstream_bitwise_templates
+from adapter.arithmetic_generator import (
+    generate_upstream_arithmetic_manifest,
+    generate_upstream_arithmetic_templates,
+)
+from adapter.bitwise_generator import (
+    generate_upstream_bitwise_manifest,
+    generate_upstream_bitwise_templates,
+)
 from adapter.comparison_generator import generate_upstream_comparison_templates
 from adapter.control_flow_generator import (
     generate_upstream_control_flow_manifest,
@@ -190,6 +196,20 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("upstream.benchmark.stack.test_dup.dup16", selected_ids)
         self.assertIn("upstream.benchmark.stack.test_swap.swap16", selected_ids)
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
+    def test_selector_allows_upstream_mapped_arithmetic_cases(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_arithmetic_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(len(selected), 65)
+        selected_ids = [case.case_id for case in selected]
+        self.assertIn("upstream.benchmark.arithmetic.test_arithmetic.add.base.arity_2", selected_ids)
+        self.assertIn("upstream.benchmark.arithmetic.test_arithmetic.signextend.base.arity_2", selected_ids)
+        self.assertIn("upstream.benchmark.arithmetic.test_mod_arithmetic.mulmod.mod_bits_255", selected_ids)
+        self.assertIn("upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_136279841", selected_ids)
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual({case.family for case in selected}, {"state/arithmetic"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
     def test_selector_allows_upstream_mapped_call_context_case(self) -> None:
@@ -529,6 +549,67 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertEqual(generated["cases"][0]["family"], "state/keccak")
 
+    def test_arithmetic_manifest_generator_matches_checked_in_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_template_path = Path(tmpdir) / "upstream_arithmetic_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_arithmetic_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_arithmetic_mapped.json"
+            generate_upstream_arithmetic_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
+            generated = generate_upstream_arithmetic_manifest(
+                repo_root=ROOT,
+                template_path=generated_template_path,
+                output_path=manifest_path,
+            )
+            checked_in_templates = json.loads(
+                (ROOT / "suites/templates/upstream_arithmetic_templates.json").read_text()
+            )
+            checked_in_inventory = json.loads(
+                (ROOT / "suites/templates/upstream_arithmetic_inventory.json").read_text()
+            )
+            checked_in_manifest = json.loads(
+                (ROOT / "suites/manifests/upstream_arithmetic_mapped.json").read_text()
+            )
+            self.assertEqual(json.loads(generated_template_path.read_text()), checked_in_templates)
+            self.assertEqual(json.loads(inventory_path.read_text()), checked_in_inventory)
+            self.assertEqual(json.loads(manifest_path.read_text()), checked_in_manifest)
+            self.assertEqual(generated["name"], "upstream-arithmetic-mapped")
+            self.assertEqual(len(generated["cases"]), 65)
+            self.assertEqual({case["family"] for case in generated["cases"]}, {"state/arithmetic"})
+            observed_case_ids = {case["case_id"] for case in generated["cases"]}
+            self.assertIn("upstream.benchmark.arithmetic.test_arithmetic.add.base.arity_2", observed_case_ids)
+            self.assertIn("upstream.benchmark.arithmetic.test_mod.mod.mod_bits_255", observed_case_ids)
+            self.assertIn("upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_136279841.base_136279841", observed_case_ids)
+            for case in generated["cases"]:
+                self.assertIn("arithmetic_probe", case["observe"])
+                self.assertIn("0x00", case["expected"]["storage"])
+
+    def test_bitwise_manifest_generator_matches_checked_in_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_template_path = Path(tmpdir) / "upstream_bitwise_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_bitwise_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_bitwise_mapped.json"
+            templates = generate_upstream_bitwise_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
+            generated = generate_upstream_bitwise_manifest(
+                repo_root=ROOT,
+                template_path=generated_template_path,
+                output_path=manifest_path,
+            )
+            checked_in = json.loads((ROOT / "suites/manifests/upstream_bitwise_mapped.json").read_text())
+            self.assertEqual(generated, checked_in)
+            self.assertEqual(generated["name"], "upstream-bitwise-mapped")
+            self.assertEqual(len(generated["cases"]), 11)
+            case_ids = {case["case_id"] for case in generated["cases"]}
+            self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", case_ids)
+            self.assertIn("upstream.benchmark.bitwise.test_shifts.sar", case_ids)
+
     def test_keccak_checked_in_artifacts_match_generated_bytes(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_template_path = Path(tmpdir) / "upstream_keccak_templates.json"
@@ -772,14 +853,27 @@ class HarnessTests(unittest.TestCase):
                 inventory_path=inventory_path,
             )
             self.assertEqual(generated["name"], "upstream-bitwise-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 9)
+            self.assertEqual(len(generated["cases"]), 11)
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(inventory["name"], "upstream-bitwise-auto-inventory")
             self.assertEqual(inventory["family"], "bitwise")
             self.assertEqual(len(inventory["entries"]), 12)
-            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 9)
+            admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
+            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
+            self.assertEqual(len(admitted), 11)
+            self.assertEqual(len(blocked), 1)
+            self.assertEqual(
+                blocked[0]["case_id"],
+                "upstream.benchmark.bitwise.test_clz_diff.clz",
+            )
+            self.assertEqual(
+                blocked[0]["reasons"],
+                ["requires gas-sensitive benchmark shape not yet mapped"],
+            )
             case_ids = [entry["case_id"] for entry in inventory["entries"]]
             self.assertEqual(len(case_ids), len(set(case_ids)))
+            self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", case_ids)
+            self.assertIn("upstream.benchmark.bitwise.test_shifts.sar", case_ids)
 
     def test_comparison_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1191,11 +1285,17 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-bitwise-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 9)
+            self.assertEqual(len(generated["cases"]), 11)
             self.assertEqual(inventory["name"], "upstream-bitwise-auto-inventory")
             self.assertEqual(inventory["family"], "bitwise")
             self.assertEqual(len(inventory["entries"]), 12)
-            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 9)
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 11)
+            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
+            self.assertEqual(len(blocked), 1)
+            self.assertEqual(blocked[0]["upstream_ref"], "tests/benchmark/compute/instruction/test_bitwise.py::test_clz_diff")
+            self.assertEqual(blocked[0]["case_id"], "upstream.benchmark.bitwise.test_clz_diff.clz")
+            self.assertEqual(blocked[0]["reasons"], ["requires gas-sensitive benchmark shape not yet mapped"])
+            self.assertEqual(blocked[0]["source"], "test_clz_diff")
 
     def test_cli_scan_upstream_comparison_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1216,11 +1316,12 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-comparison-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 6)
             self.assertEqual(inventory["name"], "upstream-comparison-auto-inventory")
             self.assertEqual(inventory["family"], "comparison")
             self.assertEqual(len(inventory["entries"]), 6)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 6)
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
 
     def test_cli_scan_upstream_stack_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1561,7 +1662,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["name"], "upstream-bitwise-auto-inventory")
             self.assertEqual(inventory["family"], "bitwise")
             self.assertEqual(len(inventory["entries"]), 12)
-            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 9)
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 11)
 
     def test_cli_scan_upstream_comparison_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1672,6 +1773,27 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(generated["cases"]), 35)
             max_case = next(case for case in generated["cases"] if case["case_id"] == "upstream.benchmark.keccak.test_keccak_max_permutations")
             self.assertEqual(max_case["expected"]["storage"]["0x01"], "0x000000000000000000000000000000000000000000000000000000000001c281")
+
+    def test_cli_generate_bitwise_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "generated.json"
+            self.assertEqual(
+                main(["generate-bitwise-manifest", "--output", str(output_path)]),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            self.assertEqual(generated["name"], "upstream-bitwise-mapped")
+            self.assertEqual(len(generated["cases"]), 11)
+            case_ids = {case["case_id"] for case in generated["cases"]}
+            self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", case_ids)
+            self.assertIn("upstream.benchmark.bitwise.test_shifts.sar", case_ids)
+            for case in generated["cases"]:
+                if case["case_id"] in {
+                    "upstream.benchmark.bitwise.test_shifts.shr",
+                    "upstream.benchmark.bitwise.test_shifts.sar",
+                }:
+                    self.assertEqual(case["observe"]["bitwise_probe"]["mode"], "test_shifts")
+                    self.assertEqual(case["family"], "state/bitwise")
 
     def test_cli_scan_upstream_keccak_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -2029,9 +2151,9 @@ class HarnessTests(unittest.TestCase):
                 "arithmetic": {"total": 65, "admitted": 65, "blocked": 0, "blocked_reasons": {}},
                 "bitwise": {
                     "total": 12,
-                    "admitted": 9,
-                    "blocked": 3,
-                    "blocked_reasons": {"requires gas-sensitive benchmark shape not yet mapped": 3},
+                    "admitted": 11,
+                    "blocked": 1,
+                    "blocked_reasons": {"requires gas-sensitive benchmark shape not yet mapped": 1},
                 },
                 "comparison": {"total": 6, "admitted": 6, "blocked": 0, "blocked_reasons": {}},
                 "stack": {"total": 65, "admitted": 65, "blocked": 0, "blocked_reasons": {}},
@@ -2046,13 +2168,13 @@ class HarnessTests(unittest.TestCase):
                 "admitted": sum(item["admitted"] for item in phase3_families.values()),
                 "blocked": sum(item["blocked"] for item in phase3_families.values()),
             },
-            {"families": 6, "cases": 190, "admitted": 187, "blocked": 3},
+            {"families": 6, "cases": 190, "admitted": 189, "blocked": 1},
         )
 
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 326, "blocked": 287},
+            {"families": 14, "cases": 613, "admitted": 328, "blocked": 285},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -2082,7 +2204,7 @@ class HarnessTests(unittest.TestCase):
             },
             {
                 "arithmetic": {"total": 65, "admitted": 65, "blocked": 0},
-                "bitwise": {"total": 12, "admitted": 9, "blocked": 3},
+                "bitwise": {"total": 12, "admitted": 11, "blocked": 1},
                 "comparison": {"total": 6, "admitted": 6, "blocked": 0},
                 "stack": {"total": 65, "admitted": 65, "blocked": 0},
                 "control-flow": {"total": 7, "admitted": 7, "blocked": 0},
@@ -2123,11 +2245,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 321, "blocked": 252},
+                {"families": 13, "cases": 573, "admitted": 323, "blocked": 250},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 326, "blocked": 287},
+                {"families": 14, "cases": 613, "admitted": 328, "blocked": 285},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -2198,11 +2320,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 325, "blocked": 287},
+                {"families": 14, "cases": 612, "admitted": 327, "blocked": 285},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 326, "blocked": 287},
+                {"families": 14, "cases": 613, "admitted": 328, "blocked": 285},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -2222,7 +2344,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 325, "blocked": 287},
+                {"families": 14, "cases": 612, "admitted": 327, "blocked": 285},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -2968,6 +3090,58 @@ class HarnessTests(unittest.TestCase):
                 self.assertTrue(result["success"], result["case_id"])
                 self.assertEqual(result["observed"], result["expected"], result["case_id"])
 
+    def test_mock_backend_runs_upstream_mapped_bitwise_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_bitwise_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 11)
+
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            representative_storage = {
+                "upstream.benchmark.bitwise.test_bitwise.and": {
+                    "0x00": "0x73eda753299d7d483339d80809a1d80553bda402fffe5bfefffffffe00000001",
+                },
+                "upstream.benchmark.bitwise.test_not_op.not": {
+                    "0x00": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                },
+                "upstream.benchmark.bitwise.test_clz_same.clz": {
+                    "0x00": "0x00000000000000000000000000000000000000000000000000000000000000f8",
+                },
+                "upstream.benchmark.bitwise.test_shifts.shr": {
+                    "0x00": "0x0000100000000000000000000000000000000000000000000000000000000000",
+                },
+                "upstream.benchmark.bitwise.test_shifts.sar": {
+                    "0x00": "0xfffffffffffffffe000000000000000000000000000000000000000000000000",
+                },
+            }
+            self.assertEqual(set(representative_storage).issubset(observed_by_case), True)
+            for case_id, expected_slots in representative_storage.items():
+                result = observed_by_case[case_id]
+                self.assertEqual(result["observed"]["storage"], expected_slots)
+                self.assertEqual(result["expected"]["storage"], expected_slots)
+                self.assertEqual(result["diffs"], [])
+                self.assertTrue(result["tx_hashes"])
+                self.assertIs(result["success"], True)
+
+            for result in report["results"]:
+                self.assertEqual(result["diffs"], [], result["case_id"])
+                self.assertTrue(result["success"], result["case_id"])
+                self.assertEqual(result["observed"], result["expected"], result["case_id"])
+
     def test_cli_run_mock_upstream_control_flow_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -3127,6 +3301,50 @@ class HarnessTests(unittest.TestCase):
                 ]["expected"],
             )
 
+    def test_cli_run_mock_upstream_bitwise_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_bitwise_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-bitwise-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 11)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertEqual(
+                {
+                    "upstream.benchmark.bitwise.test_shifts.shr": observed_by_case[
+                        "upstream.benchmark.bitwise.test_shifts.shr"
+                    ]["observed"]["storage"],
+                    "upstream.benchmark.bitwise.test_shifts.sar": observed_by_case[
+                        "upstream.benchmark.bitwise.test_shifts.sar"
+                    ]["observed"]["storage"],
+                },
+                {
+                    "upstream.benchmark.bitwise.test_shifts.shr": {
+                        "0x00": "0x0000100000000000000000000000000000000000000000000000000000000000",
+                    },
+                    "upstream.benchmark.bitwise.test_shifts.sar": {
+                        "0x00": "0xfffffffffffffffe000000000000000000000000000000000000000000000000",
+                    },
+                },
+            )
+
     def test_cli_run_mock_upstream_stack_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -3199,6 +3417,17 @@ class HarnessTests(unittest.TestCase):
         broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-keccak-runtime")
+
+    def test_mock_backend_rejects_unsupported_bitwise_runtime_code_path(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_bitwise_mapped.json")
+        broken_case = next(
+            case for case in manifest.cases if case.case_id == "upstream.benchmark.bitwise.test_shifts.shr"
+        )
+        broken_case.steps[0]["bytecode_runtime"] = "0xdeadbeef"
+        broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
+        with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
+            backend.execute_case(broken_case, "negative-unsupported-bitwise-runtime")
 
     def test_mock_backend_rejects_unsupported_stack_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
@@ -3311,6 +3540,79 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertEqual(gasprice["context"]["$gas_price"], "0x3b9aca00")
             self.assertIs(gasprice["success"], True)
+
+    def test_cli_run_mock_upstream_tx_context_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_tx_context_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-tx-context-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 2)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result["observed"]["storage"]["0x00"] for result in report["results"]}
+            self.assertEqual(
+                observed_by_case,
+                {
+                    "upstream.benchmark.tx_context.origin.success": "0x000000000000000000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    "upstream.benchmark.tx_context.gasprice.success": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+                },
+            )
+
+    def test_cli_run_mock_upstream_arithmetic_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_arithmetic_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-arithmetic-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 65)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result["observed"]["storage"]["0x00"] for result in report["results"]}
+            self.assertEqual(
+                {
+                    "upstream.benchmark.arithmetic.test_arithmetic.add.base.arity_2": observed_by_case["upstream.benchmark.arithmetic.test_arithmetic.add.base.arity_2"],
+                    "upstream.benchmark.arithmetic.test_arithmetic.signextend.base.arity_2": observed_by_case["upstream.benchmark.arithmetic.test_arithmetic.signextend.base.arity_2"],
+                    "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_255": observed_by_case["upstream.benchmark.arithmetic.test_mod.mod.mod_bits_255"],
+                    "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_3": observed_by_case["upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_3"],
+                },
+                {
+                    "upstream.benchmark.arithmetic.test_arithmetic.add.base.arity_2": "0x73eda753299d7d483339d80809a1d80553bda402fffe5bfefffffffdfffffc30",
+                    "upstream.benchmark.arithmetic.test_arithmetic.signextend.base.arity_2": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdadada",
+                    "upstream.benchmark.arithmetic.test_mod.mod.mod_bits_255": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_3.base_3": "0x000000000000000000000000000000000000000000000000000000000000001b",
+                },
+            )
 
     def test_cli_run_mock_upstream_tx_context_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import random
 import re
 from dataclasses import asdict, dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +15,13 @@ from adapter.assembler import _push_int, _word_hex, _build_init_code
 
 
 BLOCKED_REASON = "requires gas-sensitive benchmark shape not yet mapped"
+SHIFT_WITNESS_DEPLOY_GAS = "0x989680"
+SHIFT_WITNESS_INVOKE_GAS = "0x0f4240"
+UPSTREAM_MAX_CODE_SIZE = 24_576
+UPSTREAM_SHIFT_PREFIX_LEN = 34
+UPSTREAM_SHIFT_SUFFIX_LEN = 4
+SHIFT_INITIAL_VALUE = (1 << 256) - 1
+SHIFT_AMOUNTS: tuple[int, ...] = tuple(x + (x >= 8) + (x >= 15) for x in range(1, 16))
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,6 +46,14 @@ class AutoBitwiseInventoryEntry:
     source: str
     opcode: str | None = None
     args: tuple[int, ...] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ShiftWitness:
+    opcode: str
+    rounds: int
+    final_value: int
+    schedule: tuple[tuple[int, int], ...]
 
 
 def generate_upstream_bitwise_templates(
@@ -145,15 +162,57 @@ def _scan_test_bitwise_cases(text: str) -> list[AutoBitwiseInventoryEntry]:
     ]
     if len(opcodes) != 7:
         raise ValueError(f"expected 7 bitwise benchmark cases, found {len(opcodes)}")
-    
+
     exact_args = [
-        ('AND', (115792089237316195423570985008687907853269984665640564039457584007908834671663, 52435875175126190479447740508185965837690552500527637822603658699938581184513)), 
-        ('OR', (115792089237316195423570985008687907853269984665640564039457584007908834671663, 52435875175126190479447740508185965837690552500527637822603658699938581184513)), 
-        ('XOR', (115792089237316195423570985008687907853269984665640564039457584007908834671663, 52435875175126190479447740508185965837690552500527637822603658699938581184513)), 
-        ('BYTE', (31, 115792089237316195423570985008687907853269984665640564039457584007908834671663)), 
-        ('SHL', (1, 115792089237316195423570985008687907853269984665640564039457584007908834671663)), 
-        ('SHR', (1, 115792089237316195423570985008687907853269984665640564039457584007908834671663)), 
-        ('SAR', (1, 115792089237316195423570985008687907853269984665640564039457584007908834671663))
+        (
+            "AND",
+            (
+                115792089237316195423570985008687907853269984665640564039457584007908834671663,
+                52435875175126190479447740508185965837690552500527637822603658699938581184513,
+            ),
+        ),
+        (
+            "OR",
+            (
+                115792089237316195423570985008687907853269984665640564039457584007908834671663,
+                52435875175126190479447740508185965837690552500527637822603658699938581184513,
+            ),
+        ),
+        (
+            "XOR",
+            (
+                115792089237316195423570985008687907853269984665640564039457584007908834671663,
+                52435875175126190479447740508185965837690552500527637822603658699938581184513,
+            ),
+        ),
+        (
+            "BYTE",
+            (
+                31,
+                115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            ),
+        ),
+        (
+            "SHL",
+            (
+                1,
+                115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            ),
+        ),
+        (
+            "SHR",
+            (
+                1,
+                115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            ),
+        ),
+        (
+            "SAR",
+            (
+                1,
+                115792089237316195423570985008687907853269984665640564039457584007908834671663,
+            ),
+        ),
     ]
 
     entries: list[AutoBitwiseInventoryEntry] = []
@@ -197,10 +256,12 @@ def _scan_test_shifts_cases(text: str) -> list[AutoBitwiseInventoryEntry]:
             AutoBitwiseInventoryEntry(
                 upstream_ref=upstream_ref,
                 case_id=case_id,
-                admitted=False,
-                mode=None,
-                reasons=[BLOCKED_REASON],
+                admitted=True,
+                mode="test_shifts",
+                reasons=[],
                 source="test_shifts",
+                opcode=opcode,
+                args=(),
             )
         )
     return entries
@@ -262,58 +323,90 @@ def _extract_param_block(text: str, *, function_name: str) -> str:
 
 
 def _bitwise_inventory_entry_to_template(entry: AutoBitwiseInventoryEntry) -> BitwiseMappingTemplate:
+    opcode = entry.opcode or ""
+    if entry.source == "test_shifts":
+        witness = _compute_shift_witness(opcode)
+        return BitwiseMappingTemplate(
+            case_id=entry.case_id,
+            description=(
+                f"Mapped from execution-specs {opcode} shift benchmark onto an RPC-only deterministic witness flow."
+            ),
+            namespace_seed=f"upstream-bitwise-shifts-{opcode.lower()}",
+            upstream_ref=entry.upstream_ref,
+            notes=[
+                f"Upstream intent: benchmark {opcode} inside the fixed-seed `test_shifts` benchmark shape.",
+                (
+                    "RPC mapping: replay the upstream-derived finite shift schedule as a benchmark-shape witness, "
+                    "store the final post-schedule value in slot0, and validate the exact runtime bytes in the mock backend."
+                ),
+                (
+                    f"Admitted as a deterministic witness of the current benchmark shape only; it does not claim throughput parity. "
+                    f"This witness currently replays {witness.rounds} upstream-derived shift pairs."
+                ),
+            ],
+            mode="test_shifts",
+            opcode=opcode,
+            args=(),
+        )
     return BitwiseMappingTemplate(
         case_id=entry.case_id,
-        description=f"Mapped from execution-specs {entry.opcode} onto an RPC-only deploy/call/storage-assert flow.",
-        namespace_seed=f"upstream-bitwise-{entry.opcode.lower()}",
+        description=f"Mapped from execution-specs {opcode} onto an RPC-only deploy/call/storage-assert flow.",
+        namespace_seed=f"upstream-bitwise-{opcode.lower()}",
         upstream_ref=entry.upstream_ref,
         notes=[
-            f"Upstream intent: benchmark {entry.opcode} with specific parameters.",
+            f"Upstream intent: benchmark {opcode} with specific parameters.",
             "RPC mapping: runtime pushes parameters, executes the opcode, and writes the result to storage slot0.",
             "Admitted because the mathematical result is perfectly deterministic and observable in final storage.",
         ],
         mode=entry.mode or "",
-        opcode=entry.opcode or "",
+        opcode=opcode,
         args=entry.args or (),
     )
 
 
+def _to_signed(value: int) -> int:
+    return value if value < (1 << 255) else value - (1 << 256)
+
+
+def _to_unsigned(value: int) -> int:
+    return value if value >= 0 else value + (1 << 256)
+
+
 def _simulate_bitwise(opcode: str, args: tuple[int, ...]) -> int:
-    if opcode == 'AND':
+    if opcode == "AND":
         return args[0] & args[1]
-    elif opcode == 'OR':
+    if opcode == "OR":
         return args[0] | args[1]
-    elif opcode == 'XOR':
+    if opcode == "XOR":
         return args[0] ^ args[1]
-    elif opcode == 'NOT':
-        return ~args[0] & ((1<<256)-1)
-    elif opcode == 'BYTE':
+    if opcode == "NOT":
+        return ~args[0] & ((1 << 256) - 1)
+    if opcode == "BYTE":
         idx, val = args[0], args[1]
         if idx >= 32:
             return 0
         return (val >> ((31 - idx) * 8)) & 0xFF
-    elif opcode == 'SHL':
+    if opcode == "SHL":
         shift, val = args[0], args[1]
         if shift >= 256:
             return 0
-        return (val << shift) & ((1<<256)-1)
-    elif opcode == 'SHR':
+        return (val << shift) & ((1 << 256) - 1)
+    if opcode == "SHR":
         shift, val = args[0], args[1]
         if shift >= 256:
             return 0
         return val >> shift
-    elif opcode == 'SAR':
+    if opcode == "SAR":
         shift, val = args[0], args[1]
         is_neg = (val & (1 << 255)) != 0
         if shift >= 256:
-            return ((1<<256)-1) if is_neg else 0
+            return ((1 << 256) - 1) if is_neg else 0
         if is_neg:
-            val_signed = val - (1<<256)
+            val_signed = val - (1 << 256)
             res = val_signed >> shift
-            return res + (1<<256)
-        else:
-            return val >> shift
-    elif opcode == 'CLZ':
+            return res + (1 << 256)
+        return val >> shift
+    if opcode == "CLZ":
         val = args[0]
         if val == 0:
             return 256
@@ -321,16 +414,60 @@ def _simulate_bitwise(opcode: str, args: tuple[int, ...]) -> int:
     raise ValueError(f"unsupported bitwise opcode: {opcode}")
 
 
+@lru_cache(maxsize=None)
+def _compute_shift_witness(opcode: str) -> ShiftWitness:
+    if opcode not in {"SHR", "SAR"}:
+        raise ValueError(f"unsupported shift witness opcode: {opcode}")
+    shift_right_fn = _shift_right_function(opcode)
+    rng = random.Random(1)
+    value = SHIFT_INITIAL_VALUE
+    code_body_len = UPSTREAM_MAX_CODE_SIZE - UPSTREAM_SHIFT_PREFIX_LEN - UPSTREAM_SHIFT_SUFFIX_LEN
+    schedule: list[tuple[int, int]] = []
+    code_body_bytes = 0
+    while code_body_bytes <= code_body_len - 4:
+        value, left_index = _select_shift_amount(rng, value, _shift_left_mod)
+        value, right_index = _select_shift_amount(rng, value, shift_right_fn)
+        schedule.append((left_index, right_index))
+        code_body_bytes += 4
+    return ShiftWitness(
+        opcode=opcode,
+        rounds=len(schedule),
+        final_value=value,
+        schedule=tuple(schedule),
+    )
+
+
+def _shift_left_mod(value: int, shift: int) -> int:
+    return (value << shift) % (1 << 256)
+
+
+def _shift_right_function(opcode: str):
+    if opcode == "SHR":
+        return lambda value, shift: value >> shift
+    if opcode == "SAR":
+        return lambda value, shift: _to_unsigned(_to_signed(value) >> shift)
+    raise ValueError(f"unsupported shift witness opcode: {opcode}")
+
+
+def _select_shift_amount(rng: random.Random, value: int, shift_fn) -> tuple[int, int]:
+    while True:
+        index = rng.randint(0, len(SHIFT_AMOUNTS) - 1)
+        shift = SHIFT_AMOUNTS[index]
+        new_value = shift_fn(value, shift) % (1 << 256)
+        if new_value != 0:
+            return new_value, index
+
+
 OPCODES: dict[str, int] = {
-    'AND': 0x16,
-    'OR': 0x17,
-    'XOR': 0x18,
-    'NOT': 0x19,
-    'BYTE': 0x1A,
-    'SHL': 0x1B,
-    'SHR': 0x1C,
-    'SAR': 0x1D,
-    'CLZ': 0x1E,
+    "AND": 0x16,
+    "OR": 0x17,
+    "XOR": 0x18,
+    "NOT": 0x19,
+    "BYTE": 0x1A,
+    "SHL": 0x1B,
+    "SHR": 0x1C,
+    "SAR": 0x1D,
+    "CLZ": 0x1E,
 }
 
 
@@ -345,29 +482,97 @@ def _build_bitwise_runtime(opcode: str, args: tuple[int, ...]) -> str:
     return "0x" + code.hex()
 
 
+def _build_large_init_code(runtime_code: str) -> str:
+    runtime_hex = runtime_code.removeprefix("0x")
+    runtime_bytes = bytes.fromhex(runtime_hex)
+    length = len(runtime_bytes)
+    if length == 0:
+        raise ValueError("runtime_code must not be empty")
+    if length <= 0xFF:
+        return _build_init_code(runtime_code)
+    length_push = _push_int(length)
+    offset = 0
+    while True:
+        offset_push = _push_int(offset)
+        header = length_push + offset_push + _push_int(0) + bytes([0x39]) + length_push + _push_int(0) + bytes([0xF3])
+        if len(header) == offset:
+            break
+        offset = len(header)
+    return "0x" + header.hex() + runtime_hex
+
+
+def _build_shift_witness_runtime(opcode: str) -> str:
+    witness = _compute_shift_witness(opcode)
+    code = bytearray()
+    for shift in SHIFT_AMOUNTS:
+        code += _push_int(shift)
+    code += _push_int(0)
+    code.append(0x35)  # CALLDATALOAD
+    for left_index, right_index in witness.schedule:
+        code.append(_dup_opcode_for_shift_index(left_index))
+        code.append(OPCODES["SHL"])
+        code.append(_dup_opcode_for_shift_index(right_index))
+        code.append(OPCODES[opcode])
+    code += _push_int(0)
+    code.append(0x55)  # SSTORE slot0 <- final witness value
+    code.append(0x00)  # STOP
+    runtime = "0x" + code.hex()
+    if len(bytes.fromhex(runtime.removeprefix("0x"))) > UPSTREAM_MAX_CODE_SIZE:
+        raise ValueError(f"shift witness runtime exceeds max code size for {opcode}")
+    return runtime
+
+
+def _dup_opcode_for_shift_index(index: int) -> int:
+    stack_index = len(SHIFT_AMOUNTS) - index
+    if not 1 <= stack_index <= 15:
+        raise ValueError(f"unsupported shift-index duplication target: {index}")
+    return 0x80 + stack_index
+
+
 def render_bitwise_case(template: BitwiseMappingTemplate) -> dict[str, Any]:
-    expected_val = _simulate_bitwise(template.opcode, template.args)
+    deploy_gas = "0x186a0"
+    invoke_gas = "0xc350"
+    if template.mode == "test_shifts":
+        witness = _compute_shift_witness(template.opcode)
+        expected_val = witness.final_value
+        runtime_code = _build_shift_witness_runtime(template.opcode)
+        init_code = _build_large_init_code(runtime_code)
+        observe = {
+            "storage_address": "$last_contract",
+            "bitwise_probe": {
+                "mode": template.mode,
+                "opcode": template.opcode,
+                "args": list(template.args),
+                "expected_result": expected_val,
+                "witness_rounds": witness.rounds,
+            },
+        }
+        deploy_gas = SHIFT_WITNESS_DEPLOY_GAS
+        invoke_gas = SHIFT_WITNESS_INVOKE_GAS
+    else:
+        expected_val = _simulate_bitwise(template.opcode, template.args)
+        runtime_code = _build_bitwise_runtime(template.opcode, template.args)
+        init_code = _build_init_code(runtime_code)
+        observe = {
+            "storage_address": "$last_contract",
+            "bitwise_probe": {
+                "mode": template.mode,
+                "opcode": template.opcode,
+                "args": list(template.args),
+                "expected_result": expected_val,
+            },
+        }
     expected = {"storage": {"0x00": _word_hex(expected_val)}}
-    runtime_code = _build_bitwise_runtime(template.opcode, template.args)
-    
-    observe = {
-        "storage_address": "$last_contract",
-        "bitwise_probe": {
-            "opcode": template.opcode,
-            "args": template.args,
-            "expected_result": expected_val,
-        },
-    }
     case = build_case(
         template,  # type: ignore[arg-type]
         steps=[
             deploy_contract_step(
-                init_code=_build_init_code(runtime_code),
+                init_code=init_code,
                 runtime_code=runtime_code,
-                gas="0x186a0",
+                gas=deploy_gas,
             ),
             wait_receipt_step(),
-            invoke_contract_step(data_hex="0x", gas="0xc350"),
+            invoke_contract_step(data_hex="0x", gas=invoke_gas),
             wait_receipt_step(),
         ],
         expected=expected,
