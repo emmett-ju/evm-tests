@@ -1,0 +1,1881 @@
+{
+  "name": "upstream-keccak-mapped",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_0.mem_update_false",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc empty, offset 0, and mem_update=False.",
+      "namespace_seed": "upstream-keccak-empty-offset0-memupdate-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=empty-offset=0-mem_update=False]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='empty' into offset 0 with mem_update=False.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "",
+          "offset": 0,
+          "mem_update": false
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6016600c60003960166000f336805f5f37365f20805f5550596002555f5160015500",
+          "bytecode_runtime": "0x36805f5f37365f20805f5550596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_0.mem_update_true",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc empty, offset 0, and mem_update=True.",
+      "namespace_seed": "upstream-keccak-empty-offset0-memupdate-true",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=empty-offset=0-mem_update=True]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='empty' into offset 0 with mem_update=True.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "",
+          "offset": 0,
+          "mem_update": true
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6017600c60003960176000f336805f5f37365f20805f555f52596002555f5160015500",
+          "bytecode_runtime": "0x36805f5f37365f20805f555f52596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x01": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_1024.mem_update_false",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc empty, offset 1024, and mem_update=False.",
+      "namespace_seed": "upstream-keccak-empty-offset1024-memupdate-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=empty-offset=1024-mem_update=False]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='empty' into offset 1024 with mem_update=False.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "",
+          "offset": 1024,
+          "mem_update": false
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601a600c600039601a6000f336805f610400373661040020805f5550596002555f5160015500",
+          "bytecode_runtime": "0x36805f610400373661040020805f5550596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_1024.mem_update_true",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc empty, offset 1024, and mem_update=True.",
+      "namespace_seed": "upstream-keccak-empty-offset1024-memupdate-true",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=empty-offset=1024-mem_update=True]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='empty' into offset 1024 with mem_update=True.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "",
+          "offset": 1024,
+          "mem_update": true
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601b600c600039601b6000f336805f610400373661040020805f555f52596002555f5160015500",
+          "bytecode_runtime": "0x36805f610400373661040020805f555f52596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x01": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_31.mem_update_false",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc empty, offset 31, and mem_update=False.",
+      "namespace_seed": "upstream-keccak-empty-offset31-memupdate-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=empty-offset=31-mem_update=False]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='empty' into offset 31 with mem_update=False.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "",
+          "offset": 31,
+          "mem_update": false
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6018600c60003960186000f336805f601f3736601f20805f5550596002555f5160015500",
+          "bytecode_runtime": "0x36805f601f3736601f20805f5550596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_31.mem_update_true",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc empty, offset 31, and mem_update=True.",
+      "namespace_seed": "upstream-keccak-empty-offset31-memupdate-true",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=empty-offset=31-mem_update=True]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='empty' into offset 31 with mem_update=True.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "",
+          "offset": 31,
+          "mem_update": true
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6019600c60003960196000f336805f601f3736601f20805f555f52596002555f5160015500",
+          "bytecode_runtime": "0x36805f601f3736601f20805f555f52596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x01": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff_32.offset_0.mem_update_false",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff\" * 32, offset 0, and mem_update=False.",
+      "namespace_seed": "upstream-keccak-ff_32-offset0-memupdate-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff\" * 32-offset=0-mem_update=False]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff\" * 32' into offset 0 with mem_update=False.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "offset": 0,
+          "mem_update": false
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6016600c60003960166000f336805f5f37365f20805f5550596002555f5160015500",
+          "bytecode_runtime": "0x36805f5f37365f20805f5550596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x361d92d9ca87a13035d5df9014118b15f267d0e6024e81f135be3f9da3ac70b5",
+          "0x01": "0x6666666666666666666666666666666666666666666666666666666666666666",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000040"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff_32.offset_0.mem_update_true",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff\" * 32, offset 0, and mem_update=True.",
+      "namespace_seed": "upstream-keccak-ff_32-offset0-memupdate-true",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff\" * 32-offset=0-mem_update=True]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff\" * 32' into offset 0 with mem_update=True.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "offset": 0,
+          "mem_update": true
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6017600c60003960176000f336805f5f37365f20805f555f52596002555f5160015500",
+          "bytecode_runtime": "0x36805f5f37365f20805f555f52596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x361d92d9ca87a13035d5df9014118b15f267d0e6024e81f135be3f9da3ac70b5",
+          "0x01": "0x361d92d9ca87a13035d5df9014118b15f267d0e6024e81f135be3f9da3ac70b5",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000040"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff_32.offset_1024.mem_update_false",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff\" * 32, offset 1024, and mem_update=False.",
+      "namespace_seed": "upstream-keccak-ff_32-offset1024-memupdate-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff\" * 32-offset=1024-mem_update=False]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff\" * 32' into offset 1024 with mem_update=False.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "offset": 1024,
+          "mem_update": false
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601a600c600039601a6000f336805f610400373661040020805f5550596002555f5160015500",
+          "bytecode_runtime": "0x36805f610400373661040020805f5550596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x361d92d9ca87a13035d5df9014118b15f267d0e6024e81f135be3f9da3ac70b5",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000440"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff_32.offset_1024.mem_update_true",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff\" * 32, offset 1024, and mem_update=True.",
+      "namespace_seed": "upstream-keccak-ff_32-offset1024-memupdate-true",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff\" * 32-offset=1024-mem_update=True]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff\" * 32' into offset 1024 with mem_update=True.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "offset": 1024,
+          "mem_update": true
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601b600c600039601b6000f336805f610400373661040020805f555f52596002555f5160015500",
+          "bytecode_runtime": "0x36805f610400373661040020805f555f52596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x361d92d9ca87a13035d5df9014118b15f267d0e6024e81f135be3f9da3ac70b5",
+          "0x01": "0x361d92d9ca87a13035d5df9014118b15f267d0e6024e81f135be3f9da3ac70b5",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000440"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff_32.offset_31.mem_update_false",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff\" * 32, offset 31, and mem_update=False.",
+      "namespace_seed": "upstream-keccak-ff_32-offset31-memupdate-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff\" * 32-offset=31-mem_update=False]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff\" * 32' into offset 31 with mem_update=False.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "offset": 31,
+          "mem_update": false
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6018600c60003960186000f336805f601f3736601f20805f5550596002555f5160015500",
+          "bytecode_runtime": "0x36805f601f3736601f20805f5550596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x361d92d9ca87a13035d5df9014118b15f267d0e6024e81f135be3f9da3ac70b5",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000066",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000060"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff_32.offset_31.mem_update_true",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff\" * 32, offset 31, and mem_update=True.",
+      "namespace_seed": "upstream-keccak-ff_32-offset31-memupdate-true",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff\" * 32-offset=31-mem_update=True]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff\" * 32' into offset 31 with mem_update=True.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "offset": 31,
+          "mem_update": true
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6019600c60003960196000f336805f601f3736601f20805f555f52596002555f5160015500",
+          "bytecode_runtime": "0x36805f601f3736601f20805f555f52596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x66666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x361d92d9ca87a13035d5df9014118b15f267d0e6024e81f135be3f9da3ac70b5",
+          "0x01": "0x361d92d9ca87a13035d5df9014118b15f267d0e6024e81f135be3f9da3ac70b5",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000060"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_0.mem_update_false",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff, offset 0, and mem_update=False.",
+      "namespace_seed": "upstream-keccak-ff-offset0-memupdate-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff-offset=0-mem_update=False]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff' into offset 0 with mem_update=False.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "6666",
+          "offset": 0,
+          "mem_update": false
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6016600c60003960166000f336805f5f37365f20805f5550596002555f5160015500",
+          "bytecode_runtime": "0x36805f5f37365f20805f5550596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x6666",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+          "0x01": "0x6666000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_0.mem_update_true",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff, offset 0, and mem_update=True.",
+      "namespace_seed": "upstream-keccak-ff-offset0-memupdate-true",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff-offset=0-mem_update=True]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff' into offset 0 with mem_update=True.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "6666",
+          "offset": 0,
+          "mem_update": true
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6017600c60003960176000f336805f5f37365f20805f555f52596002555f5160015500",
+          "bytecode_runtime": "0x36805f5f37365f20805f555f52596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x6666",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+          "0x01": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_1024.mem_update_false",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff, offset 1024, and mem_update=False.",
+      "namespace_seed": "upstream-keccak-ff-offset1024-memupdate-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff-offset=1024-mem_update=False]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff' into offset 1024 with mem_update=False.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "6666",
+          "offset": 1024,
+          "mem_update": false
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601a600c600039601a6000f336805f610400373661040020805f5550596002555f5160015500",
+          "bytecode_runtime": "0x36805f610400373661040020805f5550596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x6666",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000420"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_1024.mem_update_true",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff, offset 1024, and mem_update=True.",
+      "namespace_seed": "upstream-keccak-ff-offset1024-memupdate-true",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff-offset=1024-mem_update=True]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff' into offset 1024 with mem_update=True.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "6666",
+          "offset": 1024,
+          "mem_update": true
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601b600c600039601b6000f336805f610400373661040020805f555f52596002555f5160015500",
+          "bytecode_runtime": "0x36805f610400373661040020805f555f52596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x6666",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+          "0x01": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000420"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_31.mem_update_false",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff, offset 31, and mem_update=False.",
+      "namespace_seed": "upstream-keccak-ff-offset31-memupdate-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff-offset=31-mem_update=False]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff' into offset 31 with mem_update=False.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "6666",
+          "offset": 31,
+          "mem_update": false
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6018600c60003960186000f336805f601f3736601f20805f5550596002555f5160015500",
+          "bytecode_runtime": "0x36805f601f3736601f20805f5550596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x6666",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000066",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000040"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_31.mem_update_true",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 calldata benchmark with mem_alloc ff, offset 31, and mem_update=True.",
+      "namespace_seed": "upstream-keccak-ff-offset31-memupdate-true",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak[mem_alloc=ff-offset=31-mem_update=True]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 after CALLDATACOPY of mem_alloc='ff' into offset 31 with mem_update=True.",
+        "RPC mapping: runtime reproduces the CALLDATACOPY + SHA3 shape, persists the digest into slot0, persists a post-attack memory witness word into slot1, and persists the pre-instrumentation MSIZE into slot2.",
+        "Admitted because the stored digest and memory witnesses make offset and mem_update drift visible without pretending to prove upstream throughput."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "keccak",
+          "mem_alloc_hex": "6666",
+          "offset": 31,
+          "mem_update": true
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6019600c60003960196000f336805f601f3736601f20805f555f52596002555f5160015500",
+          "bytecode_runtime": "0x36805f601f3736601f20805f555f52596002555f5160015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x6666",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+          "0x01": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000040"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_0.msg_size_0",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 0 and hashed msg_size 0.",
+      "namespace_seed": "upstream-keccak-diff-mem0-msg0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=0-msg_size=0]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 0 and message size 0.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 0,
+          "msg_size": 0
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6011600c60003960116000f35f5f20805f555f525f6001555960025500",
+          "bytecode_runtime": "0x5f5f20805f555f525f6001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_0.msg_size_1024",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 0 and hashed msg_size 1024.",
+      "namespace_seed": "upstream-keccak-diff-mem0-msg1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=0-msg_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 0 and message size 1024.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 0,
+          "msg_size": 1024
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6015600c60003960156000f36104005f20805f555f526104006001555960025500",
+          "bytecode_runtime": "0x6104005f20805f555f526104006001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xb5d4d1df10388bbc208778ff02310db98fdaa68efed0b2068a9bef78bd3bfd74",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000400"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_0.msg_size_256",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 0 and hashed msg_size 256.",
+      "namespace_seed": "upstream-keccak-diff-mem0-msg256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=0-msg_size=256]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 0 and message size 256.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 0,
+          "msg_size": 256
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6015600c60003960156000f36101005f20805f555f526101006001555960025500",
+          "bytecode_runtime": "0x6101005f20805f555f526101006001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xd397b3b043d87fcd6fad1291ff0bfd16401c274896d8c63a923727f077b8e0b5",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000100",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000100"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_0.msg_size_32",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 0 and hashed msg_size 32.",
+      "namespace_seed": "upstream-keccak-diff-mem0-msg32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=0-msg_size=32]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 0 and message size 32.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 0,
+          "msg_size": 32
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6013600c60003960136000f360205f20805f555f5260206001555960025500",
+          "bytecode_runtime": "0x60205f20805f555f5260206001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_1024.msg_size_0",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 1024 and hashed msg_size 0.",
+      "namespace_seed": "upstream-keccak-diff-mem1024-msg0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=1024-msg_size=0]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 1024 and message size 0.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 1024,
+          "msg_size": 0
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6017600c60003960176000f360ff6103ff535f5f20805f555f525f6001555960025500",
+          "bytecode_runtime": "0x60ff6103ff535f5f20805f555f525f6001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000400"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_1024.msg_size_1024",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 1024 and hashed msg_size 1024.",
+      "namespace_seed": "upstream-keccak-diff-mem1024-msg1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=1024-msg_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 1024 and message size 1024.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 1024,
+          "msg_size": 1024
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601b600c600039601b6000f360ff6103ff536104005f20805f555f526104006001555960025500",
+          "bytecode_runtime": "0x60ff6103ff536104005f20805f555f526104006001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x3b1b3e9b13cb87973d598a1cf5f49a21baf16eefd8c2077c8df5608866fe0987",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000400"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_1024.msg_size_256",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 1024 and hashed msg_size 256.",
+      "namespace_seed": "upstream-keccak-diff-mem1024-msg256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=1024-msg_size=256]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 1024 and message size 256.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 1024,
+          "msg_size": 256
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601b600c600039601b6000f360ff6103ff536101005f20805f555f526101006001555960025500",
+          "bytecode_runtime": "0x60ff6103ff536101005f20805f555f526101006001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xd397b3b043d87fcd6fad1291ff0bfd16401c274896d8c63a923727f077b8e0b5",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000100",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000400"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_1024.msg_size_32",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 1024 and hashed msg_size 32.",
+      "namespace_seed": "upstream-keccak-diff-mem1024-msg32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=1024-msg_size=32]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 1024 and message size 32.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 1024,
+          "msg_size": 32
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6019600c60003960196000f360ff6103ff5360205f20805f555f5260206001555960025500",
+          "bytecode_runtime": "0x60ff6103ff5360205f20805f555f5260206001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000400"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_256.msg_size_0",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 256 and hashed msg_size 0.",
+      "namespace_seed": "upstream-keccak-diff-mem256-msg0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=256-msg_size=0]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 256 and message size 0.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 256,
+          "msg_size": 0
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6016600c60003960166000f360ff60ff535f5f20805f555f525f6001555960025500",
+          "bytecode_runtime": "0x60ff60ff535f5f20805f555f525f6001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000100"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_256.msg_size_1024",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 256 and hashed msg_size 1024.",
+      "namespace_seed": "upstream-keccak-diff-mem256-msg1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=256-msg_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 256 and message size 1024.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 256,
+          "msg_size": 1024
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601a600c600039601a6000f360ff60ff536104005f20805f555f526104006001555960025500",
+          "bytecode_runtime": "0x60ff60ff536104005f20805f555f526104006001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xe16c117273cc542a3510904f49d806a3eca0b8de58b3fa8c28ad7679821216c6",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000400"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_256.msg_size_256",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 256 and hashed msg_size 256.",
+      "namespace_seed": "upstream-keccak-diff-mem256-msg256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=256-msg_size=256]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 256 and message size 256.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 256,
+          "msg_size": 256
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601a600c600039601a6000f360ff60ff536101005f20805f555f526101006001555960025500",
+          "bytecode_runtime": "0x60ff60ff536101005f20805f555f526101006001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc67a44325c2aa485110c9afa65dba2d6c01f58400db4507216300ad93a527e3e",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000100",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000100"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_256.msg_size_32",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 256 and hashed msg_size 32.",
+      "namespace_seed": "upstream-keccak-diff-mem256-msg32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=256-msg_size=32]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 256 and message size 32.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 256,
+          "msg_size": 32
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6018600c60003960186000f360ff60ff5360205f20805f555f5260206001555960025500",
+          "bytecode_runtime": "0x60ff60ff5360205f20805f555f5260206001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000100"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_32.msg_size_0",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 32 and hashed msg_size 0.",
+      "namespace_seed": "upstream-keccak-diff-mem32-msg0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=32-msg_size=0]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 32 and message size 0.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 32,
+          "msg_size": 0
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6016600c60003960166000f360ff601f535f5f20805f555f525f6001555960025500",
+          "bytecode_runtime": "0x60ff601f535f5f20805f555f525f6001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_32.msg_size_1024",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 32 and hashed msg_size 1024.",
+      "namespace_seed": "upstream-keccak-diff-mem32-msg1024",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=32-msg_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 32 and message size 1024.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 32,
+          "msg_size": 1024
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601a600c600039601a6000f360ff601f536104005f20805f555f526104006001555960025500",
+          "bytecode_runtime": "0x60ff601f536104005f20805f555f526104006001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0aaeac84b5b031a238322b0ed1d1d21cf1f2021112dc8d7ab6dcaa960f103c7d",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000400"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_32.msg_size_256",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 32 and hashed msg_size 256.",
+      "namespace_seed": "upstream-keccak-diff-mem32-msg256",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=32-msg_size=256]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 32 and message size 256.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 32,
+          "msg_size": 256
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601a600c600039601a6000f360ff601f536101005f20805f555f526101006001555960025500",
+          "bytecode_runtime": "0x60ff601f536101005f20805f555f526101006001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x14328519e96f252beef6126919b0e10c1b5867b0462fad8dccb7363b7a5880bb",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000100",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000100"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_32.msg_size_32",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 benchmark with pre-expanded mem_size 32 and hashed msg_size 32.",
+      "namespace_seed": "upstream-keccak-diff-mem32-msg32",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_diff_mem_msg_sizes[mem_size=32-msg_size=32]",
+      "notes": [
+        "Upstream intent: benchmark KECCAK256 with setup memory size 32 and message size 32.",
+        "RPC mapping: runtime reproduces the setup MSTORE8 when present, hashes msg_size bytes from memory offset 0, stores the digest in slot0, stores msg_size in slot1, and stores the pre-instrumentation MSIZE in slot2.",
+        "Admitted because the digest and explicit size witnesses make memory/message drift visible in final storage."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "diff_mem_msg_sizes",
+          "mem_size": 32,
+          "msg_size": 32
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6018600c60003960186000f360ff601f5360205f20805f555f5260206001555960025500",
+          "bytecode_runtime": "0x60ff601f5360205f20805f555f5260206001555960025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xe08ec2af2cfc251225e1968fd6ca21e4044f129bffa95bac3503be8bdb30a367",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.keccak.test_keccak_max_permutations",
+      "family": "state/keccak",
+      "description": "Mapped from execution-specs KECCAK256 max-permutations benchmark using deterministic witness input length 115329.",
+      "namespace_seed": "upstream-keccak-max-permutations-len115329",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_keccak.py::test_keccak_max_permutations",
+      "notes": [
+        "Upstream intent: maximize KECCAK256 permutations per block; traced witness length is 115329 bytes under the Prague benchmark gas budget.",
+        "RPC mapping: runtime performs a single SHA3 over zero-initialized memory of that length, stores the digest in slot0, the selected input length in slot1, and the pre-instrumentation MSIZE in slot2.",
+        "Admitted as a deterministic input-shape witness only; it does not claim benchmark throughput parity."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "keccak_probe": {
+          "mode": "max_permutations",
+          "witness_input_length": 115329
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6014600c60003960146000f36201c281805f20805f5550806001555960025500",
+          "bytecode_runtime": "0x6201c281805f20805f5550806001555960025500",
+          "gas": "0x1e8480"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x1e8480"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0xe75384f0f905e18b92cd7e2618d56152f760b3267ae733c3cfe49953613bb453",
+          "0x01": "0x000000000000000000000000000000000000000000000000000000000001c281",
+          "0x02": "0x000000000000000000000000000000000000000000000000000000000001c2a0"
+        }
+      }
+    }
+  ]
+}

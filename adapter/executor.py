@@ -15,9 +15,16 @@ from adapter.control_flow_generator import (
     _build_jumpi_taken_runtime,
     _build_pc_runtime,
 )
+from adapter.keccak_generator import (
+    _build_basic_keccak_runtime,
+    _build_diff_mem_msg_sizes_runtime,
+    _build_max_permutations_runtime,
+    simulate_basic_keccak_case,
+    simulate_diff_mem_msg_sizes_case,
+)
 from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
-from adapter.signer import load_private_key, private_key_to_address, sign_type_2_transaction
+from adapter.signer import keccak256, load_private_key, private_key_to_address, sign_type_2_transaction
 
 ZERO_STORAGE_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
 WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
@@ -166,6 +173,11 @@ class MockBackend:
                 if control_flow_probe is not None:
                     mode = control_flow_probe.get("mode")
                     storage["0x00"] = self._simulate_control_flow_probe(mode, code)
+                    continue
+
+                keccak_probe = case.observe.get("keccak_probe")
+                if keccak_probe is not None:
+                    self._simulate_keccak_probe(storage, keccak_probe, code, data)
                     continue
                 
                 if code in {"0x60003560005500", "0x60003560005560006000fd"}:
@@ -323,6 +335,61 @@ class MockBackend:
         if code != expected_runtime:
             raise ValueError(f"unsupported mock contract code path: {code}")
         return expected_storage
+
+    def _simulate_keccak_probe(
+        self,
+        storage: dict[str, Any],
+        keccak_probe: dict[str, Any],
+        code: Any,
+        data: str,
+    ) -> None:
+        mode = keccak_probe.get("mode")
+        calldata_hex = data[2:] if isinstance(data, str) and data.startswith("0x") else data
+        calldata = bytes.fromhex(calldata_hex or "")
+        if mode == "max_permutations":
+            witness_input_length = keccak_probe.get("witness_input_length")
+            if witness_input_length is None:
+                raise ValueError("missing keccak probe mode data: witness_input_length")
+            expected_runtime = _build_max_permutations_runtime(witness_input_length)
+            if code != expected_runtime:
+                raise ValueError(f"unsupported mock contract code path: {code}")
+            storage["0x00"] = "0x" + keccak256(b"\x00" * witness_input_length).hex()
+            storage["0x01"] = self._hex_to_word(hex(witness_input_length))
+            rounded = ((witness_input_length + 31) // 32) * 32 if witness_input_length > 0 else 0
+            storage["0x02"] = self._hex_to_word(hex(rounded))
+            return
+        if mode == "keccak":
+            mem_alloc_hex = keccak_probe.get("mem_alloc_hex")
+            offset = keccak_probe.get("offset")
+            mem_update = keccak_probe.get("mem_update")
+            if mem_alloc_hex is None or offset is None or mem_update is None:
+                raise ValueError("missing keccak probe mode data for basic keccak case")
+            expected_runtime = _build_basic_keccak_runtime(offset=offset, mem_update=mem_update)
+            if code != expected_runtime:
+                raise ValueError(f"unsupported mock contract code path: {code}")
+            digest, memory_witness_word, pre_witness_msize = simulate_basic_keccak_case(
+                calldata=calldata,
+                offset=offset,
+                mem_update=mem_update,
+            )
+            storage["0x00"] = digest
+            storage["0x01"] = self._hex_to_word(hex(memory_witness_word))
+            storage["0x02"] = self._hex_to_word(hex(pre_witness_msize))
+            return
+        if mode == "diff_mem_msg_sizes":
+            mem_size = keccak_probe.get("mem_size")
+            msg_size = keccak_probe.get("msg_size")
+            if mem_size is None or msg_size is None:
+                raise ValueError("missing keccak probe mode data for diff_mem_msg_sizes case")
+            expected_runtime = _build_diff_mem_msg_sizes_runtime(mem_size=mem_size, msg_size=msg_size)
+            if code != expected_runtime:
+                raise ValueError(f"unsupported mock contract code path: {code}")
+            digest, pre_witness_msize = simulate_diff_mem_msg_sizes_case(mem_size=mem_size, msg_size=msg_size)
+            storage["0x00"] = digest
+            storage["0x01"] = self._hex_to_word(hex(msg_size))
+            storage["0x02"] = self._hex_to_word(hex(pre_witness_msize))
+            return
+        raise ValueError(f"missing keccak probe mode: {mode!r}")
 
 
 class JsonRpcBackend:

@@ -50,7 +50,12 @@ from adapter.control_flow_generator import (
 )
 from adapter.log_generator import generate_upstream_log_templates
 from adapter.inventory import summarize_inventory_dir, write_inventory_payload
-from adapter.keccak_generator import generate_upstream_keccak_templates
+from adapter.keccak_generator import (
+    compute_keccak_max_permutations_input_length,
+    generate_upstream_keccak_manifest,
+    generate_upstream_keccak_templates,
+    load_keccak_templates,
+)
 from adapter.stack_generator import (
     generate_upstream_stack_manifest,
     generate_upstream_stack_templates,
@@ -263,6 +268,19 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(deploy_steps), 1)
             self.assertIn(deploy_steps[0]["bytecode_runtime"], allowed_runtimes)
 
+    def test_selector_allows_upstream_mapped_keccak_cases(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_keccak_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(len(selected), 35)
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual({case.family for case in selected}, {"state/keccak"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+        selected_ids = [case.case_id for case in selected]
+        self.assertIn("upstream.benchmark.keccak.test_keccak_max_permutations", selected_ids)
+        self.assertIn("upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_31.mem_update_true", selected_ids)
+        self.assertIn("upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_1024.msg_size_1024", selected_ids)
+
     def test_selector_allows_upstream_mapped_control_flow_cases(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_control_flow_mapped.json")
@@ -439,6 +457,110 @@ class HarnessTests(unittest.TestCase):
                 any("codecopy" in case_id or "extcodecopy" in case_id for case_id in manifest_case_ids),
                 "blocked account-query neighbors leaked into manifest",
             )
+
+    def _assert_keccak_parity_contract(
+        self,
+        *,
+        templates_payload: dict[str, object],
+        inventory_payload: dict[str, object],
+        manifest_payload: dict[str, object] | None = None,
+    ) -> None:
+        checked_in_templates_path = ROOT / "suites/templates/upstream_keccak_templates.json"
+        checked_in_inventory_path = ROOT / "suites/templates/upstream_keccak_inventory.json"
+        checked_in_templates = json.loads(checked_in_templates_path.read_text())
+        checked_in_inventory = json.loads(checked_in_inventory_path.read_text())
+
+        self.assertEqual(templates_payload, checked_in_templates, "keccak template JSON drift")
+        self.assertEqual(inventory_payload, checked_in_inventory, "keccak inventory JSON drift")
+
+        self.assertEqual(templates_payload["name"], "upstream-keccak-mapping-templates")
+        self.assertEqual(inventory_payload["name"], "upstream-keccak-auto-inventory")
+        self.assertEqual(inventory_payload["family"], "keccak")
+
+        entries = inventory_payload["entries"]
+        case_ids = [entry["case_id"] for entry in entries]
+        upstream_refs = [entry["upstream_ref"] for entry in entries]
+        self.assertEqual(upstream_refs, sorted(upstream_refs), "keccak upstream_ref ordering drifted")
+        self.assertEqual(len(case_ids), 35)
+        self.assertEqual(len(case_ids), len(set(case_ids)))
+
+        admitted = [entry for entry in entries if entry["admitted"]]
+        blocked = [entry for entry in entries if not entry["admitted"]]
+        self.assertEqual(len(admitted), 35, "keccak admitted count drifted")
+        self.assertEqual(len(blocked), 0, "keccak blocked count drifted")
+        self.assertEqual({entry["mode"] for entry in admitted}, {"keccak", "diff_mem_msg_sizes", "max_permutations"})
+
+        template_case_ids = [case["case_id"] for case in templates_payload["cases"]]
+        admitted_case_ids = [entry["case_id"] for entry in admitted]
+        self.assertEqual(template_case_ids, admitted_case_ids)
+        self.assertEqual(len(templates_payload["cases"]), 35)
+
+        max_case = next(case for case in templates_payload["cases"] if case["mode"] == "max_permutations")
+        self.assertEqual(max_case["witness_input_length"], 115329)
+
+        if manifest_payload is not None:
+            checked_in_manifest_path = ROOT / "suites/manifests/upstream_keccak_mapped.json"
+            checked_in_manifest = json.loads(checked_in_manifest_path.read_text())
+            self.assertEqual(manifest_payload, checked_in_manifest, "keccak manifest JSON drift")
+            manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
+            self.assertEqual(manifest_case_ids, admitted_case_ids)
+            self.assertEqual(len(manifest_payload["cases"]), 35)
+            self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/keccak"})
+
+    def test_keccak_manifest_generator_matches_checked_in_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_template_path = Path(tmpdir) / "upstream_keccak_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_keccak_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_keccak_mapped.json"
+            templates = generate_upstream_keccak_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
+            generated = generate_upstream_keccak_manifest(
+                repo_root=ROOT,
+                template_path=generated_template_path,
+                output_path=manifest_path,
+            )
+            self._assert_keccak_parity_contract(
+                templates_payload=templates,
+                inventory_payload=json.loads(inventory_path.read_text()),
+                manifest_payload=generated,
+            )
+            self.assertEqual(generated["cases"][0]["family"], "state/keccak")
+
+    def test_keccak_checked_in_artifacts_match_generated_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_template_path = Path(tmpdir) / "upstream_keccak_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_keccak_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_keccak_mapped.json"
+            generate_upstream_keccak_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
+            generate_upstream_keccak_manifest(
+                repo_root=ROOT,
+                template_path=generated_template_path,
+                output_path=manifest_path,
+            )
+            checked_in_pairs = [
+                (generated_template_path, ROOT / "suites/templates/upstream_keccak_templates.json"),
+                (inventory_path, ROOT / "suites/templates/upstream_keccak_inventory.json"),
+                (manifest_path, ROOT / "suites/manifests/upstream_keccak_mapped.json"),
+            ]
+            for generated_path, checked_in_path in checked_in_pairs:
+                self.assertEqual(
+                    generated_path.read_text(),
+                    checked_in_path.read_text(),
+                    f"{checked_in_path.name} byte drift",
+                )
+
+    def test_keccak_templates_load(self) -> None:
+        templates = load_keccak_templates(ROOT / "suites/templates/upstream_keccak_templates.json")
+        self.assertEqual(len(templates), 35)
+        self.assertEqual(templates[0].mode, "keccak")
+        self.assertEqual(templates[-1].mode, "max_permutations")
 
     def test_account_query_manifest_generator_matches_checked_in_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -878,7 +1000,13 @@ class HarnessTests(unittest.TestCase):
                     inventory_path=Path(tmpdir) / "inventory.json",
                 )
 
-    def test_keccak_template_scanner_writes_blocked_inventory_only(self) -> None:
+    def test_keccak_max_permutations_witness_contract_matches_upstream_helper(self) -> None:
+        self.assertEqual(compute_keccak_max_permutations_input_length(), 115329)
+        templates = load_keccak_templates(ROOT / "suites/templates/upstream_keccak_templates.json")
+        max_case = next(template for template in templates if template.mode == "max_permutations")
+        self.assertEqual(max_case.witness_input_length, 115329)
+
+    def test_keccak_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_keccak_templates.json"
             inventory_path = Path(tmpdir) / "upstream_keccak_inventory.json"
@@ -887,17 +1015,10 @@ class HarnessTests(unittest.TestCase):
                 output_path=generated_path,
                 inventory_path=inventory_path,
             )
-            self.assertEqual(generated["name"], "upstream-keccak-mapping-templates")
-            self.assertEqual(generated["cases"], [])
-            inventory = json.loads(inventory_path.read_text())
-            self.assertEqual(inventory["name"], "upstream-keccak-auto-inventory")
-            self.assertEqual(inventory["family"], "keccak")
-            self.assertEqual(len(inventory["entries"]), 35)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
-            case_ids = [entry["case_id"] for entry in inventory["entries"]]
-            self.assertEqual(len(case_ids), len(set(case_ids)))
-            self.assertIn("upstream.benchmark.keccak.test_keccak_max_permutations", case_ids)
-            self.assertIn("upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_1024.msg_size_1024", case_ids)
+            self._assert_keccak_parity_contract(
+                templates_payload=generated,
+                inventory_payload=json.loads(inventory_path.read_text()),
+            )
 
     def test_keccak_template_scanner_fails_loudly_on_missing_function(self) -> None:
         source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_keccak.py"
@@ -1539,6 +1660,42 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(inventory["entries"]), 140)
             self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
 
+    def test_cli_generate_keccak_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "generated.json"
+            self.assertEqual(
+                main(["generate-keccak-manifest", "--output", str(output_path)]),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            self.assertEqual(generated["name"], "upstream-keccak-mapped")
+            self.assertEqual(len(generated["cases"]), 35)
+            max_case = next(case for case in generated["cases"] if case["case_id"] == "upstream.benchmark.keccak.test_keccak_max_permutations")
+            self.assertEqual(max_case["expected"]["storage"]["0x01"], "0x000000000000000000000000000000000000000000000000000000000001c281")
+
+    def test_cli_scan_upstream_keccak_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-keccak",
+                        "--template-output",
+                        str(output_path),
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            inventory = json.loads(inventory_path.read_text())
+            self._assert_keccak_parity_contract(
+                templates_payload=generated,
+                inventory_payload=inventory,
+            )
+
     def test_cli_scan_upstream_keccak_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             inventory_path = Path(tmpdir) / "inventory.json"
@@ -1556,7 +1713,8 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["name"], "upstream-keccak-auto-inventory")
             self.assertEqual(inventory["family"], "keccak")
             self.assertEqual(len(inventory["entries"]), 35)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 35)
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
 
     def test_cli_scan_upstream_system_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1882,7 +2040,7 @@ class HarnessTests(unittest.TestCase):
                 "block-context": {"total": 13, "admitted": 0, "blocked": 13},
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
                 "log": {"total": 140, "admitted": 0, "blocked": 140},
-                "keccak": {"total": 35, "admitted": 0, "blocked": 35},
+                "keccak": {"total": 35, "admitted": 35, "blocked": 0},
                 "system": {"total": 46, "admitted": 0, "blocked": 46},
                 "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
                 "memory": {"total": 143, "admitted": 95, "blocked": 48},
@@ -2702,6 +2860,63 @@ class HarnessTests(unittest.TestCase):
                 self.assertTrue(result["tx_hashes"])
                 self.assertIs(result["success"], True)
 
+    def test_mock_backend_runs_upstream_mapped_keccak_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_keccak_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 35)
+
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            representative_storage = {
+                "upstream.benchmark.keccak.test_keccak_max_permutations": {
+                    "0x00": "0xe75384f0f905e18b92cd7e2618d56152f760b3267ae733c3cfe49953613bb453",
+                    "0x01": "0x000000000000000000000000000000000000000000000000000000000001c281",
+                    "0x02": "0x000000000000000000000000000000000000000000000000000000000001c2a0",
+                },
+                "upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_0.mem_update_true": {
+                    "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                    "0x01": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                    "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                },
+                "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_31.mem_update_false": {
+                    "0x00": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000066",
+                    "0x02": "0x0000000000000000000000000000000000000000000000000000000000000040",
+                },
+                "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_32.msg_size_1024": {
+                    "0x00": "0x0aaeac84b5b031a238322b0ed1d1d21cf1f2021112dc8d7ab6dcaa960f103c7d",
+                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+                    "0x02": "0x0000000000000000000000000000000000000000000000000000000000000400",
+                },
+            }
+            self.assertEqual(set(representative_storage).issubset(observed_by_case), True)
+            for case_id, expected_slots in representative_storage.items():
+                result = observed_by_case[case_id]
+                self.assertEqual(result["observed"]["storage"], expected_slots)
+                self.assertEqual(result["expected"]["storage"], expected_slots)
+                self.assertEqual(result["diffs"], [])
+                self.assertTrue(result["tx_hashes"])
+                self.assertIs(result["success"], True)
+
+            for result in report["results"]:
+                self.assertEqual(result["diffs"], [], result["case_id"])
+                self.assertTrue(result["success"], result["case_id"])
+                self.assertEqual(result["observed"], result["expected"], result["case_id"])
+
     def test_cli_run_mock_upstream_control_flow_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -2784,6 +2999,83 @@ class HarnessTests(unittest.TestCase):
                 },
             )
 
+    def test_cli_run_mock_upstream_keccak_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_keccak_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-keccak-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 35)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertEqual(
+                {
+                    "upstream.benchmark.keccak.test_keccak_max_permutations": observed_by_case[
+                        "upstream.benchmark.keccak.test_keccak_max_permutations"
+                    ]["observed"]["storage"],
+                    "upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_0.mem_update_true": observed_by_case[
+                        "upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_0.mem_update_true"
+                    ]["observed"]["storage"],
+                    "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_31.mem_update_false": observed_by_case[
+                        "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_31.mem_update_false"
+                    ]["observed"]["storage"],
+                    "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_32.msg_size_1024": observed_by_case[
+                        "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_32.msg_size_1024"
+                    ]["observed"]["storage"],
+                },
+                {
+                    "upstream.benchmark.keccak.test_keccak_max_permutations": {
+                        "0x00": "0xe75384f0f905e18b92cd7e2618d56152f760b3267ae733c3cfe49953613bb453",
+                        "0x01": "0x000000000000000000000000000000000000000000000000000000000001c281",
+                        "0x02": "0x000000000000000000000000000000000000000000000000000000000001c2a0",
+                    },
+                    "upstream.benchmark.keccak.test_keccak.mem_alloc_empty.offset_0.mem_update_true": {
+                        "0x00": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                        "0x01": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                        "0x02": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                    },
+                    "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_31.mem_update_false": {
+                        "0x00": "0x979b141b8bcd3ba17815cd76811f1fca1cabaa9d51f7c00712606970f81d6e37",
+                        "0x01": "0x0000000000000000000000000000000000000000000000000000000000000066",
+                        "0x02": "0x0000000000000000000000000000000000000000000000000000000000000040",
+                    },
+                    "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_32.msg_size_1024": {
+                        "0x00": "0x0aaeac84b5b031a238322b0ed1d1d21cf1f2021112dc8d7ab6dcaa960f103c7d",
+                        "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+                        "0x02": "0x0000000000000000000000000000000000000000000000000000000000000400",
+                    },
+                },
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.keccak.test_keccak_max_permutations"]["observed"],
+                observed_by_case["upstream.benchmark.keccak.test_keccak_max_permutations"]["expected"],
+            )
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_32.msg_size_1024"
+                ]["observed"],
+                observed_by_case[
+                    "upstream.benchmark.keccak.test_keccak_diff_mem_msg_sizes.mem_size_32.msg_size_1024"
+                ]["expected"],
+            )
+
     def test_cli_run_mock_upstream_stack_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -2843,6 +3135,19 @@ class HarnessTests(unittest.TestCase):
         broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-account-query-runtime")
+
+    def test_mock_backend_rejects_unsupported_keccak_runtime_code_path(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_keccak_mapped.json")
+        broken_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.keccak.test_keccak.mem_alloc_ff.offset_31.mem_update_false"
+        )
+        broken_case.steps[0]["bytecode_runtime"] = "0xdeadbeef"
+        broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
+        with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
+            backend.execute_case(broken_case, "negative-unsupported-keccak-runtime")
 
     def test_mock_backend_rejects_unsupported_stack_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
