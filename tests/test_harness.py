@@ -60,7 +60,7 @@ from adapter.control_flow_generator import (
     generate_upstream_control_flow_templates,
     load_control_flow_templates,
 )
-from adapter.log_generator import generate_upstream_log_templates
+from adapter.log_generator import generate_upstream_log_manifest, generate_upstream_log_templates
 from adapter.inventory import summarize_inventory_dir, write_inventory_payload
 from adapter.keccak_generator import (
     compute_keccak_max_permutations_input_length,
@@ -637,6 +637,28 @@ class HarnessTests(unittest.TestCase):
                 manifest_payload=generated,
             )
             self.assertEqual(generated["cases"][0]["family"], "state/keccak")
+
+    def test_log_manifest_generator_matches_checked_in_manifest_subset(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_template_path = Path(tmpdir) / "upstream_log_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_log_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_log_mapped.json"
+            templates = generate_upstream_log_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
+            generated = generate_upstream_log_manifest(
+                repo_root=ROOT,
+                template_path=generated_template_path,
+                output_path=manifest_path,
+            )
+            self._assert_log_parity_contract(
+                templates_payload=templates,
+                inventory_payload=json.loads(inventory_path.read_text()),
+                manifest_payload=generated,
+            )
+            self.assertEqual(generated["cases"][0]["family"], "state/log")
 
     def test_arithmetic_manifest_generator_matches_checked_in_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1266,7 +1288,103 @@ class HarnessTests(unittest.TestCase):
                     inventory_path=Path(tmpdir) / "inventory.json",
                 )
 
-    def test_log_template_scanner_writes_blocked_inventory_only(self) -> None:
+    def _assert_log_parity_contract(
+        self,
+        *,
+        templates_payload: dict[str, object],
+        inventory_payload: dict[str, object],
+        manifest_payload: dict[str, object] | None = None,
+    ) -> None:
+        checked_in_templates_path = ROOT / "suites/templates/upstream_log_templates.json"
+        checked_in_inventory_path = ROOT / "suites/templates/upstream_log_inventory.json"
+        checked_in_templates = json.loads(checked_in_templates_path.read_text())
+        checked_in_inventory = json.loads(checked_in_inventory_path.read_text())
+
+        self.assertEqual(templates_payload, checked_in_templates, "log template JSON drift")
+        self.assertEqual(inventory_payload, checked_in_inventory, "log inventory JSON drift")
+
+        self.assertEqual(templates_payload["name"], "upstream-log-mapping-templates")
+        self.assertEqual(inventory_payload["name"], "upstream-log-auto-inventory")
+        self.assertEqual(inventory_payload["family"], "log")
+
+        entries = inventory_payload["entries"]
+        case_ids = [entry["case_id"] for entry in entries]
+        upstream_refs = [entry["upstream_ref"] for entry in entries]
+        self.assertEqual(upstream_refs, sorted(upstream_refs), "log upstream_ref ordering drifted")
+        self.assertEqual(len(case_ids), 140)
+        self.assertEqual(len(case_ids), len(set(case_ids)))
+
+        admitted = [entry for entry in entries if entry["admitted"]]
+        blocked = [entry for entry in entries if not entry["admitted"]]
+        self.assertEqual(len(admitted), 3, "log admitted count drifted")
+        self.assertEqual(len(blocked), 137, "log blocked count drifted")
+
+        admitted_case_ids = [entry["case_id"] for entry in admitted]
+        self.assertEqual(
+            admitted_case_ids,
+            [
+                "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
+                "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true",
+                "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
+            ],
+        )
+        self.assertEqual(
+            {entry["mode"] for entry in admitted},
+            {"log0_empty_topics0", "log1_empty_zero_topic", "log1_empty_non_zero_topic"},
+        )
+        self.assertEqual(
+            Counter(reason for entry in blocked for reason in entry["reasons"]),
+            Counter({"outside minimal admitted receipt-log subset": 137}),
+        )
+        self.assertEqual(
+            Counter(entry["source"] for entry in blocked),
+            Counter({"test_log": 57, "test_log_benchmark": 80}),
+        )
+        self.assertTrue(all(entry["mode"] is None for entry in blocked))
+
+        template_case_ids = [case["case_id"] for case in templates_payload["cases"]]
+        self.assertEqual(template_case_ids, admitted_case_ids)
+        self.assertEqual(len(templates_payload["cases"]), 3)
+
+        if manifest_payload is not None:
+            checked_in_manifest_path = ROOT / "suites/manifests/upstream_log_mapped.json"
+            checked_in_manifest = json.loads(checked_in_manifest_path.read_text())
+            self.assertEqual(manifest_payload, checked_in_manifest, "log manifest JSON drift")
+            manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
+            self.assertEqual(manifest_case_ids, admitted_case_ids)
+            self.assertEqual(len(manifest_payload["cases"]), 3)
+            self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/log"})
+            observed_by_case = {case["case_id"]: case for case in manifest_payload["cases"]}
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true"
+                ]["expected"]["receipt_logs"],
+                [{"topics": [], "data": "0x"}],
+            )
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_true"
+                ]["expected"]["receipt_logs"],
+                [
+                    {
+                        "topics": ["0x0000000000000000000000000000000000000000000000000000000000000000"],
+                        "data": "0x",
+                    }
+                ],
+            )
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true"
+                ]["expected"]["receipt_logs"],
+                [
+                    {
+                        "topics": ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"],
+                        "data": "0x",
+                    }
+                ],
+            )
+
+    def test_log_template_scanner_writes_admitted_inventory_subset(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_log_templates.json"
             inventory_path = Path(tmpdir) / "upstream_log_inventory.json"
@@ -1275,17 +1393,10 @@ class HarnessTests(unittest.TestCase):
                 output_path=generated_path,
                 inventory_path=inventory_path,
             )
-            self.assertEqual(generated["name"], "upstream-log-mapping-templates")
-            self.assertEqual(generated["cases"], [])
-            inventory = json.loads(inventory_path.read_text())
-            self.assertEqual(inventory["name"], "upstream-log-auto-inventory")
-            self.assertEqual(inventory["family"], "log")
-            self.assertEqual(len(inventory["entries"]), 140)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
-            case_ids = [entry["case_id"] for entry in inventory["entries"]]
-            self.assertEqual(len(case_ids), len(set(case_ids)))
-            self.assertIn("upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true", case_ids)
-            self.assertIn("upstream.benchmark.log.test_log_benchmark.log4.mem_size_1024.log_size_1024", case_ids)
+            self._assert_log_parity_contract(
+                templates_payload=generated,
+                inventory_payload=json.loads(inventory_path.read_text()),
+            )
 
     def test_log_template_scanner_fails_loudly_on_missing_function(self) -> None:
         source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_log.py"
@@ -2072,10 +2183,24 @@ class HarnessTests(unittest.TestCase):
                 0,
             )
             inventory = json.loads(inventory_path.read_text())
-            self.assertEqual(inventory["name"], "upstream-log-auto-inventory")
-            self.assertEqual(inventory["family"], "log")
-            self.assertEqual(len(inventory["entries"]), 140)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self._assert_log_parity_contract(
+                templates_payload=json.loads((ROOT / "suites/templates/upstream_log_templates.json").read_text()),
+                inventory_payload=inventory,
+            )
+
+    def test_cli_generate_log_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "generated.json"
+            self.assertEqual(
+                main(["generate-log-manifest", "--output", str(output_path)]),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            self._assert_log_parity_contract(
+                templates_payload=json.loads((ROOT / "suites/templates/upstream_log_templates.json").read_text()),
+                inventory_payload=json.loads((ROOT / "suites/templates/upstream_log_inventory.json").read_text()),
+                manifest_payload=generated,
+            )
 
     def test_cli_generate_keccak_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -2152,6 +2277,29 @@ class HarnessTests(unittest.TestCase):
                 ],
             )
             self.assertTrue(all(case["family"] == "state/comparison" for case in generated["cases"]))
+
+    def test_cli_scan_upstream_log_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-log",
+                        "--template-output",
+                        str(output_path),
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            inventory = json.loads(inventory_path.read_text())
+            self._assert_log_parity_contract(
+                templates_payload=generated,
+                inventory_payload=inventory,
+            )
 
     def test_cli_scan_upstream_keccak_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -2532,7 +2680,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 335, "blocked": 278},
+            {"families": 14, "cases": 613, "admitted": 338, "blocked": 275},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -2569,7 +2717,7 @@ class HarnessTests(unittest.TestCase):
                 "account-query": {"total": 40, "admitted": 5, "blocked": 35},
                 "block-context": {"total": 13, "admitted": 7, "blocked": 6},
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
-                "log": {"total": 140, "admitted": 0, "blocked": 140},
+                "log": {"total": 140, "admitted": 3, "blocked": 137},
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
                 "system": {"total": 46, "admitted": 0, "blocked": 46},
                 "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
@@ -2582,6 +2730,10 @@ class HarnessTests(unittest.TestCase):
                 "requires byte-range code-copy observation not yet mapped": 30,
                 "requires external-account code-copy fixtures and byte-range observation not yet mapped": 5,
             },
+        )
+        self.assertEqual(
+            families["log"]["blocked_reasons"],
+            {"outside minimal admitted receipt-log subset": 137},
         )
         self._assert_checked_in_phase3_inventory_summary(summary)
 
@@ -2603,11 +2755,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 330, "blocked": 243},
+                {"families": 13, "cases": 573, "admitted": 333, "blocked": 240},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 335, "blocked": 278},
+                {"families": 14, "cases": 613, "admitted": 338, "blocked": 275},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:

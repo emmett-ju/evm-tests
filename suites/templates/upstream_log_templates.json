@@ -1,0 +1,43 @@
+{
+  "name": "upstream-log-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_log.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
+      "description": "Mapped from execution-specs LOG0 with fixed offset and empty payload onto a minimal receipt-log witness case.",
+      "namespace_seed": "upstream-log-log0-empty-topics0",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=0_bytes_data-zeros_topic=zeros_topic-fixed_offset=True]",
+      "notes": [
+        "Upstream intent: benchmark LOG0 with a fixed offset and zero-length data payload.",
+        "RPC mapping: deploy a tiny runtime that emits exactly one LOG0 record with empty data, then prove it later through receipt-log observation rather than storage side effects.",
+        "Admitted as part of the minimal receipt-log seam because it proves zero-topic receipt shape without claiming the wider log benchmark family is closed."
+      ],
+      "mode": "log0_empty_topics0"
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true",
+      "description": "Mapped from execution-specs LOG1 with a non-zero topic, fixed offset, and empty payload onto a minimal receipt-log witness case.",
+      "namespace_seed": "upstream-log-log1-empty-non-zero-topic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=0_bytes_data-zeros_topic=non_zero_topic-fixed_offset=True]",
+      "notes": [
+        "Upstream intent: benchmark LOG1 with a single non-zero topic, fixed offset, and zero-length data payload.",
+        "RPC mapping: deploy a tiny runtime that emits exactly one LOG1 record with topic0=0xff..ff and empty data, then prove it later through receipt-log observation rather than storage side effects.",
+        "Admitted as part of the minimal receipt-log seam because it proves topic-count and concrete non-zero topic value handling without admitting the broader log matrix yet."
+      ],
+      "mode": "log1_empty_non_zero_topic"
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
+      "description": "Mapped from execution-specs LOG1 with a zero topic, fixed offset, and empty payload onto a minimal receipt-log witness case.",
+      "namespace_seed": "upstream-log-log1-empty-zero-topic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=0_bytes_data-zeros_topic=zeros_topic-fixed_offset=True]",
+      "notes": [
+        "Upstream intent: benchmark LOG1 with a single zero topic, fixed offset, and zero-length data payload.",
+        "RPC mapping: deploy a tiny runtime that emits exactly one LOG1 record with topic0=0x00..00 and empty data, then prove it later through receipt-log observation rather than storage side effects.",
+        "Admitted as part of the minimal receipt-log seam because it proves topic-count and concrete zero-topic value handling without admitting the broader log matrix yet."
+      ],
+      "mode": "log1_empty_zero_topic"
+    }
+  ]
+}

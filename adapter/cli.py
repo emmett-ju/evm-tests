@@ -33,7 +33,7 @@ from adapter.control_flow_generator import (
     generate_upstream_control_flow_manifest,
     generate_upstream_control_flow_templates,
 )
-from adapter.log_generator import generate_upstream_log_templates
+from adapter.log_generator import generate_upstream_log_manifest, generate_upstream_log_templates
 from adapter.keccak_generator import (
     generate_upstream_keccak_manifest,
     generate_upstream_keccak_templates,
@@ -149,6 +149,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_log.add_argument("--template-output")
     scan_log.add_argument("--inventory-output", required=True)
+
+    generate_log = subparsers.add_parser("generate-log-manifest")
+    generate_log.add_argument("--template", default="suites/templates/upstream_log_templates.json")
+    generate_log.add_argument("--output", required=True)
 
     scan_keccak = subparsers.add_parser("scan-upstream-keccak")
     scan_keccak.add_argument(
@@ -454,6 +458,15 @@ def main(argv: list[str] | None = None) -> int:
             inventory_path=args.inventory_output,
         )
         print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-log-manifest":
+        manifest = generate_upstream_log_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
         return 0
 
     if args.command == "scan-upstream-keccak":

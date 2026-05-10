@@ -4,12 +4,28 @@ import json
 import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
+from adapter.assembler import _build_init_code
+from adapter.generator import deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
+from adapter.manifest import resolve_execution_specs_ref
 
 
-BLOCKED_REASON = "requires log benchmark mapping support not yet mapped"
+BLOCKED_REASON = "outside minimal admitted receipt-log subset"
+ZERO_TOPIC_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
+NON_ZERO_TOPIC_WORD = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+LOG0_EMPTY_RUNTIME = "0x5f5fa000"
+LOG1_EMPTY_ZERO_TOPIC_RUNTIME = "0x5f5f5fa100"
+LOG1_EMPTY_NON_ZERO_TOPIC_RUNTIME = (
+    "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5fa100"
+)
+
+LogTemplateMode = Literal[
+    "log0_empty_topics0",
+    "log1_empty_zero_topic",
+    "log1_empty_non_zero_topic",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -19,7 +35,7 @@ class LogMappingTemplate:
     namespace_seed: str
     upstream_ref: str
     notes: list[str]
-    mode: str
+    mode: LogTemplateMode
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,6 +46,46 @@ class AutoLogInventoryEntry:
     mode: str | None
     reasons: list[str]
     source: str
+
+
+LOG_MODE_SPECS: dict[LogTemplateMode, dict[str, Any]] = {
+    "log0_empty_topics0": {
+        "description": "Mapped from execution-specs LOG0 with fixed offset and empty payload onto a minimal receipt-log witness case.",
+        "namespace_seed": "upstream-log-log0-empty-topics0",
+        "notes": [
+            "Upstream intent: benchmark LOG0 with a fixed offset and zero-length data payload.",
+            "RPC mapping: deploy a tiny runtime that emits exactly one LOG0 record with empty data, then prove it later through receipt-log observation rather than storage side effects.",
+            "Admitted as part of the minimal receipt-log seam because it proves zero-topic receipt shape without claiming the wider log benchmark family is closed.",
+        ],
+        "runtime_code": LOG0_EMPTY_RUNTIME,
+        "topics": [],
+        "data": "0x",
+    },
+    "log1_empty_zero_topic": {
+        "description": "Mapped from execution-specs LOG1 with a zero topic, fixed offset, and empty payload onto a minimal receipt-log witness case.",
+        "namespace_seed": "upstream-log-log1-empty-zero-topic",
+        "notes": [
+            "Upstream intent: benchmark LOG1 with a single zero topic, fixed offset, and zero-length data payload.",
+            "RPC mapping: deploy a tiny runtime that emits exactly one LOG1 record with topic0=0x00..00 and empty data, then prove it later through receipt-log observation rather than storage side effects.",
+            "Admitted as part of the minimal receipt-log seam because it proves topic-count and concrete zero-topic value handling without admitting the broader log matrix yet.",
+        ],
+        "runtime_code": LOG1_EMPTY_ZERO_TOPIC_RUNTIME,
+        "topics": [ZERO_TOPIC_WORD],
+        "data": "0x",
+    },
+    "log1_empty_non_zero_topic": {
+        "description": "Mapped from execution-specs LOG1 with a non-zero topic, fixed offset, and empty payload onto a minimal receipt-log witness case.",
+        "namespace_seed": "upstream-log-log1-empty-non-zero-topic",
+        "notes": [
+            "Upstream intent: benchmark LOG1 with a single non-zero topic, fixed offset, and zero-length data payload.",
+            "RPC mapping: deploy a tiny runtime that emits exactly one LOG1 record with topic0=0xff..ff and empty data, then prove it later through receipt-log observation rather than storage side effects.",
+            "Admitted as part of the minimal receipt-log seam because it proves topic-count and concrete non-zero topic value handling without admitting the broader log matrix yet.",
+        ],
+        "runtime_code": LOG1_EMPTY_NON_ZERO_TOPIC_RUNTIME,
+        "topics": [NON_ZERO_TOPIC_WORD],
+        "data": "0x",
+    },
+}
 
 
 def generate_upstream_log_templates(
@@ -76,6 +132,48 @@ def generate_upstream_log_templates(
     return payload
 
 
+def generate_upstream_log_manifest(
+    *,
+    repo_root: str | Path,
+    output_path: str | Path,
+    template_path: str | Path | None = None,
+    suite_version: str = "0.1.0",
+    chain_profile_version: str = "1",
+) -> dict[str, Any]:
+    repo_root_path = Path(repo_root).resolve()
+    output = Path(output_path).resolve()
+    template_file = (
+        Path(template_path).resolve()
+        if template_path is not None
+        else repo_root_path / "suites" / "templates" / "upstream_log_templates.json"
+    )
+    templates = load_log_templates(template_file)
+    execution_specs_ref = resolve_execution_specs_ref(
+        repo_root_path / "suites" / "manifests" / "upstream_log_mapped.json",
+        "submodule-pending",
+    )
+    manifest = {
+        "name": "upstream-log-mapped",
+        "version": "1",
+        "execution_specs_ref": execution_specs_ref,
+        "suite_version": suite_version,
+        "chain_profile_version": chain_profile_version,
+        "cases": [render_log_case(template) for template in templates],
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(manifest, indent=2) + "\n")
+    return manifest
+
+
+def load_log_templates(path: str | Path) -> tuple[LogMappingTemplate, ...]:
+    template_path = Path(path)
+    data = json.loads(template_path.read_text())
+    entries = data.get("cases")
+    if not isinstance(entries, list):
+        raise ValueError("log template payload must contain a list 'cases'")
+    return tuple(_load_log_template_entry(entry, index=index) for index, entry in enumerate(entries))
+
+
 def scan_log_cases(
     source_path: str | Path,
 ) -> tuple[tuple[LogMappingTemplate, ...], tuple[AutoLogInventoryEntry, ...]]:
@@ -87,7 +185,80 @@ def scan_log_cases(
     )
     if len(inventory) != 140:
         raise ValueError(f"expected 140 log benchmark cases, found {len(inventory)}")
-    return (), tuple(inventory)
+    templates = tuple(
+        _inventory_entry_to_template(entry)
+        for entry in inventory
+        if entry.admitted and entry.mode is not None
+    )
+    return templates, tuple(inventory)
+
+
+def render_log_case(template: LogMappingTemplate) -> dict[str, Any]:
+    spec = LOG_MODE_SPECS[template.mode]
+    return {
+        "kind": "upstream_mapped",
+        "case_id": template.case_id,
+        "family": "state/log",
+        "description": template.description,
+        "namespace_seed": template.namespace_seed,
+        "upstream_ref": template.upstream_ref,
+        "notes": template.notes,
+        "observe": {
+            "log_probe": {
+                "mode": template.mode,
+                "topics": spec["topics"],
+                "data": spec["data"],
+            }
+        },
+        "filters": {},
+        "steps": [
+            deploy_contract_step(
+                init_code=_build_init_code(spec["runtime_code"]),
+                runtime_code=spec["runtime_code"],
+            ),
+            wait_receipt_step(),
+            invoke_contract_step(data_hex="0x"),
+            wait_receipt_step(),
+        ],
+        "expected": {
+            "receipt_logs": [
+                {
+                    "topics": spec["topics"],
+                    "data": spec["data"],
+                }
+            ]
+        },
+    }
+
+
+def _load_log_template_entry(entry: object, *, index: int) -> LogMappingTemplate:
+    if not isinstance(entry, dict):
+        raise ValueError(f"log template entry {index} must be an object")
+    required_fields = (
+        "case_id",
+        "description",
+        "namespace_seed",
+        "upstream_ref",
+        "notes",
+        "mode",
+    )
+    for field in required_fields:
+        if field not in entry:
+            raise ValueError(f"log template entry {index} missing required field: {field}")
+    mode = entry["mode"]
+    if mode not in LOG_MODE_SPECS:
+        raise ValueError(f"unsupported log template mode: {mode}")
+    notes = entry["notes"]
+    if not isinstance(notes, list) or not all(isinstance(note, str) for note in notes):
+        raise ValueError(f"log template entry {index} field 'notes' must be a list of strings")
+    return LogMappingTemplate(
+        case_id=str(entry["case_id"]),
+        description=str(entry["description"]),
+        namespace_seed=str(entry["namespace_seed"]),
+        upstream_ref=str(entry["upstream_ref"]),
+        notes=list(notes),
+        mode=mode,
+    )
 
 
 def _scan_test_log_cases(text: str) -> list[AutoLogInventoryEntry]:
@@ -104,9 +275,9 @@ def _scan_test_log_cases(text: str) -> list[AutoLogInventoryEntry]:
     ]
     results: list[AutoLogInventoryEntry] = []
     for opcode in opcodes:
-        for _size_value, size_label in size_entries:
+        for size_value, non_zero_data, size_label in size_entries:
             size_slug = _slugify_label(size_label)
-            for _zeros_topic_value, zeros_topic_label in zeros_topic_entries:
+            for zeros_topic, zeros_topic_label in zeros_topic_entries:
                 zeros_topic_slug = _slugify_label(zeros_topic_label)
                 for fixed_offset in fixed_offset_values:
                     fixed_slug = "true" if fixed_offset else "false"
@@ -118,13 +289,20 @@ def _scan_test_log_cases(text: str) -> list[AutoLogInventoryEntry]:
                         "upstream.benchmark.log.test_log."
                         f"{opcode.lower()}.size_{size_slug}.topic_{zeros_topic_slug}.fixed_offset_{fixed_slug}"
                     )
+                    admitted_mode = _resolve_test_log_mode(
+                        opcode=opcode,
+                        size_value=size_value,
+                        zeros_topic=zeros_topic,
+                        fixed_offset=fixed_offset,
+                        non_zero_data=non_zero_data,
+                    )
                     results.append(
                         AutoLogInventoryEntry(
                             upstream_ref=upstream_ref,
                             case_id=case_id,
-                            admitted=False,
-                            mode=None,
-                            reasons=[BLOCKED_REASON],
+                            admitted=admitted_mode is not None,
+                            mode=admitted_mode,
+                            reasons=[] if admitted_mode is not None else [BLOCKED_REASON],
                             source="test_log",
                         )
                     )
@@ -174,6 +352,42 @@ def _scan_test_log_benchmark_cases(text: str) -> list[AutoLogInventoryEntry]:
     return results
 
 
+def _resolve_test_log_mode(
+    *,
+    opcode: str,
+    size_value: int,
+    zeros_topic: bool,
+    fixed_offset: bool,
+    non_zero_data: bool,
+) -> LogTemplateMode | None:
+    if size_value != 0:
+        return None
+    if non_zero_data:
+        return None
+    if not fixed_offset:
+        return None
+    if opcode == "LOG0" and zeros_topic:
+        return "log0_empty_topics0"
+    if opcode == "LOG1" and zeros_topic:
+        return "log1_empty_zero_topic"
+    if opcode == "LOG1" and not zeros_topic:
+        return "log1_empty_non_zero_topic"
+    return None
+
+
+def _inventory_entry_to_template(entry: AutoLogInventoryEntry) -> LogMappingTemplate:
+    assert entry.mode is not None
+    spec = LOG_MODE_SPECS[entry.mode]
+    return LogMappingTemplate(
+        case_id=entry.case_id,
+        description=spec["description"],
+        namespace_seed=spec["namespace_seed"],
+        upstream_ref=entry.upstream_ref,
+        notes=list(spec["notes"]),
+        mode=entry.mode,
+    )
+
+
 def _extract_param_block(text: str, *, function_name: str) -> str:
     func_marker = f"def {function_name}("
     func = text.find(func_marker)
@@ -190,7 +404,7 @@ def _extract_param_block(text: str, *, function_name: str) -> str:
     return block
 
 
-def _extract_pytest_param_entries(block: str, param_name: str, *, function_name: str) -> list[tuple[str, str]]:
+def _extract_pytest_param_entries(block: str, param_name: str, *, function_name: str) -> list[Any]:
     pattern = re.compile(
         rf'@pytest\.mark\.parametrize\(\s*"{re.escape(param_name)}",\s*\[(?P<values>.*?)\]\s*\)',
         re.MULTILINE | re.DOTALL,
@@ -199,19 +413,30 @@ def _extract_pytest_param_entries(block: str, param_name: str, *, function_name:
     if not match:
         raise ValueError(f"could not find parameter block for {function_name} field {param_name}")
     values_block = match.group("values")
-    entries: list[tuple[str, str]] = []
+    entries: list[Any] = []
     if param_name == "size,non_zero_data":
         for param_match in re.finditer(
             r'pytest\.param\((?P<size>[^,]+),\s*(?P<non_zero_data>True|False),\s*id="(?P<label>[^"]+)"\)',
             values_block,
         ):
-            entries.append((param_match.group("size").strip(), param_match.group("label")))
+            entries.append(
+                (
+                    _parse_int_literal(param_match.group("size")),
+                    _parse_bool_literal(param_match.group("non_zero_data")),
+                    param_match.group("label"),
+                )
+            )
     elif param_name == "zeros_topic":
         for param_match in re.finditer(
             r'pytest\.param\((?P<value>True|False),\s*id="(?P<label>[^"]+)"\)',
             values_block,
         ):
-            entries.append((param_match.group("value").strip(), param_match.group("label")))
+            entries.append(
+                (
+                    _parse_bool_literal(param_match.group("value")),
+                    param_match.group("label"),
+                )
+            )
     else:
         raise ValueError(f"unsupported pytest.param field for {function_name}: {param_name}")
     if not entries:
