@@ -6,26 +6,24 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-from adapter.assembler import _build_init_code
+from adapter.assembler import _build_init_code, _push_int
 from adapter.generator import deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
+from adapter.signer import keccak256
 
 
-BLOCKED_REASON = "outside minimal admitted receipt-log subset"
+DYNAMIC_OFFSET_BLOCKED_REASON = "requires gas-derived dynamic log offset observation not yet mapped"
 ZERO_TOPIC_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
 NON_ZERO_TOPIC_WORD = "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-LOG0_EMPTY_RUNTIME = "0x5f5fa000"
-LOG1_EMPTY_ZERO_TOPIC_RUNTIME = "0x5f5f5fa100"
-LOG1_EMPTY_NON_ZERO_TOPIC_RUNTIME = (
-    "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5fa100"
-)
+EXACT_LOG_DATA_MAX_BYTES = 256
 
 LogTemplateMode = Literal[
-    "log0_empty_topics0",
-    "log1_empty_zero_topic",
-    "log1_empty_non_zero_topic",
+    "test_log_fixed_offset",
+    "test_log_benchmark",
 ]
+LogWitnessMode = Literal["exact", "digest"]
+LogMemorySeedKind = Literal["zero", "ff"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,6 +34,13 @@ class LogMappingTemplate:
     upstream_ref: str
     notes: list[str]
     mode: LogTemplateMode
+    opcode: str
+    topic_count: int
+    topic_word: str | None
+    log_size: int
+    memory_seed_kind: LogMemorySeedKind
+    memory_seed_size: int
+    witness_mode: LogWitnessMode
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,46 +51,47 @@ class AutoLogInventoryEntry:
     mode: str | None
     reasons: list[str]
     source: str
+    opcode: str | None = None
+    topic_count: int | None = None
+    topic_word: str | None = None
+    log_size: int | None = None
+    memory_seed_kind: str | None = None
+    memory_seed_size: int | None = None
+    witness_mode: str | None = None
 
 
-LOG_MODE_SPECS: dict[LogTemplateMode, dict[str, Any]] = {
-    "log0_empty_topics0": {
-        "description": "Mapped from execution-specs LOG0 with fixed offset and empty payload onto a minimal receipt-log witness case.",
-        "namespace_seed": "upstream-log-log0-empty-topics0",
-        "notes": [
-            "Upstream intent: benchmark LOG0 with a fixed offset and zero-length data payload.",
-            "RPC mapping: deploy a tiny runtime that emits exactly one LOG0 record with empty data, then prove it later through receipt-log observation rather than storage side effects.",
-            "Admitted as part of the minimal receipt-log seam because it proves zero-topic receipt shape without claiming the wider log benchmark family is closed.",
-        ],
-        "runtime_code": LOG0_EMPTY_RUNTIME,
-        "topics": [],
-        "data": "0x",
-    },
-    "log1_empty_zero_topic": {
-        "description": "Mapped from execution-specs LOG1 with a zero topic, fixed offset, and empty payload onto a minimal receipt-log witness case.",
-        "namespace_seed": "upstream-log-log1-empty-zero-topic",
-        "notes": [
-            "Upstream intent: benchmark LOG1 with a single zero topic, fixed offset, and zero-length data payload.",
-            "RPC mapping: deploy a tiny runtime that emits exactly one LOG1 record with topic0=0x00..00 and empty data, then prove it later through receipt-log observation rather than storage side effects.",
-            "Admitted as part of the minimal receipt-log seam because it proves topic-count and concrete zero-topic value handling without admitting the broader log matrix yet.",
-        ],
-        "runtime_code": LOG1_EMPTY_ZERO_TOPIC_RUNTIME,
-        "topics": [ZERO_TOPIC_WORD],
-        "data": "0x",
-    },
-    "log1_empty_non_zero_topic": {
-        "description": "Mapped from execution-specs LOG1 with a non-zero topic, fixed offset, and empty payload onto a minimal receipt-log witness case.",
-        "namespace_seed": "upstream-log-log1-empty-non-zero-topic",
-        "notes": [
-            "Upstream intent: benchmark LOG1 with a single non-zero topic, fixed offset, and zero-length data payload.",
-            "RPC mapping: deploy a tiny runtime that emits exactly one LOG1 record with topic0=0xff..ff and empty data, then prove it later through receipt-log observation rather than storage side effects.",
-            "Admitted as part of the minimal receipt-log seam because it proves topic-count and concrete non-zero topic value handling without admitting the broader log matrix yet.",
-        ],
-        "runtime_code": LOG1_EMPTY_NON_ZERO_TOPIC_RUNTIME,
-        "topics": [NON_ZERO_TOPIC_WORD],
-        "data": "0x",
-    },
-}
+class _BytecodeBuilder:
+    def __init__(self) -> None:
+        self.code = bytearray()
+        self.labels: dict[str, int] = {}
+        self.fixups: list[tuple[int, str]] = []
+
+    def op(self, opcode: int) -> None:
+        self.code.append(opcode)
+
+    def extend(self, payload: bytes) -> None:
+        self.code.extend(payload)
+
+    def push_int(self, value: int) -> None:
+        self.extend(_push_int(value))
+
+    def push_label(self, name: str) -> None:
+        self.code.extend((0x60, 0x00))
+        self.fixups.append((len(self.code) - 1, name))
+
+    def mark(self, name: str) -> None:
+        self.labels[name] = len(self.code)
+        self.op(0x5B)  # JUMPDEST
+
+    def finish(self) -> bytes:
+        for position, name in self.fixups:
+            if name not in self.labels:
+                raise ValueError(f"unknown bytecode label: {name}")
+            target = self.labels[name]
+            if target > 0xFF:
+                raise ValueError(f"bytecode label {name} out of PUSH1 range: {target}")
+            self.code[position] = target
+        return bytes(self.code)
 
 
 def generate_upstream_log_templates(
@@ -194,7 +200,7 @@ def scan_log_cases(
 
 
 def render_log_case(template: LogMappingTemplate) -> dict[str, Any]:
-    spec = LOG_MODE_SPECS[template.mode]
+    runtime_code = _build_log_runtime(template)
     return {
         "kind": "upstream_mapped",
         "case_id": template.case_id,
@@ -205,29 +211,27 @@ def render_log_case(template: LogMappingTemplate) -> dict[str, Any]:
         "notes": template.notes,
         "observe": {
             "log_probe": {
-                "mode": template.mode,
-                "topics": spec["topics"],
-                "data": spec["data"],
+                "mode": "parametric_log",
+                "opcode": template.opcode,
+                "topic_count": template.topic_count,
+                "topic_word": template.topic_word,
+                "log_size": template.log_size,
+                "memory_seed_kind": template.memory_seed_kind,
+                "memory_seed_size": template.memory_seed_size,
+                "witness_mode": template.witness_mode,
             }
         },
         "filters": {},
         "steps": [
             deploy_contract_step(
-                init_code=_build_init_code(spec["runtime_code"]),
-                runtime_code=spec["runtime_code"],
+                init_code=_build_init_code(runtime_code),
+                runtime_code=runtime_code,
             ),
             wait_receipt_step(),
-            invoke_contract_step(data_hex="0x"),
+            invoke_contract_step(data_hex="0x", gas=_invoke_gas(template)),
             wait_receipt_step(),
         ],
-        "expected": {
-            "receipt_logs": [
-                {
-                    "topics": spec["topics"],
-                    "data": spec["data"],
-                }
-            ]
-        },
+        "expected": {"receipt_logs": [_expected_receipt_log(template)]},
     }
 
 
@@ -241,16 +245,31 @@ def _load_log_template_entry(entry: object, *, index: int) -> LogMappingTemplate
         "upstream_ref",
         "notes",
         "mode",
+        "opcode",
+        "topic_count",
+        "log_size",
+        "memory_seed_kind",
+        "memory_seed_size",
+        "witness_mode",
     )
     for field in required_fields:
         if field not in entry:
             raise ValueError(f"log template entry {index} missing required field: {field}")
     mode = entry["mode"]
-    if mode not in LOG_MODE_SPECS:
+    if mode not in ("test_log_fixed_offset", "test_log_benchmark"):
         raise ValueError(f"unsupported log template mode: {mode}")
+    witness_mode = entry["witness_mode"]
+    if witness_mode not in ("exact", "digest"):
+        raise ValueError(f"unsupported log witness mode: {witness_mode}")
+    memory_seed_kind = entry["memory_seed_kind"]
+    if memory_seed_kind not in ("zero", "ff"):
+        raise ValueError(f"unsupported log memory seed kind: {memory_seed_kind}")
     notes = entry["notes"]
     if not isinstance(notes, list) or not all(isinstance(note, str) for note in notes):
         raise ValueError(f"log template entry {index} field 'notes' must be a list of strings")
+    topic_word = entry.get("topic_word")
+    if topic_word is not None and not isinstance(topic_word, str):
+        raise ValueError(f"log template entry {index} field 'topic_word' must be a string when present")
     return LogMappingTemplate(
         case_id=str(entry["case_id"]),
         description=str(entry["description"]),
@@ -258,6 +277,13 @@ def _load_log_template_entry(entry: object, *, index: int) -> LogMappingTemplate
         upstream_ref=str(entry["upstream_ref"]),
         notes=list(notes),
         mode=mode,
+        opcode=str(entry["opcode"]),
+        topic_count=int(entry["topic_count"]),
+        topic_word=topic_word,
+        log_size=int(entry["log_size"]),
+        memory_seed_kind=memory_seed_kind,
+        memory_seed_size=int(entry["memory_seed_size"]),
+        witness_mode=witness_mode,
     )
 
 
@@ -275,6 +301,7 @@ def _scan_test_log_cases(text: str) -> list[AutoLogInventoryEntry]:
     ]
     results: list[AutoLogInventoryEntry] = []
     for opcode in opcodes:
+        topic_count = _opcode_topic_count(opcode)
         for size_value, non_zero_data, size_label in size_entries:
             size_slug = _slugify_label(size_label)
             for zeros_topic, zeros_topic_label in zeros_topic_entries:
@@ -289,21 +316,24 @@ def _scan_test_log_cases(text: str) -> list[AutoLogInventoryEntry]:
                         "upstream.benchmark.log.test_log."
                         f"{opcode.lower()}.size_{size_slug}.topic_{zeros_topic_slug}.fixed_offset_{fixed_slug}"
                     )
-                    admitted_mode = _resolve_test_log_mode(
-                        opcode=opcode,
-                        size_value=size_value,
-                        zeros_topic=zeros_topic,
-                        fixed_offset=fixed_offset,
-                        non_zero_data=non_zero_data,
-                    )
+                    topic_word = _resolve_topic_word(topic_count=topic_count, zeros_topic=zeros_topic)
+                    witness_mode = _resolve_witness_mode(size_value)
+                    memory_seed_kind: LogMemorySeedKind = "ff" if non_zero_data else "zero"
                     results.append(
                         AutoLogInventoryEntry(
                             upstream_ref=upstream_ref,
                             case_id=case_id,
-                            admitted=admitted_mode is not None,
-                            mode=admitted_mode,
-                            reasons=[] if admitted_mode is not None else [BLOCKED_REASON],
+                            admitted=fixed_offset,
+                            mode="test_log_fixed_offset" if fixed_offset else None,
+                            reasons=[] if fixed_offset else [DYNAMIC_OFFSET_BLOCKED_REASON],
                             source="test_log",
+                            opcode=opcode,
+                            topic_count=topic_count,
+                            topic_word=topic_word,
+                            log_size=size_value,
+                            memory_seed_kind=memory_seed_kind,
+                            memory_seed_size=size_value if non_zero_data else 0,
+                            witness_mode=witness_mode,
                         )
                     )
     if len(results) != 60:
@@ -327,6 +357,8 @@ def _scan_test_log_benchmark_cases(text: str) -> list[AutoLogInventoryEntry]:
     ]
     results: list[AutoLogInventoryEntry] = []
     for opcode in opcodes:
+        topic_count = _opcode_topic_count(opcode)
+        topic_word = _resolve_topic_word(topic_count=topic_count, zeros_topic=False)
         for mem_size in mem_sizes:
             for log_size in log_sizes:
                 upstream_ref = (
@@ -341,10 +373,17 @@ def _scan_test_log_benchmark_cases(text: str) -> list[AutoLogInventoryEntry]:
                     AutoLogInventoryEntry(
                         upstream_ref=upstream_ref,
                         case_id=case_id,
-                        admitted=False,
-                        mode=None,
-                        reasons=[BLOCKED_REASON],
+                        admitted=True,
+                        mode="test_log_benchmark",
+                        reasons=[],
                         source="test_log_benchmark",
+                        opcode=opcode,
+                        topic_count=topic_count,
+                        topic_word=topic_word,
+                        log_size=log_size,
+                        memory_seed_kind="ff" if mem_size > 0 else "zero",
+                        memory_seed_size=mem_size,
+                        witness_mode=_resolve_witness_mode(log_size),
                     )
                 )
     if len(results) != 80:
@@ -352,40 +391,165 @@ def _scan_test_log_benchmark_cases(text: str) -> list[AutoLogInventoryEntry]:
     return results
 
 
-def _resolve_test_log_mode(
-    *,
-    opcode: str,
-    size_value: int,
-    zeros_topic: bool,
-    fixed_offset: bool,
-    non_zero_data: bool,
-) -> LogTemplateMode | None:
-    if size_value != 0:
-        return None
-    if non_zero_data:
-        return None
-    if not fixed_offset:
-        return None
-    if opcode == "LOG0" and zeros_topic:
-        return "log0_empty_topics0"
-    if opcode == "LOG1" and zeros_topic:
-        return "log1_empty_zero_topic"
-    if opcode == "LOG1" and not zeros_topic:
-        return "log1_empty_non_zero_topic"
-    return None
-
-
 def _inventory_entry_to_template(entry: AutoLogInventoryEntry) -> LogMappingTemplate:
     assert entry.mode is not None
-    spec = LOG_MODE_SPECS[entry.mode]
     return LogMappingTemplate(
         case_id=entry.case_id,
-        description=spec["description"],
-        namespace_seed=spec["namespace_seed"],
+        description=_build_description(entry),
+        namespace_seed=_build_namespace_seed(entry.case_id),
         upstream_ref=entry.upstream_ref,
-        notes=list(spec["notes"]),
+        notes=_build_notes(entry),
         mode=entry.mode,
+        opcode=_require_inventory_field(entry.opcode, field="opcode"),
+        topic_count=_require_inventory_field(entry.topic_count, field="topic_count"),
+        topic_word=entry.topic_word,
+        log_size=_require_inventory_field(entry.log_size, field="log_size"),
+        memory_seed_kind=_require_inventory_field(entry.memory_seed_kind, field="memory_seed_kind"),
+        memory_seed_size=_require_inventory_field(entry.memory_seed_size, field="memory_seed_size"),
+        witness_mode=_require_inventory_field(entry.witness_mode, field="witness_mode"),
     )
+
+
+def _build_description(entry: AutoLogInventoryEntry) -> str:
+    opcode = _require_inventory_field(entry.opcode, field="opcode")
+    topic_count = _require_inventory_field(entry.topic_count, field="topic_count")
+    log_size = _require_inventory_field(entry.log_size, field="log_size")
+    witness_mode = _require_inventory_field(entry.witness_mode, field="witness_mode")
+    if entry.mode == "test_log_fixed_offset":
+        return (
+            f"Mapped from execution-specs {opcode} fixed-offset log benchmark onto a receipt-log witness "
+            f"with {topic_count} topic(s), {log_size} payload bytes, and {witness_mode} payload proof."
+        )
+    return (
+        f"Mapped from execution-specs {opcode} log benchmark mem/log-size matrix onto a receipt-log witness "
+        f"with {topic_count} topic(s), log_size={log_size}, and {witness_mode} payload proof."
+    )
+
+
+def _build_notes(entry: AutoLogInventoryEntry) -> list[str]:
+    opcode = _require_inventory_field(entry.opcode, field="opcode")
+    topic_count = _require_inventory_field(entry.topic_count, field="topic_count")
+    log_size = _require_inventory_field(entry.log_size, field="log_size")
+    memory_seed_kind = _require_inventory_field(entry.memory_seed_kind, field="memory_seed_kind")
+    memory_seed_size = _require_inventory_field(entry.memory_seed_size, field="memory_seed_size")
+    witness_mode = _require_inventory_field(entry.witness_mode, field="witness_mode")
+    topic_word = entry.topic_word
+    topic_note = (
+        "no topics"
+        if topic_count == 0
+        else f"{topic_count} repeated {'zero' if topic_word == ZERO_TOPIC_WORD else 'non-zero'} topic word(s)"
+    )
+    witness_note = (
+        "Witness keeps full `data` equality because the payload is small enough for stable diffs."
+        if witness_mode == "exact"
+        else "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs."
+    )
+    if entry.mode == "test_log_fixed_offset":
+        notes = [
+            f"Upstream intent: benchmark {opcode} with a fixed memory offset, {topic_note}, and log_size={log_size}.",
+            (
+                "RPC mapping: deploy a small runtime that emits exactly one receipt log at offset 0. "
+                f"The runtime seeds the first {memory_seed_size} memory byte(s) with 0xff before logging."
+                if memory_seed_kind == "ff"
+                else "RPC mapping: deploy a small runtime that emits exactly one receipt log at offset 0 from zero-initialized memory."
+            ),
+            witness_note,
+            "Admitted because fixed offset removes the gas-sensitive dynamic-addressing branch and the remaining topic/payload semantics are fully observable in the receipt.",
+        ]
+        if topic_count == 0:
+            notes.append(
+                "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
+            )
+        return notes
+    return [
+        f"Upstream intent: benchmark {opcode} over a fixed offset with mem_size={memory_seed_size}, log_size={log_size}, and {topic_note}.",
+        (
+            f"RPC mapping: seed the first {memory_seed_size} memory byte(s) with deterministic 0xff bytes, leave the remaining log window zero-filled, and emit exactly one receipt log from offset 0."
+            if memory_seed_kind == "ff"
+            else "RPC mapping: emit exactly one receipt log from offset 0 without pre-seeding memory, preserving the all-zero payload case."
+        ),
+        witness_note,
+        "Admitted because the benchmark varies fixed-offset topic count and payload coverage only; those outputs are directly observable without tracing gas-sensitive intermediates.",
+    ]
+
+
+def _build_namespace_seed(case_id: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", case_id.removeprefix("upstream.benchmark.log.").lower()).strip("-")
+    return f"upstream-log-{slug}"
+
+
+def _build_log_runtime(template: LogMappingTemplate) -> str:
+    builder = _BytecodeBuilder()
+    if template.memory_seed_kind == "ff" and template.memory_seed_size > 0:
+        builder.extend(_build_fill_ff_prefix(template.memory_seed_size))
+    if template.topic_word is not None:
+        topic_value = int(template.topic_word, 16)
+        for _ in range(template.topic_count):
+            builder.push_int(topic_value)
+    builder.push_int(template.log_size)
+    builder.push_int(0)
+    builder.op(0xA0 + template.topic_count)
+    builder.op(0x00)
+    return "0x" + builder.finish().hex()
+
+
+def _build_fill_ff_prefix(size: int) -> bytes:
+    builder = _BytecodeBuilder()
+    full_word_bytes = (size // 32) * 32
+    tail_bytes = size - full_word_bytes
+    if full_word_bytes > 0:
+        builder.push_int(full_word_bytes)
+        builder.mark("fill_words_loop")
+        builder.op(0x80)  # DUP1
+        builder.push_int(0)
+        builder.op(0x14)  # EQ
+        builder.push_label("fill_words_done")
+        builder.op(0x57)  # JUMPI
+        builder.push_int((1 << 256) - 1)
+        builder.op(0x81)  # DUP2
+        builder.push_int(32)
+        builder.op(0x03)  # SUB
+        builder.op(0x52)  # MSTORE
+        builder.push_int(32)
+        builder.op(0x03)  # SUB
+        builder.push_label("fill_words_loop")
+        builder.op(0x56)  # JUMP
+        builder.mark("fill_words_done")
+        builder.op(0x50)  # POP
+    for offset in range(full_word_bytes, full_word_bytes + tail_bytes):
+        builder.push_int(0xFF)
+        builder.push_int(offset)
+        builder.op(0x53)  # MSTORE8
+    return builder.finish()
+
+
+def _expected_receipt_log(template: LogMappingTemplate) -> dict[str, Any]:
+    topics = [] if template.topic_word is None else [template.topic_word] * template.topic_count
+    payload = _payload_bytes(template)
+    if template.witness_mode == "exact":
+        return {"topics": topics, "data": "0x" + payload.hex()}
+    return {
+        "topics": topics,
+        "data_digest": "0x" + keccak256(payload).hex(),
+        "data_length_bytes": len(payload),
+    }
+
+
+def _payload_bytes(template: LogMappingTemplate) -> bytes:
+    if template.log_size == 0:
+        return b""
+    if template.memory_seed_kind == "zero" or template.memory_seed_size == 0:
+        return b"\x00" * template.log_size
+    filled = min(template.log_size, template.memory_seed_size)
+    return (b"\xff" * filled) + (b"\x00" * (template.log_size - filled))
+
+
+def _invoke_gas(template: LogMappingTemplate) -> str:
+    if template.log_size >= 1024 * 1024:
+        return "0x2000000"
+    if template.memory_seed_size >= 1024 or template.log_size >= 1024:
+        return "0x200000"
+    return "0xc350"
 
 
 def _extract_param_block(text: str, *, function_name: str) -> str:
@@ -454,6 +618,28 @@ def _extract_param_values_from_block(block: str, param_name: str, *, function_na
         raise ValueError(f"could not find parameter block for {function_name} field {param_name}")
     values = match.group("values")
     return [value.strip() for value in values.split(",") if value.strip()]
+
+
+def _opcode_topic_count(opcode: str) -> int:
+    if not opcode.startswith("LOG"):
+        raise ValueError(f"unsupported log opcode: {opcode}")
+    return int(opcode.removeprefix("LOG"))
+
+
+def _resolve_topic_word(*, topic_count: int, zeros_topic: bool) -> str | None:
+    if topic_count == 0:
+        return None
+    return ZERO_TOPIC_WORD if zeros_topic else NON_ZERO_TOPIC_WORD
+
+
+def _resolve_witness_mode(log_size: int) -> LogWitnessMode:
+    return "exact" if log_size <= EXACT_LOG_DATA_MAX_BYTES else "digest"
+
+
+def _require_inventory_field(value: Any, *, field: str) -> Any:
+    if value is None:
+        raise ValueError(f"missing log inventory field: {field}")
+    return value
 
 
 def _parse_int_literal(value: str) -> int:

@@ -31,11 +31,7 @@ from adapter.keccak_generator import (
     simulate_basic_keccak_case,
     simulate_diff_mem_msg_sizes_case,
 )
-from adapter.log_generator import (
-    LOG0_EMPTY_RUNTIME,
-    LOG1_EMPTY_NON_ZERO_TOPIC_RUNTIME,
-    LOG1_EMPTY_ZERO_TOPIC_RUNTIME,
-)
+from adapter.log_generator import _build_log_runtime
 from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
 from adapter.signer import keccak256, load_private_key, private_key_to_address, sign_type_2_transaction
@@ -830,6 +826,16 @@ def result_from_execution(
     diffs: list[str],
     expected: dict[str, Any] | None = None,
 ) -> ExecutionResult:
+    return ExecutionResult(
+        case_id=case.case_id,
+        namespace=namespace,
+        success=not diffs,
+        tx_hashes=tx_hashes,
+        context=context,
+        observed=observed,
+        expected=case.expected if expected is None else expected,
+        diffs=diffs,
+    )
     return ExecutionResult(
         case_id=case.case_id,
         namespace=namespace,

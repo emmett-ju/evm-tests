@@ -638,7 +638,7 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertEqual(generated["cases"][0]["family"], "state/keccak")
 
-    def test_log_manifest_generator_matches_checked_in_manifest_subset(self) -> None:
+    def test_log_manifest_generator_matches_checked_in_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_template_path = Path(tmpdir) / "upstream_log_templates.json"
             inventory_path = Path(tmpdir) / "upstream_log_inventory.json"
@@ -1317,34 +1317,26 @@ class HarnessTests(unittest.TestCase):
         admitted = [entry for entry in entries if entry["admitted"]]
         blocked = [entry for entry in entries if not entry["admitted"]]
         self.assertEqual(len(admitted), 3, "log admitted count drifted")
-        self.assertEqual(len(blocked), 137, "log blocked count drifted")
+        self.assertEqual(len(blocked), 30, "log blocked count drifted")
 
         admitted_case_ids = [entry["case_id"] for entry in admitted]
         self.assertEqual(
-            admitted_case_ids,
-            [
-                "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
-                "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true",
-                "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
-            ],
-        )
-        self.assertEqual(
             {entry["mode"] for entry in admitted},
-            {"log0_empty_topics0", "log1_empty_zero_topic", "log1_empty_non_zero_topic"},
+            {"test_log_fixed_offset", "test_log_benchmark"},
         )
         self.assertEqual(
             Counter(reason for entry in blocked for reason in entry["reasons"]),
-            Counter({"outside minimal admitted receipt-log subset": 137}),
+            Counter({"requires gas-derived dynamic log offset observation not yet mapped": 30}),
         )
         self.assertEqual(
             Counter(entry["source"] for entry in blocked),
-            Counter({"test_log": 57, "test_log_benchmark": 80}),
+            Counter({"test_log": 30}),
         )
         self.assertTrue(all(entry["mode"] is None for entry in blocked))
 
         template_case_ids = [case["case_id"] for case in templates_payload["cases"]]
         self.assertEqual(template_case_ids, admitted_case_ids)
-        self.assertEqual(len(templates_payload["cases"]), 3)
+        self.assertEqual(len(templates_payload["cases"]), 110)
 
         if manifest_payload is not None:
             checked_in_manifest_path = ROOT / "suites/manifests/upstream_log_mapped.json"
@@ -1352,7 +1344,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(manifest_payload, checked_in_manifest, "log manifest JSON drift")
             manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
             self.assertEqual(manifest_case_ids, admitted_case_ids)
-            self.assertEqual(len(manifest_payload["cases"]), 3)
+            self.assertEqual(len(manifest_payload["cases"]), 110)
             self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/log"})
             observed_by_case = {case["case_id"]: case for case in manifest_payload["cases"]}
             self.assertEqual(
@@ -1363,28 +1355,39 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertEqual(
                 observed_by_case[
-                    "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_true"
+                    "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true"
                 ]["expected"]["receipt_logs"],
                 [
                     {
-                        "topics": ["0x0000000000000000000000000000000000000000000000000000000000000000"],
-                        "data": "0x",
+                        "topics": [
+                            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        ],
+                        "data_digest": "0xd7810f3df8f4f0134ec6fb6f6d157e8ef76ab226a0e63a14e22fbd8e5466b3c8",
+                        "data_length_bytes": 1048576,
                     }
                 ],
             )
             self.assertEqual(
                 observed_by_case[
-                    "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true"
+                    "upstream.benchmark.log.test_log_benchmark.log4.mem_size_1024.log_size_256"
                 ]["expected"]["receipt_logs"],
                 [
                     {
-                        "topics": ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"],
-                        "data": "0x",
+                        "topics": [
+                            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        ],
+                        "data": "0x" + ("ff" * 256),
                     }
                 ],
             )
 
-    def test_log_template_scanner_writes_admitted_inventory_subset(self) -> None:
+    def test_log_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_log_templates.json"
             inventory_path = Path(tmpdir) / "upstream_log_inventory.json"
@@ -1412,7 +1415,7 @@ class HarnessTests(unittest.TestCase):
                     inventory_path=Path(tmpdir) / "inventory.json",
                 )
 
-    def test_selector_allows_upstream_mapped_log_subset_cases(self) -> None:
+    def test_selector_allows_upstream_mapped_log_cases(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/mock.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_log_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
@@ -2825,7 +2828,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 338, "blocked": 275},
+            {"families": 14, "cases": 613, "admitted": 445, "blocked": 168},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -2862,7 +2865,7 @@ class HarnessTests(unittest.TestCase):
                 "account-query": {"total": 40, "admitted": 5, "blocked": 35},
                 "block-context": {"total": 13, "admitted": 7, "blocked": 6},
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
-                "log": {"total": 140, "admitted": 3, "blocked": 137},
+                "log": {"total": 140, "admitted": 110, "blocked": 30},
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
                 "system": {"total": 46, "admitted": 0, "blocked": 46},
                 "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
@@ -2878,7 +2881,7 @@ class HarnessTests(unittest.TestCase):
         )
         self.assertEqual(
             families["log"]["blocked_reasons"],
-            {"outside minimal admitted receipt-log subset": 137},
+            {"requires gas-derived dynamic log offset observation not yet mapped": 30},
         )
         self._assert_checked_in_phase3_inventory_summary(summary)
 
@@ -2900,11 +2903,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 333, "blocked": 240},
+                {"families": 13, "cases": 573, "admitted": 440, "blocked": 133},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 338, "blocked": 275},
+                {"families": 14, "cases": 613, "admitted": 445, "blocked": 168},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:

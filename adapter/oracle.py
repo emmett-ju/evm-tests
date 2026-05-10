@@ -97,6 +97,8 @@ class ResultOracle:
         observed: Any,
         diffs: list[str],
     ) -> None:
+        if self._compare_digest_backed_receipt_log(path, expected, observed, diffs):
+            return
         if isinstance(expected, dict):
             if not isinstance(observed, dict):
                 diffs.append(f"{path or '<root>'}: expected object, got {type(observed).__name__}")
@@ -125,3 +127,28 @@ class ResultOracle:
             return
         if expected != observed:
             diffs.append(f"{path}: expected {expected!r}, got {observed!r}")
+     observed: Any,
+        diffs: list[str],
+    ) -> bool:
+        if not path.startswith("receipt_logs["):
+            return False
+        if not isinstance(expected, dict) or "data_digest" not in expected:
+            return False
+        if not isinstance(observed, dict):
+            diffs.append(f"{path or '<root>'}: expected object, got {type(observed).__name__}")
+            return True
+        for key in ("topics", "topic_count", "data_length_bytes"):
+            next_path = f"{path}.{key}" if path else str(key)
+            if key not in observed:
+                diffs.append(f"{next_path}: missing observed value")
+                continue
+            self._compare_node(next_path, expected[key], observed[key], diffs)
+        observed_data = observed.get("data")
+        if not isinstance(observed_data, str):
+            diffs.append(f"{path}.data: missing observed value")
+            return True
+        normalized_data = self._normalize_hex(observed_data, field=f"{path}.data")
+        observed_digest = "0x" + keccak256(bytes.fromhex(normalized_data[2:])).hex()
+        if observed_digest != expected["data_digest"]:
+            diffs.append(f"{path}.data_digest: expected {expected['data_digest']!r}, got {observed_digest!r}")
+        return True
