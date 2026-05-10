@@ -39,7 +39,10 @@ from adapter.call_context_generator import (
     generate_upstream_call_context_templates,
     load_call_context_templates,
 )
-from adapter.block_context_generator import generate_upstream_block_context_templates
+from adapter.block_context_generator import (
+    generate_upstream_block_context_manifest,
+    generate_upstream_block_context_templates,
+)
 from adapter.arithmetic_generator import (
     generate_upstream_arithmetic_manifest,
     generate_upstream_arithmetic_templates,
@@ -550,7 +553,46 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(manifest_payload["cases"]), 35)
             self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/keccak"})
 
-    def test_keccak_manifest_generator_matches_checked_in_manifest(self) -> None:
+    def test_block_context_manifest_generator_matches_checked_in_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_template_path = Path(tmpdir) / "upstream_block_context_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_block_context_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_block_context_mapped.json"
+            templates = generate_upstream_block_context_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
+            generated = generate_upstream_block_context_manifest(
+                repo_root=ROOT,
+                template_path=generated_template_path,
+                output_path=manifest_path,
+            )
+            checked_in = json.loads(
+                (ROOT / "suites/manifests/upstream_block_context_mapped.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            self.assertEqual(generated, json.loads(manifest_path.read_text()))
+            self.assertEqual(generated["name"], "upstream-block-context-mapped")
+            self.assertEqual(len(generated["cases"]), 7)
+            self.assertEqual({case["family"] for case in generated["cases"]}, {"state/block-context"})
+            self.assertEqual(
+                [case["case_id"] for case in generated["cases"]],
+                [case["case_id"] for case in templates["cases"]],
+            )
+            self.assertEqual(
+                {case["expected"]["storage"]["0x00"] for case in generated["cases"]},
+                {
+                    "$block_basefee_word",
+                    "$chain_id_word",
+                    "$block_coinbase_word",
+                    "$block_gaslimit_word",
+                    "$block_number_word",
+                    "$block_prevrandao_word",
+                    "$block_timestamp_word",
+                },
+            )
+
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_template_path = Path(tmpdir) / "upstream_keccak_templates.json"
             inventory_path = Path(tmpdir) / "upstream_keccak_inventory.json"
@@ -1134,7 +1176,7 @@ class HarnessTests(unittest.TestCase):
                     inventory_path=Path(tmpdir) / "inventory.json",
                 )
 
-    def test_block_context_template_scanner_writes_blocked_inventory_only(self) -> None:
+    def test_block_context_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_block_context_templates.json"
             inventory_path = Path(tmpdir) / "upstream_block_context_inventory.json"
@@ -1143,17 +1185,48 @@ class HarnessTests(unittest.TestCase):
                 output_path=generated_path,
                 inventory_path=inventory_path,
             )
+            checked_in = json.loads(
+                (ROOT / "suites/templates/upstream_block_context_templates.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
             self.assertEqual(generated["name"], "upstream-block-context-mapping-templates")
-            self.assertEqual(generated["cases"], [])
+            self.assertEqual(len(generated["cases"]), 7)
+            self.assertEqual(
+                [case["case_id"] for case in generated["cases"]],
+                [
+                    "upstream.benchmark.block_context.test_block_context_ops.basefee",
+                    "upstream.benchmark.block_context.test_block_context_ops.chainid",
+                    "upstream.benchmark.block_context.test_block_context_ops.coinbase",
+                    "upstream.benchmark.block_context.test_block_context_ops.gaslimit",
+                    "upstream.benchmark.block_context.test_block_context_ops.number",
+                    "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
+                    "upstream.benchmark.block_context.test_block_context_ops.timestamp",
+                ],
+            )
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(inventory["name"], "upstream-block-context-auto-inventory")
             self.assertEqual(inventory["family"], "block-context")
             self.assertEqual(len(inventory["entries"]), 13)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
+            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
+            self.assertEqual(len(admitted), 7)
+            self.assertEqual(len(blocked), 6)
+            self.assertEqual([entry["case_id"] for entry in admitted], [case["case_id"] for case in generated["cases"]])
             case_ids = [entry["case_id"] for entry in inventory["entries"]]
             self.assertEqual(len(case_ids), len(set(case_ids)))
-            self.assertIn("upstream.benchmark.block_context.test_block_context_ops.coinbase", case_ids)
-            self.assertIn("upstream.benchmark.block_context.test_blockhash.random", case_ids)
+            blocked_reason_counts = Counter(reason for entry in blocked for reason in entry["reasons"])
+            self.assertEqual(
+                blocked_reason_counts,
+                Counter(
+                    {
+                        "requires block environment control": 5,
+                        "requires blob-capable profile support not yet enabled": 1,
+                    }
+                ),
+            )
+            blocked_case_ids = {entry["case_id"] for entry in blocked}
+            self.assertIn("upstream.benchmark.block_context.test_blockhash.random", blocked_case_ids)
+            self.assertIn("upstream.benchmark.block_context.test_block_context_ops.blobbasefee", blocked_case_ids)
 
     def test_block_context_template_scanner_fails_loudly_on_missing_function(self) -> None:
         source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_block_context.py"
@@ -1570,6 +1643,37 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(generated["cases"]), 7)
             self.assertEqual(generated["cases"][0]["family"], "state/control-flow")
 
+    def test_cli_generate_block_context_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_output_path = Path(tmpdir) / "templates.json"
+            inventory_output_path = Path(tmpdir) / "inventory.json"
+            manifest_output_path = Path(tmpdir) / "generated.json"
+            generate_upstream_block_context_templates(
+                repo_root=ROOT,
+                output_path=template_output_path,
+                inventory_path=inventory_output_path,
+            )
+            self.assertEqual(
+                main(
+                    [
+                        "generate-block-context-manifest",
+                        "--template",
+                        str(template_output_path),
+                        "--output",
+                        str(manifest_output_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(manifest_output_path.read_text())
+            checked_in = json.loads(
+                (ROOT / "suites/manifests/upstream_block_context_mapped.json").read_text()
+            )
+            self.assertEqual(generated, checked_in)
+            self.assertEqual(generated["name"], "upstream-block-context-mapped")
+            self.assertEqual(len(generated["cases"]), 7)
+            self.assertEqual(generated["cases"][0]["family"], "state/block-context")
+
     def test_cli_generate_memory_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "generated.json"
@@ -1709,6 +1813,39 @@ class HarnessTests(unittest.TestCase):
             self._assert_account_query_parity_contract(
                 templates_payload=generated,
                 inventory_payload=inventory,
+            )
+
+    def test_cli_scan_upstream_block_context_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-block-context",
+                        "--template-output",
+                        str(output_path),
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(generated["name"], "upstream-block-context-mapping-templates")
+            self.assertEqual(len(generated["cases"]), 7)
+            self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
+            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
+            self.assertEqual(len(blocked), 6)
+            self.assertEqual(
+                Counter(reason for entry in blocked for reason in entry["reasons"]),
+                Counter(
+                    {
+                        "requires block environment control": 5,
+                        "requires blob-capable profile support not yet enabled": 1,
+                    }
+                ),
             )
 
     def test_cli_scan_upstream_tx_context_writes_expected_output(self) -> None:
@@ -1895,7 +2032,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["name"], "upstream-block-context-auto-inventory")
             self.assertEqual(inventory["family"], "block-context")
             self.assertEqual(len(inventory["entries"]), 13)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 7)
 
     def test_cli_scan_upstream_log_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -2371,7 +2508,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 328, "blocked": 285},
+            {"families": 14, "cases": 613, "admitted": 335, "blocked": 278},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -2406,7 +2543,7 @@ class HarnessTests(unittest.TestCase):
                 "stack": {"total": 65, "admitted": 65, "blocked": 0},
                 "control-flow": {"total": 7, "admitted": 7, "blocked": 0},
                 "account-query": {"total": 40, "admitted": 5, "blocked": 35},
-                "block-context": {"total": 13, "admitted": 0, "blocked": 13},
+                "block-context": {"total": 13, "admitted": 7, "blocked": 6},
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
                 "log": {"total": 140, "admitted": 0, "blocked": 140},
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
@@ -2442,11 +2579,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 323, "blocked": 250},
+                {"families": 13, "cases": 573, "admitted": 330, "blocked": 243},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 328, "blocked": 285},
+                {"families": 14, "cases": 613, "admitted": 335, "blocked": 278},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -2517,11 +2654,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 327, "blocked": 285},
+                {"families": 14, "cases": 612, "admitted": 334, "blocked": 278},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 328, "blocked": 285},
+                {"families": 14, "cases": 613, "admitted": 335, "blocked": 278},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -2541,7 +2678,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 327, "blocked": 285},
+                {"families": 14, "cases": 612, "admitted": 334, "blocked": 278},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(

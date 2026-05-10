@@ -1,0 +1,91 @@
+{
+  "name": "upstream-block-context-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_block_context.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.basefee",
+      "description": "Mapped from execution-specs BASEFEE onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-block-context-basefee",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=BASEFEE]",
+      "notes": [
+        "Upstream intent: benchmark BASEFEE in an external-call frame.",
+        "RPC mapping: runtime writes BASEFEE to storage slot0 after deployment, then the harness asserts it against the effective block base fee witness captured at execution time.",
+        "Admitted because the block base fee is a truthful runtime environment value that can be proven without genesis rewriting or trace equivalence."
+      ],
+      "mode": "basefee"
+    },
+    {
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.chainid",
+      "description": "Mapped from execution-specs CHAINID onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-block-context-chainid",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=CHAINID]",
+      "notes": [
+        "Upstream intent: benchmark CHAINID in an external-call frame.",
+        "RPC mapping: runtime writes CHAINID to storage slot0 after deployment, then the harness asserts it against the active chain profile chain id resolved at execution time.",
+        "Admitted because the selected profile already names the chain id truthfully and the runtime opcode exposes the same value without block control."
+      ],
+      "mode": "chainid"
+    },
+    {
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.coinbase",
+      "description": "Mapped from execution-specs COINBASE onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-block-context-coinbase",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=COINBASE]",
+      "notes": [
+        "Upstream intent: benchmark COINBASE in an external-call frame.",
+        "RPC mapping: runtime writes COINBASE to storage slot0 after deployment, then the harness asserts it against the execution block beneficiary witness captured at run time.",
+        "Admitted because the block beneficiary is a truthful runtime environment value that can be observed per execution without fixture-level block rewriting."
+      ],
+      "mode": "coinbase"
+    },
+    {
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.gaslimit",
+      "description": "Mapped from execution-specs GASLIMIT onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-block-context-gaslimit",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=GASLIMIT]",
+      "notes": [
+        "Upstream intent: benchmark GASLIMIT in an external-call frame.",
+        "RPC mapping: runtime writes GASLIMIT to storage slot0 after deployment, then the harness asserts it against the execution block gas-limit witness captured at run time.",
+        "Admitted because the block gas limit is a truthful runtime environment value that can be proven without custom block construction."
+      ],
+      "mode": "gaslimit"
+    },
+    {
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.number",
+      "description": "Mapped from execution-specs NUMBER onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-block-context-number",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=NUMBER]",
+      "notes": [
+        "Upstream intent: benchmark NUMBER in an external-call frame.",
+        "RPC mapping: runtime writes NUMBER to storage slot0 after deployment, then the harness asserts it against the execution block number witness captured at run time.",
+        "Admitted because the block number is a truthful runtime environment value that can be observed from the actual execution result without block control."
+      ],
+      "mode": "number"
+    },
+    {
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
+      "description": "Mapped from execution-specs PREVRANDAO onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-block-context-prevrandao",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=PREVRANDAO]",
+      "notes": [
+        "Upstream intent: benchmark PREVRANDAO in an external-call frame.",
+        "RPC mapping: runtime writes PREVRANDAO to storage slot0 after deployment, then the harness asserts it against the execution block randomness witness captured at run time.",
+        "Admitted because PREVRANDAO is a truthful runtime environment value available from the executed block without needing historical block fixtures."
+      ],
+      "mode": "prevrandao"
+    },
+    {
+      "case_id": "upstream.benchmark.block_context.test_block_context_ops.timestamp",
+      "description": "Mapped from execution-specs TIMESTAMP onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-block-context-timestamp",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=TIMESTAMP]",
+      "notes": [
+        "Upstream intent: benchmark TIMESTAMP in an external-call frame.",
+        "RPC mapping: runtime writes TIMESTAMP to storage slot0 after deployment, then the harness asserts it against the execution block timestamp witness captured at run time.",
+        "Admitted because the block timestamp is a truthful runtime environment value that can be observed from the actual execution result without special fixtures."
+      ],
+      "mode": "timestamp"
+    }
+  ]
+}

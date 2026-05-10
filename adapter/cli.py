@@ -13,7 +13,10 @@ from adapter.call_context_generator import (
     generate_upstream_call_context_manifest,
     generate_upstream_call_context_templates,
 )
-from adapter.block_context_generator import generate_upstream_block_context_templates
+from adapter.block_context_generator import (
+    generate_upstream_block_context_manifest,
+    generate_upstream_block_context_templates,
+)
 from adapter.arithmetic_generator import (
     generate_upstream_arithmetic_manifest,
     generate_upstream_arithmetic_templates,
@@ -134,6 +137,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_block_context.add_argument("--template-output")
     scan_block_context.add_argument("--inventory-output", required=True)
+
+    generate_block_context = subparsers.add_parser("generate-block-context-manifest")
+    generate_block_context.add_argument("--template", default="suites/templates/upstream_block_context_templates.json")
+    generate_block_context.add_argument("--output", required=True)
 
     scan_log = subparsers.add_parser("scan-upstream-log")
     scan_log.add_argument(
@@ -406,6 +413,15 @@ def main(argv: list[str] | None = None) -> int:
             inventory_path=args.inventory_output,
         )
         print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-block-context-manifest":
+        manifest = generate_upstream_block_context_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
         return 0
 
     if args.command == "scan-upstream-log":

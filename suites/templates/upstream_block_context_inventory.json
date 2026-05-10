@@ -7,11 +7,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=BASEFEE]",
       "case_id": "upstream.benchmark.block_context.test_block_context_ops.basefee",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires block-context benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "basefee",
+      "reasons": [],
       "source": "test_block_context_ops"
     },
     {
@@ -20,68 +18,56 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires block-context benchmark mapping support not yet mapped"
+        "requires blob-capable profile support not yet enabled"
       ],
       "source": "test_block_context_ops"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=CHAINID]",
       "case_id": "upstream.benchmark.block_context.test_block_context_ops.chainid",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires block-context benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "chainid",
+      "reasons": [],
       "source": "test_block_context_ops"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=COINBASE]",
       "case_id": "upstream.benchmark.block_context.test_block_context_ops.coinbase",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires block-context benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "coinbase",
+      "reasons": [],
       "source": "test_block_context_ops"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=GASLIMIT]",
       "case_id": "upstream.benchmark.block_context.test_block_context_ops.gaslimit",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires block-context benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "gaslimit",
+      "reasons": [],
       "source": "test_block_context_ops"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=NUMBER]",
       "case_id": "upstream.benchmark.block_context.test_block_context_ops.number",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires block-context benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "number",
+      "reasons": [],
       "source": "test_block_context_ops"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=PREVRANDAO]",
       "case_id": "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires block-context benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "prevrandao",
+      "reasons": [],
       "source": "test_block_context_ops"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=TIMESTAMP]",
       "case_id": "upstream.benchmark.block_context.test_block_context_ops.timestamp",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires block-context benchmark mapping support not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "timestamp",
+      "reasons": [],
       "source": "test_block_context_ops"
     },
     {
