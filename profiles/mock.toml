@@ -19,3 +19,12 @@ reuse_strategy = "idempotent"
 base_fee = true
 blob = false
 
+[block_context]
+coinbase = "0x1111111111111111111111111111111111111111"
+timestamp = 1717171717
+number = 19000001
+prevrandao = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+gas_limit = 30000000
+base_fee = 1000000000
+rpc_block_tag = "latest"
+

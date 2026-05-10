@@ -4,7 +4,7 @@ import tomllib
 from pathlib import Path
 
 from adapter.env import load_dotenv
-from adapter.models import ChainProfile, GasPolicy, NamespacePolicy
+from adapter.models import BlockContextConfig, ChainProfile, GasPolicy, NamespacePolicy
 
 
 def load_chain_profile(path: str | Path) -> ChainProfile:
@@ -27,6 +27,31 @@ def load_chain_profile(path: str | Path) -> ChainProfile:
         trace_support=bool(data.get("trace_support", False)),
         predeployed_allowlist=list(data.get("predeployed_allowlist", [])),
         backend=backend,
+        block_context=BlockContextConfig(
+            coinbase=data.get("block_context", {}).get("coinbase"),
+            timestamp=(
+                None
+                if data.get("block_context", {}).get("timestamp") is None
+                else int(data["block_context"]["timestamp"])
+            ),
+            number=(
+                None
+                if data.get("block_context", {}).get("number") is None
+                else int(data["block_context"]["number"])
+            ),
+            prevrandao=data.get("block_context", {}).get("prevrandao"),
+            gas_limit=(
+                None
+                if data.get("block_context", {}).get("gas_limit") is None
+                else int(data["block_context"]["gas_limit"])
+            ),
+            base_fee=(
+                None
+                if data.get("block_context", {}).get("base_fee") is None
+                else int(data["block_context"]["base_fee"])
+            ),
+            rpc_block_tag=data.get("block_context", {}).get("rpc_block_tag", "latest"),
+        ),
     )
     profile.validate()
     return profile

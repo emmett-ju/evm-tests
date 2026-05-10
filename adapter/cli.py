@@ -292,7 +292,18 @@ def main(argv: list[str] | None = None) -> int:
         bootstrapper = StateBootstrapper(profile, args.state_dir)
         bootstrapper.bootstrap_global()
         backend = (
-            MockBackend(admin_account=profile.admin_account)
+            MockBackend(
+                admin_account=profile.admin_account,
+                chain_id=profile.chain_id,
+                block_context_config={
+                    "coinbase": profile.block_context.coinbase,
+                    "timestamp": profile.block_context.timestamp,
+                    "number": profile.block_context.number,
+                    "prevrandao": profile.block_context.prevrandao,
+                    "gas_limit": profile.block_context.gas_limit,
+                    "base_fee": profile.block_context.base_fee,
+                },
+            )
             if profile.backend == "mock"
             else JsonRpcBackend(profile)
         )
@@ -302,8 +313,19 @@ def main(argv: list[str] | None = None) -> int:
         for case in selected_cases:
             namespace = bootstrapper.prepare_case_namespace(case).namespace
             tx_hashes, observed, context = executor.run_case(case, namespace)
+            resolved_expected = oracle.resolve_expected(case.expected, context)
             diffs = oracle.compare(case.expected, observed, context)
-            results.append(result_from_execution(case, namespace, tx_hashes, context, observed, diffs))
+            results.append(
+                result_from_execution(
+                    case,
+                    namespace,
+                    tx_hashes,
+                    context,
+                    observed,
+                    diffs,
+                    expected=resolved_expected,
+                )
+            )
         report = Report(
             manifest=manifest.name,
             execution_specs_ref=manifest.execution_specs_ref,

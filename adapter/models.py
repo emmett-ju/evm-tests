@@ -22,6 +22,33 @@ class NamespacePolicy:
 
 
 @dataclass(slots=True)
+class BlockContextConfig:
+    coinbase: str | None = None
+    timestamp: int | None = None
+    number: int | None = None
+    prevrandao: str | None = None
+    gas_limit: int | None = None
+    base_fee: int | None = None
+    rpc_block_tag: str = "latest"
+
+    def validate(self) -> None:
+        if self.coinbase is not None and not self.coinbase.startswith("0x"):
+            raise ValueError("block_context.coinbase must be hex-prefixed")
+        if self.prevrandao is not None and not self.prevrandao.startswith("0x"):
+            raise ValueError("block_context.prevrandao must be hex-prefixed")
+        if self.timestamp is not None and self.timestamp < 0:
+            raise ValueError("block_context.timestamp must be non-negative")
+        if self.number is not None and self.number < 0:
+            raise ValueError("block_context.number must be non-negative")
+        if self.gas_limit is not None and self.gas_limit < 0:
+            raise ValueError("block_context.gas_limit must be non-negative")
+        if self.base_fee is not None and self.base_fee < 0:
+            raise ValueError("block_context.base_fee must be non-negative")
+        if not self.rpc_block_tag:
+            raise ValueError("block_context.rpc_block_tag is required")
+
+
+@dataclass(slots=True)
 class ChainProfile:
     name: str
     rpc_url: str
@@ -35,6 +62,7 @@ class ChainProfile:
     trace_support: bool = False
     predeployed_allowlist: list[str] = field(default_factory=list)
     backend: Literal["mock", "jsonrpc"] = "jsonrpc"
+    block_context: BlockContextConfig = field(default_factory=BlockContextConfig)
 
     def validate(self) -> None:
         if not self.rpc_url:
@@ -45,6 +73,7 @@ class ChainProfile:
             raise ValueError("namespace prefix is required")
         if not self.admin_account.startswith("0x"):
             raise ValueError("admin_account must be hex-prefixed")
+        self.block_context.validate()
 
 
 @dataclass(slots=True)

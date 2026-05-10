@@ -11,9 +11,19 @@ class ResultOracle:
         context: dict[str, Any] | None = None,
     ) -> list[str]:
         diffs: list[str] = []
-        resolved_expected = self._resolve_placeholders(expected, context or {})
+        resolved_expected = self.resolve_expected(expected, context)
         self._compare_node("", resolved_expected, observed, diffs)
         return diffs
+
+    def resolve_expected(
+        self,
+        expected: dict[str, Any],
+        context: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        resolved = self._resolve_placeholders(expected, context or {})
+        if not isinstance(resolved, dict):
+            raise ValueError("resolved expected payload must be an object")
+        return resolved
 
     def _resolve_placeholders(self, node: Any, context: dict[str, Any]) -> Any:
         if isinstance(node, dict):

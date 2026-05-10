@@ -6,6 +6,15 @@ import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
+from adapter.block_context_generator import (
+    BLOCK_CONTEXT_BASEFEE_RUNTIME,
+    BLOCK_CONTEXT_CHAINID_RUNTIME,
+    BLOCK_CONTEXT_COINBASE_RUNTIME,
+    BLOCK_CONTEXT_GASLIMIT_RUNTIME,
+    BLOCK_CONTEXT_NUMBER_RUNTIME,
+    BLOCK_CONTEXT_PREVRANDAO_RUNTIME,
+    BLOCK_CONTEXT_TIMESTAMP_RUNTIME,
+)
 from adapter.control_flow_generator import (
     _build_gas_runtime,
     _build_jump_runtime,
@@ -51,6 +60,8 @@ class Backend(Protocol):
 @dataclass(slots=True)
 class MockBackend:
     admin_account: str = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    chain_id: int = 1337
+    block_context_config: dict[str, Any] = field(default_factory=dict)
     state: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     def execute_case(
@@ -65,6 +76,7 @@ class MockBackend:
         last_contract_address: str | None = None
         admin_state = self._address_state(contracts, self.admin_account)
         admin_state.setdefault("balance", ZERO_STORAGE_WORD)
+        block_context = self._build_mock_block_context()
         for idx, step in enumerate(case.steps):
             action = step["action"]
             if action == "set_storage":
@@ -193,6 +205,12 @@ class MockBackend:
                     storage["0x00"] = self._simulate_control_flow_probe(mode, code)
                     continue
 
+                block_context_probe = case.observe.get("block_context_probe")
+                if block_context_probe is not None:
+                    mode = block_context_probe.get("mode")
+                    storage["0x00"] = self._simulate_block_context_probe(mode, code, block_context)
+                    continue
+
                 keccak_probe = case.observe.get("keccak_probe")
                 if keccak_probe is not None:
                     self._simulate_keccak_probe(storage, keccak_probe, code, data)
@@ -269,6 +287,7 @@ class MockBackend:
             context["$last_contract"] = last_contract_address
         if last_receipt is not None and last_receipt.get("effectiveGasPrice") is not None:
             context["$gas_price"] = last_receipt["effectiveGasPrice"]
+        context.update(self._block_context_to_placeholders(block_context))
         if "receipt_status" in case.expected:
             observed["receipt_status"] = None if last_receipt is None else last_receipt.get("status")
         if "receipt_contract_address" in case.expected:
@@ -354,6 +373,74 @@ class MockBackend:
             raise ValueError(f"unsupported mock contract code path: {code}")
         return expected_storage
 
+    def _build_mock_block_context(self) -> dict[str, str]:
+        configured = self.block_context_config
+        coinbase = configured.get("coinbase", "0x1111111111111111111111111111111111111111")
+        timestamp = int(configured.get("timestamp", 1_717_171_717))
+        number = int(configured.get("number", 19_000_001))
+        prevrandao = configured.get(
+            "prevrandao",
+            "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        )
+        gas_limit = int(configured.get("gas_limit", 30_000_000))
+        base_fee = int(configured.get("base_fee", 1_000_000_000))
+        return {
+            "coinbase": coinbase.lower(),
+            "timestamp": hex(timestamp),
+            "number": hex(number),
+            "prevrandao": prevrandao.lower(),
+            "gaslimit": hex(gas_limit),
+            "chainid": hex(self.chain_id),
+            "basefee": hex(base_fee),
+        }
+
+    def _simulate_block_context_probe(
+        self,
+        mode: Any,
+        code: Any,
+        block_context: dict[str, str],
+    ) -> str:
+        expected_runtimes = {
+            "basefee": (BLOCK_CONTEXT_BASEFEE_RUNTIME, "basefee"),
+            "chainid": (BLOCK_CONTEXT_CHAINID_RUNTIME, "chainid"),
+            "coinbase": (BLOCK_CONTEXT_COINBASE_RUNTIME, "coinbase"),
+            "gaslimit": (BLOCK_CONTEXT_GASLIMIT_RUNTIME, "gaslimit"),
+            "number": (BLOCK_CONTEXT_NUMBER_RUNTIME, "number"),
+            "prevrandao": (BLOCK_CONTEXT_PREVRANDAO_RUNTIME, "prevrandao"),
+            "timestamp": (BLOCK_CONTEXT_TIMESTAMP_RUNTIME, "timestamp"),
+        }
+        if mode not in expected_runtimes:
+            raise ValueError(f"missing block-context probe mode: {mode!r}")
+        expected_runtime, field_name = expected_runtimes[mode]
+        if code != expected_runtime:
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        value = block_context[field_name]
+        if field_name == "coinbase":
+            return self._address_to_word(value)
+        return self._hex_to_word(value)
+
+    def _block_context_to_placeholders(self, block_context: dict[str, str]) -> dict[str, str]:
+        return {
+            "$block_coinbase": block_context["coinbase"],
+            "$block_timestamp": block_context["timestamp"],
+            "$block_number": block_context["number"],
+            "$block_prevrandao": block_context["prevrandao"],
+            "$block_gaslimit": block_context["gaslimit"],
+            "$chain_id": block_context["chainid"],
+            "$block_basefee": block_context["basefee"],
+        }
+
+    def _int_to_word(self, value: int) -> str:
+        return self._hex_to_word(hex(value))
+
+    def _address_to_word(self, value: str) -> str:
+        if not isinstance(value, str) or not value.startswith("0x"):
+            raise ValueError(f"unsupported address literal for word conversion: {value!r}")
+        normalized = value[2:].lower()
+        if len(normalized) != 40:
+            raise ValueError(f"address must be 20 bytes, got: {value}")
+        return "0x" + normalized.rjust(64, "0")
+
     def _simulate_keccak_probe(
         self,
         storage: dict[str, Any],
@@ -423,6 +510,7 @@ class JsonRpcBackend:
         tx_hashes: list[str] = []
         last_receipt: dict[str, Any] | None = None
         last_contract_address: str | None = None
+        block_context: dict[str, str] | None = None
         for step in case.steps:
             action = step["action"]
             if action == "rpc_call":
@@ -473,6 +561,8 @@ class JsonRpcBackend:
                     tx_hash,
                     timeout_seconds=step.get("timeout_seconds", 60),
                 )
+                if case.observe.get("block_context_probe") is not None:
+                    block_context = self._load_block_context(last_receipt)
                 if last_receipt.get("contractAddress"):
                     last_contract_address = last_receipt["contractAddress"]
             else:
@@ -485,6 +575,8 @@ class JsonRpcBackend:
             context["$last_contract"] = last_contract_address
         if last_receipt is not None and last_receipt.get("effectiveGasPrice") is not None:
             context["$gas_price"] = last_receipt["effectiveGasPrice"]
+        if block_context is not None:
+            context.update(self._block_context_to_placeholders(block_context))
         return tx_hashes, observed, context
 
     def _observe(
@@ -532,6 +624,39 @@ class JsonRpcBackend:
                 raise ValueError("no prior contractAddress available for $last_contract")
             return address
         return value
+
+    def _load_block_context(self, last_receipt: dict[str, Any]) -> dict[str, str]:
+        block_number = last_receipt.get("blockNumber")
+        block_tag = block_number or self.profile.block_context.rpc_block_tag
+        block = self._rpc("eth_getBlockByNumber", [block_tag, False])
+        if block is None:
+            raise ValueError(f"could not load block context for block tag {block_tag!r}")
+        required_fields = {
+            "coinbase": "miner",
+            "timestamp": "timestamp",
+            "number": "number",
+            "prevrandao": "mixHash",
+            "gaslimit": "gasLimit",
+            "basefee": "baseFeePerGas",
+        }
+        context: dict[str, str] = {"chainid": hex(self.profile.chain_id)}
+        for context_key, block_key in required_fields.items():
+            value = block.get(block_key)
+            if value in (None, ""):
+                raise ValueError(f"block context missing required field {block_key} for {context_key}")
+            context[context_key] = value
+        return context
+
+    def _block_context_to_placeholders(self, block_context: dict[str, str]) -> dict[str, str]:
+        return {
+            "$block_coinbase": block_context["coinbase"],
+            "$block_timestamp": block_context["timestamp"],
+            "$block_number": block_context["number"],
+            "$block_prevrandao": block_context["prevrandao"],
+            "$block_gaslimit": block_context["gaslimit"],
+            "$chain_id": block_context["chainid"],
+            "$block_basefee": block_context["basefee"],
+        }
 
     def _send_transaction(self, transaction: dict[str, Any]) -> str:
         source = describe_admin_key_source(self.profile)
@@ -620,6 +745,7 @@ def result_from_execution(
     context: dict[str, Any],
     observed: dict[str, Any],
     diffs: list[str],
+    expected: dict[str, Any] | None = None,
 ) -> ExecutionResult:
     return ExecutionResult(
         case_id=case.case_id,
@@ -628,6 +754,6 @@ def result_from_execution(
         tx_hashes=tx_hashes,
         context=context,
         observed=observed,
-        expected=case.expected,
+        expected=case.expected if expected is None else expected,
         diffs=diffs,
     )

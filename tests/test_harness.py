@@ -351,6 +351,30 @@ class HarnessTests(unittest.TestCase):
             {"gas", "pc", "jump", "jump_pc_relative", "jumpi_fallthrough", "jumpi_taken", "jumpdest"},
         )
 
+    def test_selector_allows_upstream_mapped_block_context_cases(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_block_context_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(
+            [case.case_id for case in selected],
+            [
+                "upstream.benchmark.block_context.test_block_context_ops.basefee",
+                "upstream.benchmark.block_context.test_block_context_ops.chainid",
+                "upstream.benchmark.block_context.test_block_context_ops.coinbase",
+                "upstream.benchmark.block_context.test_block_context_ops.gaslimit",
+                "upstream.benchmark.block_context.test_block_context_ops.number",
+                "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
+                "upstream.benchmark.block_context.test_block_context_ops.timestamp",
+            ],
+        )
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual({case.family for case in selected}, {"state/block-context"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+        self.assertEqual(
+            {case.observe["block_context_probe"]["mode"] for case in selected},
+            {"basefee", "chainid", "coinbase", "gaslimit", "number", "prevrandao", "timestamp"},
+        )
+
     def test_manifest_resolves_execution_specs_ref(self) -> None:
         manifest = load_manifest(ROOT / "suites/manifests/upstream_smoke.json")
         head = (
@@ -3232,6 +3256,84 @@ class HarnessTests(unittest.TestCase):
                 ],
             )
 
+    def test_mock_backend_runs_upstream_mapped_block_context_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            profile = load_chain_profile(ROOT / "profiles/mock.toml")
+            coinbase_word = "0x" + profile.block_context.coinbase[2:].lower().rjust(64, "0")
+            timestamp_word = "0x" + format(profile.block_context.timestamp, "x").rjust(64, "0")
+            number_word = "0x" + format(profile.block_context.number, "x").rjust(64, "0")
+            gaslimit_word = "0x" + format(profile.block_context.gas_limit, "x").rjust(64, "0")
+            chainid_word = "0x" + format(profile.chain_id, "x").rjust(64, "0")
+            basefee_word = "0x" + format(profile.block_context.base_fee, "x").rjust(64, "0")
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_block_context_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 7)
+
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            expected_storage = {
+                "upstream.benchmark.block_context.test_block_context_ops.basefee": {
+                    "0x00": basefee_word,
+                },
+                "upstream.benchmark.block_context.test_block_context_ops.chainid": {
+                    "0x00": chainid_word,
+                },
+                "upstream.benchmark.block_context.test_block_context_ops.coinbase": {
+                    "0x00": coinbase_word,
+                },
+                "upstream.benchmark.block_context.test_block_context_ops.gaslimit": {
+                    "0x00": gaslimit_word,
+                },
+                "upstream.benchmark.block_context.test_block_context_ops.number": {
+                    "0x00": number_word,
+                },
+                "upstream.benchmark.block_context.test_block_context_ops.prevrandao": {
+                    "0x00": profile.block_context.prevrandao,
+                },
+                "upstream.benchmark.block_context.test_block_context_ops.timestamp": {
+                    "0x00": timestamp_word,
+                },
+            }
+            self.assertEqual(set(observed_by_case), set(expected_storage))
+            self.assertEqual(
+                {result["context"]["$last_contract"] for result in report["results"]},
+                {"0xcccccccccccccccccccccccccccccccccccccccc"},
+            )
+            for case_id, expected_slots in expected_storage.items():
+                result = observed_by_case[case_id]
+                self.assertEqual(result["observed"]["storage"], expected_slots)
+                self.assertEqual(result["expected"]["storage"], expected_slots)
+                self.assertEqual(result["diffs"], [])
+                self.assertTrue(result["tx_hashes"])
+                self.assertIs(result["success"], True)
+
+            coinbase = observed_by_case["upstream.benchmark.block_context.test_block_context_ops.coinbase"]
+            self.assertEqual(coinbase["context"]["$block_coinbase"], "0x1111111111111111111111111111111111111111")
+            chainid = observed_by_case["upstream.benchmark.block_context.test_block_context_ops.chainid"]
+            self.assertEqual(chainid["context"]["$chain_id"], "0x539")
+            basefee = observed_by_case["upstream.benchmark.block_context.test_block_context_ops.basefee"]
+            self.assertEqual(basefee["context"]["$block_basefee"], "0x3b9aca00")
+
+            diffs = ResultOracle().compare(
+                {"storage": {"0x00": "$chain_id_word"}},
+                chainid["observed"],
+                chainid["context"],
+            )
+            self.assertEqual(diffs, [])
+
     def test_mock_backend_runs_upstream_mapped_call_context_case(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -3560,6 +3662,63 @@ class HarnessTests(unittest.TestCase):
                 observed_by_case["upstream.benchmark.control_flow.test_jumpi_fallthrough"]["expected"],
             )
 
+    def test_cli_run_mock_upstream_block_context_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            profile = load_chain_profile(ROOT / "profiles/mock.toml")
+            coinbase_word = "0x" + profile.block_context.coinbase[2:].lower().rjust(64, "0")
+            timestamp_word = "0x" + format(profile.block_context.timestamp, "x").rjust(64, "0")
+            number_word = "0x" + format(profile.block_context.number, "x").rjust(64, "0")
+            gaslimit_word = "0x" + format(profile.block_context.gas_limit, "x").rjust(64, "0")
+            chainid_word = "0x" + format(profile.chain_id, "x").rjust(64, "0")
+            basefee_word = "0x" + format(profile.block_context.base_fee, "x").rjust(64, "0")
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_block_context_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-block-context-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 7)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertEqual(
+                {case_id: result["observed"]["storage"]["0x00"] for case_id, result in observed_by_case.items()},
+                {
+                    "upstream.benchmark.block_context.test_block_context_ops.basefee": basefee_word,
+                    "upstream.benchmark.block_context.test_block_context_ops.chainid": chainid_word,
+                    "upstream.benchmark.block_context.test_block_context_ops.coinbase": coinbase_word,
+                    "upstream.benchmark.block_context.test_block_context_ops.gaslimit": gaslimit_word,
+                    "upstream.benchmark.block_context.test_block_context_ops.number": number_word,
+                    "upstream.benchmark.block_context.test_block_context_ops.prevrandao": profile.block_context.prevrandao,
+                    "upstream.benchmark.block_context.test_block_context_ops.timestamp": timestamp_word,
+                },
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.block_context.test_block_context_ops.coinbase"]["expected"],
+                observed_by_case["upstream.benchmark.block_context.test_block_context_ops.coinbase"]["observed"],
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.block_context.test_block_context_ops.prevrandao"]["context"]["$block_prevrandao"],
+                profile.block_context.prevrandao,
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.block_context.test_block_context_ops.timestamp"]["context"]["$block_timestamp"],
+                hex(profile.block_context.timestamp),
+            )
+
     def test_cli_run_mock_upstream_account_query_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -3804,6 +3963,31 @@ class HarnessTests(unittest.TestCase):
         broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-control-flow-runtime")
+
+    def test_mock_backend_rejects_unsupported_block_context_runtime_code_path(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/mock.toml")
+        backend = MockBackend(
+            admin_account=profile.admin_account,
+            chain_id=profile.chain_id,
+            block_context_config={
+                "coinbase": profile.block_context.coinbase,
+                "timestamp": profile.block_context.timestamp,
+                "number": profile.block_context.number,
+                "prevrandao": profile.block_context.prevrandao,
+                "gas_limit": profile.block_context.gas_limit,
+                "base_fee": profile.block_context.base_fee,
+            },
+        )
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_block_context_mapped.json")
+        broken_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.block_context.test_block_context_ops.number"
+        )
+        broken_case.steps[0]["bytecode_runtime"] = "0xdeadbeef"
+        broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
+        with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
+            backend.execute_case(broken_case, "negative-unsupported-block-context-runtime")
 
     def test_mock_backend_rejects_unsupported_account_query_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
