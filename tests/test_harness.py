@@ -1412,6 +1412,151 @@ class HarnessTests(unittest.TestCase):
                     inventory_path=Path(tmpdir) / "inventory.json",
                 )
 
+    def test_selector_allows_upstream_mapped_log_subset_cases(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/mock.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_log_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(
+            [case.case_id for case in selected],
+            [
+                "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
+                "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true",
+                "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
+            ],
+        )
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual({case.family for case in selected}, {"state/log"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
+    def test_mock_backend_runs_upstream_mapped_log_subset_cases(self) -> None:
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_log_mapped.json")
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        observed_by_case: dict[str, dict[str, object]] = {}
+        for index, case in enumerate(manifest.cases):
+            tx_hashes, observed, context = backend.execute_case(case, f"log-subset-{index}")
+            self.assertEqual(len(tx_hashes), 2)
+            self.assertEqual(ResultOracle().compare(case.expected, observed, context), [])
+            observed_by_case[case.case_id] = observed
+
+        self.assertEqual(
+            observed_by_case[
+                "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true"
+            ]["receipt_logs"],
+            [
+                {
+                    "topics": [],
+                    "topic_count": 0,
+                    "data": "0x",
+                    "data_length_bytes": 0,
+                }
+            ],
+        )
+        self.assertEqual(
+            observed_by_case[
+                "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_true"
+            ]["receipt_logs"],
+            [
+                {
+                    "topics": ["0x0000000000000000000000000000000000000000000000000000000000000000"],
+                    "topic_count": 1,
+                    "data": "0x",
+                    "data_length_bytes": 0,
+                }
+            ],
+        )
+        self.assertEqual(
+            observed_by_case[
+                "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true"
+            ]["receipt_logs"],
+            [
+                {
+                    "topics": ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"],
+                    "topic_count": 1,
+                    "data": "0x",
+                    "data_length_bytes": 0,
+                }
+            ],
+        )
+
+    def test_cli_run_mock_upstream_log_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_log_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-log-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 3)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true"
+                ]["observed"]["receipt_logs"],
+                [
+                    {
+                        "topics": [],
+                        "topic_count": 0,
+                        "data": "0x",
+                        "data_length_bytes": 0,
+                    }
+                ],
+            )
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_true"
+                ]["observed"]["receipt_logs"][0]["topics"],
+                ["0x0000000000000000000000000000000000000000000000000000000000000000"],
+            )
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true"
+                ]["observed"]["receipt_logs"][0]["topics"],
+                ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"],
+            )
+
+    def test_oracle_reports_precise_receipt_log_topic_mismatch(self) -> None:
+        diffs = ResultOracle().compare(
+            {
+                "receipt_logs": [
+                    {
+                        "topics": ["0x0000000000000000000000000000000000000000000000000000000000000000"],
+                        "data": "0x",
+                    }
+                ]
+            },
+            {
+                "receipt_logs": [
+                    {
+                        "topics": ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"],
+                        "topic_count": 1,
+                        "data": "0x",
+                        "data_length_bytes": 0,
+                    }
+                ]
+            },
+        )
+        self.assertEqual(
+            diffs,
+            [
+                "receipt_logs[0].topics[0]: expected '0x0000000000000000000000000000000000000000000000000000000000000000', got '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'"
+            ],
+        )
+
     def test_keccak_max_permutations_witness_contract_matches_upstream_helper(self) -> None:
         contract = derive_upstream_keccak_witness_contract()
         self.assertTrue(contract.tx_gas_limit_cap_is_none)
@@ -4149,6 +4294,15 @@ class HarnessTests(unittest.TestCase):
         broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-account-query-runtime")
+
+    def test_mock_backend_rejects_unsupported_log_runtime_code_path(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_log_mapped.json")
+        broken_case = manifest.cases[0]
+        broken_case.steps[0]["bytecode_runtime"] = "0xdeadbeef"
+        broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
+        with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
+            backend.execute_case(broken_case, "negative-unsupported-log-runtime")
 
     def test_mock_backend_rejects_unsupported_keccak_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")

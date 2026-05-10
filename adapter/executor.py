@@ -31,6 +31,11 @@ from adapter.keccak_generator import (
     simulate_basic_keccak_case,
     simulate_diff_mem_msg_sizes_case,
 )
+from adapter.log_generator import (
+    LOG0_EMPTY_RUNTIME,
+    LOG1_EMPTY_NON_ZERO_TOPIC_RUNTIME,
+    LOG1_EMPTY_ZERO_TOPIC_RUNTIME,
+)
 from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
 from adapter.signer import keccak256, load_private_key, private_key_to_address, sign_type_2_transaction
@@ -128,6 +133,7 @@ class MockBackend:
                     "transactionHash": tx_hash,
                     "status": receipt_status,
                     "effectiveGasPrice": gas_price,
+                    "logs": [],
                 }
                 contract_state = self._address_state(contracts, target_address)
                 data = step.get("data", "0x")
@@ -215,6 +221,11 @@ class MockBackend:
                 if keccak_probe is not None:
                     self._simulate_keccak_probe(storage, keccak_probe, code, data)
                     continue
+
+                log_probe = case.observe.get("log_probe")
+                if log_probe is not None:
+                    self._simulate_log_probe(last_receipt, log_probe, code)
+                    continue
                 
                 if code in {"0x60003560005500", "0x60003560005560006000fd"}:
                     padded = data[2:] if data.startswith("0x") else data
@@ -294,6 +305,10 @@ class MockBackend:
             observed["receipt_contract_address"] = (
                 None if last_receipt is None else last_receipt.get("contractAddress")
             )
+        if "receipt_logs" in case.expected:
+            observed["receipt_logs"] = self._normalize_receipt_logs(
+                [] if last_receipt is None else last_receipt.get("logs")
+            )
         return tx_hashes, observed, context
 
     def _mock_observe(
@@ -322,6 +337,10 @@ class MockBackend:
             storage = self._address_state(contracts, storage_address).get("storage", {})
             for slot in case.expected["storage"]:
                 observed["storage"][slot] = storage.get(slot, ZERO_STORAGE_WORD)
+        if "receipt_logs" in case.expected:
+            observed["receipt_logs"] = self._normalize_receipt_logs(
+                [] if last_receipt is None else last_receipt.get("logs")
+            )
         return observed
 
     def _address_state(
@@ -496,6 +515,66 @@ class MockBackend:
             return
         raise ValueError(f"missing keccak probe mode: {mode!r}")
 
+    def _simulate_log_probe(
+        self,
+        last_receipt: dict[str, Any] | None,
+        log_probe: dict[str, Any],
+        code: Any,
+    ) -> None:
+        if last_receipt is None:
+            raise ValueError("log probe requires a receipt context")
+        mode = log_probe.get("mode")
+        if mode == "log0_empty_topics0":
+            expected_runtime = LOG0_EMPTY_RUNTIME
+        elif mode == "log1_empty_zero_topic":
+            expected_runtime = LOG1_EMPTY_ZERO_TOPIC_RUNTIME
+        elif mode == "log1_empty_non_zero_topic":
+            expected_runtime = LOG1_EMPTY_NON_ZERO_TOPIC_RUNTIME
+        else:
+            raise ValueError(f"missing log probe mode: {mode!r}")
+        if code != expected_runtime:
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        last_receipt["logs"] = [
+            {
+                "address": "0xcccccccccccccccccccccccccccccccccccccccc",
+                "topics": list(log_probe.get("topics", [])),
+                "data": log_probe.get("data", "0x"),
+            }
+        ]
+
+    def _normalize_receipt_logs(self, logs: Any) -> list[dict[str, Any]]:
+        if logs is None:
+            return []
+        if not isinstance(logs, list):
+            raise ValueError(f"receipt logs must be a list, got {type(logs).__name__}")
+        normalized: list[dict[str, Any]] = []
+        for index, entry in enumerate(logs):
+            if not isinstance(entry, dict):
+                raise ValueError(f"receipt log {index} must be an object")
+            topics = entry.get("topics")
+            if not isinstance(topics, list):
+                raise ValueError(f"receipt log {index}.topics must be a list")
+            data = entry.get("data")
+            if not isinstance(data, str):
+                raise ValueError(f"receipt log {index}.data must be a hex string")
+            normalized.append(
+                {
+                    "topics": [str(topic).lower() for topic in topics],
+                    "topic_count": len(topics),
+                    "data": data.lower(),
+                    "data_length_bytes": self._hex_data_length_bytes(data),
+                }
+            )
+        return normalized
+
+    def _hex_data_length_bytes(self, value: str) -> int:
+        if not value.startswith("0x"):
+            raise ValueError(f"receipt log data must be hex-prefixed, got: {value!r}")
+        normalized = value[2:]
+        if len(normalized) % 2 != 0:
+            raise ValueError(f"receipt log data must contain whole bytes, got: {value!r}")
+        return len(normalized) // 2
+
 
 class JsonRpcBackend:
     def __init__(self, profile: ChainProfile) -> None:
@@ -614,6 +693,10 @@ class JsonRpcBackend:
         if "receipt_contract_address" in expected_shape:
             observed["receipt_contract_address"] = (
                 None if last_receipt is None else last_receipt.get("contractAddress")
+            )
+        if "receipt_logs" in expected_shape:
+            observed["receipt_logs"] = MockBackend()._normalize_receipt_logs(
+                [] if last_receipt is None else last_receipt.get("logs")
             )
         return observed
 

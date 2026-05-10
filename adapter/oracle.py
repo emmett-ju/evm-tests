@@ -23,7 +23,7 @@ class ResultOracle:
         resolved = self._resolve_placeholders(expected, context or {})
         if not isinstance(resolved, dict):
             raise ValueError("resolved expected payload must be an object")
-        return resolved
+        return self._canonicalize_expected(resolved)
 
     def _resolve_placeholders(self, node: Any, context: dict[str, Any]) -> Any:
         if isinstance(node, dict):
@@ -51,6 +51,45 @@ class ResultOracle:
             raise ValueError(f"expected value that fits in 32 bytes for word conversion, got: {value}")
         return "0x" + normalized.rjust(64, "0")
 
+    def _canonicalize_expected(self, expected: dict[str, Any]) -> dict[str, Any]:
+        canonical = dict(expected)
+        receipt_logs = canonical.get("receipt_logs")
+        if receipt_logs is not None:
+            if not isinstance(receipt_logs, list):
+                raise ValueError("expected receipt_logs payload must be a list")
+            canonical["receipt_logs"] = [self._canonicalize_receipt_log(entry, index) for index, entry in enumerate(receipt_logs)]
+        return canonical
+
+    def _canonicalize_receipt_log(self, entry: Any, index: int) -> dict[str, Any]:
+        if not isinstance(entry, dict):
+            raise ValueError(f"expected receipt log {index} must be an object")
+        topics = entry.get("topics")
+        data = entry.get("data")
+        if not isinstance(topics, list):
+            raise ValueError(f"expected receipt log {index}.topics must be a list")
+        if not isinstance(data, str):
+            raise ValueError(f"expected receipt log {index}.data must be a hex string")
+        normalized_topics = [self._normalize_hex(topic, field=f"expected receipt log {index}.topics[{topic_index}]") for topic_index, topic in enumerate(topics)]
+        normalized_data = self._normalize_hex(data, field=f"expected receipt log {index}.data")
+        return {
+            "topics": normalized_topics,
+            "topic_count": len(normalized_topics),
+            "data": normalized_data,
+            "data_length_bytes": self._hex_data_length_bytes(normalized_data, field=f"expected receipt log {index}.data"),
+        }
+
+    def _normalize_hex(self, value: Any, *, field: str) -> str:
+        if not isinstance(value, str) or not value.startswith("0x"):
+            raise ValueError(f"{field} must be a hex string, got: {value!r}")
+        normalized = value[2:]
+        if len(normalized) % 2 != 0:
+            raise ValueError(f"{field} must contain whole bytes, got: {value!r}")
+        return "0x" + normalized.lower()
+
+    def _hex_data_length_bytes(self, value: str, *, field: str) -> int:
+        normalized = self._normalize_hex(value, field=field)
+        return (len(normalized) - 2) // 2
+
     def _compare_node(
         self,
         path: str,
@@ -68,6 +107,17 @@ class ResultOracle:
                     diffs.append(f"{next_path}: missing observed value")
                     continue
                 self._compare_node(next_path, value, observed[key], diffs)
+            return
+        if isinstance(expected, list):
+            if not isinstance(observed, list):
+                diffs.append(f"{path or '<root>'}: expected list, got {type(observed).__name__}")
+                return
+            if len(expected) != len(observed):
+                diffs.append(f"{path}: expected {len(expected)} entries, got {len(observed)}")
+                return
+            for index, value in enumerate(expected):
+                next_path = f"{path}[{index}]"
+                self._compare_node(next_path, value, observed[index], diffs)
             return
         if expected == "nonempty":
             if observed in (None, "", "0x"):
