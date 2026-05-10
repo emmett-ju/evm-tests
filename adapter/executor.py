@@ -31,7 +31,7 @@ from adapter.keccak_generator import (
     simulate_basic_keccak_case,
     simulate_diff_mem_msg_sizes_case,
 )
-from adapter.log_generator import _build_log_runtime
+from adapter.log_generator import _build_log_runtime, derive_receipt_log_expectation
 from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
 from adapter.signer import keccak256, load_private_key, private_key_to_address, sign_type_2_transaction
@@ -326,7 +326,7 @@ class MockBackend:
             observed["receipt_contract_address"] = (
                 None if last_receipt is None else last_receipt.get("contractAddress")
             )
-        if "receipt_logs" in expected_shape:
+        if "receipt_logs" in expected_shape or observe_config.get("log_probe") is not None:
             observed["receipt_logs"] = self._normalize_receipt_logs(
                 [] if last_receipt is None else last_receipt.get("logs")
             )
@@ -725,7 +725,7 @@ class JsonRpcBackend:
             observed["receipt_contract_address"] = (
                 None if last_receipt is None else last_receipt.get("contractAddress")
             )
-        if "receipt_logs" in expected_shape:
+        if "receipt_logs" in expected_shape or observe_config.get("log_probe") is not None:
             observed["receipt_logs"] = MockBackend()._normalize_receipt_logs(
                 [] if last_receipt is None else last_receipt.get("logs")
             )

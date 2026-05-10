@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from adapter.log_generator import derive_receipt_log_expectation
 from adapter.signer import keccak256
 
 
@@ -11,9 +12,10 @@ class ResultOracle:
         expected: dict[str, Any],
         observed: dict[str, Any],
         context: dict[str, Any] | None = None,
+        observed_contract: dict[str, Any] | None = None,
     ) -> list[str]:
         diffs: list[str] = []
-        resolved_expected = self.resolve_expected(expected, context)
+        resolved_expected = self.resolve_expected(expected, context, observed_contract)
         self._compare_node("", resolved_expected, observed, diffs)
         return diffs
 
@@ -21,11 +23,12 @@ class ResultOracle:
         self,
         expected: dict[str, Any],
         context: dict[str, Any] | None = None,
+        observed_contract: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         resolved = self._resolve_placeholders(expected, context or {})
         if not isinstance(resolved, dict):
             raise ValueError("resolved expected payload must be an object")
-        return self._canonicalize_expected(resolved)
+        return self._canonicalize_expected(resolved, observed_contract)
 
     def _resolve_placeholders(self, node: Any, context: dict[str, Any]) -> Any:
         if isinstance(node, dict):
@@ -53,16 +56,51 @@ class ResultOracle:
             raise ValueError(f"expected value that fits in 32 bytes for word conversion, got: {value}")
         return "0x" + normalized.rjust(64, "0")
 
-    def _canonicalize_expected(self, expected: dict[str, Any]) -> dict[str, Any]:
+    def _canonicalize_expected(
+        self,
+        expected: dict[str, Any],
+        observed_contract: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         canonical = dict(expected)
         receipt_logs = canonical.get("receipt_logs")
         if receipt_logs is not None:
             if not isinstance(receipt_logs, list):
                 raise ValueError("expected receipt_logs payload must be a list")
-            canonical["receipt_logs"] = [
+            canonical["receipt_logs"] = self._canonicalize_receipt_logs(
+                receipt_logs,
+                observed_contract or {},
+            )
+        return canonical
+
+    def _canonicalize_receipt_logs(
+        self,
+        receipt_logs: list[Any],
+        observed_contract: dict[str, Any],
+    ) -> list[dict[str, Any]]:
+        log_probe = observed_contract.get("log_probe") if isinstance(observed_contract, dict) else None
+        if log_probe is None:
+            return [
                 self._canonicalize_receipt_log(entry, index) for index, entry in enumerate(receipt_logs)
             ]
-        return canonical
+        if len(receipt_logs) != 1:
+            raise ValueError(
+                f"expected receipt_logs to contain exactly 1 entry for observe.log_probe, got {len(receipt_logs)}"
+            )
+        canonical_entry = self._canonicalize_receipt_log(receipt_logs[0], 0)
+        derived_entry = self._canonicalize_receipt_log(derive_receipt_log_expectation(log_probe), 0)
+        self._validate_declared_receipt_log_matches_runtime_contract(canonical_entry, derived_entry)
+        return [derived_entry]
+
+    def _validate_declared_receipt_log_matches_runtime_contract(
+        self,
+        declared: dict[str, Any],
+        derived: dict[str, Any],
+    ) -> None:
+        if declared != derived:
+            diffs: list[str] = []
+            self._compare_node("receipt_logs[0]", derived, declared, diffs)
+            detail = diffs[0] if diffs else "receipt_logs[0]: declared witness does not match derived runtime contract"
+            raise ValueError(f"declared receipt_logs witness does not match observe.log_probe: {detail}")
 
     def _canonicalize_receipt_log(self, entry: Any, index: int) -> dict[str, Any]:
         if not isinstance(entry, dict):

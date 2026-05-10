@@ -62,7 +62,7 @@ from adapter.control_flow_generator import (
     generate_upstream_control_flow_templates,
     load_control_flow_templates,
 )
-from adapter.log_generator import generate_upstream_log_manifest, generate_upstream_log_templates
+from adapter.log_generator import derive_receipt_log_expectation, generate_upstream_log_manifest, generate_upstream_log_templates
 from adapter.inventory import summarize_inventory_dir, write_inventory_payload
 from adapter.keccak_generator import (
     compute_keccak_max_permutations_input_length,
@@ -1921,9 +1921,10 @@ class HarnessTests(unittest.TestCase):
                 ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"] * 4,
             )
             self.assertEqual(large_digest_case["data_length_bytes"], 1048576)
-            self.assertEqual(large_digest_case["data"][:66], "0x" + ("ff" * 32))
+            self.assertNotIn("data", large_digest_case)
+            self.assertTrue(large_digest_case["data_elided"])
             self.assertEqual(
-                "0x" + keccak256(bytes.fromhex(large_digest_case["data"][2:])).hex(),
+                large_digest_case["data_digest"],
                 observed_by_case[
                     "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true"
                 ]["expected"]["receipt_logs"][0]["data_digest"],
@@ -1971,6 +1972,111 @@ class HarnessTests(unittest.TestCase):
             [
                 f"receipt_logs[0].data_digest: expected {wrong_expected_digest!r}, got {'0x' + keccak256(bytes.fromhex(observed_data[2:])).hex()!r}"
             ],
+        )
+
+    def test_oracle_rejects_declared_receipt_log_witness_mismatch_against_runtime_contract(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            r"declared receipt_logs witness does not match observe\.log_probe: receipt_logs\[0\]\.topics\[0\]: expected '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', got '0x0000000000000000000000000000000000000000000000000000000000000000'",
+        ):
+            ResultOracle().resolve_expected(
+                {
+                    "receipt_logs": [
+                        {
+                            "topics": ["0x0000000000000000000000000000000000000000000000000000000000000000"],
+                            "data": "0x",
+                        }
+                    ]
+                },
+                observed_contract={
+                    "log_probe": {
+                        "mode": "parametric_log",
+                        "opcode": "LOG1",
+                        "topic_count": 1,
+                        "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        "log_size": 0,
+                        "memory_seed_kind": "zero",
+                        "memory_seed_size": 0,
+                        "witness_mode": "exact",
+                    }
+                },
+            )
+
+    def test_oracle_rejects_malformed_receipt_log_shape_against_runtime_contract(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            r"expected receipt log 0\.topics must be a list",
+        ):
+            ResultOracle().resolve_expected(
+                {
+                    "receipt_logs": [
+                        {
+                            "topics": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                            "data": "0x",
+                        }
+                    ]
+                },
+                observed_contract={
+                    "log_probe": {
+                        "mode": "parametric_log",
+                        "opcode": "LOG1",
+                        "topic_count": 1,
+                        "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                        "log_size": 0,
+                        "memory_seed_kind": "zero",
+                        "memory_seed_size": 0,
+                        "witness_mode": "exact",
+                    }
+                },
+            )
+
+    def test_oracle_rejects_invalid_receipt_log_data_type_against_runtime_contract(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            r"expected receipt log 0\.data must be a hex string",
+        ):
+            ResultOracle().resolve_expected(
+                {
+                    "receipt_logs": [
+                        {
+                            "topics": [],
+                            "data": 123,
+                        }
+                    ]
+                },
+                observed_contract={
+                    "log_probe": {
+                        "mode": "parametric_log",
+                        "opcode": "LOG0",
+                        "topic_count": 0,
+                        "topic_word": None,
+                        "log_size": 0,
+                        "memory_seed_kind": "zero",
+                        "memory_seed_size": 0,
+                        "witness_mode": "exact",
+                    }
+                },
+            )
+
+    def test_derive_receipt_log_expectation_matches_runtime_contract(self) -> None:
+        self.assertEqual(
+            derive_receipt_log_expectation(
+                {
+                    "mode": "parametric_log",
+                    "opcode": "LOG2",
+                    "topic_count": 2,
+                    "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    "log_size": 1024,
+                    "memory_seed_kind": "ff",
+                    "memory_seed_size": 32,
+                    "witness_mode": "digest",
+                }
+            ),
+            {
+                "topics": ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"] * 2,
+                "data_digest": "0x" + keccak256((b"\xff" * 32) + (b"\x00" * 992)).hex(),
+                "data_length_bytes": 1024,
+            },
         )
 
     def test_oracle_reports_precise_receipt_log_topic_mismatch(self) -> None:

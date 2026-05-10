@@ -523,6 +523,57 @@ def _build_fill_ff_prefix(size: int) -> bytes:
     return builder.finish()
 
 
+def derive_receipt_log_expectation(log_probe: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(log_probe, dict):
+        raise ValueError("observe.log_probe must be an object")
+    required_fields = (
+        "opcode",
+        "topic_count",
+        "log_size",
+        "memory_seed_kind",
+        "memory_seed_size",
+        "witness_mode",
+    )
+    missing_fields = [field for field in required_fields if field not in log_probe]
+    if missing_fields:
+        raise ValueError(
+            "observe.log_probe is missing required fields: " + ", ".join(missing_fields)
+        )
+    topic_count = int(log_probe["topic_count"])
+    if topic_count < 0:
+        raise ValueError("observe.log_probe.topic_count must be non-negative")
+    topic_word = log_probe.get("topic_word")
+    if topic_count == 0:
+        topic_word = None
+    elif not isinstance(topic_word, str):
+        raise ValueError(
+            "observe.log_probe.topic_word must be a hex string when topic_count is greater than zero"
+        )
+    memory_seed_kind = str(log_probe["memory_seed_kind"])
+    if memory_seed_kind not in ("zero", "ff"):
+        raise ValueError(f"unsupported observe.log_probe.memory_seed_kind: {memory_seed_kind}")
+    witness_mode = str(log_probe["witness_mode"])
+    if witness_mode not in ("exact", "digest"):
+        raise ValueError(f"unsupported observe.log_probe.witness_mode: {witness_mode}")
+    template = LogMappingTemplate(
+        case_id="observe.log_probe",
+        description="Derived receipt-log expectation from runtime contract",
+        namespace_seed="observe-log-probe",
+        upstream_ref="observe.log_probe",
+        notes=[],
+        mode="test_log_fixed_offset",
+        opcode=str(log_probe["opcode"]),
+        topic_count=topic_count,
+        topic_word=topic_word,
+        log_size=int(log_probe["log_size"]),
+        memory_seed_kind=memory_seed_kind,
+        memory_seed_size=int(log_probe["memory_seed_size"]),
+        witness_mode=witness_mode,
+    )
+    return _expected_receipt_log(template)
+
+
+
 def _expected_receipt_log(template: LogMappingTemplate) -> dict[str, Any]:
     topics = [] if template.topic_word is None else [template.topic_word] * template.topic_count
     payload = _payload_bytes(template)
