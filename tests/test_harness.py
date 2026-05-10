@@ -3619,6 +3619,155 @@ class HarnessTests(unittest.TestCase):
             "0x00000000000000000000000000000000000000000000000000000004a817c800",
         )
 
+    def test_jsonrpc_backend_uses_receipt_block_number_for_block_context_probe(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.block_context.rpc_block_tag = "safe"
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_block_context_mapped.json")
+        number_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.block_context.test_block_context_ops.number"
+        )
+
+        class StubBackend(JsonRpcBackend):
+            def __init__(self, profile):
+                super().__init__(profile)
+                self.sent = 0
+                self.block_calls: list[list[object]] = []
+
+            def _send_transaction(self, transaction: dict[str, Any]) -> str:
+                self.sent += 1
+                return f"0xtx{self.sent}"
+
+            def _wait_for_receipt(self, tx_hash: str, timeout_seconds: int = 60) -> dict[str, Any]:
+                if tx_hash == "0xtx1":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "contractAddress": "0xcccccccccccccccccccccccccccccccccccccccc",
+                        "blockNumber": "0x99",
+                    }
+                if tx_hash == "0xtx2":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "blockNumber": "0x2a",
+                    }
+                raise AssertionError(tx_hash)
+
+            def _rpc(self, method: str, params: list[object]) -> object:
+                if method == "eth_getBlockByNumber":
+                    self.block_calls.append(params)
+                    block_tag = params[0]
+                    if block_tag == "0x99":
+                        return {
+                            "miner": "0x1111111111111111111111111111111111111111",
+                            "timestamp": "0x65000000",
+                            "number": "0x99",
+                            "mixHash": "0x" + "22" * 32,
+                            "gasLimit": "0x1c9c380",
+                            "baseFeePerGas": "0x3b9aca00",
+                        }
+                    if block_tag == "0x2a":
+                        return {
+                            "miner": "0x1111111111111111111111111111111111111111",
+                            "timestamp": "0x6500002a",
+                            "number": "0x2a",
+                            "mixHash": "0x" + "33" * 32,
+                            "gasLimit": "0x1c9c380",
+                            "baseFeePerGas": "0x3b9aca00",
+                        }
+                    raise AssertionError(block_tag)
+                if method == "eth_getStorageAt":
+                    return "0x000000000000000000000000000000000000000000000000000000000000002a"
+                raise AssertionError(method)
+
+        backend = StubBackend(profile)
+        tx_hashes, observed, context = backend.execute_case(number_case, "jsonrpc-block-context-number")
+        self.assertEqual(tx_hashes, ["0xtx1", "0xtx2"])
+        self.assertEqual(backend.block_calls, [["0x99", False], ["0x2a", False]])
+        self.assertEqual(context["$block_number"], "0x2a")
+        self.assertEqual(
+            observed["storage"]["0x00"],
+            "0x000000000000000000000000000000000000000000000000000000000000002a",
+        )
+        self.assertEqual(ResultOracle().compare(number_case.expected, observed, context), [])
+        self.assertEqual(
+            ResultOracle().compare(
+                {"storage": {"0x00": "0x000000000000000000000000000000000000000000000000000000000000002b"}},
+                observed,
+                context,
+            ),
+            [
+                "storage.0x00: expected '0x000000000000000000000000000000000000000000000000000000000000002b', got '0x000000000000000000000000000000000000000000000000000000000000002a'"
+            ],
+        )
+
+    def test_jsonrpc_backend_load_block_context_falls_back_to_profile_block_tag(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.block_context.rpc_block_tag = "safe"
+
+        class StubBackend(JsonRpcBackend):
+            def __init__(self, profile):
+                super().__init__(profile)
+                self.block_calls: list[list[object]] = []
+
+            def _rpc(self, method: str, params: list[object]) -> object:
+                self.block_calls.append(params)
+                if method != "eth_getBlockByNumber":
+                    raise AssertionError(method)
+                if params != ["safe", False]:
+                    raise AssertionError(params)
+                return {
+                    "miner": "0x1111111111111111111111111111111111111111",
+                    "timestamp": "0x65000000",
+                    "number": "0x2a",
+                    "mixHash": "0x" + "44" * 32,
+                    "gasLimit": "0x1c9c380",
+                    "baseFeePerGas": "0x3b9aca00",
+                }
+
+        backend = StubBackend(profile)
+        context = backend._load_block_context({"transactionHash": "0xtx2", "status": "0x1"})
+        self.assertEqual(backend.block_calls, [["safe", False]])
+        self.assertEqual(
+            context,
+            {
+                "chainid": hex(profile.chain_id),
+                "coinbase": "0x1111111111111111111111111111111111111111",
+                "timestamp": "0x65000000",
+                "number": "0x2a",
+                "prevrandao": "0x" + "44" * 32,
+                "gaslimit": "0x1c9c380",
+                "basefee": "0x3b9aca00",
+            },
+        )
+
+    def test_jsonrpc_backend_load_block_context_rejects_missing_required_field(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+
+        class StubBackend(JsonRpcBackend):
+            def _rpc(self, method: str, params: list[object]) -> object:
+                if method != "eth_getBlockByNumber":
+                    raise AssertionError(method)
+                if params != ["0x2a", False]:
+                    raise AssertionError(params)
+                return {
+                    "miner": "0x1111111111111111111111111111111111111111",
+                    "timestamp": "0x65000000",
+                    "number": "0x2a",
+                    "mixHash": "0x" + "55" * 32,
+                    "gasLimit": None,
+                    "baseFeePerGas": "0x3b9aca00",
+                }
+
+        backend = StubBackend(profile)
+        with self.assertRaisesRegex(
+            ValueError,
+            "block context missing required field gasLimit for gaslimit",
+        ):
+            backend._load_block_context({"transactionHash": "0xtx2", "status": "0x1", "blockNumber": "0x2a"})
+
     def test_jsonrpc_backend_rejects_mismatched_admin_account(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         os.environ["JUCHAIN_PRIVATE_KEY"] = "0x" + "11" * 32
