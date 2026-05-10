@@ -84,8 +84,10 @@ from adapter.tx_context_generator import (
     generate_upstream_tx_context_templates,
     load_tx_context_templates,
 )
+from adapter.models import ExecutionResult, Report
 from adapter.oracle import ResultOracle
 from adapter.profile import describe_admin_key_source, load_chain_profile
+from adapter.report import write_report
 from adapter.selector import TestSelector
 from adapter.signer import keccak256, private_key_to_address, sign_type_2_transaction
 
@@ -1942,6 +1944,125 @@ class HarnessTests(unittest.TestCase):
                     }
                 ],
             )
+
+    def test_cli_run_mock_upstream_log_manifest_rejects_declared_witness_mismatch(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_log_mapped.json").read_text())
+        target_case = next(
+            case
+            for case in payload["cases"]
+            if case["case_id"]
+            == "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true"
+        )
+        target_case["expected"]["receipt_logs"][0]["topics"] = [
+            "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            manifest_path = tmp_path / "tampered_upstream_log_mapped.json"
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            manifest_path.write_text(json.dumps(payload, indent=2, sort_keys=True))
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"declared receipt_logs witness does not match observe\.log_probe: receipt_logs\[0\]\.topics\[0\]: expected '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', got '0x0000000000000000000000000000000000000000000000000000000000000000'",
+            ):
+                main(
+                    [
+                        "run",
+                        "--profile",
+                        str(ROOT / "profiles/mock.toml"),
+                        "--manifest",
+                        str(manifest_path),
+                        "--state-dir",
+                        str(state_dir),
+                        "--report",
+                        str(report_path),
+                    ]
+                )
+            self.assertFalse(report_path.exists())
+
+    def test_write_report_compacts_only_receipt_log_payloads_above_inline_threshold(self) -> None:
+        exact_256 = "0x" + ("ab" * 256)
+        exact_257 = "0x" + ("cd" * 257)
+        report = Report(
+            manifest="upstream-log-mapped",
+            execution_specs_ref="test-ref",
+            suite_version="0.1.0",
+            chain_profile="mock-devnet",
+            chain_profile_version="1",
+            results=[
+                ExecutionResult(
+                    case_id="inline-256",
+                    namespace="ns-inline",
+                    success=True,
+                    tx_hashes=["0x01"],
+                    context={},
+                    observed={
+                        "receipt_logs": [
+                            {
+                                "topics": [],
+                                "topic_count": 0,
+                                "data": exact_256,
+                                "data_length_bytes": 256,
+                            }
+                        ]
+                    },
+                    expected={"receipt_logs": [{"topics": [], "data": exact_256}]},
+                    diffs=[],
+                ),
+                ExecutionResult(
+                    case_id="digest-257",
+                    namespace="ns-digest",
+                    success=True,
+                    tx_hashes=["0x02"],
+                    context={},
+                    observed={
+                        "receipt_logs": [
+                            {
+                                "topics": [],
+                                "topic_count": 0,
+                                "data": exact_257,
+                                "data_length_bytes": 257,
+                            }
+                        ]
+                    },
+                    expected={
+                        "receipt_logs": [
+                            {
+                                "topics": [],
+                                "data_digest": "0x" + keccak256(bytes.fromhex(exact_257[2:])).hex(),
+                                "data_length_bytes": 257,
+                            }
+                        ]
+                    },
+                    diffs=[],
+                ),
+            ],
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_path = Path(tmpdir) / "report.json"
+            write_report(report, report_path)
+            payload = json.loads(report_path.read_text())
+
+        observed_by_case = {result["case_id"]: result["observed"] for result in payload["results"]}
+        inline_case = observed_by_case["inline-256"]["receipt_logs"][0]
+        digest_case = observed_by_case["digest-257"]["receipt_logs"][0]
+
+        self.assertEqual(inline_case["data"], exact_256)
+        self.assertEqual(inline_case["data_length_bytes"], 256)
+        self.assertNotIn("data_digest", inline_case)
+        self.assertNotIn("data_elided", inline_case)
+
+        self.assertNotIn("data", digest_case)
+        self.assertEqual(digest_case["data_length_bytes"], 257)
+        self.assertTrue(digest_case["data_elided"])
+        self.assertEqual(
+            digest_case["data_digest"],
+            "0x" + keccak256(bytes.fromhex(exact_257[2:])).hex(),
+        )
 
     def test_oracle_reports_precise_receipt_log_digest_mismatch(self) -> None:
         observed_data = "0x" + ("ff" * 32)
