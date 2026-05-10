@@ -82,7 +82,7 @@ from adapter.tx_context_generator import (
 from adapter.oracle import ResultOracle
 from adapter.profile import describe_admin_key_source, load_chain_profile
 from adapter.selector import TestSelector
-from adapter.signer import private_key_to_address, sign_type_2_transaction
+from adapter.signer import keccak256, private_key_to_address, sign_type_2_transaction
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -1419,28 +1419,34 @@ class HarnessTests(unittest.TestCase):
         profile = load_chain_profile(ROOT / "profiles/mock.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_log_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
-        self.assertEqual(
-            [case.case_id for case in selected],
-            [
-                "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
-                "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true",
-                "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
-            ],
-        )
+        selected_case_ids = [case.case_id for case in selected]
+        manifest_case_ids = [case.case_id for case in manifest.cases]
+
+        self.assertEqual(selected_case_ids, manifest_case_ids)
+        self.assertEqual(len(selected_case_ids), 110)
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual({case.family for case in selected}, {"state/log"})
+        self.assertEqual(Counter(case.case_id.split(".")[4] for case in selected), Counter({"log0": 22, "log1": 22, "log2": 22, "log3": 22, "log4": 22}))
+        self.assertEqual(
+            Counter(
+                "digest" if "data_digest" in case.expected["receipt_logs"][0] else "exact"
+                for case in selected
+            ),
+            Counter({"exact": 70, "digest": 40}),
+        )
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
-    def test_mock_backend_runs_upstream_mapped_log_subset_cases(self) -> None:
+    def test_mock_backend_runs_upstream_mapped_log_cases(self) -> None:
         manifest = load_manifest(ROOT / "suites/manifests/upstream_log_mapped.json")
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         observed_by_case: dict[str, dict[str, object]] = {}
         for index, case in enumerate(manifest.cases):
-            tx_hashes, observed, context = backend.execute_case(case, f"log-subset-{index}")
+            tx_hashes, observed, context = backend.execute_case(case, f"log-case-{index}")
             self.assertEqual(len(tx_hashes), 2)
             self.assertEqual(ResultOracle().compare(case.expected, observed, context), [])
             observed_by_case[case.case_id] = observed
 
+        self.assertEqual(len(observed_by_case), 110)
         self.assertEqual(
             observed_by_case[
                 "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true"
@@ -1480,6 +1486,43 @@ class HarnessTests(unittest.TestCase):
                 }
             ],
         )
+        self.assertEqual(
+            observed_by_case[
+                "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true"
+            ]["receipt_logs"][0]["topic_count"],
+            4,
+        )
+        self.assertEqual(
+            observed_by_case[
+                "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true"
+            ]["receipt_logs"][0]["topics"],
+            ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"] * 4,
+        )
+        self.assertEqual(
+            observed_by_case[
+                "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true"
+            ]["receipt_logs"][0]["data_length_bytes"],
+            1048576,
+        )
+        self.assertEqual(
+            observed_by_case[
+                "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true"
+            ]["receipt_logs"][0]["data"][:66],
+            "0x" + ("ff" * 32),
+        )
+        self.assertEqual(
+            observed_by_case[
+                "upstream.benchmark.log.test_log_benchmark.log4.mem_size_1024.log_size_256"
+            ]["receipt_logs"],
+            [
+                {
+                    "topics": ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"] * 4,
+                    "topic_count": 4,
+                    "data": "0x" + ("ff" * 256),
+                    "data_length_bytes": 256,
+                }
+            ],
+        )
 
     def test_cli_run_mock_upstream_log_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1502,7 +1545,7 @@ class HarnessTests(unittest.TestCase):
             report = json.loads(report_path.read_text())
             self.assertEqual(report["manifest"], "upstream-log-mapped")
             self.assertEqual(report["chain_profile"], "mock-devnet")
-            self.assertEqual(len(report["results"]), 3)
+            self.assertEqual(len(report["results"]), 110)
             self.assertTrue(all(result["success"] for result in report["results"]))
             self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
             observed_by_case = {result["case_id"]: result for result in report["results"]}
@@ -1531,6 +1574,79 @@ class HarnessTests(unittest.TestCase):
                 ]["observed"]["receipt_logs"][0]["topics"],
                 ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"],
             )
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.log.test_log.log0.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_true"
+                ]["expected"]["receipt_logs"],
+                [
+                    {
+                        "topics": [],
+                        "topic_count": 0,
+                        "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+                        "data_length_bytes": 1048576,
+                    }
+                ],
+            )
+            large_digest_case = observed_by_case[
+                "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true"
+            ]["observed"]["receipt_logs"][0]
+            self.assertEqual(large_digest_case["topic_count"], 4)
+            self.assertEqual(
+                large_digest_case["topics"],
+                ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"] * 4,
+            )
+            self.assertEqual(large_digest_case["data_length_bytes"], 1048576)
+            self.assertEqual(large_digest_case["data"][:66], "0x" + ("ff" * 32))
+            self.assertEqual(
+                "0x" + keccak256(bytes.fromhex(large_digest_case["data"][2:])).hex(),
+                observed_by_case[
+                    "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true"
+                ]["expected"]["receipt_logs"][0]["data_digest"],
+            )
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.log.test_log_benchmark.log4.mem_size_1024.log_size_256"
+                ]["observed"]["receipt_logs"],
+                [
+                    {
+                        "topics": ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"] * 4,
+                        "topic_count": 4,
+                        "data": "0x" + ("ff" * 256),
+                        "data_length_bytes": 256,
+                    }
+                ],
+            )
+
+    def test_oracle_reports_precise_receipt_log_digest_mismatch(self) -> None:
+        observed_data = "0x" + ("ff" * 32)
+        wrong_expected_digest = "0x" + keccak256(b"wrong-payload").hex()
+        diffs = ResultOracle().compare(
+            {
+                "receipt_logs": [
+                    {
+                        "topics": ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"] * 4,
+                        "data_digest": wrong_expected_digest,
+                        "data_length_bytes": 32,
+                    }
+                ]
+            },
+            {
+                "receipt_logs": [
+                    {
+                        "topics": ["0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"] * 4,
+                        "topic_count": 4,
+                        "data": observed_data,
+                        "data_length_bytes": 32,
+                    }
+                ]
+            },
+        )
+        self.assertEqual(
+            diffs,
+            [
+                f"receipt_logs[0].data_digest: expected {wrong_expected_digest!r}, got {'0x' + keccak256(bytes.fromhex(observed_data[2:])).hex()!r}"
+            ],
+        )
 
     def test_oracle_reports_precise_receipt_log_topic_mismatch(self) -> None:
         diffs = ResultOracle().compare(
