@@ -1983,7 +1983,7 @@ class HarnessTests(unittest.TestCase):
                 )
             self.assertFalse(report_path.exists())
 
-    def test_cli_run_mock_upstream_log_manifest_rejects_tampered_log_probe_opcode(self) -> None:
+    def test_cli_run_mock_upstream_log_manifest_rejects_log_probe_opcode_topic_count_mismatch(self) -> None:
         payload = json.loads((ROOT / "suites/manifests/upstream_log_mapped.json").read_text())
         target_case = next(
             case
