@@ -132,9 +132,151 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(
             blocked["custom.balance.and.storage"],
             [
-                "contains mock-only actions not runnable on jsonrpc backend: set_balance, set_storage"
+                "case custom.balance.and.storage step 1: action 'set_balance' is mock-only and not runnable on jsonrpc backend",
+                "case custom.balance.and.storage step 2: action 'set_storage' is mock-only and not runnable on jsonrpc backend",
+                "contains mock-only actions not runnable on jsonrpc backend: set_balance, set_storage",
             ],
         )
+
+    def test_selector_rejects_jsonrpc_profile_when_manifest_contains_mock_only_actions(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
+        broken_case = manifest.cases[0]
+        broken_case.steps.insert(0, {"action": "set_balance", "value": "0x1"})
+        decision = TestSelector(profile).decide(broken_case)
+        self.assertFalse(decision.selected)
+        self.assertEqual(
+            decision.reasons,
+            [
+                "case upstream.benchmark.account_query.codesize.success step 1: action 'set_balance' is mock-only and not runnable on jsonrpc backend",
+                "contains mock-only actions not runnable on jsonrpc backend: set_balance",
+            ],
+        )
+
+    def test_load_manifest_rejects_missing_required_case_field(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "broken.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "name": "broken",
+                        "version": "1",
+                        "execution_specs_ref": "submodule-pending",
+                        "suite_version": "0.1.0",
+                        "chain_profile_version": "1",
+                        "cases": [
+                            {
+                                "kind": "custom_chain",
+                                "family": "custom/smoke",
+                                "description": "missing case id",
+                                "namespace_seed": "missing-case-id",
+                                "steps": [],
+                                "expected": {},
+                            }
+                        ],
+                    }
+                )
+            )
+            with self.assertRaisesRegex(
+                ValueError,
+                r"manifest case 1\.case_id is required and must be a non-empty string",
+            ):
+                load_manifest(manifest_path)
+
+    def test_load_manifest_rejects_non_list_steps(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "broken.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "name": "broken",
+                        "version": "1",
+                        "execution_specs_ref": "submodule-pending",
+                        "suite_version": "0.1.0",
+                        "chain_profile_version": "1",
+                        "cases": [
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "broken.steps",
+                                "family": "custom/smoke",
+                                "description": "steps has wrong type",
+                                "namespace_seed": "broken-steps",
+                                "steps": {"action": "set_balance", "value": "0x1"},
+                                "expected": {},
+                            }
+                        ],
+                    }
+                )
+            )
+            with self.assertRaisesRegex(ValueError, r"case broken\.steps: steps must be a list"):
+                load_manifest(manifest_path)
+
+    def test_load_manifest_rejects_unsupported_action(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "broken.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "name": "broken",
+                        "version": "1",
+                        "execution_specs_ref": "submodule-pending",
+                        "suite_version": "0.1.0",
+                        "chain_profile_version": "1",
+                        "cases": [
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "broken.unsupported-action",
+                                "family": "custom/smoke",
+                                "description": "uses unsupported action",
+                                "namespace_seed": "broken-unsupported-action",
+                                "steps": [{"action": "explode", "value": "0x1"}],
+                                "expected": {},
+                            }
+                        ],
+                    }
+                )
+            )
+            with self.assertRaisesRegex(
+                ValueError,
+                r"case broken\.unsupported-action step 1: unsupported action 'explode'",
+            ):
+                load_manifest(manifest_path)
+
+    def test_load_manifest_rejects_malformed_deploy_contract_step(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "broken.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "name": "broken",
+                        "version": "1",
+                        "execution_specs_ref": "submodule-pending",
+                        "suite_version": "0.1.0",
+                        "chain_profile_version": "1",
+                        "cases": [
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "broken.deploy-shape",
+                                "family": "custom/smoke",
+                                "description": "missing bytecode_runtime",
+                                "namespace_seed": "broken-deploy-shape",
+                                "steps": [
+                                    {
+                                        "action": "deploy_contract",
+                                        "bytecode_init": "0x6000",
+                                    }
+                                ],
+                                "expected": {},
+                            }
+                        ],
+                    }
+                )
+            )
+            with self.assertRaisesRegex(
+                ValueError,
+                r"case broken\.deploy-shape step 1: action 'deploy_contract' is missing required fields: bytecode_runtime",
+            ):
+                load_manifest(manifest_path)
 
     def test_selector_allows_real_jsonrpc_smoke_case(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
@@ -4854,6 +4996,29 @@ class HarnessTests(unittest.TestCase):
                 },
             )
 
+    def test_mock_backend_rejects_jsonrpc_only_manifest_action_before_runtime(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/custom_storage_smoke.json")
+        broken_case = manifest.cases[0]
+        broken_case.steps = [{"action": "rpc_call", "method": "eth_chainId"}]
+        with self.assertRaisesRegex(
+            ValueError,
+            r"case custom\.balance\.and\.storage step 1: action 'rpc_call' is jsonrpc-only and not runnable on mock backend",
+        ):
+            backend.execute_case(broken_case, "negative-jsonrpc-only-action-on-mock")
+
+    def test_jsonrpc_backend_rejects_mock_only_manifest_action_before_runtime(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        manifest = load_manifest(ROOT / "suites/manifests/juchain_smoke.json")
+        broken_case = manifest.cases[0]
+        broken_case.steps.insert(0, {"action": "set_balance", "value": "0x1"})
+        with self.assertRaisesRegex(
+            ValueError,
+            r"case juchain\.self-transfer\.receipt step 1: action 'set_balance' is mock-only and not runnable on jsonrpc backend",
+        ):
+            backend.execute_case(broken_case, "negative-mock-only-action-on-jsonrpc")
+
     def test_mock_backend_rejects_unsupported_control_flow_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_control_flow_mapped.json")
@@ -4989,16 +5154,7 @@ class HarnessTests(unittest.TestCase):
             backend.execute_case(broken_case, "negative-unsupported-stack-runtime")
 
     def test_selector_rejects_mock_only_account_query_shortcuts_on_jsonrpc_profile(self) -> None:
-        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
-        manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
-        broken_case = manifest.cases[0]
-        broken_case.steps.insert(0, {"action": "set_balance", "value": "0x1"})
-        decision = TestSelector(profile).decide(broken_case)
-        self.assertFalse(decision.selected)
-        self.assertEqual(
-            decision.reasons,
-            ["contains mock-only actions not runnable on jsonrpc backend: set_balance"],
-        )
+        self.test_selector_rejects_jsonrpc_profile_when_manifest_contains_mock_only_actions()
 
     def test_selector_rejects_codecopy_neighbor_runtime_shape_for_account_query_manifest(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")

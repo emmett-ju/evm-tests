@@ -6,6 +6,134 @@ from typing import Any, Literal
 
 
 CaseKind = Literal["upstream_mapped", "custom_chain"]
+BackendName = Literal["mock", "jsonrpc"]
+
+SUPPORTED_EXECUTION_ACTIONS = frozenset(
+    {
+        "set_balance",
+        "set_code",
+        "set_storage",
+        "transfer_native",
+        "deploy_contract",
+        "invoke_contract",
+        "wait_receipt",
+        "rpc_call",
+        "eth_sendRawTransaction",
+        "eth_sendTransaction",
+    }
+)
+MOCK_ONLY_ACTIONS = frozenset({"set_balance", "set_code", "set_storage"})
+JSONRPC_ONLY_ACTIONS = frozenset({"rpc_call", "eth_sendRawTransaction", "eth_sendTransaction"})
+_ACTION_REQUIRED_FIELDS: dict[str, frozenset[str]] = {
+    "set_balance": frozenset({"value"}),
+    "set_code": frozenset({"value"}),
+    "set_storage": frozenset({"slot", "value"}),
+    "transfer_native": frozenset({"to", "value"}),
+    "deploy_contract": frozenset({"bytecode_init", "bytecode_runtime"}),
+    "invoke_contract": frozenset({"to", "data"}),
+    "wait_receipt": frozenset({"tx_hash"}),
+    "rpc_call": frozenset({"method"}),
+    "eth_sendRawTransaction": frozenset({"raw_transaction"}),
+    "eth_sendTransaction": frozenset({"transaction"}),
+}
+_ACTION_OPTIONAL_FIELDS: dict[str, frozenset[str]] = {
+    "set_balance": frozenset(),
+    "set_code": frozenset(),
+    "set_storage": frozenset(),
+    "transfer_native": frozenset({"data", "gas"}),
+    "deploy_contract": frozenset({"gas", "initial_storage", "value"}),
+    "invoke_contract": frozenset({"expected_receipt_status", "gas", "gas_price", "value"}),
+    "wait_receipt": frozenset({"timeout_seconds"}),
+    "rpc_call": frozenset({"params"}),
+    "eth_sendRawTransaction": frozenset(),
+    "eth_sendTransaction": frozenset(),
+}
+_ACTION_STRING_FIELDS: dict[str, frozenset[str]] = {
+    "set_balance": frozenset({"value"}),
+    "set_code": frozenset({"value"}),
+    "set_storage": frozenset({"slot", "value"}),
+    "transfer_native": frozenset({"to", "value", "data", "gas"}),
+    "deploy_contract": frozenset({"bytecode_init", "bytecode_runtime", "gas", "value"}),
+    "invoke_contract": frozenset({"to", "data", "expected_receipt_status", "gas", "gas_price", "value"}),
+    "wait_receipt": frozenset({"tx_hash"}),
+    "rpc_call": frozenset({"method"}),
+    "eth_sendRawTransaction": frozenset({"raw_transaction"}),
+    "eth_sendTransaction": frozenset(),
+}
+
+
+def _case_label(case_id: Any) -> str:
+    if isinstance(case_id, str) and case_id:
+        return case_id
+    return "<unknown-case>"
+
+
+def _require_non_empty_string(value: Any, context: str, field_name: str, errors: list[str]) -> None:
+    if not isinstance(value, str) or not value:
+        errors.append(f"{context}: {field_name} is required and must be a non-empty string")
+
+
+def _validate_string_mapping(value: Any, context: str, field_name: str, errors: list[str]) -> None:
+    if not isinstance(value, dict):
+        errors.append(f"{context}: {field_name} must be an object mapping string keys to string values")
+        return
+    for key, item in value.items():
+        if not isinstance(key, str) or not isinstance(item, str):
+            errors.append(
+                f"{context}: {field_name} must be an object mapping string keys to string values"
+            )
+            return
+
+
+def validate_execution_step(
+    step: Any,
+    *,
+    case_id: Any,
+    step_index: int,
+    backend: BackendName | None = None,
+) -> list[str]:
+    context = f"case {_case_label(case_id)} step {step_index + 1}"
+    errors: list[str] = []
+    if not isinstance(step, dict):
+        return [f"{context}: step must be an object"]
+
+    action = step.get("action")
+    if not isinstance(action, str) or not action:
+        return [f"{context}: action is required and must be a non-empty string"]
+    if action not in SUPPORTED_EXECUTION_ACTIONS:
+        supported = ", ".join(sorted(SUPPORTED_EXECUTION_ACTIONS))
+        return [f"{context}: unsupported action {action!r}; supported actions: {supported}"]
+
+    required_fields = _ACTION_REQUIRED_FIELDS[action]
+    optional_fields = _ACTION_OPTIONAL_FIELDS[action]
+    allowed_fields = required_fields | optional_fields | {"action"}
+    missing_fields = sorted(required_fields - step.keys())
+    if missing_fields:
+        errors.append(
+            f"{context}: action {action!r} is missing required fields: {', '.join(missing_fields)}"
+        )
+    extra_fields = sorted(set(step) - allowed_fields)
+    if extra_fields:
+        errors.append(f"{context}: action {action!r} does not allow fields: {', '.join(extra_fields)}")
+
+    for field_name in _ACTION_STRING_FIELDS[action]:
+        if field_name in step and not isinstance(step[field_name], str):
+            errors.append(f"{context}: action {action!r} field {field_name!r} must be a string")
+
+    if action == "wait_receipt" and "timeout_seconds" in step and not isinstance(step["timeout_seconds"], int):
+        errors.append(f"{context}: action 'wait_receipt' field 'timeout_seconds' must be an integer")
+    if action == "rpc_call" and "params" in step and not isinstance(step["params"], list):
+        errors.append(f"{context}: action 'rpc_call' field 'params' must be a list")
+    if action == "eth_sendTransaction" and "transaction" in step and not isinstance(step["transaction"], dict):
+        errors.append(f"{context}: action 'eth_sendTransaction' field 'transaction' must be an object")
+    if action == "deploy_contract" and "initial_storage" in step:
+        _validate_string_mapping(step["initial_storage"], context, "initial_storage", errors)
+
+    if backend == "jsonrpc" and action in MOCK_ONLY_ACTIONS:
+        errors.append(f"{context}: action {action!r} is mock-only and not runnable on jsonrpc backend")
+    if backend == "mock" and action in JSONRPC_ONLY_ACTIONS:
+        errors.append(f"{context}: action {action!r} is jsonrpc-only and not runnable on mock backend")
+    return errors
 
 
 @dataclass(slots=True)
@@ -113,6 +241,46 @@ class TestCase:
     upstream_ref: str | None = None
     notes: list[str] = field(default_factory=list)
 
+    def validation_errors(self, backend: BackendName | None = None) -> list[str]:
+        context = f"case {_case_label(self.case_id)}"
+        errors: list[str] = []
+        if self.kind not in {"upstream_mapped", "custom_chain"}:
+            errors.append(
+                f"{context}: kind must be one of ['custom_chain', 'upstream_mapped'], got {self.kind!r}"
+            )
+        _require_non_empty_string(self.case_id, context, "case_id", errors)
+        _require_non_empty_string(self.family, context, "family", errors)
+        _require_non_empty_string(self.description, context, "description", errors)
+        _require_non_empty_string(self.namespace_seed, context, "namespace_seed", errors)
+        if not isinstance(self.filters, FilterRule):
+            errors.append(f"{context}: filters must be a FilterRule")
+        if not isinstance(self.steps, list):
+            errors.append(f"{context}: steps must be a list")
+        else:
+            for step_index, step in enumerate(self.steps):
+                errors.extend(
+                    validate_execution_step(
+                        step,
+                        case_id=self.case_id,
+                        step_index=step_index,
+                        backend=backend,
+                    )
+                )
+        if not isinstance(self.expected, dict):
+            errors.append(f"{context}: expected must be an object")
+        if not isinstance(self.observe, dict):
+            errors.append(f"{context}: observe must be an object")
+        if self.upstream_ref is not None and not isinstance(self.upstream_ref, str):
+            errors.append(f"{context}: upstream_ref must be a string when present")
+        if not isinstance(self.notes, list) or any(not isinstance(note, str) for note in self.notes):
+            errors.append(f"{context}: notes must be a list of strings")
+        return errors
+
+    def validate(self, backend: BackendName | None = None) -> None:
+        errors = self.validation_errors(backend)
+        if errors:
+            raise ValueError(errors[0])
+
 
 @dataclass(slots=True)
 class Manifest:
@@ -123,6 +291,39 @@ class Manifest:
     chain_profile_version: str
     cases: list[TestCase]
     path: Path
+
+    def validation_errors(self, backend: BackendName | None = None) -> list[str]:
+        errors: list[str] = []
+        if not isinstance(self.name, str) or not self.name:
+            errors.append("manifest: name is required and must be a non-empty string")
+        if not isinstance(self.version, str) or not self.version:
+            errors.append("manifest: version is required and must be a non-empty string")
+        if not isinstance(self.execution_specs_ref, str) or not self.execution_specs_ref:
+            errors.append(
+                "manifest: execution_specs_ref is required and must resolve to a non-empty string"
+            )
+        if not isinstance(self.suite_version, str) or not self.suite_version:
+            errors.append("manifest: suite_version is required and must be a non-empty string")
+        if not isinstance(self.chain_profile_version, str) or not self.chain_profile_version:
+            errors.append(
+                "manifest: chain_profile_version is required and must be a non-empty string"
+            )
+        if not isinstance(self.cases, list):
+            errors.append("manifest: cases must be a list")
+        else:
+            for case in self.cases:
+                if not isinstance(case, TestCase):
+                    errors.append("manifest: cases must contain TestCase objects")
+                    continue
+                errors.extend(case.validation_errors(backend))
+        if not isinstance(self.path, Path):
+            errors.append("manifest: path must be a Path")
+        return errors
+
+    def validate(self, backend: BackendName | None = None) -> None:
+        errors = self.validation_errors(backend)
+        if errors:
+            raise ValueError(errors[0])
 
 
 @dataclass(slots=True)

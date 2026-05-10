@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from adapter.models import ChainProfile, Manifest, TestCase
+from adapter.models import ChainProfile, MOCK_ONLY_ACTIONS, Manifest, TestCase
 
 
-MOCK_ONLY_ACTIONS = {"set_balance", "set_storage", "set_code"}
 BLOCK_CONTEXT_MODE_REQUIRED_FEATURES = {
     "basefee": "base_fee",
 }
@@ -24,12 +23,13 @@ class TestSelector:
 
     def decide(self, case: TestCase) -> SelectionDecision:
         reasons = case.filters.blocked_reasons()
+        reasons.extend(case.validation_errors(self.profile.backend))
         reasons.extend(self._capability_blocked_reasons(case))
         if case.filters.requires_trace_equivalence and not self.profile.trace_support:
             reasons.append("trace support unavailable in chain profile")
         if self.profile.backend == "jsonrpc":
             mock_only = sorted(
-                {step["action"] for step in case.steps if step["action"] in MOCK_ONLY_ACTIONS}
+                {step["action"] for step in case.steps if isinstance(step, dict) and step.get("action") in MOCK_ONLY_ACTIONS}
             )
             if mock_only:
                 reasons.append(
@@ -54,6 +54,7 @@ class TestSelector:
         ]
 
     def select(self, manifest: Manifest) -> tuple[list[TestCase], list[SelectionDecision]]:
+        manifest.validate()
         selected: list[TestCase] = []
         decisions: list[SelectionDecision] = []
         for case in manifest.cases:
