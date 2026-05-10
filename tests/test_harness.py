@@ -317,6 +317,46 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(deploy_steps), 1)
             self.assertIn(deploy_steps[0]["bytecode_runtime"], allowed_runtimes)
 
+    def test_selector_allows_upstream_mapped_system_subset_cases(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(
+            [case.case_id for case in selected],
+            [
+                "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
+                "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
+                "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
+                "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data",
+                "upstream.benchmark.system.test_return_revert.return.empty",
+                "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data",
+                "upstream.benchmark.system.test_return_revert.revert.1kib_of_zero_data",
+                "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
+                "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
+                "upstream.benchmark.system.test_return_revert.revert.empty",
+            ],
+        )
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual({case.family for case in selected}, {"state/system"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+        self.assertTrue(
+            all(
+                case.observe == {"storage_address": "$last_contract"}
+                and case.expected["receipt_status"] == "0x1"
+                and set(case.expected["storage"]) == {"0x00", "0x01", "0x02"}
+                for case in selected
+            )
+        )
+        self.assertFalse(
+            any(
+                "test_create" in case.case_id
+                or "test_selfdestruct" in case.case_id
+                or "test_contract_calling_many_addresses" in case.case_id
+                or "test_creates_collisions" in case.case_id
+                for case in selected
+            )
+        )
+
     def test_selector_allows_upstream_mapped_keccak_cases(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_keccak_mapped.json")
@@ -4614,6 +4654,19 @@ class HarnessTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-account-query-runtime")
 
+    def test_mock_backend_rejects_unsupported_system_runtime_code_path(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
+        broken_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.system.test_return_revert.return.empty"
+        )
+        broken_case.steps[0]["bytecode_runtime"] = "0xdeadbeef"
+        broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
+        with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
+            backend.execute_case(broken_case, "negative-unsupported-system-runtime")
+
     def test_mock_backend_rejects_unsupported_log_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_log_mapped.json")
@@ -4770,6 +4823,69 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(gasprice["context"]["$gas_price"], "0x3b9aca00")
             self.assertIs(gasprice["success"], True)
 
+    def test_mock_backend_runs_upstream_mapped_system_subset_cases(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_system_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 10)
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.system.test_return_revert.return.empty"]["observed"]["storage"],
+                {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                },
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data"]["observed"]["storage"],
+                {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+                    "0x02": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054",
+                },
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data"]["observed"]["storage"]["0x01"],
+                "0x0000000000000000000000000000000000000000000000000000000000100000",
+            )
+            for result in report["results"]:
+                self.assertEqual(result["observed"].get("receipt_status"), "0x1")
+                self.assertEqual(result["diffs"], [])
+                self.assertTrue(result["tx_hashes"])
+                self.assertIs(result["success"], True)
+
+            wrong_digest_diffs = ResultOracle().compare(
+                {
+                    "storage": {
+                        "0x02": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    }
+                },
+                observed_by_case["upstream.benchmark.system.test_return_revert.return.empty"]["observed"],
+                observed_by_case["upstream.benchmark.system.test_return_revert.return.empty"]["context"],
+            )
+            self.assertEqual(
+                wrong_digest_diffs,
+                [
+                    "storage.0x02: expected '0x0000000000000000000000000000000000000000000000000000000000000000', got '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'"
+                ],
+            )
+
     def test_cli_run_mock_upstream_tx_context_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -4800,6 +4916,54 @@ class HarnessTests(unittest.TestCase):
                 {
                     "upstream.benchmark.tx_context.origin.success": "0x000000000000000000000000aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                     "upstream.benchmark.tx_context.gasprice.success": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+                },
+            )
+
+    def test_cli_run_mock_upstream_system_manifest_writes_passing_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_system_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            self.assertTrue(report_path.exists())
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-system-mapped")
+            self.assertEqual(report["chain_profile"], "mock-devnet")
+            self.assertEqual(len(report["results"]), 10)
+            self.assertTrue(all(result["success"] for result in report["results"]))
+            self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+            observed_by_case = {result["case_id"]: result["observed"] for result in report["results"]}
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.system.test_return_revert.return.empty"],
+                {
+                    "receipt_status": "0x1",
+                    "storage": {
+                        "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                        "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                    },
+                },
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.system.test_return_revert.revert.empty"],
+                {
+                    "receipt_status": "0x1",
+                    "storage": {
+                        "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                    },
                 },
             )
 

@@ -47,6 +47,7 @@ CALLDATA_WORD_PATTERN = "0x000102030405060708090a0b0c0d0e0f101112131415161718191
 SELFBALANCE_RUNTIME = "0x4760005500"
 CODESIZE_RUNTIME = "0x3860005500"
 BALANCE_RUNTIME = "0x5f353160005500"
+SYSTEM_SELF_CALL_WRAPPER_SUFFIX = bytes.fromhex("5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500")
 
 
 class Backend(Protocol):
@@ -221,6 +222,10 @@ class MockBackend:
                 log_probe = case.observe.get("log_probe")
                 if log_probe is not None:
                     self._simulate_log_probe(last_receipt, log_probe, code)
+                    continue
+
+                if self._is_system_self_call_runtime(code):
+                    self._simulate_system_self_call_probe(storage, code)
                     continue
                 
                 if code in {"0x60003560005500", "0x60003560005560006000fd"}:
@@ -557,6 +562,73 @@ class MockBackend:
                 "data": "0x" + payload.hex(),
             }
         ]
+
+    def _is_system_self_call_runtime(self, code: Any) -> bool:
+        if not isinstance(code, str) or not code.startswith("0x"):
+            return False
+        runtime = bytes.fromhex(code[2:])
+        return runtime.endswith(SYSTEM_SELF_CALL_WRAPPER_SUFFIX)
+
+    def _simulate_system_self_call_probe(
+        self,
+        storage: dict[str, Any],
+        code: str,
+    ) -> None:
+        runtime = bytes.fromhex(code[2:])
+        prefix = runtime[: -len(SYSTEM_SELF_CALL_WRAPPER_SUFFIX)]
+        return_size, return_non_zero_data, child_succeeds = self._decode_system_self_call_prefix(prefix, code)
+        payload = (b"\xff" if return_non_zero_data else b"\x00") * return_size
+        storage["0x00"] = WORD_01 if child_succeeds else ZERO_STORAGE_WORD
+        storage["0x01"] = self._hex_to_word(hex(return_size))
+        storage["0x02"] = "0x" + keccak256(payload).hex()
+
+    def _decode_system_self_call_prefix(
+        self,
+        prefix: bytes,
+        code: str,
+    ) -> tuple[int, bool, bool]:
+        if len(prefix) < 8 or prefix[0] != 0x36 or prefix[1] != 0x5F or prefix[2] != 0x14:
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        wrapper_label, jump_index = self._read_push_int(prefix, 3)
+        if jump_index >= len(prefix) or prefix[jump_index] != 0x57:
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        if prefix[-1] not in {0xF3, 0xFD} or prefix[-2] != 0x5F:
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        child_succeeds = prefix[-1] == 0xF3
+        push_size_start = self._find_terminal_push_start(prefix)
+        return_size, after_size = self._read_push_int(prefix, push_size_start)
+        if after_size != len(prefix) - 2:
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        middle = prefix[jump_index + 1 : push_size_start]
+        return_non_zero_data = len(middle) > 0
+        if not return_non_zero_data and wrapper_label != len(prefix):
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        return return_size, return_non_zero_data, child_succeeds
+
+    def _find_terminal_push_start(self, data: bytes) -> int:
+        search_start = max(0, len(data) - 34)
+        for index in range(search_start, len(data) - 2):
+            try:
+                _, next_index = self._read_push_int(data, index)
+            except ValueError:
+                continue
+            if next_index == len(data) - 2:
+                return index
+        raise ValueError("could not locate terminal PUSH operand in system runtime")
+
+    def _read_push_int(self, data: bytes, index: int) -> tuple[int, int]:
+        if index >= len(data):
+            raise ValueError("unexpected end of bytecode while decoding PUSH")
+        opcode = data[index]
+        if opcode == 0x5F:
+            return 0, index + 1
+        if not 0x60 <= opcode <= 0x7F:
+            raise ValueError(f"expected PUSH opcode, got 0x{opcode:02x}")
+        length = opcode - 0x5F
+        end = index + 1 + length
+        if end > len(data):
+            raise ValueError("truncated PUSH operand in bytecode")
+        return int.from_bytes(data[index + 1:end], "big"), end
 
     def _normalize_receipt_logs(self, logs: Any) -> list[dict[str, Any]]:
         if logs is None:
