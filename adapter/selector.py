@@ -6,6 +6,9 @@ from adapter.models import ChainProfile, Manifest, TestCase
 
 
 MOCK_ONLY_ACTIONS = {"set_balance", "set_storage", "set_code"}
+BLOCK_CONTEXT_MODE_REQUIRED_FEATURES = {
+    "basefee": "base_fee",
+}
 
 
 @dataclass(slots=True)
@@ -21,6 +24,7 @@ class TestSelector:
 
     def decide(self, case: TestCase) -> SelectionDecision:
         reasons = case.filters.blocked_reasons()
+        reasons.extend(self._capability_blocked_reasons(case))
         if case.filters.requires_trace_equivalence and not self.profile.trace_support:
             reasons.append("trace support unavailable in chain profile")
         if self.profile.backend == "jsonrpc":
@@ -33,6 +37,21 @@ class TestSelector:
                     + ", ".join(mock_only)
                 )
         return SelectionDecision(case=case, selected=not reasons, reasons=reasons)
+
+    def _capability_blocked_reasons(self, case: TestCase) -> list[str]:
+        block_context_probe = case.observe.get("block_context_probe")
+        if block_context_probe is None:
+            return []
+        mode = block_context_probe.get("mode")
+        if not isinstance(mode, str):
+            return []
+        required_feature = BLOCK_CONTEXT_MODE_REQUIRED_FEATURES.get(mode)
+        if required_feature is None or self.profile.supports_feature(required_feature):
+            return []
+        return [
+            "block-context mode "
+            f"{mode} requires feature_flags.{required_feature}=true in chain profile"
+        ]
 
     def select(self, manifest: Manifest) -> tuple[list[TestCase], list[SelectionDecision]]:
         selected: list[TestCase] = []

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from collections import Counter
+from contextlib import redirect_stdout
+from io import StringIO
 import json
 import os
 from pathlib import Path
@@ -420,6 +422,61 @@ class HarnessTests(unittest.TestCase):
             {case.observe["block_context_probe"]["mode"] for case in selected},
             {"basefee", "chainid", "coinbase", "gaslimit", "number", "prevrandao", "timestamp"},
         )
+
+    def test_selector_rejects_basefee_block_context_case_when_profile_lacks_feature_flag(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.feature_flags["base_fee"] = False
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_block_context_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(
+            [case.case_id for case in selected],
+            [
+                "upstream.benchmark.block_context.test_block_context_ops.chainid",
+                "upstream.benchmark.block_context.test_block_context_ops.coinbase",
+                "upstream.benchmark.block_context.test_block_context_ops.gaslimit",
+                "upstream.benchmark.block_context.test_block_context_ops.number",
+                "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
+                "upstream.benchmark.block_context.test_block_context_ops.timestamp",
+            ],
+        )
+        blocked = {decision.case.case_id: decision.reasons for decision in decisions if not decision.selected}
+        self.assertEqual(
+            blocked,
+            {
+                "upstream.benchmark.block_context.test_block_context_ops.basefee": [
+                    "block-context mode basefee requires feature_flags.base_fee=true in chain profile"
+                ]
+            },
+        )
+
+    def test_cli_list_reports_basefee_block_context_capability_rejection(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            profile_path = Path(tmpdir) / "profile.toml"
+            profile_path.write_text((ROOT / "profiles/juchain.toml").read_text().replace("base_fee = true", "base_fee = false", 1))
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "list",
+                        "--manifest",
+                        str(ROOT / "suites/manifests/upstream_block_context_mapped.json"),
+                        "--profile",
+                        str(profile_path),
+                    ]
+                )
+            self.assertEqual(exit_code, 0)
+            payload = json.loads(stdout.getvalue())
+            by_case = {entry["case_id"]: entry for entry in payload}
+            self.assertFalse(by_case["upstream.benchmark.block_context.test_block_context_ops.basefee"]["selected"])
+            self.assertEqual(
+                by_case["upstream.benchmark.block_context.test_block_context_ops.basefee"]["reasons"],
+                ["block-context mode basefee requires feature_flags.base_fee=true in chain profile"],
+            )
+            self.assertTrue(by_case["upstream.benchmark.block_context.test_block_context_ops.chainid"]["selected"])
+            self.assertEqual(
+                by_case["upstream.benchmark.block_context.test_block_context_ops.chainid"]["reasons"],
+                [],
+            )
 
     def test_manifest_resolves_execution_specs_ref(self) -> None:
         manifest = load_manifest(ROOT / "suites/manifests/upstream_smoke.json")
@@ -4384,6 +4441,36 @@ class HarnessTests(unittest.TestCase):
                 hex(profile.block_context.timestamp),
             )
 
+    def test_cli_run_mock_upstream_block_context_manifest_fails_on_missing_witness_config(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            broken_profile_path = tmp_path / "mock-missing-timestamp.toml"
+            broken_profile_path.write_text(
+                (ROOT / "profiles/mock.toml").read_text().replace(
+                    "timestamp = 1717171717\n",
+                    "",
+                )
+            )
+            args = [
+                "run",
+                "--profile",
+                str(broken_profile_path),
+                "--manifest",
+                str(ROOT / "suites/manifests/upstream_block_context_mapped.json"),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            with self.assertRaisesRegex(
+                ValueError,
+                "missing mock block-context witness config: block_context.timestamp is required",
+            ):
+                main(args)
+            self.assertFalse(report_path.exists())
+
     def test_cli_run_mock_upstream_account_query_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -4628,6 +4715,29 @@ class HarnessTests(unittest.TestCase):
         broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-control-flow-runtime")
+
+    def test_mock_backend_rejects_missing_block_context_witness_config(self) -> None:
+        backend = MockBackend(
+            admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            block_context_config={
+                "coinbase": "0x1111111111111111111111111111111111111111",
+                "number": 19_000_001,
+                "prevrandao": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+                "gas_limit": 30_000_000,
+                "base_fee": 1_000_000_000,
+            },
+        )
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_block_context_mapped.json")
+        case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.block_context.test_block_context_ops.timestamp"
+        )
+        with self.assertRaisesRegex(
+            ValueError,
+            "missing mock block-context witness config: block_context.timestamp is required",
+        ):
+            backend.execute_case(case, "negative-missing-block-context-witness")
 
     def test_mock_backend_rejects_unsupported_block_context_runtime_code_path(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/mock.toml")

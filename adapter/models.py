@@ -75,6 +75,9 @@ class ChainProfile:
             raise ValueError("admin_account must be hex-prefixed")
         self.block_context.validate()
 
+    def supports_feature(self, feature_name: str) -> bool:
+        return bool(self.feature_flags.get(feature_name, False))
+
 
 @dataclass(slots=True)
 class FilterRule:

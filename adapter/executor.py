@@ -395,15 +395,12 @@ class MockBackend:
 
     def _build_mock_block_context(self) -> dict[str, str]:
         configured = self.block_context_config
-        coinbase = configured.get("coinbase", "0x1111111111111111111111111111111111111111")
-        timestamp = int(configured.get("timestamp", 1_717_171_717))
-        number = int(configured.get("number", 19_000_001))
-        prevrandao = configured.get(
-            "prevrandao",
-            "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
-        )
-        gas_limit = int(configured.get("gas_limit", 30_000_000))
-        base_fee = int(configured.get("base_fee", 1_000_000_000))
+        coinbase = self._require_mock_block_context_field(configured, "coinbase")
+        timestamp = int(self._require_mock_block_context_field(configured, "timestamp"))
+        number = int(self._require_mock_block_context_field(configured, "number"))
+        prevrandao = self._require_mock_block_context_field(configured, "prevrandao")
+        gas_limit = int(self._require_mock_block_context_field(configured, "gas_limit"))
+        base_fee = int(self._require_mock_block_context_field(configured, "base_fee"))
         return {
             "coinbase": coinbase.lower(),
             "timestamp": hex(timestamp),
@@ -413,6 +410,14 @@ class MockBackend:
             "chainid": hex(self.chain_id),
             "basefee": hex(base_fee),
         }
+
+    def _require_mock_block_context_field(self, configured: dict[str, Any], field_name: str) -> Any:
+        value = configured.get(field_name)
+        if value is None:
+            raise ValueError(
+                f"missing mock block-context witness config: block_context.{field_name} is required"
+            )
+        return value
 
     def _simulate_block_context_probe(
         self,
