@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from adapter.signer import keccak256
+
 
 class ResultOracle:
     def compare(
@@ -57,26 +59,48 @@ class ResultOracle:
         if receipt_logs is not None:
             if not isinstance(receipt_logs, list):
                 raise ValueError("expected receipt_logs payload must be a list")
-            canonical["receipt_logs"] = [self._canonicalize_receipt_log(entry, index) for index, entry in enumerate(receipt_logs)]
+            canonical["receipt_logs"] = [
+                self._canonicalize_receipt_log(entry, index) for index, entry in enumerate(receipt_logs)
+            ]
         return canonical
 
     def _canonicalize_receipt_log(self, entry: Any, index: int) -> dict[str, Any]:
         if not isinstance(entry, dict):
             raise ValueError(f"expected receipt log {index} must be an object")
         topics = entry.get("topics")
-        data = entry.get("data")
         if not isinstance(topics, list):
             raise ValueError(f"expected receipt log {index}.topics must be a list")
-        if not isinstance(data, str):
-            raise ValueError(f"expected receipt log {index}.data must be a hex string")
-        normalized_topics = [self._normalize_hex(topic, field=f"expected receipt log {index}.topics[{topic_index}]") for topic_index, topic in enumerate(topics)]
-        normalized_data = self._normalize_hex(data, field=f"expected receipt log {index}.data")
-        return {
+        normalized_topics = [
+            self._normalize_hex(topic, field=f"expected receipt log {index}.topics[{topic_index}]")
+            for topic_index, topic in enumerate(topics)
+        ]
+        canonical: dict[str, Any] = {
             "topics": normalized_topics,
             "topic_count": len(normalized_topics),
-            "data": normalized_data,
-            "data_length_bytes": self._hex_data_length_bytes(normalized_data, field=f"expected receipt log {index}.data"),
         }
+        if "data_digest" in entry:
+            data_digest = entry.get("data_digest")
+            data_length_bytes = entry.get("data_length_bytes")
+            if not isinstance(data_digest, str):
+                raise ValueError(f"expected receipt log {index}.data_digest must be a hex string")
+            if not isinstance(data_length_bytes, int):
+                raise ValueError(f"expected receipt log {index}.data_length_bytes must be an int")
+            canonical["data_digest"] = self._normalize_hex(
+                data_digest,
+                field=f"expected receipt log {index}.data_digest",
+            )
+            canonical["data_length_bytes"] = data_length_bytes
+            return canonical
+        data = entry.get("data")
+        if not isinstance(data, str):
+            raise ValueError(f"expected receipt log {index}.data must be a hex string")
+        normalized_data = self._normalize_hex(data, field=f"expected receipt log {index}.data")
+        canonical["data"] = normalized_data
+        canonical["data_length_bytes"] = self._hex_data_length_bytes(
+            normalized_data,
+            field=f"expected receipt log {index}.data",
+        )
+        return canonical
 
     def _normalize_hex(self, value: Any, *, field: str) -> str:
         if not isinstance(value, str) or not value.startswith("0x"):
@@ -127,7 +151,12 @@ class ResultOracle:
             return
         if expected != observed:
             diffs.append(f"{path}: expected {expected!r}, got {observed!r}")
-     observed: Any,
+
+    def _compare_digest_backed_receipt_log(
+        self,
+        path: str,
+        expected: Any,
+        observed: Any,
         diffs: list[str],
     ) -> bool:
         if not path.startswith("receipt_logs["):
@@ -150,5 +179,7 @@ class ResultOracle:
         normalized_data = self._normalize_hex(observed_data, field=f"{path}.data")
         observed_digest = "0x" + keccak256(bytes.fromhex(normalized_data[2:])).hex()
         if observed_digest != expected["data_digest"]:
-            diffs.append(f"{path}.data_digest: expected {expected['data_digest']!r}, got {observed_digest!r}")
+            diffs.append(
+                f"{path}.data_digest: expected {expected['data_digest']!r}, got {observed_digest!r}"
+            )
         return True

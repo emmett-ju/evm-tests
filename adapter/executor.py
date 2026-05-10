@@ -520,21 +520,41 @@ class MockBackend:
         if last_receipt is None:
             raise ValueError("log probe requires a receipt context")
         mode = log_probe.get("mode")
-        if mode == "log0_empty_topics0":
-            expected_runtime = LOG0_EMPTY_RUNTIME
-        elif mode == "log1_empty_zero_topic":
-            expected_runtime = LOG1_EMPTY_ZERO_TOPIC_RUNTIME
-        elif mode == "log1_empty_non_zero_topic":
-            expected_runtime = LOG1_EMPTY_NON_ZERO_TOPIC_RUNTIME
-        else:
+        if mode != "parametric_log":
             raise ValueError(f"missing log probe mode: {mode!r}")
+
+        opcode = log_probe.get("opcode")
+        topic_count = log_probe.get("topic_count")
+        topic_word = log_probe.get("topic_word")
+        log_size = log_probe.get("log_size")
+        memory_seed_kind = log_probe.get("memory_seed_kind")
+        memory_seed_size = log_probe.get("memory_seed_size")
+        witness_mode = log_probe.get("witness_mode")
+
+        expected_runtime = _build_log_runtime(
+            template=type("InlineLogTemplate", (), {
+                "opcode": opcode,
+                "topic_count": topic_count,
+                "topic_word": topic_word,
+                "log_size": log_size,
+                "memory_seed_kind": memory_seed_kind,
+                "memory_seed_size": memory_seed_size,
+                "witness_mode": witness_mode,
+            })()
+        )
         if code != expected_runtime:
             raise ValueError(f"unsupported mock contract code path: {code}")
+
+        filled = 0
+        if memory_seed_kind == "ff" and isinstance(memory_seed_size, int):
+            filled = min(int(log_size or 0), memory_seed_size)
+        payload = (b"\xff" * filled) + (b"\x00" * max(0, int(log_size or 0) - filled))
+        topics = [] if topic_word is None else [topic_word] * int(topic_count or 0)
         last_receipt["logs"] = [
             {
                 "address": "0xcccccccccccccccccccccccccccccccccccccccc",
-                "topics": list(log_probe.get("topics", [])),
-                "data": log_probe.get("data", "0x"),
+                "topics": topics,
+                "data": "0x" + payload.hex(),
             }
         ]
 

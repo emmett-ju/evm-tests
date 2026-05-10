@@ -1316,7 +1316,7 @@ class HarnessTests(unittest.TestCase):
 
         admitted = [entry for entry in entries if entry["admitted"]]
         blocked = [entry for entry in entries if not entry["admitted"]]
-        self.assertEqual(len(admitted), 3, "log admitted count drifted")
+        self.assertEqual(len(admitted), 110, "log admitted count drifted")
         self.assertEqual(len(blocked), 30, "log blocked count drifted")
 
         admitted_case_ids = [entry["case_id"] for entry in admitted]
@@ -1365,7 +1365,7 @@ class HarnessTests(unittest.TestCase):
                             "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                             "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
                         ],
-                        "data_digest": "0xd7810f3df8f4f0134ec6fb6f6d157e8ef76ab226a0e63a14e22fbd8e5466b3c8",
+                        "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
                         "data_length_bytes": 1048576,
                     }
                 ],
