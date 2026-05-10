@@ -1983,6 +1983,42 @@ class HarnessTests(unittest.TestCase):
                 )
             self.assertFalse(report_path.exists())
 
+    def test_cli_run_mock_upstream_log_manifest_rejects_tampered_log_probe_opcode(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_log_mapped.json").read_text())
+        target_case = next(
+            case
+            for case in payload["cases"]
+            if case["case_id"]
+            == "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true"
+        )
+        target_case["observe"]["log_probe"]["opcode"] = "LOG0"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            manifest_path = tmp_path / "tampered_upstream_log_mapped.json"
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            manifest_path.write_text(json.dumps(payload, indent=2, sort_keys=True))
+
+            with self.assertRaisesRegex(
+                ValueError,
+                r"observe\.log_probe\.topic_count does not match opcode LOG0: expected 0, got 1",
+            ):
+                main(
+                    [
+                        "run",
+                        "--profile",
+                        str(ROOT / "profiles/mock.toml"),
+                        "--manifest",
+                        str(manifest_path),
+                        "--state-dir",
+                        str(state_dir),
+                        "--report",
+                        str(report_path),
+                    ]
+                )
+            self.assertFalse(report_path.exists())
+
     def test_write_report_compacts_only_receipt_log_payloads_above_inline_threshold(self) -> None:
         exact_256 = "0x" + ("ab" * 256)
         exact_257 = "0x" + ("cd" * 257)
@@ -2199,6 +2235,42 @@ class HarnessTests(unittest.TestCase):
                 "data_length_bytes": 1024,
             },
         )
+
+    def test_derive_receipt_log_expectation_rejects_opcode_topic_count_mismatch(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            r"observe\.log_probe\.topic_count does not match opcode LOG0: expected 0, got 1",
+        ):
+            derive_receipt_log_expectation(
+                {
+                    "mode": "parametric_log",
+                    "opcode": "LOG0",
+                    "topic_count": 1,
+                    "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    "log_size": 0,
+                    "memory_seed_kind": "zero",
+                    "memory_seed_size": 0,
+                    "witness_mode": "exact",
+                }
+            )
+
+    def test_derive_receipt_log_expectation_rejects_unsupported_log_opcode(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            r"unsupported log opcode: LOG5",
+        ):
+            derive_receipt_log_expectation(
+                {
+                    "mode": "parametric_log",
+                    "opcode": "LOG5",
+                    "topic_count": 5,
+                    "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    "log_size": 0,
+                    "memory_seed_kind": "zero",
+                    "memory_seed_size": 0,
+                    "witness_mode": "exact",
+                }
+            )
 
     def test_oracle_reports_precise_receipt_log_topic_mismatch(self) -> None:
         diffs = ResultOracle().compare(

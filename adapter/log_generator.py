@@ -523,7 +523,7 @@ def _build_fill_ff_prefix(size: int) -> bytes:
     return builder.finish()
 
 
-def derive_receipt_log_expectation(log_probe: dict[str, Any]) -> dict[str, Any]:
+def build_validated_log_probe_template(log_probe: dict[str, Any]) -> LogMappingTemplate:
     if not isinstance(log_probe, dict):
         raise ValueError("observe.log_probe must be an object")
     required_fields = (
@@ -539,9 +539,15 @@ def derive_receipt_log_expectation(log_probe: dict[str, Any]) -> dict[str, Any]:
         raise ValueError(
             "observe.log_probe is missing required fields: " + ", ".join(missing_fields)
         )
+    opcode = str(log_probe["opcode"])
     topic_count = int(log_probe["topic_count"])
     if topic_count < 0:
         raise ValueError("observe.log_probe.topic_count must be non-negative")
+    opcode_topic_count = _opcode_topic_count(opcode)
+    if opcode_topic_count != topic_count:
+        raise ValueError(
+            f"observe.log_probe.topic_count does not match opcode {opcode}: expected {opcode_topic_count}, got {topic_count}"
+        )
     topic_word = log_probe.get("topic_word")
     if topic_count == 0:
         topic_word = None
@@ -555,14 +561,14 @@ def derive_receipt_log_expectation(log_probe: dict[str, Any]) -> dict[str, Any]:
     witness_mode = str(log_probe["witness_mode"])
     if witness_mode not in ("exact", "digest"):
         raise ValueError(f"unsupported observe.log_probe.witness_mode: {witness_mode}")
-    template = LogMappingTemplate(
+    return LogMappingTemplate(
         case_id="observe.log_probe",
         description="Derived receipt-log expectation from runtime contract",
         namespace_seed="observe-log-probe",
         upstream_ref="observe.log_probe",
         notes=[],
         mode="test_log_fixed_offset",
-        opcode=str(log_probe["opcode"]),
+        opcode=opcode,
         topic_count=topic_count,
         topic_word=topic_word,
         log_size=int(log_probe["log_size"]),
@@ -570,7 +576,11 @@ def derive_receipt_log_expectation(log_probe: dict[str, Any]) -> dict[str, Any]:
         memory_seed_size=int(log_probe["memory_seed_size"]),
         witness_mode=witness_mode,
     )
-    return _expected_receipt_log(template)
+
+
+
+def derive_receipt_log_expectation(log_probe: dict[str, Any]) -> dict[str, Any]:
+    return _expected_receipt_log(build_validated_log_probe_template(log_probe))
 
 
 
@@ -674,7 +684,10 @@ def _extract_param_values_from_block(block: str, param_name: str, *, function_na
 def _opcode_topic_count(opcode: str) -> int:
     if not opcode.startswith("LOG"):
         raise ValueError(f"unsupported log opcode: {opcode}")
-    return int(opcode.removeprefix("LOG"))
+    suffix = opcode.removeprefix("LOG")
+    if suffix not in {"0", "1", "2", "3", "4"}:
+        raise ValueError(f"unsupported log opcode: {opcode}")
+    return int(suffix)
 
 
 def _resolve_topic_word(*, topic_count: int, zeros_topic: bool) -> str | None:

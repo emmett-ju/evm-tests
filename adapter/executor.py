@@ -31,7 +31,12 @@ from adapter.keccak_generator import (
     simulate_basic_keccak_case,
     simulate_diff_mem_msg_sizes_case,
 )
-from adapter.log_generator import _build_log_runtime, derive_receipt_log_expectation
+from adapter.log_generator import (
+    _build_log_runtime,
+    _payload_bytes,
+    build_validated_log_probe_template,
+    derive_receipt_log_expectation,
+)
 from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
 from adapter.signer import keccak256, load_private_key, private_key_to_address, sign_type_2_transaction
@@ -471,30 +476,14 @@ class MockBackend:
         log_probe: dict[str, Any],
         code: str | None,
     ) -> None:
-        from types import SimpleNamespace
-
-        template = SimpleNamespace(
-            opcode=log_probe["opcode"],
-            topic_count=int(log_probe["topic_count"]),
-            topic_word=log_probe.get("topic_word"),
-            log_size=int(log_probe["log_size"]),
-            memory_seed_kind=log_probe["memory_seed_kind"],
-            memory_seed_size=int(log_probe["memory_seed_size"]),
-            witness_mode=log_probe["witness_mode"],
-        )
+        template = build_validated_log_probe_template(log_probe)
         expected_runtime = _build_log_runtime(template)
         if code != expected_runtime:
             raise ValueError(f"unsupported mock contract code path: {code}")
         if last_receipt is None:
             raise ValueError("log probe requires a receipt context")
         topics = [] if template.topic_word is None else [template.topic_word] * template.topic_count
-        if template.log_size == 0:
-            payload = b""
-        elif template.memory_seed_kind == "zero" or template.memory_seed_size == 0:
-            payload = b"\x00" * template.log_size
-        else:
-            filled = min(template.log_size, template.memory_seed_size)
-            payload = (b"\xff" * filled) + (b"\x00" * (template.log_size - filled))
+        payload = _payload_bytes(template)
         last_receipt["logs"] = [
             {
                 "topics": topics,
