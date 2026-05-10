@@ -278,6 +278,86 @@ class HarnessTests(unittest.TestCase):
             ):
                 load_manifest(manifest_path)
 
+    def test_validation_boundary_accepts_current_checked_in_family_shape_manifests(self) -> None:
+        scenarios = [
+            {
+                "manifest_path": ROOT / "suites/manifests/custom_storage_smoke.json",
+                "profile": load_chain_profile(ROOT / "profiles/mock.toml"),
+                "expected_case_ids": ["custom.balance.and.storage"],
+            },
+            {
+                "manifest_path": ROOT / "suites/manifests/upstream_block_context_mapped.json",
+                "profile": load_chain_profile(ROOT / "profiles/juchain.toml"),
+                "expected_case_ids": [
+                    "upstream.benchmark.block_context.test_block_context_ops.basefee",
+                    "upstream.benchmark.block_context.test_block_context_ops.chainid",
+                    "upstream.benchmark.block_context.test_block_context_ops.coinbase",
+                    "upstream.benchmark.block_context.test_block_context_ops.gaslimit",
+                    "upstream.benchmark.block_context.test_block_context_ops.number",
+                    "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
+                    "upstream.benchmark.block_context.test_block_context_ops.timestamp",
+                ],
+            },
+            {
+                "manifest_path": ROOT / "suites/manifests/upstream_log_mapped.json",
+                "profile": load_chain_profile(ROOT / "profiles/juchain.toml"),
+                "expected_case_ids": None,
+            },
+            {
+                "manifest_path": ROOT / "suites/manifests/upstream_system_mapped.json",
+                "profile": load_chain_profile(ROOT / "profiles/juchain.toml"),
+                "expected_case_ids": None,
+            },
+        ]
+
+        for scenario in scenarios:
+            with self.subTest(manifest=scenario["manifest_path"].name):
+                manifest = load_manifest(scenario["manifest_path"])
+                selected, decisions = TestSelector(scenario["profile"]).select(manifest)
+                self.assertEqual(manifest.validation_errors(scenario["profile"].backend), [])
+                self.assertEqual([decision for decision in decisions if not decision.selected], [])
+                self.assertEqual([case.case_id for case in selected], scenario["expected_case_ids"] or [case.case_id for case in manifest.cases])
+                self.assertEqual(len(selected), len(manifest.cases))
+
+    def test_validation_boundary_rejects_malformed_block_context_manifest_shape(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_block_context_mapped.json").read_text())
+        payload["cases"][0]["steps"][0].pop("bytecode_runtime")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "upstream_block_context_mapped.json"
+            manifest_path.write_text(json.dumps(payload))
+            with self.assertRaises(ValueError) as error:
+                load_manifest(manifest_path)
+        self.assertEqual(
+            str(error.exception),
+            "case upstream.benchmark.block_context.test_block_context_ops.basefee step 1: action 'deploy_contract' is missing required fields: bytecode_runtime",
+        )
+
+    def test_validation_boundary_rejects_malformed_log_manifest_shape(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_log_mapped.json").read_text())
+        payload["cases"][0]["steps"][3]["timeout_seconds"] = "60"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "upstream_log_mapped.json"
+            manifest_path.write_text(json.dumps(payload))
+            with self.assertRaises(ValueError) as error:
+                load_manifest(manifest_path)
+        self.assertEqual(
+            str(error.exception),
+            "case upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true step 4: action 'wait_receipt' field 'timeout_seconds' must be an integer",
+        )
+
+    def test_validation_boundary_rejects_malformed_system_manifest_shape(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
+        payload["cases"][0]["steps"][2]["data"] = 0
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "upstream_system_mapped.json"
+            manifest_path.write_text(json.dumps(payload))
+            with self.assertRaises(ValueError) as error:
+                load_manifest(manifest_path)
+        self.assertEqual(
+            str(error.exception),
+            "case upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data step 3: action 'invoke_contract' field 'data' must be a string",
+        )
+
     def test_selector_allows_real_jsonrpc_smoke_case(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/juchain_smoke.json")
