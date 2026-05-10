@@ -73,7 +73,10 @@ from adapter.stack_generator import (
     generate_upstream_stack_manifest,
     generate_upstream_stack_templates,
 )
-from adapter.system_generator import generate_upstream_system_templates
+from adapter.system_generator import (
+    generate_upstream_system_manifest,
+    generate_upstream_system_templates,
+)
 from adapter.tx_context_generator import (
     generate_upstream_tx_context_manifest,
     generate_upstream_tx_context_templates,
@@ -1718,7 +1721,134 @@ class HarnessTests(unittest.TestCase):
                     inventory_path=Path(tmpdir) / "inventory.json",
                 )
 
-    def test_system_template_scanner_writes_blocked_inventory_only(self) -> None:
+    def _assert_system_parity_contract(
+        self,
+        *,
+        templates_payload: dict[str, object],
+        inventory_payload: dict[str, object],
+        manifest_payload: dict[str, object] | None = None,
+    ) -> None:
+        checked_in_templates_path = ROOT / "suites/templates/upstream_system_templates.json"
+        checked_in_inventory_path = ROOT / "suites/templates/upstream_system_inventory.json"
+        checked_in_templates = json.loads(checked_in_templates_path.read_text())
+        checked_in_inventory = json.loads(checked_in_inventory_path.read_text())
+
+        self.assertEqual(templates_payload, checked_in_templates, "system template JSON drift")
+        self.assertEqual(inventory_payload, checked_in_inventory, "system inventory JSON drift")
+
+        self.assertEqual(templates_payload["name"], "upstream-system-mapping-templates")
+        self.assertEqual(inventory_payload["name"], "upstream-system-auto-inventory")
+        self.assertEqual(inventory_payload["family"], "system")
+
+        entries = inventory_payload["entries"]
+        case_ids = [entry["case_id"] for entry in entries]
+        upstream_refs = [entry["upstream_ref"] for entry in entries]
+        self.assertEqual(upstream_refs, sorted(upstream_refs), "system upstream_ref ordering drifted")
+        self.assertEqual(len(case_ids), 46)
+        self.assertEqual(len(case_ids), len(set(case_ids)))
+
+        admitted = [entry for entry in entries if entry["admitted"]]
+        blocked = [entry for entry in entries if not entry["admitted"]]
+        self.assertEqual(len(admitted), 10, "system admitted count drifted")
+        self.assertEqual(len(blocked), 36, "system blocked count drifted")
+
+        admitted_case_ids = [entry["case_id"] for entry in admitted]
+        self.assertEqual(
+            admitted_case_ids,
+            [
+                "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
+                "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
+                "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
+                "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data",
+                "upstream.benchmark.system.test_return_revert.return.empty",
+                "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data",
+                "upstream.benchmark.system.test_return_revert.revert.1kib_of_zero_data",
+                "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
+                "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
+                "upstream.benchmark.system.test_return_revert.revert.empty",
+            ],
+        )
+        self.assertEqual({entry["mode"] for entry in admitted}, {"return_revert_self_call"})
+        self.assertEqual(
+            Counter(reason for entry in blocked for reason in entry["reasons"]),
+            Counter(
+                {
+                    "requires multi-address external-call orchestration not yet mapped": 8,
+                    "requires create/create2 deployed-address witness not yet mapped": 20,
+                    "requires gas-capped create collision orchestration not yet mapped": 2,
+                    "requires selfdestruct lifecycle witness not yet mapped": 6,
+                }
+            ),
+        )
+        self.assertEqual(
+            Counter(entry["source"] for entry in blocked),
+            Counter(
+                {
+                    "test_contract_calling_many_addresses": 8,
+                    "test_create": 20,
+                    "test_creates_collisions": 2,
+                    "test_selfdestruct_created": 2,
+                    "test_selfdestruct_existing": 2,
+                    "test_selfdestruct_initcode": 2,
+                }
+            ),
+        )
+        self.assertTrue(all(entry["mode"] is None for entry in blocked))
+
+        template_case_ids = [case["case_id"] for case in templates_payload["cases"]]
+        self.assertEqual(template_case_ids, admitted_case_ids)
+        self.assertEqual(len(templates_payload["cases"]), 10)
+
+        if manifest_payload is not None:
+            checked_in_manifest_path = ROOT / "suites/manifests/upstream_system_mapped.json"
+            checked_in_manifest = json.loads(checked_in_manifest_path.read_text())
+            self.assertEqual(manifest_payload, checked_in_manifest, "system manifest JSON drift")
+            manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
+            self.assertEqual(manifest_case_ids, admitted_case_ids)
+            self.assertEqual(len(manifest_payload["cases"]), 10)
+            self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/system"})
+            observed_by_case = {case["case_id"]: case for case in manifest_payload["cases"]}
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.system.test_return_revert.return.empty"
+                ]["expected"],
+                {
+                    "receipt_status": "0x1",
+                    "storage": {
+                        "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                        "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                    },
+                },
+            )
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data"
+                ]["expected"]["storage"],
+                {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+                    "0x02": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054",
+                },
+            )
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data"
+                ]["expected"]["storage"]["0x01"],
+                "0x0000000000000000000000000000000000000000000000000000000000100000",
+            )
+            self.assertFalse(
+                any(
+                    "test_create" in case_id
+                    or "test_selfdestruct" in case_id
+                    or "test_contract_calling_many_addresses" in case_id
+                    or "test_creates_collisions" in case_id
+                    for case_id in manifest_case_ids
+                ),
+                "blocked system neighbors leaked into manifest",
+            )
+
+    def test_system_template_scanner_writes_admitted_inventory_subset(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_system_templates.json"
             inventory_path = Path(tmpdir) / "upstream_system_inventory.json"
@@ -1727,17 +1857,32 @@ class HarnessTests(unittest.TestCase):
                 output_path=generated_path,
                 inventory_path=inventory_path,
             )
-            self.assertEqual(generated["name"], "upstream-system-mapping-templates")
-            self.assertEqual(generated["cases"], [])
-            inventory = json.loads(inventory_path.read_text())
-            self.assertEqual(inventory["name"], "upstream-system-auto-inventory")
-            self.assertEqual(inventory["family"], "system")
-            self.assertEqual(len(inventory["entries"]), 46)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
-            case_ids = [entry["case_id"] for entry in inventory["entries"]]
-            self.assertEqual(len(case_ids), len(set(case_ids)))
-            self.assertIn("upstream.benchmark.system.test_create.create.max_code_size_with_non_zero_data", case_ids)
-            self.assertIn("upstream.benchmark.system.test_selfdestruct_initcode.value_bearing_true", case_ids)
+            self._assert_system_parity_contract(
+                templates_payload=generated,
+                inventory_payload=json.loads(inventory_path.read_text()),
+            )
+
+    def test_system_manifest_generator_matches_checked_in_manifest_subset(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_template_path = Path(tmpdir) / "upstream_system_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_system_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_system_mapped.json"
+            templates = generate_upstream_system_templates(
+                repo_root=ROOT,
+                output_path=generated_template_path,
+                inventory_path=inventory_path,
+            )
+            generated = generate_upstream_system_manifest(
+                repo_root=ROOT,
+                template_path=generated_template_path,
+                output_path=manifest_path,
+            )
+            self._assert_system_parity_contract(
+                templates_payload=templates,
+                inventory_payload=json.loads(inventory_path.read_text()),
+                manifest_payload=generated,
+            )
+            self.assertEqual(generated["cases"][0]["family"], "state/system")
 
     def test_system_template_scanner_fails_loudly_on_missing_function(self) -> None:
         source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_system.py"
@@ -2466,6 +2611,38 @@ class HarnessTests(unittest.TestCase):
                 manifest_payload=generated,
             )
 
+    def test_cli_generate_system_manifest_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            template_output_path = Path(tmpdir) / "templates.json"
+            inventory_output_path = Path(tmpdir) / "inventory.json"
+            manifest_output_path = Path(tmpdir) / "generated.json"
+            templates = generate_upstream_system_templates(
+                repo_root=ROOT,
+                output_path=template_output_path,
+                inventory_path=inventory_output_path,
+            )
+            self.assertEqual(
+                main(
+                    [
+                        "generate-system-manifest",
+                        "--template",
+                        str(template_output_path),
+                        "--output",
+                        str(manifest_output_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(manifest_output_path.read_text())
+            self._assert_system_parity_contract(
+                templates_payload=templates,
+                inventory_payload=json.loads(inventory_output_path.read_text()),
+                manifest_payload=generated,
+            )
+            self.assertEqual(generated["name"], "upstream-system-mapped")
+            self.assertEqual(len(generated["cases"]), 10)
+            self.assertEqual(generated["cases"][0]["family"], "state/system")
+
     def test_cli_generate_keccak_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "generated.json"
@@ -2608,6 +2785,29 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 35)
             self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
 
+    def test_cli_scan_upstream_system_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output_path = Path(tmpdir) / "templates.json"
+            inventory_path = Path(tmpdir) / "inventory.json"
+            self.assertEqual(
+                main(
+                    [
+                        "scan-upstream-system",
+                        "--template-output",
+                        str(output_path),
+                        "--inventory-output",
+                        str(inventory_path),
+                    ]
+                ),
+                0,
+            )
+            generated = json.loads(output_path.read_text())
+            inventory = json.loads(inventory_path.read_text())
+            self._assert_system_parity_contract(
+                templates_payload=generated,
+                inventory_payload=inventory,
+            )
+
     def test_cli_scan_upstream_system_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             inventory_path = Path(tmpdir) / "inventory.json"
@@ -2622,10 +2822,10 @@ class HarnessTests(unittest.TestCase):
                 0,
             )
             inventory = json.loads(inventory_path.read_text())
-            self.assertEqual(inventory["name"], "upstream-system-auto-inventory")
-            self.assertEqual(inventory["family"], "system")
-            self.assertEqual(len(inventory["entries"]), 46)
-            self.assertEqual([entry for entry in inventory["entries"] if entry["admitted"]], [])
+            self._assert_system_parity_contract(
+                templates_payload=json.loads((ROOT / "suites/templates/upstream_system_templates.json").read_text()),
+                inventory_payload=inventory,
+            )
 
     def test_cli_scan_upstream_memory_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

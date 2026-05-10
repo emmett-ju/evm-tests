@@ -10,9 +10,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires multi-address external-call orchestration not yet mapped"
       ],
-      "source": "test_contract_calling_many_addresses"
+      "source": "test_contract_calling_many_addresses",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=0-opcode=CALL-access_warm=True]",
@@ -20,9 +23,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires multi-address external-call orchestration not yet mapped"
       ],
-      "source": "test_contract_calling_many_addresses"
+      "source": "test_contract_calling_many_addresses",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=0-opcode=CALLCODE-access_warm=False]",
@@ -30,9 +36,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires multi-address external-call orchestration not yet mapped"
       ],
-      "source": "test_contract_calling_many_addresses"
+      "source": "test_contract_calling_many_addresses",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=0-opcode=CALLCODE-access_warm=True]",
@@ -40,9 +49,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires multi-address external-call orchestration not yet mapped"
       ],
-      "source": "test_contract_calling_many_addresses"
+      "source": "test_contract_calling_many_addresses",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALL-access_warm=False]",
@@ -50,9 +62,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires multi-address external-call orchestration not yet mapped"
       ],
-      "source": "test_contract_calling_many_addresses"
+      "source": "test_contract_calling_many_addresses",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALL-access_warm=True]",
@@ -60,9 +75,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires multi-address external-call orchestration not yet mapped"
       ],
-      "source": "test_contract_calling_many_addresses"
+      "source": "test_contract_calling_many_addresses",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALLCODE-access_warm=False]",
@@ -70,9 +88,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires multi-address external-call orchestration not yet mapped"
       ],
-      "source": "test_contract_calling_many_addresses"
+      "source": "test_contract_calling_many_addresses",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALLCODE-access_warm=True]",
@@ -80,9 +101,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires multi-address external-call orchestration not yet mapped"
       ],
-      "source": "test_contract_calling_many_addresses"
+      "source": "test_contract_calling_many_addresses",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0 bytes with value]",
@@ -90,9 +114,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0 bytes without value]",
@@ -100,9 +127,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.25x max code size with non-zero data]",
@@ -110,9 +140,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.25x max code size with zero data]",
@@ -120,9 +153,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.50x max code size with non-zero data]",
@@ -130,9 +166,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.50x max code size with zero data]",
@@ -140,9 +179,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.75x max code size with non-zero data]",
@@ -150,9 +192,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.75x max code size with zero data]",
@@ -160,9 +205,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=max code size with non-zero data]",
@@ -170,9 +218,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=max code size with zero data]",
@@ -180,9 +231,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0 bytes with value]",
@@ -190,9 +244,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0 bytes without value]",
@@ -200,9 +257,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.25x max code size with non-zero data]",
@@ -210,9 +270,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.25x max code size with zero data]",
@@ -220,9 +283,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.50x max code size with non-zero data]",
@@ -230,9 +296,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.50x max code size with zero data]",
@@ -240,9 +309,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.75x max code size with non-zero data]",
@@ -250,9 +322,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.75x max code size with zero data]",
@@ -260,9 +335,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=max code size with non-zero data]",
@@ -270,9 +348,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=max code size with zero data]",
@@ -280,9 +361,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires create/create2 deployed-address witness not yet mapped"
       ],
-      "source": "test_create"
+      "source": "test_create",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_creates_collisions[opcode=CREATE2]",
@@ -290,9 +374,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires gas-capped create collision orchestration not yet mapped"
       ],
-      "source": "test_creates_collisions"
+      "source": "test_creates_collisions",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_creates_collisions[opcode=CREATE]",
@@ -300,109 +387,122 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires gas-capped create collision orchestration not yet mapped"
       ],
-      "source": "test_creates_collisions"
+      "source": "test_creates_collisions",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1KiB of non-zero data]",
       "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires system benchmark mapping support not yet mapped"
-      ],
-      "source": "test_return_revert"
+      "admitted": true,
+      "mode": "return_revert_self_call",
+      "reasons": [],
+      "source": "test_return_revert",
+      "opcode": "RETURN",
+      "return_size": 1024,
+      "return_non_zero_data": true
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1KiB of zero data]",
       "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires system benchmark mapping support not yet mapped"
-      ],
-      "source": "test_return_revert"
+      "admitted": true,
+      "mode": "return_revert_self_call",
+      "reasons": [],
+      "source": "test_return_revert",
+      "opcode": "RETURN",
+      "return_size": 1024,
+      "return_non_zero_data": false
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1MiB of non-zero data]",
       "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires system benchmark mapping support not yet mapped"
-      ],
-      "source": "test_return_revert"
+      "admitted": true,
+      "mode": "return_revert_self_call",
+      "reasons": [],
+      "source": "test_return_revert",
+      "opcode": "RETURN",
+      "return_size": 1048576,
+      "return_non_zero_data": true
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1MiB of zero data]",
       "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires system benchmark mapping support not yet mapped"
-      ],
-      "source": "test_return_revert"
+      "admitted": true,
+      "mode": "return_revert_self_call",
+      "reasons": [],
+      "source": "test_return_revert",
+      "opcode": "RETURN",
+      "return_size": 1048576,
+      "return_non_zero_data": false
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=empty]",
       "case_id": "upstream.benchmark.system.test_return_revert.return.empty",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires system benchmark mapping support not yet mapped"
-      ],
-      "source": "test_return_revert"
+      "admitted": true,
+      "mode": "return_revert_self_call",
+      "reasons": [],
+      "source": "test_return_revert",
+      "opcode": "RETURN",
+      "return_size": 0,
+      "return_non_zero_data": false
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1KiB of non-zero data]",
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires system benchmark mapping support not yet mapped"
-      ],
-      "source": "test_return_revert"
+      "admitted": true,
+      "mode": "return_revert_self_call",
+      "reasons": [],
+      "source": "test_return_revert",
+      "opcode": "REVERT",
+      "return_size": 1024,
+      "return_non_zero_data": true
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1KiB of zero data]",
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1kib_of_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires system benchmark mapping support not yet mapped"
-      ],
-      "source": "test_return_revert"
+      "admitted": true,
+      "mode": "return_revert_self_call",
+      "reasons": [],
+      "source": "test_return_revert",
+      "opcode": "REVERT",
+      "return_size": 1024,
+      "return_non_zero_data": false
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1MiB of non-zero data]",
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires system benchmark mapping support not yet mapped"
-      ],
-      "source": "test_return_revert"
+      "admitted": true,
+      "mode": "return_revert_self_call",
+      "reasons": [],
+      "source": "test_return_revert",
+      "opcode": "REVERT",
+      "return_size": 1048576,
+      "return_non_zero_data": true
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1MiB of zero data]",
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires system benchmark mapping support not yet mapped"
-      ],
-      "source": "test_return_revert"
+      "admitted": true,
+      "mode": "return_revert_self_call",
+      "reasons": [],
+      "source": "test_return_revert",
+      "opcode": "REVERT",
+      "return_size": 1048576,
+      "return_non_zero_data": false
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=empty]",
       "case_id": "upstream.benchmark.system.test_return_revert.revert.empty",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires system benchmark mapping support not yet mapped"
-      ],
-      "source": "test_return_revert"
+      "admitted": true,
+      "mode": "return_revert_self_call",
+      "reasons": [],
+      "source": "test_return_revert",
+      "opcode": "REVERT",
+      "return_size": 0,
+      "return_non_zero_data": false
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_created[value_bearing=False]",
@@ -410,9 +510,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires selfdestruct lifecycle witness not yet mapped"
       ],
-      "source": "test_selfdestruct_created"
+      "source": "test_selfdestruct_created",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_created[value_bearing=True]",
@@ -420,9 +523,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires selfdestruct lifecycle witness not yet mapped"
       ],
-      "source": "test_selfdestruct_created"
+      "source": "test_selfdestruct_created",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_existing[value_bearing=False]",
@@ -430,9 +536,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires selfdestruct lifecycle witness not yet mapped"
       ],
-      "source": "test_selfdestruct_existing"
+      "source": "test_selfdestruct_existing",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_existing[value_bearing=True]",
@@ -440,9 +549,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires selfdestruct lifecycle witness not yet mapped"
       ],
-      "source": "test_selfdestruct_existing"
+      "source": "test_selfdestruct_existing",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_initcode[value_bearing=False]",
@@ -450,9 +562,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires selfdestruct lifecycle witness not yet mapped"
       ],
-      "source": "test_selfdestruct_initcode"
+      "source": "test_selfdestruct_initcode",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_initcode[value_bearing=True]",
@@ -460,9 +575,12 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires system benchmark mapping support not yet mapped"
+        "requires selfdestruct lifecycle witness not yet mapped"
       ],
-      "source": "test_selfdestruct_initcode"
+      "source": "test_selfdestruct_initcode",
+      "opcode": null,
+      "return_size": null,
+      "return_non_zero_data": null
     }
   ]
 }

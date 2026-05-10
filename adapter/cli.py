@@ -38,7 +38,10 @@ from adapter.keccak_generator import (
     generate_upstream_keccak_manifest,
     generate_upstream_keccak_templates,
 )
-from adapter.system_generator import generate_upstream_system_templates
+from adapter.system_generator import (
+    generate_upstream_system_manifest,
+    generate_upstream_system_templates,
+)
 from adapter.env import load_dotenv
 from adapter.stack_generator import (
     generate_upstream_stack_manifest,
@@ -173,6 +176,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_system.add_argument("--template-output")
     scan_system.add_argument("--inventory-output", required=True)
+
+    generate_system = subparsers.add_parser("generate-system-manifest")
+    generate_system.add_argument("--template", default="suites/templates/upstream_system_templates.json")
+    generate_system.add_argument("--output", required=True)
 
     scan_account_query = subparsers.add_parser("scan-upstream-account-query")
     scan_account_query.add_argument(
@@ -496,6 +503,15 @@ def main(argv: list[str] | None = None) -> int:
             inventory_path=args.inventory_output,
         )
         print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-system-manifest":
+        manifest = generate_upstream_system_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
         return 0
 
     if args.command == "scan-upstream-account-query":

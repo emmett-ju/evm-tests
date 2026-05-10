@@ -1,0 +1,519 @@
+{
+  "name": "upstream-system-mapped",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
+      "family": "state/system",
+      "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1024-byte non-zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-return-1kib-of-non-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1KiB of non-zero data]",
+      "notes": [
+        "Upstream intent: benchmark RETURN with a 1024-byte non-zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path fills the first 1024 memory byte(s) with 0xff before RETURN.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x605e600c600039605e6000f3365f146043576104005b805f146036577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036003565b506104005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f146043576104005b805f146036577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036003565b506104005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+          "0x02": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
+      "family": "state/system",
+      "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1024-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-return-1kib-of-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1KiB of zero data]",
+      "notes": [
+        "Upstream intent: benchmark RETURN with a 1024-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path RETURNs 1024 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6026600c60003960266000f3365f14600b576104005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f14600b576104005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+          "0x02": "0xb5d4d1df10388bbc208778ff02310db98fdaa68efed0b2068a9bef78bd3bfd74"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
+      "family": "state/system",
+      "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1048576-byte non-zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-return-1mib-of-non-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1MiB of non-zero data]",
+      "notes": [
+        "Upstream intent: benchmark RETURN with a 1048576-byte non-zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path fills the first 1048576 memory byte(s) with 0xff before RETURN.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6060600c60003960606000f3365f14604557621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f14604557621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x2000000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000",
+          "0x02": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data",
+      "family": "state/system",
+      "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1048576-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-return-1mib-of-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1MiB of zero data]",
+      "notes": [
+        "Upstream intent: benchmark RETURN with a 1048576-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path RETURNs 1048576 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6027600c60003960276000f3365f14600c57621000005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f14600c57621000005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x2000000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000",
+          "0x02": "0x7b6ff0a03e9c5a8e77a2059bf28e26a7f0e8d3939a7cfe2193908ad8d683be90"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_return_revert.return.empty",
+      "family": "state/system",
+      "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 0-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-return-empty",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=empty]",
+      "notes": [
+        "Upstream intent: benchmark RETURN with a 0-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path RETURNs 0 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6024600c60003960246000f3365f146009575f5ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f146009575f5ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x1e8480"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data",
+      "family": "state/system",
+      "description": "Mapped from execution-specs REVERT benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1024-byte non-zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-revert-1kib-of-non-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1KiB of non-zero data]",
+      "notes": [
+        "Upstream intent: benchmark REVERT with a 1024-byte non-zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path fills the first 1024 memory byte(s) with 0xff before REVERT.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x605e600c600039605e6000f3365f146043576104005b805f146036577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036003565b506104005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f146043576104005b805f146036577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036003565b506104005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+          "0x02": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_return_revert.revert.1kib_of_zero_data",
+      "family": "state/system",
+      "description": "Mapped from execution-specs REVERT benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1024-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-revert-1kib-of-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1KiB of zero data]",
+      "notes": [
+        "Upstream intent: benchmark REVERT with a 1024-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path REVERTs 1024 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6026600c60003960266000f3365f14600b576104005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f14600b576104005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+          "0x02": "0xb5d4d1df10388bbc208778ff02310db98fdaa68efed0b2068a9bef78bd3bfd74"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
+      "family": "state/system",
+      "description": "Mapped from execution-specs REVERT benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1048576-byte non-zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-revert-1mib-of-non-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1MiB of non-zero data]",
+      "notes": [
+        "Upstream intent: benchmark REVERT with a 1048576-byte non-zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path fills the first 1048576 memory byte(s) with 0xff before REVERT.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6060600c60003960606000f3365f14604557621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f14604557621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x2000000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000",
+          "0x02": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
+      "family": "state/system",
+      "description": "Mapped from execution-specs REVERT benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1048576-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-revert-1mib-of-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1MiB of zero data]",
+      "notes": [
+        "Upstream intent: benchmark REVERT with a 1048576-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path REVERTs 1048576 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6027600c60003960276000f3365f14600c57621000005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f14600c57621000005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x2000000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000",
+          "0x02": "0x7b6ff0a03e9c5a8e77a2059bf28e26a7f0e8d3939a7cfe2193908ad8d683be90"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_return_revert.revert.empty",
+      "family": "state/system",
+      "description": "Mapped from execution-specs REVERT benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 0-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-revert-empty",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=empty]",
+      "notes": [
+        "Upstream intent: benchmark REVERT with a 0-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path REVERTs 0 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
+      ],
+      "observe": {
+        "storage_address": "$last_contract"
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6024600c60003960246000f3365f146009575f5ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f146009575f5ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x1e8480"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+        }
+      }
+    }
+  ]
+}

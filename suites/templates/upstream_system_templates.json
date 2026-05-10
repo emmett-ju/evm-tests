@@ -1,0 +1,177 @@
+{
+  "name": "upstream-system-mapping-templates",
+  "version": "1",
+  "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_system.py",
+  "cases": [
+    {
+      "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
+      "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1024-byte non-zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-return-1kib-of-non-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1KiB of non-zero data]",
+      "notes": [
+        "Upstream intent: benchmark RETURN with a 1024-byte non-zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path fills the first 1024 memory byte(s) with 0xff before RETURN.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
+      ],
+      "mode": "return_revert_self_call",
+      "opcode": "RETURN",
+      "return_size": 1024,
+      "return_non_zero_data": true
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
+      "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1024-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-return-1kib-of-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1KiB of zero data]",
+      "notes": [
+        "Upstream intent: benchmark RETURN with a 1024-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path RETURNs 1024 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
+      ],
+      "mode": "return_revert_self_call",
+      "opcode": "RETURN",
+      "return_size": 1024,
+      "return_non_zero_data": false
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
+      "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1048576-byte non-zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-return-1mib-of-non-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1MiB of non-zero data]",
+      "notes": [
+        "Upstream intent: benchmark RETURN with a 1048576-byte non-zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path fills the first 1048576 memory byte(s) with 0xff before RETURN.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
+      ],
+      "mode": "return_revert_self_call",
+      "opcode": "RETURN",
+      "return_size": 1048576,
+      "return_non_zero_data": true
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data",
+      "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1048576-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-return-1mib-of-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1MiB of zero data]",
+      "notes": [
+        "Upstream intent: benchmark RETURN with a 1048576-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path RETURNs 1048576 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
+      ],
+      "mode": "return_revert_self_call",
+      "opcode": "RETURN",
+      "return_size": 1048576,
+      "return_non_zero_data": false
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_return_revert.return.empty",
+      "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 0-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-return-empty",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=empty]",
+      "notes": [
+        "Upstream intent: benchmark RETURN with a 0-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path RETURNs 0 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
+      ],
+      "mode": "return_revert_self_call",
+      "opcode": "RETURN",
+      "return_size": 0,
+      "return_non_zero_data": false
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data",
+      "description": "Mapped from execution-specs REVERT benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1024-byte non-zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-revert-1kib-of-non-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1KiB of non-zero data]",
+      "notes": [
+        "Upstream intent: benchmark REVERT with a 1024-byte non-zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path fills the first 1024 memory byte(s) with 0xff before REVERT.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
+      ],
+      "mode": "return_revert_self_call",
+      "opcode": "REVERT",
+      "return_size": 1024,
+      "return_non_zero_data": true
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_return_revert.revert.1kib_of_zero_data",
+      "description": "Mapped from execution-specs REVERT benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1024-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-revert-1kib-of-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1KiB of zero data]",
+      "notes": [
+        "Upstream intent: benchmark REVERT with a 1024-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path REVERTs 1024 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
+      ],
+      "mode": "return_revert_self_call",
+      "opcode": "REVERT",
+      "return_size": 1024,
+      "return_non_zero_data": false
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
+      "description": "Mapped from execution-specs REVERT benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1048576-byte non-zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-revert-1mib-of-non-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1MiB of non-zero data]",
+      "notes": [
+        "Upstream intent: benchmark REVERT with a 1048576-byte non-zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path fills the first 1048576 memory byte(s) with 0xff before REVERT.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
+      ],
+      "mode": "return_revert_self_call",
+      "opcode": "REVERT",
+      "return_size": 1048576,
+      "return_non_zero_data": true
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
+      "description": "Mapped from execution-specs REVERT benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1048576-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-revert-1mib-of-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1MiB of zero data]",
+      "notes": [
+        "Upstream intent: benchmark REVERT with a 1048576-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path REVERTs 1048576 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
+      ],
+      "mode": "return_revert_self_call",
+      "opcode": "REVERT",
+      "return_size": 1048576,
+      "return_non_zero_data": false
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_return_revert.revert.empty",
+      "description": "Mapped from execution-specs REVERT benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 0-byte zero variant.",
+      "namespace_seed": "upstream-system-test-return-revert-revert-empty",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=empty]",
+      "notes": [
+        "Upstream intent: benchmark REVERT with a 0-byte zero returndata payload.",
+        "RPC mapping: a single deployed contract self-CALLs into its child path so the outer wrapper can observe the inner result without requiring multi-contract orchestration in the manifest.",
+        "The child path REVERTs 0 byte(s) from zero-initialized memory.",
+        "Wrapper witness contract stores the inner-call success bit in slot0, RETURNDATASIZE in slot1, and KECCAK256(returndata) in slot2; the outer transaction receipt remains successful so receipt_status stays directly observable.",
+        "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
+      ],
+      "mode": "return_revert_self_call",
+      "opcode": "REVERT",
+      "return_size": 0,
+      "return_non_zero_data": false
+    }
+  ]
+}
