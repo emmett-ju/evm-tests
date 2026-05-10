@@ -317,7 +317,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(deploy_steps), 1)
             self.assertIn(deploy_steps[0]["bytecode_runtime"], allowed_runtimes)
 
-    def test_selector_allows_upstream_mapped_system_subset_cases(self) -> None:
+    def test_selector_allows_upstream_mapped_system_cases(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
@@ -356,6 +356,9 @@ class HarnessTests(unittest.TestCase):
                 for case in selected
             )
         )
+
+    def test_selector_allows_upstream_mapped_system_subset_cases(self) -> None:
+        self.test_selector_allows_upstream_mapped_system_cases()
 
     def test_selector_allows_upstream_mapped_keccak_cases(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
@@ -1888,7 +1891,7 @@ class HarnessTests(unittest.TestCase):
                 "blocked system neighbors leaked into manifest",
             )
 
-    def test_system_template_scanner_writes_admitted_inventory_subset(self) -> None:
+    def test_system_template_scanner_writes_admitted_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_path = Path(tmpdir) / "upstream_system_templates.json"
             inventory_path = Path(tmpdir) / "upstream_system_inventory.json"
@@ -1902,7 +1905,10 @@ class HarnessTests(unittest.TestCase):
                 inventory_payload=json.loads(inventory_path.read_text()),
             )
 
-    def test_system_manifest_generator_matches_checked_in_manifest_subset(self) -> None:
+    def test_system_template_scanner_writes_admitted_inventory_subset(self) -> None:
+        self.test_system_template_scanner_writes_admitted_inventory()
+
+    def test_system_manifest_generator_matches_checked_in_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_template_path = Path(tmpdir) / "upstream_system_templates.json"
             inventory_path = Path(tmpdir) / "upstream_system_inventory.json"
@@ -1923,6 +1929,9 @@ class HarnessTests(unittest.TestCase):
                 manifest_payload=generated,
             )
             self.assertEqual(generated["cases"][0]["family"], "state/system")
+
+    def test_system_manifest_generator_matches_checked_in_manifest_subset(self) -> None:
+        self.test_system_manifest_generator_matches_checked_in_manifest()
 
     def test_system_template_scanner_fails_loudly_on_missing_function(self) -> None:
         source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_system.py"
@@ -3184,7 +3193,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 445, "blocked": 168},
+            {"families": 14, "cases": 613, "admitted": 455, "blocked": 158},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -3223,7 +3232,7 @@ class HarnessTests(unittest.TestCase):
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
                 "log": {"total": 140, "admitted": 110, "blocked": 30},
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
-                "system": {"total": 46, "admitted": 0, "blocked": 46},
+                "system": {"total": 46, "admitted": 10, "blocked": 36},
                 "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
                 "memory": {"total": 143, "admitted": 95, "blocked": 48},
             },
@@ -3259,11 +3268,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 440, "blocked": 133},
+                {"families": 13, "cases": 573, "admitted": 450, "blocked": 123},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 445, "blocked": 168},
+                {"families": 14, "cases": 613, "admitted": 455, "blocked": 158},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -3334,11 +3343,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 334, "blocked": 278},
+                {"families": 14, "cases": 612, "admitted": 454, "blocked": 158},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 335, "blocked": 278},
+                {"families": 14, "cases": 613, "admitted": 455, "blocked": 158},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -3358,7 +3367,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 334, "blocked": 278},
+                {"families": 14, "cases": 612, "admitted": 454, "blocked": 158},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -4823,7 +4832,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(gasprice["context"]["$gas_price"], "0x3b9aca00")
             self.assertIs(gasprice["success"], True)
 
-    def test_mock_backend_runs_upstream_mapped_system_subset_cases(self) -> None:
+    def test_mock_backend_runs_upstream_mapped_system_cases(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
             state_dir = tmp_path / "state"
@@ -4885,6 +4894,9 @@ class HarnessTests(unittest.TestCase):
                     "storage.0x02: expected '0x0000000000000000000000000000000000000000000000000000000000000000', got '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'"
                 ],
             )
+
+    def test_mock_backend_runs_upstream_mapped_system_subset_cases(self) -> None:
+        self.test_mock_backend_runs_upstream_mapped_system_cases()
 
     def test_cli_run_mock_upstream_tx_context_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
