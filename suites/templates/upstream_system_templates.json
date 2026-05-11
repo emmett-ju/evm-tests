@@ -4,6 +4,44 @@
   "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_system.py",
   "cases": [
     {
+      "case_id": "upstream.benchmark.system.test_create.create.0_bytes_without_value",
+      "description": "Mapped from execution-specs CREATE zero-byte create benchmark onto a single wrapper that stores create success, created address, and created code size.",
+      "namespace_seed": "upstream-system-test-create-create-0-bytes-without-value",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0 bytes without value]",
+      "notes": [
+        "Upstream intent: benchmark CREATE with zero-byte initcode and zero value.",
+        "RPC mapping: a single deployed wrapper performs one zero-value CREATE, then stores create success, the returned child address, and EXTCODESIZE(child) as deterministic witness fields.",
+        "Only the zero-byte without-value variant is admitted; value-bearing and non-empty/max-code-size variants remain blocked until their funding and code-size witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, and zero child code size are deterministic final observables."
+      ],
+      "mode": "create_empty_child",
+      "opcode": "CREATE",
+      "return_size": null,
+      "return_non_zero_data": null,
+      "create_value": 0,
+      "create_initcode_size": 0,
+      "create_salt": null
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_create.create2.0_bytes_without_value",
+      "description": "Mapped from execution-specs CREATE2 zero-byte create benchmark onto a single wrapper that stores create success, created address, and created code size.",
+      "namespace_seed": "upstream-system-test-create-create2-0-bytes-without-value",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0 bytes without value]",
+      "notes": [
+        "Upstream intent: benchmark CREATE2 with zero-byte initcode and zero value.",
+        "RPC mapping: a single deployed wrapper performs one zero-value CREATE2 with CREATE2 salt 42, then stores create success, the returned child address, and EXTCODESIZE(child) as deterministic witness fields.",
+        "Only the zero-byte without-value variant is admitted; value-bearing and non-empty/max-code-size variants remain blocked until their funding and code-size witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, and zero child code size are deterministic final observables."
+      ],
+      "mode": "create_empty_child",
+      "opcode": "CREATE2",
+      "return_size": null,
+      "return_non_zero_data": null,
+      "create_value": 0,
+      "create_initcode_size": 0,
+      "create_salt": 42
+    },
+    {
       "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
       "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1024-byte non-zero variant.",
       "namespace_seed": "upstream-system-test-return-revert-return-1kib-of-non-zero-data",
@@ -18,7 +56,10 @@
       "mode": "return_revert_self_call",
       "opcode": "RETURN",
       "return_size": 1024,
-      "return_non_zero_data": true
+      "return_non_zero_data": true,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
@@ -35,7 +76,10 @@
       "mode": "return_revert_self_call",
       "opcode": "RETURN",
       "return_size": 1024,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
@@ -52,7 +96,10 @@
       "mode": "return_revert_self_call",
       "opcode": "RETURN",
       "return_size": 1048576,
-      "return_non_zero_data": true
+      "return_non_zero_data": true,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data",
@@ -69,7 +116,10 @@
       "mode": "return_revert_self_call",
       "opcode": "RETURN",
       "return_size": 1048576,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.return.empty",
@@ -86,7 +136,10 @@
       "mode": "return_revert_self_call",
       "opcode": "RETURN",
       "return_size": 0,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data",
@@ -103,7 +156,10 @@
       "mode": "return_revert_self_call",
       "opcode": "REVERT",
       "return_size": 1024,
-      "return_non_zero_data": true
+      "return_non_zero_data": true,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1kib_of_zero_data",
@@ -120,7 +176,10 @@
       "mode": "return_revert_self_call",
       "opcode": "REVERT",
       "return_size": 1024,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
@@ -137,7 +196,10 @@
       "mode": "return_revert_self_call",
       "opcode": "REVERT",
       "return_size": 1048576,
-      "return_non_zero_data": true
+      "return_non_zero_data": true,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
@@ -154,7 +216,10 @@
       "mode": "return_revert_self_call",
       "opcode": "REVERT",
       "return_size": 1048576,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.revert.empty",
@@ -171,7 +236,10 @@
       "mode": "return_revert_self_call",
       "opcode": "REVERT",
       "return_size": 0,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     }
   ]
 }

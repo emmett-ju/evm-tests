@@ -45,9 +45,10 @@ from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
 from adapter.signer import keccak256, load_private_key, private_key_to_address, sign_type_2_transaction
 from adapter.system_witness import (
-    collect_return_revert_system_witness_from_storage,
+    collect_system_witness_from_storage,
     system_witness_storage_slots,
 )
+from adapter.system_generator import _build_create_empty_child_runtime
 
 ZERO_STORAGE_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
 WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
@@ -265,6 +266,11 @@ class MockBackend:
                     self._simulate_log_probe(last_receipt, log_probe, code)
                     continue
 
+                system_witness = case.observe.get("system_witness")
+                if system_witness is not None and system_witness.get("shape") == "create_empty_child":
+                    self._simulate_create_empty_child_probe(storage, system_witness, code)
+                    continue
+
                 if self._is_system_self_call_runtime(code):
                     self._simulate_system_self_call_probe(storage, code)
                     continue
@@ -382,7 +388,7 @@ class MockBackend:
                 raise ValueError("system witness subject $last_contract is unavailable")
             storage = self._address_state(contracts, subject).get("storage", {})
             transport = {slot: storage.get(slot, ZERO_STORAGE_WORD) for slot in system_witness_storage_slots(witness_config)}
-            observed["system_witness"] = collect_return_revert_system_witness_from_storage(
+            observed["system_witness"] = collect_system_witness_from_storage(
                 witness_config=witness_config,
                 storage=transport,
             )
@@ -570,6 +576,19 @@ class MockBackend:
                 "data": "0x" + payload.hex(),
             }
         ]
+
+    def _simulate_create_empty_child_probe(
+        self,
+        storage: dict[str, str],
+        witness_config: dict[str, Any],
+        code: str | None,
+    ) -> None:
+        expected_runtime = _build_create_empty_child_runtime(witness_config["opcode"])
+        if code != expected_runtime:
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        storage["0x00"] = WORD_01
+        storage["0x01"] = self._address_to_word("0xdddddddddddddddddddddddddddddddddddddddd")
+        storage["0x02"] = ZERO_STORAGE_WORD
 
     def _is_system_self_call_runtime(self, code: str | None) -> bool:
         try:
@@ -848,7 +867,7 @@ class JsonRpcBackend:
                 slot: self._rpc("eth_getStorageAt", [subject, slot, storage_block_tag])
                 for slot in system_witness_storage_slots(witness_config)
             }
-            observed["system_witness"] = collect_return_revert_system_witness_from_storage(
+            observed["system_witness"] = collect_system_witness_from_storage(
                 witness_config=witness_config,
                 storage=transport,
             )

@@ -6,11 +6,11 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-from adapter.assembler import _build_init_code, _push_int, _word_hex
+from adapter.assembler import _build_init_code, _push_int
 from adapter.generator import deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
-from adapter.system_witness import build_return_revert_system_witness
+from adapter.system_witness import build_create_empty_child_system_witness, build_return_revert_system_witness
 
 
 BLOCKED_EXTERNAL_CALL_REASON = "requires multi-address external-call orchestration not yet mapped"
@@ -18,7 +18,7 @@ BLOCKED_CREATE_REASON = "requires create/create2 deployed-address witness not ye
 BLOCKED_CREATE_COLLISION_REASON = "requires gas-capped create collision orchestration not yet mapped"
 BLOCKED_SELFDESTRUCT_REASON = "requires selfdestruct lifecycle witness not yet mapped"
 
-SystemTemplateMode = Literal["return_revert_self_call"]
+SystemTemplateMode = Literal["return_revert_self_call", "create_empty_child"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,8 +30,11 @@ class SystemMappingTemplate:
     notes: list[str]
     mode: SystemTemplateMode
     opcode: str
-    return_size: int
-    return_non_zero_data: bool
+    return_size: int | None = None
+    return_non_zero_data: bool | None = None
+    create_value: int | None = None
+    create_initcode_size: int | None = None
+    create_salt: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,6 +48,9 @@ class AutoSystemInventoryEntry:
     opcode: str | None = None
     return_size: int | None = None
     return_non_zero_data: bool | None = None
+    create_value: int | None = None
+    create_initcode_size: int | None = None
+    create_salt: int | None = None
 
 
 class _BytecodeBuilder:
@@ -193,13 +199,59 @@ def scan_system_cases(
 
 
 def render_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
-    payload = _payload_bytes(template.return_size, template.return_non_zero_data)
+    if template.mode == "return_revert_self_call":
+        return _render_return_revert_system_case(template)
+    if template.mode == "create_empty_child":
+        return _render_create_empty_child_system_case(template)
+    raise ValueError(f"unsupported system template mode: {template.mode}")
+
+
+def _render_return_revert_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
+    return_size = _require_inventory_field(template.return_size, field="return_size")
+    return_non_zero_data = _require_inventory_field(
+        template.return_non_zero_data,
+        field="return_non_zero_data",
+    )
+    payload = _payload_bytes(return_size, return_non_zero_data)
     runtime_code = _build_return_revert_wrapper_runtime(template)
     witness = build_return_revert_system_witness(
         opcode=template.opcode,
-        returndata_size=template.return_size,
+        returndata_size=return_size,
         returndata_payload=payload,
     )
+    return _render_system_case_payload(
+        template=template,
+        runtime_code=runtime_code,
+        witness=witness,
+        invoke_gas=_invoke_gas(return_size),
+    )
+
+
+def _render_create_empty_child_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
+    create_value = _require_inventory_field(template.create_value, field="create_value")
+    initcode_size = _require_inventory_field(template.create_initcode_size, field="create_initcode_size")
+    runtime_code = _build_create_empty_child_runtime(template.opcode)
+    witness = build_create_empty_child_system_witness(
+        opcode=template.opcode,
+        value=create_value,
+        initcode_size=initcode_size,
+        salt=template.create_salt,
+    )
+    return _render_system_case_payload(
+        template=template,
+        runtime_code=runtime_code,
+        witness=witness,
+        invoke_gas="0x1e8480",
+    )
+
+
+def _render_system_case_payload(
+    *,
+    template: SystemMappingTemplate,
+    runtime_code: str,
+    witness: Any,
+    invoke_gas: str,
+) -> dict[str, Any]:
     return {
         "kind": "upstream_mapped",
         "case_id": template.case_id,
@@ -216,7 +268,7 @@ def render_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
                 runtime_code=runtime_code,
             ),
             wait_receipt_step(),
-            invoke_contract_step(data_hex="0x", gas=_invoke_gas(template.return_size)),
+            invoke_contract_step(data_hex="0x", gas=invoke_gas),
             wait_receipt_step(),
         ],
         "expected": {
@@ -296,14 +348,19 @@ def _scan_create(text: str) -> list[AutoSystemInventoryEntry]:
                 f"test_create[opcode={opcode}-variant={combo_label}]"
             )
             case_id = f"upstream.benchmark.system.test_create.{opcode.lower()}.{combo_slug}"
+            admitted = combo_label == "0 bytes without value"
             results.append(
                 AutoSystemInventoryEntry(
                     upstream_ref=upstream_ref,
                     case_id=case_id,
-                    admitted=False,
-                    mode=None,
-                    reasons=[BLOCKED_CREATE_REASON],
+                    admitted=admitted,
+                    mode="create_empty_child" if admitted else None,
+                    reasons=[] if admitted else [BLOCKED_CREATE_REASON],
                     source="test_create",
+                    opcode=opcode if admitted else None,
+                    create_value=0 if admitted else None,
+                    create_initcode_size=0 if admitted else None,
+                    create_salt=42 if admitted and opcode == "CREATE2" else None,
                 )
             )
     return results
@@ -398,8 +455,14 @@ def _scan_value_bearing_cases(text: str, *, function_name: str) -> list[AutoSyst
 
 
 def _inventory_entry_to_template(entry: AutoSystemInventoryEntry) -> SystemMappingTemplate:
-    if entry.mode != "return_revert_self_call":
-        raise ValueError(f"unsupported admitted system mode: {entry.mode}")
+    if entry.mode == "return_revert_self_call":
+        return _return_revert_inventory_entry_to_template(entry)
+    if entry.mode == "create_empty_child":
+        return _create_empty_child_inventory_entry_to_template(entry)
+    raise ValueError(f"unsupported admitted system mode: {entry.mode}")
+
+
+def _return_revert_inventory_entry_to_template(entry: AutoSystemInventoryEntry) -> SystemMappingTemplate:
     opcode = _require_inventory_field(entry.opcode, field="opcode")
     return_size = _require_inventory_field(entry.return_size, field="return_size")
     return_non_zero_data = _require_inventory_field(
@@ -423,10 +486,31 @@ def _inventory_entry_to_template(entry: AutoSystemInventoryEntry) -> SystemMappi
     )
 
 
+def _create_empty_child_inventory_entry_to_template(entry: AutoSystemInventoryEntry) -> SystemMappingTemplate:
+    opcode = _require_inventory_field(entry.opcode, field="opcode")
+    create_value = _require_inventory_field(entry.create_value, field="create_value")
+    create_initcode_size = _require_inventory_field(entry.create_initcode_size, field="create_initcode_size")
+    return SystemMappingTemplate(
+        case_id=entry.case_id,
+        description=(
+            f"Mapped from execution-specs {opcode} zero-byte create benchmark onto a single wrapper "
+            "that stores create success, created address, and created code size."
+        ),
+        namespace_seed=_build_namespace_seed(entry.case_id),
+        upstream_ref=entry.upstream_ref,
+        notes=_build_create_empty_child_notes(opcode=opcode),
+        mode="create_empty_child",
+        opcode=opcode,
+        create_value=create_value,
+        create_initcode_size=create_initcode_size,
+        create_salt=entry.create_salt,
+    )
+
+
 def _load_system_template_entry(entry: object, *, index: int) -> SystemMappingTemplate:
     if not isinstance(entry, dict):
         raise ValueError(f"system template entry {index} must be an object")
-    required_fields = (
+    common_required_fields = (
         "case_id",
         "description",
         "namespace_seed",
@@ -434,32 +518,49 @@ def _load_system_template_entry(entry: object, *, index: int) -> SystemMappingTe
         "notes",
         "mode",
         "opcode",
-        "return_size",
-        "return_non_zero_data",
     )
-    for field in required_fields:
+    for field in common_required_fields:
         if field not in entry:
             raise ValueError(f"system template entry {index} missing required field: {field}")
     notes = entry["notes"]
     if not isinstance(notes, list) or not all(isinstance(note, str) for note in notes):
         raise ValueError(f"system template entry {index} field 'notes' must be a list of strings")
     mode = entry["mode"]
-    if mode != "return_revert_self_call":
-        raise ValueError(f"unsupported system template mode: {mode}")
     opcode = str(entry["opcode"])
-    if opcode not in {"RETURN", "REVERT"}:
-        raise ValueError(f"unsupported system template opcode: {opcode}")
-    return SystemMappingTemplate(
-        case_id=str(entry["case_id"]),
-        description=str(entry["description"]),
-        namespace_seed=str(entry["namespace_seed"]),
-        upstream_ref=str(entry["upstream_ref"]),
-        notes=list(notes),
-        mode="return_revert_self_call",
-        opcode=opcode,
-        return_size=int(entry["return_size"]),
-        return_non_zero_data=bool(entry["return_non_zero_data"]),
-    )
+    common = {
+        "case_id": str(entry["case_id"]),
+        "description": str(entry["description"]),
+        "namespace_seed": str(entry["namespace_seed"]),
+        "upstream_ref": str(entry["upstream_ref"]),
+        "notes": list(notes),
+        "opcode": opcode,
+    }
+    if mode == "return_revert_self_call":
+        for field in ("return_size", "return_non_zero_data"):
+            if field not in entry:
+                raise ValueError(f"system template entry {index} missing required field: {field}")
+        if opcode not in {"RETURN", "REVERT"}:
+            raise ValueError(f"unsupported system template opcode: {opcode}")
+        return SystemMappingTemplate(
+            **common,
+            mode="return_revert_self_call",
+            return_size=int(entry["return_size"]),
+            return_non_zero_data=bool(entry["return_non_zero_data"]),
+        )
+    if mode == "create_empty_child":
+        for field in ("create_value", "create_initcode_size"):
+            if field not in entry:
+                raise ValueError(f"system template entry {index} missing required field: {field}")
+        if opcode not in {"CREATE", "CREATE2"}:
+            raise ValueError(f"unsupported system template opcode: {opcode}")
+        return SystemMappingTemplate(
+            **common,
+            mode="create_empty_child",
+            create_value=int(entry["create_value"]),
+            create_initcode_size=int(entry["create_initcode_size"]),
+            create_salt=None if entry.get("create_salt") is None else int(entry["create_salt"]),
+        )
+    raise ValueError(f"unsupported system template mode: {mode}")
 
 
 def _build_namespace_seed(case_id: str) -> str:
@@ -486,7 +587,55 @@ def _build_notes(*, opcode: str, return_size: int, return_non_zero_data: bool) -
     ]
 
 
+def _build_create_empty_child_notes(*, opcode: str) -> list[str]:
+    salt_note = " with CREATE2 salt 42" if opcode == "CREATE2" else ""
+    return [
+        f"Upstream intent: benchmark {opcode} with zero-byte initcode and zero value.",
+        f"RPC mapping: a single deployed wrapper performs one zero-value {opcode}{salt_note}, then stores create success, the returned child address, and EXTCODESIZE(child) as deterministic witness fields.",
+        "Only the zero-byte without-value variant is admitted; value-bearing and non-empty/max-code-size variants remain blocked until their funding and code-size witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, and zero child code size are deterministic final observables.",
+    ]
+
+
+def _build_create_empty_child_runtime(opcode: str) -> str:
+    builder = _BytecodeBuilder()
+    if opcode == "CREATE":
+        builder.push_int(0)  # size
+        builder.push_int(0)  # offset
+        builder.push_int(0)  # value
+        builder.op(0xF0)  # CREATE
+    elif opcode == "CREATE2":
+        builder.push_int(42)  # salt
+        builder.push_int(0)  # size
+        builder.push_int(0)  # offset
+        builder.push_int(0)  # value
+        builder.op(0xF5)  # CREATE2
+    else:
+        raise ValueError(f"unsupported create-empty opcode: {opcode}")
+
+    builder.op(0x80)  # DUP1
+    builder.push_int(1)
+    builder.op(0x55)  # SSTORE slot1 <- created address
+
+    builder.op(0x80)  # DUP1
+    builder.op(0x3B)  # EXTCODESIZE
+    builder.push_int(2)
+    builder.op(0x55)  # SSTORE slot2 <- created code size
+
+    builder.op(0x15)  # ISZERO
+    builder.op(0x15)  # ISZERO
+    builder.push_int(0)
+    builder.op(0x55)  # SSTORE slot0 <- success bool
+    builder.op(0x00)  # STOP
+    return "0x" + builder.finish().hex()
+
+
 def _build_return_revert_wrapper_runtime(template: SystemMappingTemplate) -> str:
+    return_size = _require_inventory_field(template.return_size, field="return_size")
+    return_non_zero_data = _require_inventory_field(
+        template.return_non_zero_data,
+        field="return_non_zero_data",
+    )
     builder = _BytecodeBuilder()
 
     builder.op(0x36)  # CALLDATASIZE
@@ -495,9 +644,9 @@ def _build_return_revert_wrapper_runtime(template: SystemMappingTemplate) -> str
     builder.push_label("wrapper")
     builder.op(0x57)  # JUMPI
 
-    if template.return_non_zero_data and template.return_size > 0:
-        builder.extend(_build_fill_ff_prefix(template.return_size))
-    builder.push_int(template.return_size)
+    if return_non_zero_data and return_size > 0:
+        builder.extend(_build_fill_ff_prefix(return_size))
+    builder.push_int(return_size)
     builder.push_int(0)
     builder.op(0xF3 if template.opcode == "RETURN" else 0xFD)
 

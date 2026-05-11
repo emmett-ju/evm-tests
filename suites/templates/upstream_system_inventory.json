@@ -15,7 +15,10 @@
       "source": "test_contract_calling_many_addresses",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=0-opcode=CALL-access_warm=True]",
@@ -28,7 +31,10 @@
       "source": "test_contract_calling_many_addresses",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=0-opcode=CALLCODE-access_warm=False]",
@@ -41,7 +47,10 @@
       "source": "test_contract_calling_many_addresses",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=0-opcode=CALLCODE-access_warm=True]",
@@ -54,7 +63,10 @@
       "source": "test_contract_calling_many_addresses",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALL-access_warm=False]",
@@ -67,7 +79,10 @@
       "source": "test_contract_calling_many_addresses",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALL-access_warm=True]",
@@ -80,7 +95,10 @@
       "source": "test_contract_calling_many_addresses",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALLCODE-access_warm=False]",
@@ -93,7 +111,10 @@
       "source": "test_contract_calling_many_addresses",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALLCODE-access_warm=True]",
@@ -106,7 +127,10 @@
       "source": "test_contract_calling_many_addresses",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0 bytes with value]",
@@ -119,20 +143,24 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0 bytes without value]",
       "case_id": "upstream.benchmark.system.test_create.create.0_bytes_without_value",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires create/create2 deployed-address witness not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "create_empty_child",
+      "reasons": [],
       "source": "test_create",
-      "opcode": null,
+      "opcode": "CREATE",
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": 0,
+      "create_initcode_size": 0,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.25x max code size with non-zero data]",
@@ -145,7 +173,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.25x max code size with zero data]",
@@ -158,7 +189,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.50x max code size with non-zero data]",
@@ -171,7 +205,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.50x max code size with zero data]",
@@ -184,7 +221,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.75x max code size with non-zero data]",
@@ -197,7 +237,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.75x max code size with zero data]",
@@ -210,7 +253,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=max code size with non-zero data]",
@@ -223,7 +269,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=max code size with zero data]",
@@ -236,7 +285,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0 bytes with value]",
@@ -249,20 +301,24 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0 bytes without value]",
       "case_id": "upstream.benchmark.system.test_create.create2.0_bytes_without_value",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires create/create2 deployed-address witness not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "create_empty_child",
+      "reasons": [],
       "source": "test_create",
-      "opcode": null,
+      "opcode": "CREATE2",
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": 0,
+      "create_initcode_size": 0,
+      "create_salt": 42
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.25x max code size with non-zero data]",
@@ -275,7 +331,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.25x max code size with zero data]",
@@ -288,7 +347,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.50x max code size with non-zero data]",
@@ -301,7 +363,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.50x max code size with zero data]",
@@ -314,7 +379,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.75x max code size with non-zero data]",
@@ -327,7 +395,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.75x max code size with zero data]",
@@ -340,7 +411,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=max code size with non-zero data]",
@@ -353,7 +427,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=max code size with zero data]",
@@ -366,7 +443,10 @@
       "source": "test_create",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_creates_collisions[opcode=CREATE2]",
@@ -379,7 +459,10 @@
       "source": "test_creates_collisions",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_creates_collisions[opcode=CREATE]",
@@ -392,7 +475,10 @@
       "source": "test_creates_collisions",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1KiB of non-zero data]",
@@ -403,7 +489,10 @@
       "source": "test_return_revert",
       "opcode": "RETURN",
       "return_size": 1024,
-      "return_non_zero_data": true
+      "return_non_zero_data": true,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1KiB of zero data]",
@@ -414,7 +503,10 @@
       "source": "test_return_revert",
       "opcode": "RETURN",
       "return_size": 1024,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1MiB of non-zero data]",
@@ -425,7 +517,10 @@
       "source": "test_return_revert",
       "opcode": "RETURN",
       "return_size": 1048576,
-      "return_non_zero_data": true
+      "return_non_zero_data": true,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1MiB of zero data]",
@@ -436,7 +531,10 @@
       "source": "test_return_revert",
       "opcode": "RETURN",
       "return_size": 1048576,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=empty]",
@@ -447,7 +545,10 @@
       "source": "test_return_revert",
       "opcode": "RETURN",
       "return_size": 0,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1KiB of non-zero data]",
@@ -458,7 +559,10 @@
       "source": "test_return_revert",
       "opcode": "REVERT",
       "return_size": 1024,
-      "return_non_zero_data": true
+      "return_non_zero_data": true,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1KiB of zero data]",
@@ -469,7 +573,10 @@
       "source": "test_return_revert",
       "opcode": "REVERT",
       "return_size": 1024,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1MiB of non-zero data]",
@@ -480,7 +587,10 @@
       "source": "test_return_revert",
       "opcode": "REVERT",
       "return_size": 1048576,
-      "return_non_zero_data": true
+      "return_non_zero_data": true,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1MiB of zero data]",
@@ -491,7 +601,10 @@
       "source": "test_return_revert",
       "opcode": "REVERT",
       "return_size": 1048576,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=empty]",
@@ -502,7 +615,10 @@
       "source": "test_return_revert",
       "opcode": "REVERT",
       "return_size": 0,
-      "return_non_zero_data": false
+      "return_non_zero_data": false,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_created[value_bearing=False]",
@@ -515,7 +631,10 @@
       "source": "test_selfdestruct_created",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_created[value_bearing=True]",
@@ -528,7 +647,10 @@
       "source": "test_selfdestruct_created",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_existing[value_bearing=False]",
@@ -541,7 +663,10 @@
       "source": "test_selfdestruct_existing",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_existing[value_bearing=True]",
@@ -554,7 +679,10 @@
       "source": "test_selfdestruct_existing",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_initcode[value_bearing=False]",
@@ -567,7 +695,10 @@
       "source": "test_selfdestruct_initcode",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_initcode[value_bearing=True]",
@@ -580,7 +711,10 @@
       "source": "test_selfdestruct_initcode",
       "opcode": null,
       "return_size": null,
-      "return_non_zero_data": null
+      "return_non_zero_data": null,
+      "create_value": null,
+      "create_initcode_size": null,
+      "create_salt": null
     }
   ]
 }

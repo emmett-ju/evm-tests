@@ -7,7 +7,9 @@ from adapter.assembler import _word_hex
 
 SYSTEM_WITNESS_VERSION = 1
 RETURN_REVERT_SELF_CALL_SHAPE = "return_revert_self_call"
-SystemWitnessShape = Literal["return_revert_self_call"]
+CREATE_EMPTY_CHILD_SHAPE = "create_empty_child"
+SUPPORTED_SYSTEM_WITNESS_SHAPES = (CREATE_EMPTY_CHILD_SHAPE, RETURN_REVERT_SELF_CALL_SHAPE)
+SystemWitnessShape = Literal["return_revert_self_call", "create_empty_child"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,6 +24,14 @@ class ReturnRevertSystemWitness:
     success: bool
     returndata_size: int
     returndata_digest: str
+
+
+@dataclass(frozen=True, slots=True)
+class CreateEmptyChildSystemWitness:
+    success: bool
+    created_address_nonzero: bool
+    created_code_size: int
+    created_address: str
 
 
 def build_return_revert_system_witness(
@@ -53,6 +63,40 @@ def build_return_revert_system_witness(
     )
 
 
+def build_create_empty_child_system_witness(
+    *,
+    opcode: str,
+    subject: str = "$last_contract",
+    value: int = 0,
+    initcode_size: int = 0,
+    salt: int | None = None,
+) -> SystemWitnessBundle:
+    if opcode == "CREATE2" and salt is None:
+        salt = 42
+    observe_witness: dict[str, Any] = {
+        "version": SYSTEM_WITNESS_VERSION,
+        "shape": CREATE_EMPTY_CHILD_SHAPE,
+        "subject": subject,
+        "opcode": opcode,
+        "value": value,
+        "initcode_size": initcode_size,
+    }
+    if salt is not None:
+        observe_witness["salt"] = salt
+    validate_system_witness_declaration(observe_witness)
+    return SystemWitnessBundle(
+        observe={"system_witness": observe_witness},
+        expected={
+            "system_witness": {
+                "shape": CREATE_EMPTY_CHILD_SHAPE,
+                "success": True,
+                "created_address_nonzero": True,
+                "created_code_size": 0,
+            }
+        },
+    )
+
+
 def validate_system_witness_declaration(value: Any) -> None:
     if not isinstance(value, dict):
         raise ValueError("observe.system_witness must be an object")
@@ -60,14 +104,34 @@ def validate_system_witness_declaration(value: Any) -> None:
     if version != SYSTEM_WITNESS_VERSION:
         raise ValueError("observe.system_witness.version must be 1")
     shape = value.get("shape")
-    if shape != RETURN_REVERT_SELF_CALL_SHAPE:
+    if shape not in SUPPORTED_SYSTEM_WITNESS_SHAPES:
+        supported = ", ".join(repr(item) for item in SUPPORTED_SYSTEM_WITNESS_SHAPES)
         raise ValueError(
-            "observe.system_witness.shape must be 'return_revert_self_call'; "
+            f"observe.system_witness.shape must be one of [{supported}]; "
             f"unsupported system witness shape: {shape!r}"
         )
     subject = value.get("subject")
     if not isinstance(subject, str) or not subject:
         raise ValueError("observe.system_witness.subject is required and must be a non-empty string")
+    if shape == CREATE_EMPTY_CHILD_SHAPE:
+        _validate_create_empty_child_declaration(value)
+
+
+def collect_system_witness_from_storage(
+    *,
+    witness_config: Mapping[str, Any],
+    storage: Mapping[str, str],
+) -> dict[str, Any]:
+    validate_system_witness_declaration(witness_config)
+    shape = witness_config["shape"]
+    if shape == RETURN_REVERT_SELF_CALL_SHAPE:
+        return collect_return_revert_system_witness_from_storage(
+            witness_config=witness_config,
+            storage=storage,
+        )
+    if shape == CREATE_EMPTY_CHILD_SHAPE:
+        return _collect_create_empty_child_system_witness_from_storage(storage)
+    raise ValueError(f"unsupported system witness shape: {shape!r}")
 
 
 def collect_return_revert_system_witness_from_storage(
@@ -98,6 +162,35 @@ def system_witness_storage_slots(witness_config: Mapping[str, Any]) -> tuple[str
     return ("0x00", "0x01", "0x02")
 
 
+def _validate_create_empty_child_declaration(value: Mapping[str, Any]) -> None:
+    opcode = value.get("opcode")
+    if opcode not in {"CREATE", "CREATE2"}:
+        raise ValueError("observe.system_witness.opcode must be 'CREATE' or 'CREATE2' for create_empty_child")
+    if value.get("value") != 0:
+        raise ValueError("observe.system_witness.value must be 0 for create_empty_child")
+    if value.get("initcode_size") != 0:
+        raise ValueError("observe.system_witness.initcode_size must be 0 for create_empty_child")
+    salt = value.get("salt")
+    if opcode == "CREATE" and salt is not None:
+        raise ValueError("observe.system_witness.salt must be omitted for CREATE create_empty_child")
+    if opcode == "CREATE2" and salt != 42:
+        raise ValueError("observe.system_witness.salt must be 42 for CREATE2 create_empty_child")
+
+
+def _collect_create_empty_child_system_witness_from_storage(storage: Mapping[str, str]) -> dict[str, Any]:
+    success = _word_to_bool(storage.get("0x00"))
+    created_address_word = _require_word(storage.get("0x01"), "system witness created address word")
+    created_address = "0x" + created_address_word[26:]
+    created_code_size = _word_to_int(storage.get("0x02"))
+    return {
+        "shape": CREATE_EMPTY_CHILD_SHAPE,
+        "success": success,
+        "created_address_nonzero": int(created_address_word, 16) != 0,
+        "created_code_size": created_code_size,
+        "created_address": created_address,
+    }
+
+
 def _keccak256(data: bytes) -> bytes:
     from adapter.signer import keccak256
 
@@ -113,10 +206,7 @@ def _return_revert_success(opcode: str) -> bool:
 
 
 def _word_to_int(value: str | None) -> int:
-    word = _require_hex_string(value, "system witness storage word")
-    if len(word) != 66:
-        raise ValueError(f"system witness storage word must be 32 bytes: {word!r}")
-    return int(word, 16)
+    return int(_require_word(value, "system witness storage word"), 16)
 
 
 def _word_to_bool(value: str | None) -> bool:
@@ -126,6 +216,13 @@ def _word_to_bool(value: str | None) -> bool:
     if number == 1:
         return True
     raise ValueError(f"system witness success word must be 0 or 1, got {number}")
+
+
+def _require_word(value: str | None, label: str) -> str:
+    word = _require_hex_string(value, label)
+    if len(word) != 66:
+        raise ValueError(f"{label} must be 32 bytes: {word!r}")
+    return word
 
 
 def _require_hex_string(value: str | None, label: str) -> str:
