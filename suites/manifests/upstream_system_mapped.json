@@ -125,6 +125,66 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_zero_data",
+      "family": "state/system",
+      "description": "Mapped from execution-specs CREATE non-empty zero-data create benchmark onto a single wrapper that stores create success, created address, created code size, and created code hash.",
+      "namespace_seed": "upstream-system-test-create-create-0-25x-max-code-size-with-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.25x max code size with zero data]",
+      "notes": [
+        "Upstream intent: benchmark CREATE with 6144-byte zero initcode that deploys 6144-byte child code.",
+        "RPC mapping: a single deployed wrapper performs one zero value CREATE, then stores create success, the returned child address, EXTCODESIZE(child), and EXTCODEHASH(child) as deterministic witness fields.",
+        "Only the smallest zero-data non-empty variants are admitted; non-zero data, larger code-size ratios, and value-bearing non-empty variants remain blocked until separate witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, child code size, and child code hash are deterministic final observables."
+      ],
+      "observe": {
+        "system_witness": {
+          "version": 1,
+          "shape": "create_child_code",
+          "subject": "$last_contract",
+          "opcode": "CREATE",
+          "value": 0,
+          "initcode_size": 6144,
+          "data_kind": "zero"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6023600c60003960236000f36005601e5f3960055f5ff080600155803b600255803f60035515155f55006118005ff3",
+          "bytecode_runtime": "0x6005601e5f3960055f5ff080600155803b600255803f60035515155f55006118005ff3",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x4c4b40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "system_witness": {
+          "shape": "create_child_code",
+          "success": true,
+          "created_address_nonzero": true,
+          "created_code_size": 6144,
+          "created_code_hash": "0x9b91b55c6d1d06dbb8beaf563415f70074a2682eef7759c5fbb29938e297e5e8"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.system.test_create.create2.0_bytes_with_value",
       "family": "state/system",
       "description": "Mapped from execution-specs CREATE2 zero-byte create benchmark onto a single wrapper that stores create success, created address, and created code size.",
@@ -240,6 +300,67 @@
           "success": true,
           "created_address_nonzero": true,
           "created_code_size": 0
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_zero_data",
+      "family": "state/system",
+      "description": "Mapped from execution-specs CREATE2 non-empty zero-data create benchmark onto a single wrapper that stores create success, created address, created code size, and created code hash.",
+      "namespace_seed": "upstream-system-test-create-create2-0-25x-max-code-size-with-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.25x max code size with zero data]",
+      "notes": [
+        "Upstream intent: benchmark CREATE2 with 6144-byte zero initcode that deploys 6144-byte child code.",
+        "RPC mapping: a single deployed wrapper performs one zero value CREATE2 with CREATE2 salt 42, then stores create success, the returned child address, EXTCODESIZE(child), and EXTCODEHASH(child) as deterministic witness fields.",
+        "Only the smallest zero-data non-empty variants are admitted; non-zero data, larger code-size ratios, and value-bearing non-empty variants remain blocked until separate witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, child code size, and child code hash are deterministic final observables."
+      ],
+      "observe": {
+        "system_witness": {
+          "version": 1,
+          "shape": "create_child_code",
+          "subject": "$last_contract",
+          "opcode": "CREATE2",
+          "value": 0,
+          "initcode_size": 6144,
+          "data_kind": "zero",
+          "salt": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6025600c60003960256000f3600560205f39602a60055f5ff580600155803b600255803f60035515155f55006118005ff3",
+          "bytecode_runtime": "0x600560205f39602a60055f5ff580600155803b600255803f60035515155f55006118005ff3",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x4c4b40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "system_witness": {
+          "shape": "create_child_code",
+          "success": true,
+          "created_address_nonzero": true,
+          "created_code_size": 6144,
+          "created_code_hash": "0x9b91b55c6d1d06dbb8beaf563415f70074a2682eef7759c5fbb29938e297e5e8"
         }
       }
     },

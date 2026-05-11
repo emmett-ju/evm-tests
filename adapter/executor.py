@@ -48,7 +48,7 @@ from adapter.system_witness import (
     collect_system_witness_from_storage,
     system_witness_storage_slots,
 )
-from adapter.system_generator import _build_create_empty_child_runtime
+from adapter.system_generator import _build_create_child_code_runtime, _build_create_empty_child_runtime
 
 ZERO_STORAGE_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
 WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
@@ -269,6 +269,9 @@ class MockBackend:
                 system_witness = case.observe.get("system_witness")
                 if system_witness is not None and system_witness.get("shape") == "create_empty_child":
                     self._simulate_create_empty_child_probe(storage, system_witness, code)
+                    continue
+                if system_witness is not None and system_witness.get("shape") == "create_child_code":
+                    self._simulate_create_child_code_probe(storage, system_witness, code)
                     continue
 
                 if self._is_system_self_call_runtime(code):
@@ -594,6 +597,27 @@ class MockBackend:
         storage["0x02"] = ZERO_STORAGE_WORD
         if int(witness_config.get("value", 0)) > 0:
             storage["0x03"] = self._hex_to_word(hex(int(witness_config["value"])))
+
+    def _simulate_create_child_code_probe(
+        self,
+        storage: dict[str, str],
+        witness_config: dict[str, Any],
+        code: str | None,
+    ) -> None:
+        initcode_size = int(witness_config["initcode_size"])
+        data_kind = str(witness_config["data_kind"])
+        expected_runtime = _build_create_child_code_runtime(
+            witness_config["opcode"],
+            initcode_size=initcode_size,
+            data_kind=data_kind,
+        )
+        if code != expected_runtime:
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        code_payload = b"\x00" * initcode_size
+        storage["0x00"] = WORD_01
+        storage["0x01"] = self._address_to_word("0xdddddddddddddddddddddddddddddddddddddddd")
+        storage["0x02"] = self._hex_to_word(hex(initcode_size))
+        storage["0x03"] = "0x" + keccak256(code_payload).hex()
 
     def _is_system_self_call_runtime(self, code: str | None) -> bool:
         try:
