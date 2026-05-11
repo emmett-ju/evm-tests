@@ -10,7 +10,7 @@ from adapter.assembler import _build_init_code, _push_int, _word_hex
 from adapter.generator import deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
-from adapter.signer import keccak256
+from adapter.system_witness import build_return_revert_system_witness
 
 
 BLOCKED_EXTERNAL_CALL_REASON = "requires multi-address external-call orchestration not yet mapped"
@@ -195,6 +195,11 @@ def scan_system_cases(
 def render_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
     payload = _payload_bytes(template.return_size, template.return_non_zero_data)
     runtime_code = _build_return_revert_wrapper_runtime(template)
+    witness = build_return_revert_system_witness(
+        opcode=template.opcode,
+        returndata_size=template.return_size,
+        returndata_payload=payload,
+    )
     return {
         "kind": "upstream_mapped",
         "case_id": template.case_id,
@@ -202,8 +207,8 @@ def render_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
         "description": template.description,
         "namespace_seed": template.namespace_seed,
         "upstream_ref": template.upstream_ref,
-        "notes": template.notes,
-        "observe": {"storage_address": "$last_contract"},
+        "notes": template.notes + list(witness.notes),
+        "observe": witness.observe,
         "filters": {},
         "steps": [
             deploy_contract_step(
@@ -216,11 +221,7 @@ def render_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
         ],
         "expected": {
             "receipt_status": "0x1",
-            "storage": {
-                "0x00": _word_hex(1 if template.opcode == "RETURN" else 0),
-                "0x01": _word_hex(template.return_size),
-                "0x02": "0x" + keccak256(payload).hex(),
-            },
+            **witness.expected,
         },
     }
 

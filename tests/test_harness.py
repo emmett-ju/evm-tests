@@ -396,6 +396,32 @@ class HarnessTests(unittest.TestCase):
             "case upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data step 3: action 'invoke_contract' field 'data' must be a string",
         )
 
+    def test_validation_boundary_rejects_malformed_system_witness_declaration(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
+        payload["cases"][0]["observe"]["system_witness"]["shape"] = "create2"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "upstream_system_mapped.json"
+            manifest_path.write_text(json.dumps(payload))
+            with self.assertRaises(ValueError) as error:
+                load_manifest(manifest_path)
+        self.assertEqual(
+            str(error.exception),
+            "observe.system_witness.shape must be 'return_revert_self_call'; unsupported system witness shape: 'create2'",
+        )
+
+    def test_validation_boundary_rejects_missing_system_witness_subject(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
+        payload["cases"][0]["observe"]["system_witness"]["subject"] = ""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "upstream_system_mapped.json"
+            manifest_path.write_text(json.dumps(payload))
+            with self.assertRaises(ValueError) as error:
+                load_manifest(manifest_path)
+        self.assertEqual(
+            str(error.exception),
+            "observe.system_witness.subject is required and must be a non-empty string",
+        )
+
     def test_selector_allows_real_jsonrpc_smoke_case(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/juchain_smoke.json")
@@ -603,9 +629,17 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
         self.assertTrue(
             all(
-                case.observe == {"storage_address": "$last_contract"}
+                case.observe
+                == {
+                    "system_witness": {
+                        "version": 1,
+                        "shape": "return_revert_self_call",
+                        "subject": "$last_contract",
+                    }
+                }
                 and case.expected["receipt_status"] == "0x1"
-                and set(case.expected["storage"]) == {"0x00", "0x01", "0x02"}
+                and set(case.expected["system_witness"])
+                == {"shape", "success", "returndata_size", "returndata_digest"}
                 for case in selected
             )
         )
@@ -2596,28 +2630,30 @@ class HarnessTests(unittest.TestCase):
                 ]["expected"],
                 {
                     "receipt_status": "0x1",
-                    "storage": {
-                        "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
-                        "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                        "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                    "system_witness": {
+                        "shape": "return_revert_self_call",
+                        "success": True,
+                        "returndata_size": 0,
+                        "returndata_digest": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
                     },
                 },
             )
             self.assertEqual(
                 observed_by_case[
                     "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data"
-                ]["expected"]["storage"],
+                ]["expected"]["system_witness"],
                 {
-                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
-                    "0x02": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054",
+                    "shape": "return_revert_self_call",
+                    "success": False,
+                    "returndata_size": 1024,
+                    "returndata_digest": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054",
                 },
             )
             self.assertEqual(
                 observed_by_case[
                     "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data"
-                ]["expected"]["storage"]["0x01"],
-                "0x0000000000000000000000000000000000000000000000000000000000100000",
+                ]["expected"]["system_witness"]["returndata_size"],
+                1048576,
             )
             self.assertFalse(
                 any(
@@ -4546,6 +4582,76 @@ class HarnessTests(unittest.TestCase):
         )
         self.assertEqual(ResultOracle().compare(timestamp_case.expected, observed, context), [])
 
+    def test_jsonrpc_backend_observes_system_witness_storage_at_receipt_block(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
+        return_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.system.test_return_revert.return.empty"
+        )
+
+        class StubBackend(JsonRpcBackend):
+            def __init__(self, profile):
+                super().__init__(profile)
+                self.sent = 0
+                self.storage_calls: list[list[object]] = []
+
+            def _send_transaction(self, transaction: dict[str, Any]) -> str:
+                self.sent += 1
+                return f"0xtx{self.sent}"
+
+            def _wait_for_receipt(self, tx_hash: str, timeout_seconds: int = 60) -> dict[str, Any]:
+                if tx_hash == "0xtx1":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "contractAddress": "0xcccccccccccccccccccccccccccccccccccccccc",
+                        "blockNumber": "0x99",
+                    }
+                if tx_hash == "0xtx2":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "blockNumber": "0x2a",
+                    }
+                raise AssertionError(tx_hash)
+
+            def _rpc(self, method: str, params: list[object]) -> object:
+                if method == "eth_getStorageAt":
+                    self.storage_calls.append(params)
+                    slot = params[1]
+                    values = {
+                        "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                        "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                    }
+                    return values[slot]
+                raise AssertionError(method)
+
+        backend = StubBackend(profile)
+        tx_hashes, observed, context = backend.execute_case(return_case, "jsonrpc-system-witness")
+        self.assertEqual(tx_hashes, ["0xtx1", "0xtx2"])
+        self.assertEqual(
+            backend.storage_calls,
+            [
+                ["0xcccccccccccccccccccccccccccccccccccccccc", "0x00", "0x2a"],
+                ["0xcccccccccccccccccccccccccccccccccccccccc", "0x01", "0x2a"],
+                ["0xcccccccccccccccccccccccccccccccccccccccc", "0x02", "0x2a"],
+            ],
+        )
+        self.assertEqual(context["$last_contract"], "0xcccccccccccccccccccccccccccccccccccccccc")
+        self.assertEqual(
+            observed["system_witness"],
+            {
+                "shape": "return_revert_self_call",
+                "success": True,
+                "returndata_size": 0,
+                "returndata_digest": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+            },
+        )
+        self.assertEqual(ResultOracle().compare(return_case.expected, observed, context), [])
+
     def test_jsonrpc_backend_load_block_context_falls_back_to_profile_block_tag(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         profile.block_context.rpc_block_tag = "safe"
@@ -6358,24 +6464,26 @@ class HarnessTests(unittest.TestCase):
             observed_by_case = {result["case_id"]: result for result in report["results"]}
 
             self.assertEqual(
-                observed_by_case["upstream.benchmark.system.test_return_revert.return.empty"]["observed"]["storage"],
+                observed_by_case["upstream.benchmark.system.test_return_revert.return.empty"]["observed"]["system_witness"],
                 {
-                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
-                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                    "shape": "return_revert_self_call",
+                    "success": True,
+                    "returndata_size": 0,
+                    "returndata_digest": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
                 },
             )
             self.assertEqual(
-                observed_by_case["upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data"]["observed"]["storage"],
+                observed_by_case["upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data"]["observed"]["system_witness"],
                 {
-                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
-                    "0x02": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054",
+                    "shape": "return_revert_self_call",
+                    "success": False,
+                    "returndata_size": 1024,
+                    "returndata_digest": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054",
                 },
             )
             self.assertEqual(
-                observed_by_case["upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data"]["observed"]["storage"]["0x01"],
-                "0x0000000000000000000000000000000000000000000000000000000000100000",
+                observed_by_case["upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data"]["observed"]["system_witness"]["returndata_size"],
+                1048576,
             )
             for result in report["results"]:
                 self.assertEqual(result["observed"].get("receipt_status"), "0x1")
@@ -6385,8 +6493,8 @@ class HarnessTests(unittest.TestCase):
 
             wrong_digest_diffs = ResultOracle().compare(
                 {
-                    "storage": {
-                        "0x02": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "system_witness": {
+                        "returndata_digest": "0x0000000000000000000000000000000000000000000000000000000000000000",
                     }
                 },
                 observed_by_case["upstream.benchmark.system.test_return_revert.return.empty"]["observed"],
@@ -6395,7 +6503,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(
                 wrong_digest_diffs,
                 [
-                    "storage.0x02: expected '0x0000000000000000000000000000000000000000000000000000000000000000', got '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'"
+                    "system_witness.returndata_digest: expected '0x0000000000000000000000000000000000000000000000000000000000000000', got '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470'"
                 ],
             )
 
@@ -6464,10 +6572,11 @@ class HarnessTests(unittest.TestCase):
                 observed_by_case["upstream.benchmark.system.test_return_revert.return.empty"],
                 {
                     "receipt_status": "0x1",
-                    "storage": {
-                        "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
-                        "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                        "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                    "system_witness": {
+                        "shape": "return_revert_self_call",
+                        "success": True,
+                        "returndata_size": 0,
+                        "returndata_digest": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
                     },
                 },
             )
@@ -6475,10 +6584,11 @@ class HarnessTests(unittest.TestCase):
                 observed_by_case["upstream.benchmark.system.test_return_revert.revert.empty"],
                 {
                     "receipt_status": "0x1",
-                    "storage": {
-                        "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                        "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                        "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+                    "system_witness": {
+                        "shape": "return_revert_self_call",
+                        "success": False,
+                        "returndata_size": 0,
+                        "returndata_digest": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
                     },
                 },
             )

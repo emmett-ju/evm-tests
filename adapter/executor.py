@@ -44,6 +44,10 @@ from adapter.log_generator import (
 from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
 from adapter.signer import keccak256, load_private_key, private_key_to_address, sign_type_2_transaction
+from adapter.system_witness import (
+    collect_return_revert_system_witness_from_storage,
+    system_witness_storage_slots,
+)
 
 ZERO_STORAGE_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
 WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
@@ -367,6 +371,21 @@ class MockBackend:
             storage = self._address_state(contracts, storage_address).get("storage", {})
             for slot in expected_shape["storage"]:
                 observed["storage"][slot] = storage.get(slot, ZERO_STORAGE_WORD)
+        if "system_witness" in expected_shape:
+            witness_config = observe_config.get("system_witness")
+            if witness_config is None:
+                raise ValueError("expected.system_witness requires observe.system_witness")
+            subject = witness_config.get("subject", target_address)
+            if subject == "$last_contract":
+                subject = last_contract_address
+            if not subject:
+                raise ValueError("system witness subject $last_contract is unavailable")
+            storage = self._address_state(contracts, subject).get("storage", {})
+            transport = {slot: storage.get(slot, ZERO_STORAGE_WORD) for slot in system_witness_storage_slots(witness_config)}
+            observed["system_witness"] = collect_return_revert_system_witness_from_storage(
+                witness_config=witness_config,
+                storage=transport,
+            )
         if "receipt_status" in expected_shape:
             observed["receipt_status"] = None if last_receipt is None else last_receipt.get("status")
         if "receipt_contract_address" in expected_shape:
@@ -813,6 +832,26 @@ class JsonRpcBackend:
                     "eth_getStorageAt",
                     [storage_address, slot, storage_block_tag],
                 )
+        if "system_witness" in expected_shape:
+            witness_config = observe_config.get("system_witness")
+            if witness_config is None:
+                raise ValueError("expected.system_witness requires observe.system_witness")
+            subject = witness_config.get("subject", target_address)
+            if subject == "$last_contract":
+                subject = last_contract_address
+            if not subject:
+                raise ValueError("system witness subject $last_contract is unavailable")
+            storage_block_tag = "latest"
+            if last_receipt is not None:
+                storage_block_tag = last_receipt.get("blockNumber") or self.profile.block_context.rpc_block_tag
+            transport = {
+                slot: self._rpc("eth_getStorageAt", [subject, slot, storage_block_tag])
+                for slot in system_witness_storage_slots(witness_config)
+            }
+            observed["system_witness"] = collect_return_revert_system_witness_from_storage(
+                witness_config=witness_config,
+                storage=transport,
+            )
         if "receipt_status" in expected_shape:
             observed["receipt_status"] = None if last_receipt is None else last_receipt.get("status")
         if "receipt_contract_address" in expected_shape:

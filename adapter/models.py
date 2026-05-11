@@ -6,6 +6,7 @@ from typing import Any, Literal
 
 
 from adapter.log_probe import validate_log_probe_declaration
+from adapter.system_witness import validate_system_witness_declaration
 
 
 CaseKind = Literal["upstream_mapped", "custom_chain"]
@@ -278,6 +279,12 @@ class TestCase:
             if log_probe is not None:
                 try:
                     validate_log_probe_declaration(log_probe)
+                except ValueError as exc:
+                    errors.append(str(exc))
+            system_witness = self.observe.get("system_witness")
+            if system_witness is not None:
+                try:
+                    validate_system_witness_declaration(system_witness)
                 except ValueError as exc:
                     errors.append(str(exc))
         if self.upstream_ref is not None and not isinstance(self.upstream_ref, str):

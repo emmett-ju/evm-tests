@@ -20,7 +20,11 @@
         "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
       ],
       "observe": {
-        "storage_address": "$last_contract"
+        "system_witness": {
+          "version": 1,
+          "shape": "return_revert_self_call",
+          "subject": "$last_contract"
+        }
       },
       "filters": {},
       "steps": [
@@ -49,10 +53,11 @@
       ],
       "expected": {
         "receipt_status": "0x1",
-        "storage": {
-          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
-          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
-          "0x02": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054"
+        "system_witness": {
+          "shape": "return_revert_self_call",
+          "success": true,
+          "returndata_size": 1024,
+          "returndata_digest": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054"
         }
       }
     },
@@ -71,7 +76,11 @@
         "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
       ],
       "observe": {
-        "storage_address": "$last_contract"
+        "system_witness": {
+          "version": 1,
+          "shape": "return_revert_self_call",
+          "subject": "$last_contract"
+        }
       },
       "filters": {},
       "steps": [
@@ -100,10 +109,11 @@
       ],
       "expected": {
         "receipt_status": "0x1",
-        "storage": {
-          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
-          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
-          "0x02": "0xb5d4d1df10388bbc208778ff02310db98fdaa68efed0b2068a9bef78bd3bfd74"
+        "system_witness": {
+          "shape": "return_revert_self_call",
+          "success": true,
+          "returndata_size": 1024,
+          "returndata_digest": "0xb5d4d1df10388bbc208778ff02310db98fdaa68efed0b2068a9bef78bd3bfd74"
         }
       }
     },
@@ -122,7 +132,11 @@
         "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
       ],
       "observe": {
-        "storage_address": "$last_contract"
+        "system_witness": {
+          "version": 1,
+          "shape": "return_revert_self_call",
+          "subject": "$last_contract"
+        }
       },
       "filters": {},
       "steps": [
@@ -151,10 +165,11 @@
       ],
       "expected": {
         "receipt_status": "0x1",
-        "storage": {
-          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
-          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000",
-          "0x02": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615"
+        "system_witness": {
+          "shape": "return_revert_self_call",
+          "success": true,
+          "returndata_size": 1048576,
+          "returndata_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615"
         }
       }
     },
@@ -173,7 +188,11 @@
         "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
       ],
       "observe": {
-        "storage_address": "$last_contract"
+        "system_witness": {
+          "version": 1,
+          "shape": "return_revert_self_call",
+          "subject": "$last_contract"
+        }
       },
       "filters": {},
       "steps": [
@@ -202,10 +221,11 @@
       ],
       "expected": {
         "receipt_status": "0x1",
-        "storage": {
-          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
-          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000",
-          "0x02": "0x7b6ff0a03e9c5a8e77a2059bf28e26a7f0e8d3939a7cfe2193908ad8d683be90"
+        "system_witness": {
+          "shape": "return_revert_self_call",
+          "success": true,
+          "returndata_size": 1048576,
+          "returndata_digest": "0x7b6ff0a03e9c5a8e77a2059bf28e26a7f0e8d3939a7cfe2193908ad8d683be90"
         }
       }
     },
@@ -224,7 +244,11 @@
         "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the success path."
       ],
       "observe": {
-        "storage_address": "$last_contract"
+        "system_witness": {
+          "version": 1,
+          "shape": "return_revert_self_call",
+          "subject": "$last_contract"
+        }
       },
       "filters": {},
       "steps": [
@@ -253,10 +277,11 @@
       ],
       "expected": {
         "receipt_status": "0x1",
-        "storage": {
-          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
-          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+        "system_witness": {
+          "shape": "return_revert_self_call",
+          "success": true,
+          "returndata_size": 0,
+          "returndata_digest": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
         }
       }
     },
@@ -275,7 +300,11 @@
         "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
       ],
       "observe": {
-        "storage_address": "$last_contract"
+        "system_witness": {
+          "version": 1,
+          "shape": "return_revert_self_call",
+          "subject": "$last_contract"
+        }
       },
       "filters": {},
       "steps": [
@@ -304,10 +333,11 @@
       ],
       "expected": {
         "receipt_status": "0x1",
-        "storage": {
-          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
-          "0x02": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054"
+        "system_witness": {
+          "shape": "return_revert_self_call",
+          "success": false,
+          "returndata_size": 1024,
+          "returndata_digest": "0x146071216f9b08d3ffefb9581967e6c5e47e043ca3897b61f5df20c057826054"
         }
       }
     },
@@ -326,7 +356,11 @@
         "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
       ],
       "observe": {
-        "storage_address": "$last_contract"
+        "system_witness": {
+          "version": 1,
+          "shape": "return_revert_self_call",
+          "subject": "$last_contract"
+        }
       },
       "filters": {},
       "steps": [
@@ -355,10 +389,11 @@
       ],
       "expected": {
         "receipt_status": "0x1",
-        "storage": {
-          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
-          "0x02": "0xb5d4d1df10388bbc208778ff02310db98fdaa68efed0b2068a9bef78bd3bfd74"
+        "system_witness": {
+          "shape": "return_revert_self_call",
+          "success": false,
+          "returndata_size": 1024,
+          "returndata_digest": "0xb5d4d1df10388bbc208778ff02310db98fdaa68efed0b2068a9bef78bd3bfd74"
         }
       }
     },
@@ -377,7 +412,11 @@
         "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
       ],
       "observe": {
-        "storage_address": "$last_contract"
+        "system_witness": {
+          "version": 1,
+          "shape": "return_revert_self_call",
+          "subject": "$last_contract"
+        }
       },
       "filters": {},
       "steps": [
@@ -406,10 +445,11 @@
       ],
       "expected": {
         "receipt_status": "0x1",
-        "storage": {
-          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000",
-          "0x02": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615"
+        "system_witness": {
+          "shape": "return_revert_self_call",
+          "success": false,
+          "returndata_size": 1048576,
+          "returndata_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615"
         }
       }
     },
@@ -428,7 +468,11 @@
         "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
       ],
       "observe": {
-        "storage_address": "$last_contract"
+        "system_witness": {
+          "version": 1,
+          "shape": "return_revert_self_call",
+          "subject": "$last_contract"
+        }
       },
       "filters": {},
       "steps": [
@@ -457,10 +501,11 @@
       ],
       "expected": {
         "receipt_status": "0x1",
-        "storage": {
-          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000",
-          "0x02": "0x7b6ff0a03e9c5a8e77a2059bf28e26a7f0e8d3939a7cfe2193908ad8d683be90"
+        "system_witness": {
+          "shape": "return_revert_self_call",
+          "success": false,
+          "returndata_size": 1048576,
+          "returndata_digest": "0x7b6ff0a03e9c5a8e77a2059bf28e26a7f0e8d3939a7cfe2193908ad8d683be90"
         }
       }
     },
@@ -479,7 +524,11 @@
         "Admitted because final receipt status plus wrapper-exposed returndata digest/size are deterministic final observables for the revert path."
       ],
       "observe": {
-        "storage_address": "$last_contract"
+        "system_witness": {
+          "version": 1,
+          "shape": "return_revert_self_call",
+          "subject": "$last_contract"
+        }
       },
       "filters": {},
       "steps": [
@@ -508,10 +557,11 @@
       ],
       "expected": {
         "receipt_status": "0x1",
-        "storage": {
-          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000",
-          "0x02": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+        "system_witness": {
+          "shape": "return_revert_self_call",
+          "success": false,
+          "returndata_size": 0,
+          "returndata_digest": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
         }
       }
     }
