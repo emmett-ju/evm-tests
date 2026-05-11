@@ -2951,6 +2951,23 @@ class HarnessTests(unittest.TestCase):
                     "salt": 42,
                 },
             )
+            default_deploy_gas = "0x186a0"
+            create_empty_deploy = observed_by_case[
+                "upstream.benchmark.system.test_create.create.0_bytes_without_value"
+            ]["steps"][0]
+            self.assertEqual(create_empty_deploy["gas"], default_deploy_gas)
+            for case_id in (
+                "upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_non_zero_data",
+                "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_non_zero_data",
+            ):
+                deploy_step = observed_by_case[case_id]["steps"][0]
+                self.assertGreater(int(deploy_step["gas"], 16), int(default_deploy_gas, 16))
+            for case_id in (
+                "upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_zero_data",
+                "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_zero_data",
+            ):
+                deploy_step = observed_by_case[case_id]["steps"][0]
+                self.assertEqual(deploy_step["gas"], default_deploy_gas)
             self.assertEqual(
                 observed_by_case[
                     "upstream.benchmark.system.test_return_revert.return.empty"

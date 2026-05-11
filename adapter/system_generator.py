@@ -24,6 +24,11 @@ BLOCKED_CREATE_COLLISION_REASON = "requires gas-capped create collision orchestr
 BLOCKED_SELFDESTRUCT_REASON = "requires selfdestruct lifecycle witness not yet mapped"
 
 SystemTemplateMode = Literal["return_revert_self_call", "create_empty_child", "create_child_code"]
+SYSTEM_DEFAULT_DEPLOY_GAS = 0x186A0
+SYSTEM_DEPLOY_BASE_GAS = 32_000
+SYSTEM_DEPLOY_CODE_DEPOSIT_GAS_PER_BYTE = 200
+SYSTEM_DEPLOY_INITCODE_COPY_GAS_PER_BYTE = 20
+SYSTEM_DEPLOY_GAS_MARGIN = 50_000
 
 
 @dataclass(frozen=True, slots=True)
@@ -275,6 +280,7 @@ def _render_create_child_code_system_case(template: SystemMappingTemplate) -> di
         runtime_code=runtime_code,
         witness=witness,
         invoke_gas="0x4c4b40",
+        deploy_gas=_deploy_gas_for_runtime(runtime_code),
     )
 
 
@@ -284,6 +290,7 @@ def _render_system_case_payload(
     runtime_code: str,
     witness: Any,
     invoke_gas: str,
+    deploy_gas: str | None = None,
 ) -> dict[str, Any]:
     return {
         "kind": "upstream_mapped",
@@ -299,6 +306,7 @@ def _render_system_case_payload(
             deploy_contract_step(
                 init_code=_build_init_code(runtime_code),
                 runtime_code=runtime_code,
+                gas=deploy_gas or hex(SYSTEM_DEFAULT_DEPLOY_GAS),
                 value="0x" + format(template.create_value, "x") if template.create_value else None,
             ),
             wait_receipt_step(),
@@ -310,6 +318,22 @@ def _render_system_case_payload(
             **witness.expected,
         },
     }
+
+
+def _runtime_byte_length(runtime_code: str) -> int:
+    return len(bytes.fromhex(runtime_code.removeprefix("0x")))
+
+
+def _deploy_gas_for_runtime(runtime_code: str) -> str:
+    runtime_bytes = _runtime_byte_length(runtime_code)
+    initcode_bytes = _runtime_byte_length(_build_init_code(runtime_code))
+    budget = (
+        SYSTEM_DEPLOY_BASE_GAS
+        + SYSTEM_DEPLOY_CODE_DEPOSIT_GAS_PER_BYTE * runtime_bytes
+        + SYSTEM_DEPLOY_INITCODE_COPY_GAS_PER_BYTE * initcode_bytes
+        + SYSTEM_DEPLOY_GAS_MARGIN
+    )
+    return hex(max(SYSTEM_DEFAULT_DEPLOY_GAS, budget))
 
 
 def _scan_contract_calling_many_addresses(text: str) -> list[AutoSystemInventoryEntry]:
