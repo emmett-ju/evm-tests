@@ -9,6 +9,7 @@ from typing import Any, Literal
 from adapter.assembler import _build_init_code, _push_int
 from adapter.generator import deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
+from adapter.log_probe import opcode_topic_count, validate_log_probe_declaration
 from adapter.manifest import resolve_execution_specs_ref
 from adapter.signer import keccak256
 
@@ -524,43 +525,7 @@ def _build_fill_ff_prefix(size: int) -> bytes:
 
 
 def build_validated_log_probe_template(log_probe: dict[str, Any]) -> LogMappingTemplate:
-    if not isinstance(log_probe, dict):
-        raise ValueError("observe.log_probe must be an object")
-    required_fields = (
-        "opcode",
-        "topic_count",
-        "log_size",
-        "memory_seed_kind",
-        "memory_seed_size",
-        "witness_mode",
-    )
-    missing_fields = [field for field in required_fields if field not in log_probe]
-    if missing_fields:
-        raise ValueError(
-            "observe.log_probe is missing required fields: " + ", ".join(missing_fields)
-        )
-    opcode = str(log_probe["opcode"])
-    topic_count = int(log_probe["topic_count"])
-    if topic_count < 0:
-        raise ValueError("observe.log_probe.topic_count must be non-negative")
-    opcode_topic_count = _opcode_topic_count(opcode)
-    if opcode_topic_count != topic_count:
-        raise ValueError(
-            f"observe.log_probe.topic_count does not match opcode {opcode}: expected {opcode_topic_count}, got {topic_count}"
-        )
-    topic_word = log_probe.get("topic_word")
-    if topic_count == 0:
-        topic_word = None
-    elif not isinstance(topic_word, str):
-        raise ValueError(
-            "observe.log_probe.topic_word must be a hex string when topic_count is greater than zero"
-        )
-    memory_seed_kind = str(log_probe["memory_seed_kind"])
-    if memory_seed_kind not in ("zero", "ff"):
-        raise ValueError(f"unsupported observe.log_probe.memory_seed_kind: {memory_seed_kind}")
-    witness_mode = str(log_probe["witness_mode"])
-    if witness_mode not in ("exact", "digest"):
-        raise ValueError(f"unsupported observe.log_probe.witness_mode: {witness_mode}")
+    normalized = validate_log_probe_declaration(log_probe)
     return LogMappingTemplate(
         case_id="observe.log_probe",
         description="Derived receipt-log expectation from runtime contract",
@@ -568,13 +533,13 @@ def build_validated_log_probe_template(log_probe: dict[str, Any]) -> LogMappingT
         upstream_ref="observe.log_probe",
         notes=[],
         mode="test_log_fixed_offset",
-        opcode=opcode,
-        topic_count=topic_count,
-        topic_word=topic_word,
-        log_size=int(log_probe["log_size"]),
-        memory_seed_kind=memory_seed_kind,
-        memory_seed_size=int(log_probe["memory_seed_size"]),
-        witness_mode=witness_mode,
+        opcode=str(normalized["opcode"]),
+        topic_count=int(normalized["topic_count"]),
+        topic_word=normalized["topic_word"],
+        log_size=int(normalized["log_size"]),
+        memory_seed_kind=str(normalized["memory_seed_kind"]),
+        memory_seed_size=int(normalized["memory_seed_size"]),
+        witness_mode=str(normalized["witness_mode"]),
     )
 
 
@@ -682,12 +647,7 @@ def _extract_param_values_from_block(block: str, param_name: str, *, function_na
 
 
 def _opcode_topic_count(opcode: str) -> int:
-    if not opcode.startswith("LOG"):
-        raise ValueError(f"unsupported log opcode: {opcode}")
-    suffix = opcode.removeprefix("LOG")
-    if suffix not in {"0", "1", "2", "3", "4"}:
-        raise ValueError(f"unsupported log opcode: {opcode}")
-    return int(suffix)
+    return opcode_topic_count(opcode)
 
 
 def _resolve_topic_word(*, topic_count: int, zeros_topic: bool) -> str | None:

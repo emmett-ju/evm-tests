@@ -18,6 +18,17 @@ DURABLE_EVIDENCE_MANIFESTS = frozenset(
 )
 
 
+def _sanitize_path_component(value: str, *, field_name: str) -> str:
+    candidate = value.strip()
+    if not candidate:
+        raise ValueError(f"{field_name} must be a non-empty path component")
+    sanitized = candidate.replace("\\", "/")
+    parts = [part for part in sanitized.split("/") if part and part not in {".", ".."}]
+    if not parts:
+        raise ValueError(f"{field_name} must not contain path traversal segments")
+    return "-".join(parts)
+
+
 def write_report(report: Report, path: str | Path) -> list[Path]:
     report_path = Path(path)
     report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -38,7 +49,9 @@ def durable_report_path(report: Report, report_path: str | Path) -> Path | None:
         return None
     source_path = Path(report_path)
     stem = source_path.stem or "report"
-    return source_path.parent / "evidence" / report.chain_profile / report.manifest / f"{stem}.json"
+    chain_profile = _sanitize_path_component(report.chain_profile, field_name="chain_profile")
+    manifest = _sanitize_path_component(report.manifest, field_name="manifest")
+    return source_path.parent / "evidence" / chain_profile / manifest / f"{stem}.json"
 
 
 def _compact_large_receipt_log_payloads(node: Any) -> Any:

@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import Any, Literal
 
 
+from adapter.log_probe import validate_log_probe_declaration
+
+
 CaseKind = Literal["upstream_mapped", "custom_chain"]
 BackendName = Literal["mock", "jsonrpc"]
 
@@ -270,6 +273,13 @@ class TestCase:
             errors.append(f"{context}: expected must be an object")
         if not isinstance(self.observe, dict):
             errors.append(f"{context}: observe must be an object")
+        else:
+            log_probe = self.observe.get("log_probe")
+            if log_probe is not None:
+                try:
+                    validate_log_probe_declaration(log_probe)
+                except ValueError as exc:
+                    errors.append(str(exc))
         if self.upstream_ref is not None and not isinstance(self.upstream_ref, str):
             errors.append(f"{context}: upstream_ref must be a string when present")
         if not isinstance(self.notes, list) or any(not isinstance(note, str) for note in self.notes):

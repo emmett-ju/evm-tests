@@ -7,6 +7,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Protocol
+from urllib.parse import urlsplit
 
 from adapter.block_context_generator import (
     BLOCK_CONTEXT_BASEFEE_RUNTIME,
@@ -82,6 +83,13 @@ class Backend(Protocol):
 
 def _validate_case_for_backend(case: TestCase, backend: str) -> None:
     case.validate(backend)
+
+
+def _safe_rpc_endpoint_label(rpc_url: str) -> str:
+    parts = urlsplit(rpc_url)
+    if parts.scheme and parts.netloc:
+        return f"{parts.scheme}://{parts.hostname or parts.netloc}"
+    return "<redacted-rpc-endpoint>"
 
 
 @dataclass(slots=True)
@@ -920,25 +928,26 @@ class JsonRpcBackend:
                 "User-Agent": "evm-rpc-tests/0.1",
             },
         )
+        endpoint_label = _safe_rpc_endpoint_label(self.profile.rpc_url)
         try:
             with urllib.request.urlopen(request, timeout=self.rpc_timeout_seconds) as response:
                 body = json.loads(response.read().decode())
         except TimeoutError as exc:
             raise TimeoutError(
-                f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {self.profile.rpc_url}"
+                f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
             ) from exc
         except socket.timeout as exc:
             raise TimeoutError(
-                f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {self.profile.rpc_url}"
+                f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
             ) from exc
         except urllib.error.URLError as exc:
             if isinstance(exc.reason, TimeoutError):
                 raise TimeoutError(
-                    f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {self.profile.rpc_url}"
+                    f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
                 ) from exc
             if isinstance(exc.reason, socket.timeout):
                 raise TimeoutError(
-                    f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {self.profile.rpc_url}"
+                    f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
                 ) from exc
             raise RuntimeError(f"rpc transport error for {method}: {exc.reason}") from exc
         except json.JSONDecodeError as exc:

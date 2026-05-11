@@ -66,6 +66,7 @@ from adapter.control_flow_generator import (
     load_control_flow_templates,
 )
 from adapter.log_generator import derive_receipt_log_expectation, generate_upstream_log_manifest, generate_upstream_log_templates
+from adapter.log_probe import validate_log_probe_declaration
 from adapter.inventory import summarize_inventory_dir, write_inventory_payload
 from adapter.keccak_generator import (
     compute_keccak_max_permutations_input_length,
@@ -349,6 +350,33 @@ class HarnessTests(unittest.TestCase):
             str(error.exception),
             "case upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true step 4: action 'wait_receipt' field 'timeout_seconds' must be an integer",
         )
+
+    def test_validation_boundary_rejects_malformed_log_probe_declaration_at_load_time(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_log_mapped.json").read_text())
+        payload["cases"][6]["observe"]["log_probe"]["opcode"] = "LOG0"
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "upstream_log_mapped.json"
+            manifest_path.write_text(json.dumps(payload))
+            with self.assertRaises(ValueError) as error:
+                load_manifest(manifest_path)
+        self.assertEqual(
+            str(error.exception),
+            "observe.log_probe.topic_count does not match opcode LOG0: expected 0, got 1",
+        )
+
+    def test_validate_log_probe_declaration_rejects_non_integer_topic_count(self) -> None:
+        with self.assertRaisesRegex(ValueError, "observe.log_probe.topic_count must be an integer"):
+            validate_log_probe_declaration(
+                {
+                    "opcode": "LOG1",
+                    "topic_count": "1",
+                    "topic_word": "0x" + "00" * 32,
+                    "log_size": 0,
+                    "memory_seed_kind": "zero",
+                    "memory_seed_size": 0,
+                    "witness_mode": "exact",
+                }
+            )
 
     def test_validation_boundary_rejects_malformed_system_manifest_shape(self) -> None:
         payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
@@ -2017,7 +2045,10 @@ class HarnessTests(unittest.TestCase):
             report_path = tmp_path / "report.json"
             manifest_path.write_text(json.dumps(payload, indent=2, sort_keys=True))
 
-            self.assertEqual(
+            with self.assertRaisesRegex(
+                ValueError,
+                r"observe\.log_probe\.topic_count does not match opcode LOG0: expected 0, got 1",
+            ):
                 main(
                     [
                         "run",
@@ -2030,25 +2061,7 @@ class HarnessTests(unittest.TestCase):
                         "--report",
                         str(report_path),
                     ]
-                ),
-                0,
-            )
-            report = json.loads(report_path.read_text())
-            broken = next(
-                result
-                for result in report["results"]
-                if result["case_id"]
-                == "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true"
-            )
-            self.assertFalse(broken["success"])
-            self.assertEqual(
-                broken["diffs"],
-                [
-                    "proof error: observe.log_probe.topic_count does not match opcode LOG0: expected 0, got 1"
-                ],
-            )
-            self.assertEqual(broken["observed"], {})
-            self.assertEqual(broken["context"], {})
+                )
 
     def test_write_report_compacts_only_receipt_log_payloads_above_inline_threshold(self) -> None:
         exact_256 = "0x" + ("ab" * 256)
@@ -2166,6 +2179,33 @@ class HarnessTests(unittest.TestCase):
             self.assertTrue(durable_path.exists())
             self.assertEqual(json.loads(report_path.read_text()), json.loads(durable_path.read_text()))
             self.assertEqual(written_paths, [report_path, durable_path])
+
+    def test_durable_report_path_sanitizes_path_components(self) -> None:
+        report = Report(
+            manifest="upstream-log-mapped",
+            execution_specs_ref="test-ref",
+            suite_version="0.1.0",
+            chain_profile="../unsafe-profile",
+            chain_profile_version="1",
+            results=[],
+        )
+        durable_path = durable_report_path(report, Path("/tmp/out/report.json"))
+        self.assertEqual(
+            durable_path,
+            Path("/tmp/out/evidence/unsafe-profile/upstream-log-mapped/report.json"),
+        )
+
+    def test_durable_report_path_rejects_empty_path_component(self) -> None:
+        report = Report(
+            manifest="upstream-log-mapped",
+            execution_specs_ref="test-ref",
+            suite_version="0.1.0",
+            chain_profile="///",
+            chain_profile_version="1",
+            results=[],
+        )
+        with self.assertRaisesRegex(ValueError, "chain_profile must not contain path traversal segments"):
+            durable_report_path(report, Path("/tmp/out/report.json"))
 
     def test_oracle_reports_precise_receipt_log_digest_mismatch(self) -> None:
         observed_data = "0x" + ("ff" * 32)
@@ -4483,11 +4523,33 @@ class HarnessTests(unittest.TestCase):
         try:
             with self.assertRaisesRegex(
                 TimeoutError,
-                rf"rpc timeout for eth_blockNumber after {backend.rpc_timeout_seconds}s against {profile.rpc_url}",
+                rf"rpc timeout for eth_blockNumber after {backend.rpc_timeout_seconds}s against https://testnet-rpc\.juchain\.org",
             ):
                 backend._rpc("eth_blockNumber", [])
         finally:
             urllib.request.urlopen = original_urlopen
+
+    def test_jsonrpc_backend_timeout_redacts_rpc_credentials(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.rpc_url = "https://user:secret@example.invalid/path?token=abc"
+        backend = JsonRpcBackend(profile)
+
+        original_urlopen = urllib.request.urlopen
+
+        def fake_urlopen(*args: object, **kwargs: object) -> object:
+            raise socket.timeout("timed out")
+
+        urllib.request.urlopen = fake_urlopen
+        try:
+            with self.assertRaises(TimeoutError) as error:
+                backend._rpc("eth_blockNumber", [])
+        finally:
+            urllib.request.urlopen = original_urlopen
+
+        message = str(error.exception)
+        self.assertIn("against https://example.invalid", message)
+        self.assertNotIn("secret", message)
+        self.assertNotIn("token=abc", message)
 
     def test_jsonrpc_backend_rejects_response_without_result_field(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
