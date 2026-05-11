@@ -20,6 +20,9 @@ from adapter.executor import (
     BALANCE_RUNTIME,
     CODESIZE_RUNTIME,
     SELFBALANCE_RUNTIME,
+    SYSTEM_FILL_FF_WORD,
+    SYSTEM_RUNTIME_HEADER,
+    SYSTEM_SELF_CALL_WRAPPER_SUFFIX,
     JsonRpcBackend,
     MockBackend,
     SystemExecutionError,
@@ -6077,6 +6080,46 @@ class HarnessTests(unittest.TestCase):
         broken_case.steps[0]["bytecode_init"] = "0x60zz"
         with self.assertRaisesRegex(SystemExecutionError, r"malformed system runtime hex"):
             backend.execute_case(broken_case, "negative-malformed-system-hex")
+
+    def test_mock_backend_rejects_additional_malformed_system_wrapper_shapes(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
+        def runtime_for_child(child: bytes) -> str:
+            raw = SYSTEM_RUNTIME_HEADER + b"\x60\x09\x57" + child + SYSTEM_SELF_CALL_WRAPPER_SUFFIX
+            return "0x" + raw.hex()
+
+        scenarios = [
+            (
+                "empty child branch",
+                runtime_for_child(b""),
+                r"malformed system wrapper shape: empty child branch",
+            ),
+            (
+                "invalid child terminator",
+                runtime_for_child(b"\x5f\x5f\x00"),
+                r"malformed system wrapper shape: child branch must terminate in RETURN or REVERT",
+            ),
+            (
+                "missing canonical push-size push0 ending",
+                runtime_for_child(b"\x60\x01\xf3"),
+                r"malformed system wrapper shape: child branch must end with canonical PUSH-size/PUSH0 sequence",
+            ),
+            (
+                "undecodable size operand",
+                runtime_for_child(b"\x01\x02\x5f\xf3"),
+                r"malformed system wrapper shape: could not decode canonical returndata size operand",
+            ),
+            (
+                "zero-size declaration with fill prefix",
+                runtime_for_child(SYSTEM_FILL_FF_WORD + b"\x5f\x5f\xf3"),
+                r"malformed system wrapper shape: zero-length returndata declaration must not include a fill prefix",
+            ),
+        ]
+
+        for label, runtime, expected_error in scenarios:
+            with self.subTest(label=label):
+                with self.assertRaisesRegex(SystemExecutionError, expected_error):
+                    backend._parse_system_self_call_witness(runtime)
 
     def test_cli_run_mock_system_manifest_bounds_malformed_system_case_as_proof_error(self) -> None:
         scenarios = [
