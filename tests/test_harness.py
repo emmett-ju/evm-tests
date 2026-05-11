@@ -4463,6 +4463,86 @@ class HarnessTests(unittest.TestCase):
             ],
         )
 
+    def test_jsonrpc_backend_observes_block_context_storage_at_receipt_block(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.block_context.rpc_block_tag = "safe"
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_block_context_mapped.json")
+        timestamp_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.block_context.test_block_context_ops.timestamp"
+        )
+
+        class StubBackend(JsonRpcBackend):
+            def __init__(self, profile):
+                super().__init__(profile)
+                self.sent = 0
+                self.block_calls: list[list[object]] = []
+                self.storage_calls: list[list[object]] = []
+
+            def _send_transaction(self, transaction: dict[str, Any]) -> str:
+                self.sent += 1
+                return f"0xtx{self.sent}"
+
+            def _wait_for_receipt(self, tx_hash: str, timeout_seconds: int = 60) -> dict[str, Any]:
+                if tx_hash == "0xtx1":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "contractAddress": "0xcccccccccccccccccccccccccccccccccccccccc",
+                        "blockNumber": "0x99",
+                    }
+                if tx_hash == "0xtx2":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "blockNumber": "0x2a",
+                    }
+                raise AssertionError(tx_hash)
+
+            def _rpc(self, method: str, params: list[object]) -> object:
+                if method == "eth_getBlockByNumber":
+                    self.block_calls.append(params)
+                    block_tag = params[0]
+                    if block_tag == "0x99":
+                        return {
+                            "miner": "0x1111111111111111111111111111111111111111",
+                            "timestamp": "0x65000099",
+                            "number": "0x99",
+                            "mixHash": "0x" + "22" * 32,
+                            "gasLimit": "0x1c9c380",
+                            "baseFeePerGas": "0x3b9aca00",
+                        }
+                    if block_tag == "0x2a":
+                        return {
+                            "miner": "0x1111111111111111111111111111111111111111",
+                            "timestamp": "0x6500002a",
+                            "number": "0x2a",
+                            "mixHash": "0x" + "33" * 32,
+                            "gasLimit": "0x1c9c380",
+                            "baseFeePerGas": "0x3b9aca00",
+                        }
+                    raise AssertionError(block_tag)
+                if method == "eth_getStorageAt":
+                    self.storage_calls.append(params)
+                    return "0x000000000000000000000000000000000000000000000000000000006500002a"
+                raise AssertionError(method)
+
+        backend = StubBackend(profile)
+        tx_hashes, observed, context = backend.execute_case(timestamp_case, "jsonrpc-block-context-timestamp")
+        self.assertEqual(tx_hashes, ["0xtx1", "0xtx2"])
+        self.assertEqual(backend.block_calls, [["0x99", False], ["0x2a", False]])
+        self.assertEqual(
+            backend.storage_calls,
+            [["0xcccccccccccccccccccccccccccccccccccccccc", "0x00", "0x2a"]],
+        )
+        self.assertEqual(context["$block_timestamp"], "0x6500002a")
+        self.assertEqual(
+            observed["storage"]["0x00"],
+            "0x000000000000000000000000000000000000000000000000000000006500002a",
+        )
+        self.assertEqual(ResultOracle().compare(timestamp_case.expected, observed, context), [])
+
     def test_jsonrpc_backend_load_block_context_falls_back_to_profile_block_tag(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         profile.block_context.rpc_block_tag = "safe"

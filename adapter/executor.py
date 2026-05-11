@@ -804,11 +804,14 @@ class JsonRpcBackend:
             storage_address = observe_config.get("storage_address", target_address)
             if storage_address == "$last_contract":
                 storage_address = last_contract_address
+            storage_block_tag = "latest"
+            if observe_config.get("block_context_probe") is not None and last_receipt is not None:
+                storage_block_tag = last_receipt.get("blockNumber") or self.profile.block_context.rpc_block_tag
             observed["storage"] = {}
             for slot in expected_shape["storage"]:
                 observed["storage"][slot] = self._rpc(
                     "eth_getStorageAt",
-                    [storage_address, slot, "latest"],
+                    [storage_address, slot, storage_block_tag],
                 )
         if "receipt_status" in expected_shape:
             observed["receipt_status"] = None if last_receipt is None else last_receipt.get("status")
