@@ -568,7 +568,7 @@ class HarnessTests(unittest.TestCase):
             manifest = load_manifest(manifest_path)
         self.assertEqual(manifest.cases[0].observe["system_witness"]["data_kind"], "non_zero")
 
-        for size, prefix_hex in ((6144, "611800805f5f395ff3"), (12288, "613000805f5f395ff3")):
+        for size, prefix_hex in ((6144, "611800805f5f395ff3"), (12288, "613000805f5f395ff3"), (18432, "614800805f5f395ff3")):
             non_zero_bundle = build_create_child_code_system_witness(opcode="CREATE", initcode_size=size, data_kind="non_zero")
             zero_bundle = build_create_child_code_system_witness(opcode="CREATE", initcode_size=size, data_kind="zero")
             non_zero_child_prefix = bytes.fromhex(prefix_hex)
@@ -806,12 +806,16 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_zero_data",
+                "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_non_zero_data",
+                "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_bytes_with_value",
                 "upstream.benchmark.system.test_create.create2.0_bytes_without_value",
                 "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_zero_data",
+                "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_non_zero_data",
+                "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
@@ -854,8 +858,7 @@ class HarnessTests(unittest.TestCase):
                 self.assertEqual(set(expected_witness), {"shape", "success", "returndata_size", "returndata_digest"})
         self.assertFalse(
             any(
-                "0_75x" in case.case_id
-                or ".max_code_size" in case.case_id
+                ".max_code_size" in case.case_id
                 or "test_selfdestruct" in case.case_id
                 or "test_contract_calling_many_addresses" in case.case_id
                 or "test_creates_collisions" in case.case_id
@@ -2775,8 +2778,8 @@ class HarnessTests(unittest.TestCase):
 
         admitted = [entry for entry in entries if entry["admitted"]]
         blocked = [entry for entry in entries if not entry["admitted"]]
-        self.assertEqual(len(admitted), 22, "system admitted count drifted")
-        self.assertEqual(len(blocked), 24, "system blocked count drifted")
+        self.assertEqual(len(admitted), 26, "system admitted count drifted")
+        self.assertEqual(len(blocked), 20, "system blocked count drifted")
 
         admitted_case_ids = [entry["case_id"] for entry in admitted]
         self.assertEqual(
@@ -2788,12 +2791,16 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_zero_data",
+                "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_non_zero_data",
+                "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_bytes_with_value",
                 "upstream.benchmark.system.test_create.create2.0_bytes_without_value",
                 "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_zero_data",
+                "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_non_zero_data",
+                "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
@@ -2812,7 +2819,7 @@ class HarnessTests(unittest.TestCase):
             Counter(
                 {
                     "requires multi-address external-call orchestration not yet mapped": 8,
-                    "requires create/create2 deployed-address witness not yet mapped": 8,
+                    "requires create/create2 deployed-address witness not yet mapped": 4,
                     "requires gas-capped create collision orchestration not yet mapped": 2,
                     "requires selfdestruct lifecycle witness not yet mapped": 6,
                 }
@@ -2823,7 +2830,7 @@ class HarnessTests(unittest.TestCase):
             Counter(
                 {
                     "test_contract_calling_many_addresses": 8,
-                    "test_create": 8,
+                    "test_create": 4,
                     "test_creates_collisions": 2,
                     "test_selfdestruct_created": 2,
                     "test_selfdestruct_existing": 2,
@@ -2835,7 +2842,7 @@ class HarnessTests(unittest.TestCase):
 
         template_case_ids = [case["case_id"] for case in templates_payload["cases"]]
         self.assertEqual(template_case_ids, admitted_case_ids)
-        self.assertEqual(len(templates_payload["cases"]), 22)
+        self.assertEqual(len(templates_payload["cases"]), 26)
 
         if manifest_payload is not None:
             checked_in_manifest_path = ROOT / "suites/manifests/upstream_system_mapped.json"
@@ -2843,7 +2850,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(manifest_payload, checked_in_manifest, "system manifest JSON drift")
             manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
             self.assertEqual(manifest_case_ids, admitted_case_ids)
-            self.assertEqual(len(manifest_payload["cases"]), 22)
+            self.assertEqual(len(manifest_payload["cases"]), 26)
             self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/system"})
             observed_by_case = {case["case_id"]: case for case in manifest_payload["cases"]}
             self.assertEqual(
@@ -2899,6 +2906,7 @@ class HarnessTests(unittest.TestCase):
                 prefix = {
                     6144: bytes.fromhex("611800805f5f395ff3"),
                     12288: bytes.fromhex("613000805f5f395ff3"),
+                    18432: bytes.fromhex("614800805f5f395ff3"),
                 }[size]
                 return prefix + bytes(index % 256 for index in range(size - len(prefix)))
 
@@ -2907,12 +2915,16 @@ class HarnessTests(unittest.TestCase):
                 (6144, "non_zero"): "0x" + keccak256(expected_non_zero_child_code(6144)).hex(),
                 (12288, "zero"): "0x" + keccak256(b"\x00" * 12288).hex(),
                 (12288, "non_zero"): "0x" + keccak256(expected_non_zero_child_code(12288)).hex(),
+                (18432, "zero"): "0x" + keccak256(b"\x00" * 18432).hex(),
+                (18432, "non_zero"): "0x" + keccak256(expected_non_zero_child_code(18432)).hex(),
             }
             for case_id, size, data_kind in (
                 ("upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_non_zero_data", 6144, "non_zero"),
                 ("upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_zero_data", 6144, "zero"),
                 ("upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_non_zero_data", 12288, "non_zero"),
                 ("upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_zero_data", 12288, "zero"),
+                ("upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_non_zero_data", 18432, "non_zero"),
+                ("upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_zero_data", 18432, "zero"),
             ):
                 self.assertEqual(
                     observed_by_case[case_id]["expected"],
@@ -2932,6 +2944,8 @@ class HarnessTests(unittest.TestCase):
                 ("upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_zero_data", 6144, "zero"),
                 ("upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_non_zero_data", 12288, "non_zero"),
                 ("upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_zero_data", 12288, "zero"),
+                ("upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_non_zero_data", 18432, "non_zero"),
+                ("upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_zero_data", 18432, "zero"),
             ):
                 self.assertEqual(
                     observed_by_case[case_id]["observe"]["system_witness"],
@@ -2954,16 +2968,20 @@ class HarnessTests(unittest.TestCase):
             for case_id in (
                 "upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_non_zero_data",
+                "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_non_zero_data",
+                "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_non_zero_data",
             ):
                 deploy_step = observed_by_case[case_id]["steps"][0]
                 self.assertGreater(int(deploy_step["gas"], 16), int(default_deploy_gas, 16))
             for case_id in (
                 "upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_zero_data",
+                "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_zero_data",
+                "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_zero_data",
             ):
                 deploy_step = observed_by_case[case_id]["steps"][0]
                 self.assertEqual(deploy_step["gas"], default_deploy_gas)
@@ -3000,8 +3018,7 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertFalse(
                 any(
-                    "0_75x" in case_id
-                    or ".max_code_size" in case_id
+                    ".max_code_size" in case_id
                     or "test_selfdestruct" in case_id
                     or "test_contract_calling_many_addresses" in case_id
                     or "test_creates_collisions" in case_id
@@ -3809,7 +3826,7 @@ class HarnessTests(unittest.TestCase):
                 manifest_payload=generated,
             )
             self.assertEqual(generated["name"], "upstream-system-mapped")
-            self.assertEqual(len(generated["cases"]), 22)
+            self.assertEqual(len(generated["cases"]), 26)
             self.assertEqual(generated["cases"][0]["family"], "state/system")
 
     def test_cli_generate_keccak_manifest_writes_expected_output(self) -> None:
@@ -4313,7 +4330,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 468, "blocked": 145},
+            {"families": 14, "cases": 613, "admitted": 472, "blocked": 141},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -4352,7 +4369,7 @@ class HarnessTests(unittest.TestCase):
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
                 "log": {"total": 140, "admitted": 110, "blocked": 30},
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
-                "system": {"total": 46, "admitted": 22, "blocked": 24},
+                "system": {"total": 46, "admitted": 26, "blocked": 20},
                 "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
                 "memory": {"total": 143, "admitted": 95, "blocked": 48},
             },
@@ -4388,11 +4405,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 463, "blocked": 110},
+                {"families": 13, "cases": 573, "admitted": 467, "blocked": 106},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 468, "blocked": 145},
+                {"families": 14, "cases": 613, "admitted": 472, "blocked": 141},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -4463,11 +4480,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 467, "blocked": 145},
+                {"families": 14, "cases": 612, "admitted": 471, "blocked": 141},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 468, "blocked": 145},
+                {"families": 14, "cases": 613, "admitted": 472, "blocked": 141},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -4487,7 +4504,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 467, "blocked": 145},
+                {"families": 14, "cases": 612, "admitted": 471, "blocked": 141},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -4612,7 +4629,7 @@ class HarnessTests(unittest.TestCase):
         scenarios = [
             ("upstream_block_context_mapped.json", "upstream-block-context-mapped", 8),
             ("upstream_log_mapped.json", "upstream-log-mapped", 110),
-            ("upstream_system_mapped.json", "upstream-system-mapped", 22),
+            ("upstream_system_mapped.json", "upstream-system-mapped", 26),
         ]
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -6959,7 +6976,7 @@ class HarnessTests(unittest.TestCase):
                     report = json.loads(report_path.read_text())
 
                 self.assertEqual(report["manifest"], "upstream-system-mapped")
-                self.assertEqual(len(report["results"]), 22)
+                self.assertEqual(len(report["results"]), 26)
                 broken = next(
                     result for result in report["results"] if result["case_id"] == scenario["case_id"]
                 )
@@ -6970,7 +6987,7 @@ class HarnessTests(unittest.TestCase):
                 passing = [
                     result for result in report["results"] if result["case_id"] != scenario["case_id"]
                 ]
-                self.assertEqual(len(passing), 21)
+                self.assertEqual(len(passing), 25)
                 self.assertTrue(all(result["success"] for result in passing))
                 self.assertTrue(all(result["diffs"] == [] for result in passing))
 
@@ -7139,7 +7156,7 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 22)
+            self.assertEqual(len(report["results"]), 26)
             observed_by_case = {result["case_id"]: result for result in report["results"]}
 
             self.assertEqual(
@@ -7306,7 +7323,7 @@ class HarnessTests(unittest.TestCase):
             report = json.loads(report_path.read_text())
             self.assertEqual(report["manifest"], "upstream-system-mapped")
             self.assertEqual(report["chain_profile"], "mock-devnet")
-            self.assertEqual(len(report["results"]), 22)
+            self.assertEqual(len(report["results"]), 26)
             self.assertTrue(all(result["success"] for result in report["results"]))
             self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
             observed_by_case = {result["case_id"]: result["observed"] for result in report["results"]}

@@ -233,35 +233,31 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.75x max code size with non-zero data]",
       "case_id": "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_non_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires create/create2 deployed-address witness not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "create_child_code",
+      "reasons": [],
       "source": "test_create",
-      "opcode": null,
+      "opcode": "CREATE",
       "return_size": null,
       "return_non_zero_data": null,
-      "create_value": null,
-      "create_initcode_size": null,
+      "create_value": 0,
+      "create_initcode_size": 18432,
       "create_data_kind": "non_zero",
       "create_salt": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.75x max code size with zero data]",
       "case_id": "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires create/create2 deployed-address witness not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "create_child_code",
+      "reasons": [],
       "source": "test_create",
-      "opcode": null,
+      "opcode": "CREATE",
       "return_size": null,
       "return_non_zero_data": null,
-      "create_value": null,
-      "create_initcode_size": null,
-      "create_data_kind": null,
+      "create_value": 0,
+      "create_initcode_size": 18432,
+      "create_data_kind": "zero",
       "create_salt": null
     },
     {
@@ -391,36 +387,32 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.75x max code size with non-zero data]",
       "case_id": "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_non_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires create/create2 deployed-address witness not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "create_child_code",
+      "reasons": [],
       "source": "test_create",
-      "opcode": null,
+      "opcode": "CREATE2",
       "return_size": null,
       "return_non_zero_data": null,
-      "create_value": null,
-      "create_initcode_size": null,
+      "create_value": 0,
+      "create_initcode_size": 18432,
       "create_data_kind": "non_zero",
-      "create_salt": null
+      "create_salt": 42
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.75x max code size with zero data]",
       "case_id": "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_zero_data",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires create/create2 deployed-address witness not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "create_child_code",
+      "reasons": [],
       "source": "test_create",
-      "opcode": null,
+      "opcode": "CREATE2",
       "return_size": null,
       "return_non_zero_data": null,
-      "create_value": null,
-      "create_initcode_size": null,
-      "create_data_kind": null,
-      "create_salt": null
+      "create_value": 0,
+      "create_initcode_size": 18432,
+      "create_data_kind": "zero",
+      "create_salt": 42
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=max code size with non-zero data]",

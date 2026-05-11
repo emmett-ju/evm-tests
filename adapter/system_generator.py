@@ -408,7 +408,7 @@ def _scan_create(text: str) -> list[AutoSystemInventoryEntry]:
             case_id = f"upstream.benchmark.system.test_create.{opcode.lower()}.{combo_slug}"
             is_empty_admitted = combo_label in {"0 bytes without value", "0 bytes with value"}
             create_child_code_size = _create_child_code_size_for_label(combo_label)
-            is_child_code_admitted = create_child_code_size in {6144, 12288}
+            is_child_code_admitted = create_child_code_size in {6144, 12288, 18432}
             admitted = is_empty_admitted or is_child_code_admitted
             create_value = 1 if combo_label == "0 bytes with value" else 0
             create_data_kind = "non_zero" if "non-zero data" in combo_label else "zero" if is_child_code_admitted else None
