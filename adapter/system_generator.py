@@ -13,6 +13,7 @@ from adapter.manifest import resolve_execution_specs_ref
 from adapter.system_witness import (
     _create_child_code_payload,
     build_create_child_code_system_witness,
+    build_create_collision_system_witness,
     build_create_empty_child_system_witness,
     build_return_revert_system_witness,
 )
@@ -21,9 +22,10 @@ from adapter.system_witness import (
 BLOCKED_EXTERNAL_CALL_REASON = "requires multi-address external-call orchestration not yet mapped"
 BLOCKED_CREATE_REASON = "requires create/create2 deployed-address witness not yet mapped"
 BLOCKED_CREATE_COLLISION_REASON = "requires gas-capped create collision orchestration not yet mapped"
+BLOCKED_CREATE_COLLISION_CREATE_REASON = "requires mutable pre-allocation of future CREATE addresses not available through the current RPC-only harness"
 BLOCKED_SELFDESTRUCT_REASON = "requires selfdestruct lifecycle witness not yet mapped"
 
-SystemTemplateMode = Literal["return_revert_self_call", "create_empty_child", "create_child_code"]
+SystemTemplateMode = Literal["return_revert_self_call", "create_empty_child", "create_child_code", "create_collision"]
 SYSTEM_DEFAULT_DEPLOY_GAS = 0x186A0
 SYSTEM_DEPLOY_BASE_GAS = 32_000
 SYSTEM_DEPLOY_CODE_DEPOSIT_GAS_PER_BYTE = 200
@@ -46,6 +48,7 @@ class SystemMappingTemplate:
     create_initcode_size: int | None = None
     create_data_kind: str | None = None
     create_salt: int | None = None
+    proxy_call_gas: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,6 +66,7 @@ class AutoSystemInventoryEntry:
     create_initcode_size: int | None = None
     create_data_kind: str | None = None
     create_salt: int | None = None
+    proxy_call_gas: int | None = None
 
 
 class _BytecodeBuilder:
@@ -217,6 +221,8 @@ def render_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
         return _render_create_empty_child_system_case(template)
     if template.mode == "create_child_code":
         return _render_create_child_code_system_case(template)
+    if template.mode == "create_collision":
+        return _render_create_collision_system_case(template)
     raise ValueError(f"unsupported system template mode: {template.mode}")
 
 
@@ -280,6 +286,25 @@ def _render_create_child_code_system_case(template: SystemMappingTemplate) -> di
         runtime_code=runtime_code,
         witness=witness,
         invoke_gas="0x4c4b40",
+        deploy_gas=_deploy_gas_for_runtime(runtime_code),
+    )
+
+
+def _render_create_collision_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
+    proxy_call_gas = _require_inventory_field(template.proxy_call_gas, field="proxy_call_gas")
+    runtime_code = _build_create_collision_runtime(template.opcode, proxy_call_gas=proxy_call_gas)
+    witness = build_create_collision_system_witness(
+        opcode=template.opcode,
+        value=template.create_value or 0,
+        initcode_size=template.create_initcode_size or 0,
+        salt=template.create_salt or 0,
+        proxy_call_gas=proxy_call_gas,
+    )
+    return _render_system_case_payload(
+        template=template,
+        runtime_code=runtime_code,
+        witness=witness,
+        invoke_gas="0x1e8480",
         deploy_gas=_deploy_gas_for_runtime(runtime_code),
     )
 
@@ -466,17 +491,25 @@ def _scan_creates_collisions(text: str) -> list[AutoSystemInventoryEntry]:
             function_name="test_creates_collisions",
         )
     ]
-    return [
-        AutoSystemInventoryEntry(
-            upstream_ref=f"tests/benchmark/compute/instruction/test_system.py::test_creates_collisions[opcode={opcode}]",
-            case_id=f"upstream.benchmark.system.test_creates_collisions.{opcode.lower()}",
-            admitted=False,
-            mode=None,
-            reasons=[BLOCKED_CREATE_COLLISION_REASON],
-            source="test_creates_collisions",
+    results: list[AutoSystemInventoryEntry] = []
+    for opcode in opcodes:
+        admitted = opcode == "CREATE2"
+        results.append(
+            AutoSystemInventoryEntry(
+                upstream_ref=f"tests/benchmark/compute/instruction/test_system.py::test_creates_collisions[opcode={opcode}]",
+                case_id=f"upstream.benchmark.system.test_creates_collisions.{opcode.lower()}",
+                admitted=admitted,
+                mode="create_collision" if admitted else None,
+                reasons=[] if admitted else [BLOCKED_CREATE_COLLISION_CREATE_REASON],
+                source="test_creates_collisions",
+                opcode=opcode if admitted else None,
+                create_value=0 if admitted else None,
+                create_initcode_size=0 if admitted else None,
+                create_salt=0 if admitted else None,
+                proxy_call_gas=100_000 if admitted else None,
+            )
         )
-        for opcode in opcodes
-    ]
+    return results
 
 
 def _scan_return_revert(text: str) -> list[AutoSystemInventoryEntry]:
@@ -551,6 +584,8 @@ def _inventory_entry_to_template(entry: AutoSystemInventoryEntry) -> SystemMappi
         return _create_empty_child_inventory_entry_to_template(entry)
     if entry.mode == "create_child_code":
         return _create_child_code_inventory_entry_to_template(entry)
+    if entry.mode == "create_collision":
+        return _create_collision_inventory_entry_to_template(entry)
     raise ValueError(f"unsupported admitted system mode: {entry.mode}")
 
 
@@ -626,6 +661,29 @@ def _create_child_code_inventory_entry_to_template(entry: AutoSystemInventoryEnt
     )
 
 
+def _create_collision_inventory_entry_to_template(entry: AutoSystemInventoryEntry) -> SystemMappingTemplate:
+    opcode = _require_inventory_field(entry.opcode, field="opcode")
+    create_value = _require_inventory_field(entry.create_value, field="create_value")
+    create_initcode_size = _require_inventory_field(entry.create_initcode_size, field="create_initcode_size")
+    proxy_call_gas = _require_inventory_field(entry.proxy_call_gas, field="proxy_call_gas")
+    return SystemMappingTemplate(
+        case_id=entry.case_id,
+        description=(
+            f"Mapped from execution-specs {opcode} collision benchmark onto a single wrapper that deploys a proxy, "
+            "calls it once to create an empty child, then calls it again with the same CREATE2 salt to observe collision failure."
+        ),
+        namespace_seed=_build_namespace_seed(entry.case_id),
+        upstream_ref=entry.upstream_ref,
+        notes=_build_create_collision_notes(opcode=opcode, proxy_call_gas=proxy_call_gas),
+        mode="create_collision",
+        opcode=opcode,
+        create_value=create_value,
+        create_initcode_size=create_initcode_size,
+        create_salt=entry.create_salt,
+        proxy_call_gas=proxy_call_gas,
+    )
+
+
 def _load_system_template_entry(entry: object, *, index: int) -> SystemMappingTemplate:
     if not isinstance(entry, dict):
         raise ValueError(f"system template entry {index} must be an object")
@@ -693,6 +751,20 @@ def _load_system_template_entry(entry: object, *, index: int) -> SystemMappingTe
             create_data_kind=str(entry["create_data_kind"]),
             create_salt=None if entry.get("create_salt") is None else int(entry["create_salt"]),
         )
+    if mode == "create_collision":
+        for field in ("create_value", "create_initcode_size", "create_salt", "proxy_call_gas"):
+            if field not in entry:
+                raise ValueError(f"system template entry {index} missing required field: {field}")
+        if opcode != "CREATE2":
+            raise ValueError(f"unsupported system template opcode for create_collision: {opcode}")
+        return SystemMappingTemplate(
+            **common,
+            mode="create_collision",
+            create_value=int(entry["create_value"]),
+            create_initcode_size=int(entry["create_initcode_size"]),
+            create_salt=int(entry["create_salt"]),
+            proxy_call_gas=int(entry["proxy_call_gas"]),
+        )
     raise ValueError(f"unsupported system template mode: {mode}")
 
 
@@ -743,6 +815,16 @@ def _build_create_child_code_notes(*, opcode: str, initcode_size: int, data_kind
         f"RPC mapping: a single deployed wrapper performs one zero value {opcode}{salt_note}, then stores create success, the returned child address, EXTCODESIZE(child), and EXTCODEHASH(child) as deterministic witness fields.",
         blocked_neighbor_note,
         "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, child code size, and child code hash are deterministic final observables.",
+    ]
+
+
+def _build_create_collision_notes(*, opcode: str, proxy_call_gas: int) -> list[str]:
+    return [
+        f"Upstream intent: benchmark {opcode} collision behavior with empty initcode.",
+        "RPC mapping: a single wrapper deploys a proxy, calls it once to perform CREATE2 with salt 0 and empty initcode, then calls the same proxy again with the same salt so the second CREATE2 collides.",
+        f"The proxy call gas is capped at {proxy_call_gas} so the collision exhausts only the inner frame while the outer wrapper retains gas to store witness slots.",
+        "CREATE collision remains blocked because upstream depends on mutable pre-allocation of future CREATE addresses, which the current RPC-only harness cannot reproduce.",
+        "Admitted because final receipt status plus wrapper-exposed proxy deploy success, first create result, child code size, collision call failure, and collision returndata size are deterministic final observables.",
     ]
 
 
@@ -839,6 +921,89 @@ def _build_create_child_code_runtime(opcode: str, *, initcode_size: int, data_ki
     runtime.labels["initcode"] = len(runtime.code)
     runtime.extend(initcode)
     return "0x" + runtime.finish().hex()
+
+
+def _build_create_collision_runtime(opcode: str, *, proxy_call_gas: int = 100_000) -> str:
+    if opcode != "CREATE2":
+        raise ValueError("create_collision runtime is only supported for CREATE2 under the RPC-only proof model")
+    if proxy_call_gas <= 0:
+        raise ValueError("create_collision proxy_call_gas must be positive")
+
+    proxy = _BytecodeBuilder()
+    proxy.push_int(0)  # salt
+    proxy.push_int(0)  # size
+    proxy.push_int(0)  # offset
+    proxy.push_int(0)  # value
+    proxy.op(0xF5)  # CREATE2
+    proxy.push_int(0)
+    proxy.op(0x52)  # MSTORE(0, created_address)
+    proxy.push_int(32)
+    proxy.push_int(0)
+    proxy.op(0xF3)  # RETURN(0, 32)
+    proxy_runtime = proxy.finish()
+    proxy_initcode = bytes.fromhex(_build_init_code("0x" + proxy_runtime.hex())[2:])
+
+    builder = _BytecodeBuilder()
+    builder.push_int(len(proxy_initcode))
+    builder.push_label("proxy_initcode")
+    builder.push_int(0)
+    builder.op(0x39)  # CODECOPY(0, proxy_initcode_offset, proxy_initcode_size)
+    builder.push_int(len(proxy_initcode))
+    builder.push_int(0)
+    builder.push_int(0)
+    builder.op(0xF0)  # CREATE proxy
+
+    builder.op(0x80)  # DUP1 proxy_address
+    builder.op(0x15)
+    builder.op(0x15)
+    builder.push_int(0)
+    builder.op(0x55)  # slot0 <- proxy_deploy_success
+
+    builder.op(0x80)  # DUP1 proxy_address
+    builder.push_int(0)  # out_size
+    builder.push_int(0)  # out_offset
+    builder.push_int(0)  # in_size
+    builder.push_int(0)  # in_offset
+    builder.push_int(0)  # value
+    builder.op(0x85)  # DUP6 proxy_address
+    builder.push_int(proxy_call_gas)
+    builder.op(0xF1)  # CALL proxy first time
+    builder.push_int(1)
+    builder.op(0x55)  # slot1 <- first_create_call_success
+
+    builder.push_int(32)
+    builder.push_int(0)
+    builder.push_int(0)
+    builder.op(0x3E)  # RETURNDATACOPY(0, 0, 32)
+    builder.push_int(0)
+    builder.op(0x51)  # MLOAD(0) first_created_address
+    builder.op(0x80)  # DUP1
+    builder.push_int(2)
+    builder.op(0x55)  # slot2 <- first_created_address
+    builder.op(0x80)  # DUP1
+    builder.op(0x3B)  # EXTCODESIZE
+    builder.push_int(3)
+    builder.op(0x55)  # slot3 <- first_created_code_size
+    builder.op(0x50)  # POP first_created_address
+
+    builder.push_int(0)  # out_size
+    builder.push_int(0)  # out_offset
+    builder.push_int(0)  # in_size
+    builder.push_int(0)  # in_offset
+    builder.push_int(0)  # value
+    builder.op(0x84)  # DUP5 proxy_address
+    builder.push_int(proxy_call_gas)
+    builder.op(0xF1)  # CALL proxy second time; collision should fail inner call
+    builder.push_int(4)
+    builder.op(0x55)  # slot4 <- collision_call_success
+    builder.op(0x3D)  # RETURNDATASIZE
+    builder.push_int(5)
+    builder.op(0x55)  # slot5 <- collision_returndata_size
+    builder.op(0x50)  # POP proxy_address
+    builder.op(0x00)  # STOP
+    builder.labels["proxy_initcode"] = len(builder.code)
+    builder.extend(proxy_initcode)
+    return "0x" + builder.finish().hex()
 
 
 def _build_return_revert_wrapper_runtime(template: SystemMappingTemplate) -> str:

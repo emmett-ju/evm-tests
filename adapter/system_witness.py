@@ -9,8 +9,9 @@ SYSTEM_WITNESS_VERSION = 1
 RETURN_REVERT_SELF_CALL_SHAPE = "return_revert_self_call"
 CREATE_EMPTY_CHILD_SHAPE = "create_empty_child"
 CREATE_CHILD_CODE_SHAPE = "create_child_code"
-SUPPORTED_SYSTEM_WITNESS_SHAPES = (CREATE_CHILD_CODE_SHAPE, CREATE_EMPTY_CHILD_SHAPE, RETURN_REVERT_SELF_CALL_SHAPE)
-SystemWitnessShape = Literal["return_revert_self_call", "create_empty_child", "create_child_code"]
+CREATE_COLLISION_SHAPE = "create_collision"
+SUPPORTED_SYSTEM_WITNESS_SHAPES = (CREATE_CHILD_CODE_SHAPE, CREATE_COLLISION_SHAPE, CREATE_EMPTY_CHILD_SHAPE, RETURN_REVERT_SELF_CALL_SHAPE)
+SystemWitnessShape = Literal["return_revert_self_call", "create_empty_child", "create_child_code", "create_collision"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,6 +44,17 @@ class CreateChildCodeSystemWitness:
     created_code_size: int
     created_code_hash: str
     created_address: str
+
+
+@dataclass(frozen=True, slots=True)
+class CreateCollisionSystemWitness:
+    proxy_deploy_success: bool
+    first_create_call_success: bool
+    first_created_address_nonzero: bool
+    first_created_code_size: int
+    collision_call_success: bool
+    collision_returndata_size: int
+    first_created_address: str
 
 
 def build_return_revert_system_witness(
@@ -147,6 +159,42 @@ def build_create_child_code_system_witness(
     )
 
 
+def build_create_collision_system_witness(
+    *,
+    opcode: str,
+    subject: str = "$last_contract",
+    value: int = 0,
+    initcode_size: int = 0,
+    salt: int = 0,
+    proxy_call_gas: int = 100_000,
+) -> SystemWitnessBundle:
+    observe_witness: dict[str, Any] = {
+        "version": SYSTEM_WITNESS_VERSION,
+        "shape": CREATE_COLLISION_SHAPE,
+        "subject": subject,
+        "opcode": opcode,
+        "value": value,
+        "initcode_size": initcode_size,
+        "salt": salt,
+        "proxy_call_gas": proxy_call_gas,
+    }
+    validate_system_witness_declaration(observe_witness)
+    return SystemWitnessBundle(
+        observe={"system_witness": observe_witness},
+        expected={
+            "system_witness": {
+                "shape": CREATE_COLLISION_SHAPE,
+                "proxy_deploy_success": True,
+                "first_create_call_success": True,
+                "first_created_address_nonzero": True,
+                "first_created_code_size": 0,
+                "collision_call_success": False,
+                "collision_returndata_size": 0,
+            }
+        },
+    )
+
+
 def validate_system_witness_declaration(value: Any) -> None:
     if not isinstance(value, dict):
         raise ValueError("observe.system_witness must be an object")
@@ -167,6 +215,8 @@ def validate_system_witness_declaration(value: Any) -> None:
         _validate_create_empty_child_declaration(value)
     if shape == CREATE_CHILD_CODE_SHAPE:
         _validate_create_child_code_declaration(value)
+    if shape == CREATE_COLLISION_SHAPE:
+        _validate_create_collision_declaration(value)
 
 
 def collect_system_witness_from_storage(
@@ -188,6 +238,11 @@ def collect_system_witness_from_storage(
         )
     if shape == CREATE_CHILD_CODE_SHAPE:
         return _collect_create_child_code_system_witness_from_storage(
+            witness_config=witness_config,
+            storage=storage,
+        )
+    if shape == CREATE_COLLISION_SHAPE:
+        return _collect_create_collision_system_witness_from_storage(
             witness_config=witness_config,
             storage=storage,
         )
@@ -223,6 +278,8 @@ def system_witness_storage_slots(witness_config: Mapping[str, Any]) -> tuple[str
         return ("0x00", "0x01", "0x02", "0x03")
     if witness_config["shape"] == CREATE_CHILD_CODE_SHAPE:
         return ("0x00", "0x01", "0x02", "0x03")
+    if witness_config["shape"] == CREATE_COLLISION_SHAPE:
+        return ("0x00", "0x01", "0x02", "0x03", "0x04", "0x05")
     return ("0x00", "0x01", "0x02")
 
 
@@ -260,6 +317,20 @@ def _validate_create_child_code_declaration(value: Mapping[str, Any]) -> None:
     if opcode == "CREATE2" and salt != 42:
         raise ValueError("observe.system_witness.salt must be 42 for CREATE2 create_child_code")
 
+
+def _validate_create_collision_declaration(value: Mapping[str, Any]) -> None:
+    opcode = value.get("opcode")
+    if opcode != "CREATE2":
+        raise ValueError("observe.system_witness.opcode must be 'CREATE2' for create_collision under the RPC-only proof model")
+    if value.get("value") != 0:
+        raise ValueError("observe.system_witness.value must be 0 for create_collision")
+    if value.get("initcode_size") != 0:
+        raise ValueError("observe.system_witness.initcode_size must be 0 for create_collision")
+    if value.get("salt") != 0:
+        raise ValueError("observe.system_witness.salt must be 0 for CREATE2 create_collision")
+    proxy_call_gas = value.get("proxy_call_gas")
+    if not isinstance(proxy_call_gas, int) or proxy_call_gas <= 0:
+        raise ValueError("observe.system_witness.proxy_call_gas must be a positive integer for create_collision")
 
 def _collect_create_empty_child_system_witness_from_storage(
     *,
@@ -299,6 +370,23 @@ def _collect_create_child_code_system_witness_from_storage(
         "created_address": created_address,
     }
 
+
+def _collect_create_collision_system_witness_from_storage(
+    *,
+    witness_config: Mapping[str, Any],
+    storage: Mapping[str, str],
+) -> dict[str, Any]:
+    first_created_address_word = _require_word(storage.get("0x02"), "system witness first created address word")
+    return {
+        "shape": CREATE_COLLISION_SHAPE,
+        "proxy_deploy_success": _word_to_bool(storage.get("0x00")),
+        "first_create_call_success": _word_to_bool(storage.get("0x01")),
+        "first_created_address_nonzero": int(first_created_address_word, 16) != 0,
+        "first_created_address": "0x" + first_created_address_word[26:],
+        "first_created_code_size": _word_to_int(storage.get("0x03")),
+        "collision_call_success": _word_to_bool(storage.get("0x04")),
+        "collision_returndata_size": _word_to_int(storage.get("0x05")),
+    }
 
 def _create_child_code_payload(*, initcode_size: int, data_kind: str) -> bytes:
     if data_kind == "zero":

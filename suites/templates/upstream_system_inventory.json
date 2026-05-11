@@ -19,7 +19,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=0-opcode=CALL-access_warm=True]",
@@ -36,7 +37,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=0-opcode=CALLCODE-access_warm=False]",
@@ -53,7 +55,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=0-opcode=CALLCODE-access_warm=True]",
@@ -70,7 +73,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALL-access_warm=False]",
@@ -87,7 +91,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALL-access_warm=True]",
@@ -104,7 +109,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALLCODE-access_warm=False]",
@@ -121,7 +127,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_contract_calling_many_addresses[transfer_amount=1-opcode=CALLCODE-access_warm=True]",
@@ -138,7 +145,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0 bytes with value]",
@@ -153,7 +161,8 @@
       "create_value": 1,
       "create_initcode_size": 0,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0 bytes without value]",
@@ -168,7 +177,8 @@
       "create_value": 0,
       "create_initcode_size": 0,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.25x max code size with non-zero data]",
@@ -183,7 +193,8 @@
       "create_value": 0,
       "create_initcode_size": 6144,
       "create_data_kind": "non_zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.25x max code size with zero data]",
@@ -198,7 +209,8 @@
       "create_value": 0,
       "create_initcode_size": 6144,
       "create_data_kind": "zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.50x max code size with non-zero data]",
@@ -213,7 +225,8 @@
       "create_value": 0,
       "create_initcode_size": 12288,
       "create_data_kind": "non_zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.50x max code size with zero data]",
@@ -228,7 +241,8 @@
       "create_value": 0,
       "create_initcode_size": 12288,
       "create_data_kind": "zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.75x max code size with non-zero data]",
@@ -243,7 +257,8 @@
       "create_value": 0,
       "create_initcode_size": 18432,
       "create_data_kind": "non_zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.75x max code size with zero data]",
@@ -258,7 +273,8 @@
       "create_value": 0,
       "create_initcode_size": 18432,
       "create_data_kind": "zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=max code size with non-zero data]",
@@ -273,7 +289,8 @@
       "create_value": 0,
       "create_initcode_size": 24576,
       "create_data_kind": "non_zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=max code size with zero data]",
@@ -288,7 +305,8 @@
       "create_value": 0,
       "create_initcode_size": 24576,
       "create_data_kind": "zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0 bytes with value]",
@@ -303,7 +321,8 @@
       "create_value": 1,
       "create_initcode_size": 0,
       "create_data_kind": null,
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0 bytes without value]",
@@ -318,7 +337,8 @@
       "create_value": 0,
       "create_initcode_size": 0,
       "create_data_kind": null,
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.25x max code size with non-zero data]",
@@ -333,7 +353,8 @@
       "create_value": 0,
       "create_initcode_size": 6144,
       "create_data_kind": "non_zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.25x max code size with zero data]",
@@ -348,7 +369,8 @@
       "create_value": 0,
       "create_initcode_size": 6144,
       "create_data_kind": "zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.50x max code size with non-zero data]",
@@ -363,7 +385,8 @@
       "create_value": 0,
       "create_initcode_size": 12288,
       "create_data_kind": "non_zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.50x max code size with zero data]",
@@ -378,7 +401,8 @@
       "create_value": 0,
       "create_initcode_size": 12288,
       "create_data_kind": "zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.75x max code size with non-zero data]",
@@ -393,7 +417,8 @@
       "create_value": 0,
       "create_initcode_size": 18432,
       "create_data_kind": "non_zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.75x max code size with zero data]",
@@ -408,7 +433,8 @@
       "create_value": 0,
       "create_initcode_size": 18432,
       "create_data_kind": "zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=max code size with non-zero data]",
@@ -423,7 +449,8 @@
       "create_value": 0,
       "create_initcode_size": 24576,
       "create_data_kind": "non_zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=max code size with zero data]",
@@ -438,24 +465,24 @@
       "create_value": 0,
       "create_initcode_size": 24576,
       "create_data_kind": "zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_creates_collisions[opcode=CREATE2]",
       "case_id": "upstream.benchmark.system.test_creates_collisions.create2",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-capped create collision orchestration not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "create_collision",
+      "reasons": [],
       "source": "test_creates_collisions",
-      "opcode": null,
+      "opcode": "CREATE2",
       "return_size": null,
       "return_non_zero_data": null,
-      "create_value": null,
-      "create_initcode_size": null,
+      "create_value": 0,
+      "create_initcode_size": 0,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": 0,
+      "proxy_call_gas": 100000
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_creates_collisions[opcode=CREATE]",
@@ -463,7 +490,7 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires gas-capped create collision orchestration not yet mapped"
+        "requires mutable pre-allocation of future CREATE addresses not available through the current RPC-only harness"
       ],
       "source": "test_creates_collisions",
       "opcode": null,
@@ -472,7 +499,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1KiB of non-zero data]",
@@ -487,7 +515,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1KiB of zero data]",
@@ -502,7 +531,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1MiB of non-zero data]",
@@ -517,7 +547,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=1MiB of zero data]",
@@ -532,7 +563,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=RETURN-variant=empty]",
@@ -547,7 +579,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1KiB of non-zero data]",
@@ -562,7 +595,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1KiB of zero data]",
@@ -577,7 +611,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1MiB of non-zero data]",
@@ -592,7 +627,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=1MiB of zero data]",
@@ -607,7 +643,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_return_revert[opcode=REVERT-variant=empty]",
@@ -622,7 +659,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_created[value_bearing=False]",
@@ -639,7 +677,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_created[value_bearing=True]",
@@ -656,7 +695,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_existing[value_bearing=False]",
@@ -673,7 +713,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_existing[value_bearing=True]",
@@ -690,7 +731,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_initcode[value_bearing=False]",
@@ -707,7 +749,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_initcode[value_bearing=True]",
@@ -724,7 +767,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     }
   ]
 }

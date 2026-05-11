@@ -1213,6 +1213,70 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_creates_collisions.create2",
+      "family": "state/system",
+      "description": "Mapped from execution-specs CREATE2 collision benchmark onto a single wrapper that deploys a proxy, calls it once to create an empty child, then calls it again with the same CREATE2 salt to observe collision failure.",
+      "namespace_seed": "upstream-system-test-creates-collisions-create2",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_creates_collisions[opcode=CREATE2]",
+      "notes": [
+        "Upstream intent: benchmark CREATE2 collision behavior with empty initcode.",
+        "RPC mapping: a single wrapper deploys a proxy, calls it once to perform CREATE2 with salt 0 and empty initcode, then calls the same proxy again with the same salt so the second CREATE2 collides.",
+        "The proxy call gas is capped at 100000 so the collision exhausts only the inner frame while the outer wrapper retains gas to store witness slots.",
+        "CREATE collision remains blocked because upstream depends on mutable pre-allocation of future CREATE addresses, which the current RPC-only harness cannot reproduce.",
+        "Admitted because final receipt status plus wrapper-exposed proxy deploy success, first create result, child code size, collision call failure, and collision returndata size are deterministic final observables."
+      ],
+      "observe": {
+        "system_witness": {
+          "version": 1,
+          "shape": "create_collision",
+          "subject": "$last_contract",
+          "opcode": "CREATE2",
+          "value": 0,
+          "initcode_size": 0,
+          "salt": 0,
+          "proxy_call_gas": 100000
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x605b600c600039605b6000f3601760445f3960175f5ff08015155f55805f5f5f5f5f85620186a0f160015560205f5f3e5f5180600255803b600355505f5f5f5f5f84620186a0f16004553d6005555000600b600c600039600b6000f35f5f5f5ff55f5260205ff3",
+          "bytecode_runtime": "0x601760445f3960175f5ff08015155f55805f5f5f5f5f85620186a0f160015560205f5f3e5f5180600255803b600355505f5f5f5f5f84620186a0f16004553d6005555000600b600c600039600b6000f35f5f5f5ff55f5260205ff3",
+          "gas": "0x18f74"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x1e8480"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "system_witness": {
+          "shape": "create_collision",
+          "proxy_deploy_success": true,
+          "first_create_call_success": true,
+          "first_created_address_nonzero": true,
+          "first_created_code_size": 0,
+          "collision_call_success": false,
+          "collision_returndata_size": 0
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
       "family": "state/system",
       "description": "Mapped from execution-specs RETURN benchmark onto a self-call wrapper that stores inner-call success, returndata size, and returndata digest for the 1024-byte non-zero variant.",

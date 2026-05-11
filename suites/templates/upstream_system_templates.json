@@ -21,7 +21,8 @@
       "create_value": 1,
       "create_initcode_size": 0,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create.0_bytes_without_value",
@@ -41,7 +42,8 @@
       "create_value": 0,
       "create_initcode_size": 0,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_non_zero_data",
@@ -61,7 +63,8 @@
       "create_value": 0,
       "create_initcode_size": 6144,
       "create_data_kind": "non_zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create.0_25x_max_code_size_with_zero_data",
@@ -81,7 +84,8 @@
       "create_value": 0,
       "create_initcode_size": 6144,
       "create_data_kind": "zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_non_zero_data",
@@ -101,7 +105,8 @@
       "create_value": 0,
       "create_initcode_size": 12288,
       "create_data_kind": "non_zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_zero_data",
@@ -121,7 +126,8 @@
       "create_value": 0,
       "create_initcode_size": 12288,
       "create_data_kind": "zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_non_zero_data",
@@ -141,7 +147,8 @@
       "create_value": 0,
       "create_initcode_size": 18432,
       "create_data_kind": "non_zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_zero_data",
@@ -161,7 +168,8 @@
       "create_value": 0,
       "create_initcode_size": 18432,
       "create_data_kind": "zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create.max_code_size_with_non_zero_data",
@@ -181,7 +189,8 @@
       "create_value": 0,
       "create_initcode_size": 24576,
       "create_data_kind": "non_zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create.max_code_size_with_zero_data",
@@ -201,7 +210,8 @@
       "create_value": 0,
       "create_initcode_size": 24576,
       "create_data_kind": "zero",
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create2.0_bytes_with_value",
@@ -221,7 +231,8 @@
       "create_value": 1,
       "create_initcode_size": 0,
       "create_data_kind": null,
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create2.0_bytes_without_value",
@@ -241,7 +252,8 @@
       "create_value": 0,
       "create_initcode_size": 0,
       "create_data_kind": null,
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_non_zero_data",
@@ -261,7 +273,8 @@
       "create_value": 0,
       "create_initcode_size": 6144,
       "create_data_kind": "non_zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_zero_data",
@@ -281,7 +294,8 @@
       "create_value": 0,
       "create_initcode_size": 6144,
       "create_data_kind": "zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_non_zero_data",
@@ -301,7 +315,8 @@
       "create_value": 0,
       "create_initcode_size": 12288,
       "create_data_kind": "non_zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_zero_data",
@@ -321,7 +336,8 @@
       "create_value": 0,
       "create_initcode_size": 12288,
       "create_data_kind": "zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_non_zero_data",
@@ -341,7 +357,8 @@
       "create_value": 0,
       "create_initcode_size": 18432,
       "create_data_kind": "non_zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_zero_data",
@@ -361,7 +378,8 @@
       "create_value": 0,
       "create_initcode_size": 18432,
       "create_data_kind": "zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create2.max_code_size_with_non_zero_data",
@@ -381,7 +399,8 @@
       "create_value": 0,
       "create_initcode_size": 24576,
       "create_data_kind": "non_zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_create.create2.max_code_size_with_zero_data",
@@ -401,7 +420,30 @@
       "create_value": 0,
       "create_initcode_size": 24576,
       "create_data_kind": "zero",
-      "create_salt": 42
+      "create_salt": 42,
+      "proxy_call_gas": null
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_creates_collisions.create2",
+      "description": "Mapped from execution-specs CREATE2 collision benchmark onto a single wrapper that deploys a proxy, calls it once to create an empty child, then calls it again with the same CREATE2 salt to observe collision failure.",
+      "namespace_seed": "upstream-system-test-creates-collisions-create2",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_creates_collisions[opcode=CREATE2]",
+      "notes": [
+        "Upstream intent: benchmark CREATE2 collision behavior with empty initcode.",
+        "RPC mapping: a single wrapper deploys a proxy, calls it once to perform CREATE2 with salt 0 and empty initcode, then calls the same proxy again with the same salt so the second CREATE2 collides.",
+        "The proxy call gas is capped at 100000 so the collision exhausts only the inner frame while the outer wrapper retains gas to store witness slots.",
+        "CREATE collision remains blocked because upstream depends on mutable pre-allocation of future CREATE addresses, which the current RPC-only harness cannot reproduce.",
+        "Admitted because final receipt status plus wrapper-exposed proxy deploy success, first create result, child code size, collision call failure, and collision returndata size are deterministic final observables."
+      ],
+      "mode": "create_collision",
+      "opcode": "CREATE2",
+      "return_size": null,
+      "return_non_zero_data": null,
+      "create_value": 0,
+      "create_initcode_size": 0,
+      "create_data_kind": null,
+      "create_salt": 0,
+      "proxy_call_gas": 100000
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
@@ -422,7 +464,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
@@ -443,7 +486,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
@@ -464,7 +508,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data",
@@ -485,7 +530,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.return.empty",
@@ -506,7 +552,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data",
@@ -527,7 +574,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1kib_of_zero_data",
@@ -548,7 +596,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
@@ -569,7 +618,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
@@ -590,7 +640,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     },
     {
       "case_id": "upstream.benchmark.system.test_return_revert.revert.empty",
@@ -611,7 +662,8 @@
       "create_value": null,
       "create_initcode_size": null,
       "create_data_kind": null,
-      "create_salt": null
+      "create_salt": null,
+      "proxy_call_gas": null
     }
   ]
 }
