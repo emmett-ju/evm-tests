@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import socket
 import time
+import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
 from typing import Any, Protocol
@@ -653,6 +655,7 @@ class JsonRpcBackend:
     def __init__(self, profile: ChainProfile) -> None:
         self.profile = profile
         self.request_id = 0
+        self.rpc_timeout_seconds = 10
 
     def execute_case(
         self,
@@ -785,9 +788,12 @@ class JsonRpcBackend:
     def _load_block_context(self, last_receipt: dict[str, Any]) -> dict[str, str]:
         block_number = last_receipt.get("blockNumber")
         block_tag = block_number or self.profile.block_context.rpc_block_tag
+        block_source = "receipt-block" if block_number else "rpc-block-tag"
         block = self._rpc("eth_getBlockByNumber", [block_tag, False])
         if block is None:
-            raise ValueError(f"could not load block context for block tag {block_tag!r}")
+            raise ValueError(
+                f"block context {block_source} {block_tag!r} returned no block from eth_getBlockByNumber"
+            )
         required_fields = {
             "coinbase": "miner",
             "timestamp": "timestamp",
@@ -800,7 +806,9 @@ class JsonRpcBackend:
         for context_key, block_key in required_fields.items():
             value = block.get(block_key)
             if value in (None, ""):
-                raise ValueError(f"block context missing required field {block_key} for {context_key}")
+                raise ValueError(
+                    f"block context {block_source} {block_tag!r} missing required field {block_key} for {context_key}"
+                )
             context[context_key] = value
         return context
 
@@ -855,12 +863,16 @@ class JsonRpcBackend:
 
     def _wait_for_receipt(self, tx_hash: str, timeout_seconds: int = 60) -> dict[str, Any]:
         deadline = time.time() + timeout_seconds
+        attempts = 0
         while time.time() < deadline:
+            attempts += 1
             receipt = self._rpc("eth_getTransactionReceipt", [tx_hash])
             if receipt is not None:
                 return receipt
             time.sleep(1)
-        raise TimeoutError(f"timed out waiting for receipt: {tx_hash}")
+        raise TimeoutError(
+            f"timed out waiting for receipt after {timeout_seconds}s and {attempts} polls: {tx_hash}"
+        )
 
     def _rpc(self, method: str, params: list[Any]) -> Any:
         self.request_id += 1
@@ -876,10 +888,35 @@ class JsonRpcBackend:
                 "User-Agent": "evm-rpc-tests/0.1",
             },
         )
-        with urllib.request.urlopen(request) as response:
-            body = json.loads(response.read().decode())
+        try:
+            with urllib.request.urlopen(request, timeout=self.rpc_timeout_seconds) as response:
+                body = json.loads(response.read().decode())
+        except TimeoutError as exc:
+            raise TimeoutError(
+                f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {self.profile.rpc_url}"
+            ) from exc
+        except socket.timeout as exc:
+            raise TimeoutError(
+                f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {self.profile.rpc_url}"
+            ) from exc
+        except urllib.error.URLError as exc:
+            if isinstance(exc.reason, TimeoutError):
+                raise TimeoutError(
+                    f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {self.profile.rpc_url}"
+                ) from exc
+            if isinstance(exc.reason, socket.timeout):
+                raise TimeoutError(
+                    f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {self.profile.rpc_url}"
+                ) from exc
+            raise RuntimeError(f"rpc transport error for {method}: {exc.reason}") from exc
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(f"rpc decode error for {method}: {exc}") from exc
+        if not isinstance(body, dict):
+            raise RuntimeError(f"rpc response for {method} must be a JSON object")
         if "error" in body:
             raise RuntimeError(f"rpc error for {method}: {body['error']}")
+        if "result" not in body:
+            raise RuntimeError(f"rpc response for {method} missing result field")
         return body["result"]
 
 

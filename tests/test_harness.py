@@ -6,9 +6,11 @@ from io import StringIO
 import json
 import os
 from pathlib import Path
+import socket
 import subprocess
 import tempfile
 import unittest
+import urllib.request
 
 from adapter.bootstrap import StateBootstrapper
 from adapter.cli import main
@@ -88,7 +90,7 @@ from adapter.tx_context_generator import (
 from adapter.models import ExecutionResult, Report
 from adapter.oracle import ResultOracle
 from adapter.profile import describe_admin_key_source, load_chain_profile
-from adapter.report import write_report
+from adapter.report import durable_report_path, write_report
 from adapter.selector import TestSelector
 from adapter.signer import keccak256, private_key_to_address, sign_type_2_transaction
 
@@ -2081,13 +2083,15 @@ class HarnessTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmpdir:
             report_path = Path(tmpdir) / "report.json"
-            write_report(report, report_path)
+            written_paths = write_report(report, report_path)
             payload = json.loads(report_path.read_text())
 
         observed_by_case = {result["case_id"]: result["observed"] for result in payload["results"]}
         inline_case = observed_by_case["inline-256"]["receipt_logs"][0]
         digest_case = observed_by_case["digest-257"]["receipt_logs"][0]
 
+        self.assertEqual(written_paths[0], report_path)
+        self.assertEqual(written_paths[1], durable_report_path(report, report_path))
         self.assertEqual(inline_case["data"], exact_256)
         self.assertEqual(inline_case["data_length_bytes"], 256)
         self.assertNotIn("data_digest", inline_case)
@@ -2100,6 +2104,40 @@ class HarnessTests(unittest.TestCase):
             digest_case["data_digest"],
             "0x" + keccak256(bytes.fromhex(exact_257[2:])).hex(),
         )
+
+    def test_write_report_skips_durable_copy_for_non_operational_manifest(self) -> None:
+        report = Report(
+            manifest="custom-storage-smoke",
+            execution_specs_ref="test-ref",
+            suite_version="0.1.0",
+            chain_profile="mock-devnet",
+            chain_profile_version="1",
+            results=[],
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_path = Path(tmpdir) / "report.json"
+            written_paths = write_report(report, report_path)
+        self.assertEqual(written_paths, [report_path])
+        self.assertIsNone(durable_report_path(report, report_path))
+
+    def test_write_report_persists_durable_copy_for_operational_manifest(self) -> None:
+        report = Report(
+            manifest="upstream-system-mapped",
+            execution_specs_ref="test-ref",
+            suite_version="0.1.0",
+            chain_profile="mock-devnet",
+            chain_profile_version="1",
+            results=[],
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_path = Path(tmpdir) / "report.json"
+            durable_path = durable_report_path(report, report_path)
+            self.assertIsNotNone(durable_path)
+            written_paths = write_report(report, report_path)
+            self.assertTrue(report_path.exists())
+            self.assertTrue(durable_path.exists())
+            self.assertEqual(json.loads(report_path.read_text()), json.loads(durable_path.read_text()))
+            self.assertEqual(written_paths, [report_path, durable_path])
 
     def test_oracle_reports_precise_receipt_log_digest_mismatch(self) -> None:
         observed_data = "0x" + ("ff" * 32)
@@ -4037,6 +4075,36 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(second["results"][0]["namespace"], first["results"][0]["namespace"])
             self.assertTrue(second["results"][0]["tx_hashes"])
 
+    def test_cli_run_operational_manifest_writes_durable_report_artifact(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "run",
+                        "--profile",
+                        str(ROOT / "profiles/mock.toml"),
+                        "--manifest",
+                        str(ROOT / "suites/manifests/upstream_block_context_mapped.json"),
+                        "--state-dir",
+                        str(state_dir),
+                        "--report",
+                        str(report_path),
+                    ]
+                )
+            self.assertEqual(exit_code, 0)
+            payload = json.loads(stdout.getvalue())
+            durable_path = Path(payload["durable_report"])
+            self.assertEqual(payload["report"], str(report_path))
+            self.assertIn(str(report_path), payload["report_artifacts"])
+            self.assertIn(str(durable_path), payload["report_artifacts"])
+            self.assertTrue(report_path.exists())
+            self.assertTrue(durable_path.exists())
+            self.assertEqual(json.loads(report_path.read_text()), json.loads(durable_path.read_text()))
+
     def test_jsonrpc_backend_prepares_send_transaction_defaults(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         profile.admin_key_source = "rpc_unlocked"
@@ -4265,6 +4333,24 @@ class HarnessTests(unittest.TestCase):
             },
         )
 
+    def test_jsonrpc_backend_load_block_context_rejects_missing_receipt_block_result(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+
+        class StubBackend(JsonRpcBackend):
+            def _rpc(self, method: str, params: list[object]) -> object:
+                if method != "eth_getBlockByNumber":
+                    raise AssertionError(method)
+                if params != ["0x2a", False]:
+                    raise AssertionError(params)
+                return None
+
+        backend = StubBackend(profile)
+        with self.assertRaisesRegex(
+            ValueError,
+            r"block context receipt-block '0x2a' returned no block from eth_getBlockByNumber",
+        ):
+            backend._load_block_context({"transactionHash": "0xtx2", "status": "0x1", "blockNumber": "0x2a"})
+
     def test_jsonrpc_backend_load_block_context_rejects_missing_required_field(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
 
@@ -4286,9 +4372,73 @@ class HarnessTests(unittest.TestCase):
         backend = StubBackend(profile)
         with self.assertRaisesRegex(
             ValueError,
-            "block context missing required field gasLimit for gaslimit",
+            "block context receipt-block '0x2a' missing required field gasLimit for gaslimit",
         ):
             backend._load_block_context({"transactionHash": "0xtx2", "status": "0x1", "blockNumber": "0x2a"})
+
+    def test_jsonrpc_backend_wait_for_receipt_reports_poll_count_on_timeout(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+
+        class StubBackend(JsonRpcBackend):
+            def _rpc(self, method: str, params: list[object]) -> object:
+                if method != "eth_getTransactionReceipt":
+                    raise AssertionError(method)
+                return None
+
+        backend = StubBackend(profile)
+        with self.assertRaisesRegex(
+            TimeoutError,
+            r"timed out waiting for receipt after 2s and 2 polls: 0xtimeout",
+        ):
+            backend._wait_for_receipt("0xtimeout", timeout_seconds=2)
+
+    def test_jsonrpc_backend_wraps_socket_timeout_with_method_and_endpoint(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+
+        original_urlopen = urllib.request.urlopen
+
+        def fake_urlopen(*args: object, **kwargs: object) -> object:
+            raise socket.timeout("timed out")
+
+        urllib.request.urlopen = fake_urlopen
+        try:
+            with self.assertRaisesRegex(
+                TimeoutError,
+                rf"rpc timeout for eth_blockNumber after {backend.rpc_timeout_seconds}s against {profile.rpc_url}",
+            ):
+                backend._rpc("eth_blockNumber", [])
+        finally:
+            urllib.request.urlopen = original_urlopen
+
+    def test_jsonrpc_backend_rejects_response_without_result_field(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+
+        class Response:
+            def __enter__(self) -> "Response":
+                return self
+
+            def __exit__(self, exc_type, exc, tb) -> bool:
+                return False
+
+            def read(self) -> bytes:
+                return b'{"jsonrpc":"2.0","id":1}'
+
+        original_urlopen = urllib.request.urlopen
+
+        def fake_urlopen(*args: object, **kwargs: object) -> Response:
+            return Response()
+
+        urllib.request.urlopen = fake_urlopen
+        try:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                r"rpc response for eth_blockNumber missing result field",
+            ):
+                backend._rpc("eth_blockNumber", [])
+        finally:
+            urllib.request.urlopen = original_urlopen
 
     def test_jsonrpc_backend_rejects_mismatched_admin_account(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")

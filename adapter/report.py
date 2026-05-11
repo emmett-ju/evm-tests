@@ -9,13 +9,36 @@ from adapter.models import Report
 from adapter.signer import keccak256
 
 LARGE_RECEIPT_LOG_INLINE_BYTES = 256
+DURABLE_EVIDENCE_MANIFESTS = frozenset(
+    {
+        "upstream-block-context-mapped",
+        "upstream-log-mapped",
+        "upstream-system-mapped",
+    }
+)
 
 
-def write_report(report: Report, path: str | Path) -> None:
+def write_report(report: Report, path: str | Path) -> list[Path]:
     report_path = Path(path)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     payload = _compact_large_receipt_log_payloads(asdict(report))
     report_path.write_text(json.dumps(payload, indent=2, sort_keys=True))
+
+    written_paths = [report_path]
+    durable_path = durable_report_path(report, report_path)
+    if durable_path is not None:
+        durable_path.parent.mkdir(parents=True, exist_ok=True)
+        durable_path.write_text(json.dumps(payload, indent=2, sort_keys=True))
+        written_paths.append(durable_path)
+    return written_paths
+
+
+def durable_report_path(report: Report, report_path: str | Path) -> Path | None:
+    if report.manifest not in DURABLE_EVIDENCE_MANIFESTS:
+        return None
+    source_path = Path(report_path)
+    stem = source_path.stem or "report"
+    return source_path.parent / "evidence" / report.chain_profile / report.manifest / f"{stem}.json"
 
 
 def _compact_large_receipt_log_payloads(node: Any) -> Any:

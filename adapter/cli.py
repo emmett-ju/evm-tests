@@ -55,7 +55,7 @@ from adapter.memory_generator import generate_upstream_memory_manifest, generate
 from adapter.models import Report
 from adapter.oracle import ResultOracle
 from adapter.profile import load_chain_profile
-from adapter.report import write_report
+from adapter.report import durable_report_path, write_report
 from adapter.selector import TestSelector
 from adapter.tx_context_generator import (
     generate_upstream_tx_context_manifest,
@@ -358,7 +358,8 @@ def main(argv: list[str] | None = None) -> int:
             chain_profile_version=manifest.chain_profile_version,
             results=results,
         )
-        write_report(report, args.report)
+        written_report_paths = write_report(report, args.report)
+        durable_report = durable_report_path(report, args.report)
         print(
             json.dumps(
                 {
@@ -369,6 +370,8 @@ def main(argv: list[str] | None = None) -> int:
                         if not decision.selected
                     },
                     "report": str(Path(args.report)),
+                    "durable_report": None if durable_report is None else str(durable_report),
+                    "report_artifacts": [str(path) for path in written_report_paths],
                     "passed": sum(1 for result in results if result.success),
                     "failed": sum(1 for result in results if not result.success),
                     "selection_summary": {
