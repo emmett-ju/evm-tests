@@ -11,6 +11,7 @@ from adapter.generator import deploy_contract_step, invoke_contract_step, wait_r
 from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
 from adapter.system_witness import (
+    _create_child_code_payload,
     build_create_child_code_system_witness,
     build_create_empty_child_system_witness,
     build_return_revert_system_witness,
@@ -382,9 +383,13 @@ def _scan_create(text: str) -> list[AutoSystemInventoryEntry]:
             )
             case_id = f"upstream.benchmark.system.test_create.{opcode.lower()}.{combo_slug}"
             is_empty_admitted = combo_label in {"0 bytes without value", "0 bytes with value"}
-            is_child_code_admitted = combo_label == "0.25x max code size with zero data"
+            is_child_code_admitted = combo_label in {
+                "0.25x max code size with non-zero data",
+                "0.25x max code size with zero data",
+            }
             admitted = is_empty_admitted or is_child_code_admitted
             create_value = 1 if combo_label == "0 bytes with value" else 0
+            create_data_kind = "non_zero" if "non-zero data" in combo_label else "zero" if is_child_code_admitted else None
             results.append(
                 AutoSystemInventoryEntry(
                     upstream_ref=upstream_ref,
@@ -402,7 +407,7 @@ def _scan_create(text: str) -> list[AutoSystemInventoryEntry]:
                     opcode=opcode if admitted else None,
                     create_value=create_value if admitted else None,
                     create_initcode_size=6144 if is_child_code_admitted else 0 if is_empty_admitted else None,
-                    create_data_kind="zero" if is_child_code_admitted else None,
+                    create_data_kind=create_data_kind,
                     create_salt=42 if admitted and opcode == "CREATE2" else None,
                 )
             )
@@ -560,7 +565,7 @@ def _create_child_code_inventory_entry_to_template(entry: AutoSystemInventoryEnt
     return SystemMappingTemplate(
         case_id=entry.case_id,
         description=(
-            f"Mapped from execution-specs {opcode} non-empty zero-data create benchmark onto a single wrapper "
+            f"Mapped from execution-specs {opcode} non-empty {create_data_kind.replace('_', '-')} data create benchmark onto a single wrapper "
             "that stores create success, created address, created code size, and created code hash."
         ),
         namespace_seed=_build_namespace_seed(entry.case_id),
@@ -687,10 +692,14 @@ def _build_create_empty_child_notes(*, opcode: str, value: int) -> list[str]:
 
 def _build_create_child_code_notes(*, opcode: str, initcode_size: int, data_kind: str) -> list[str]:
     salt_note = " with CREATE2 salt 42" if opcode == "CREATE2" else ""
+    data_label = data_kind.replace("_", "-")
+    blocked_neighbor_note = (
+        "Only the smallest non-zero-data and zero-data non-empty variants are admitted; larger code-size ratios and value-bearing non-empty variants remain blocked until separate witness contracts are mapped."
+    )
     return [
-        f"Upstream intent: benchmark {opcode} with {initcode_size}-byte {data_kind} initcode that deploys {initcode_size}-byte child code.",
+        f"Upstream intent: benchmark {opcode} with {initcode_size}-byte {data_label} initcode that deploys {initcode_size}-byte child code.",
         f"RPC mapping: a single deployed wrapper performs one zero value {opcode}{salt_note}, then stores create success, the returned child address, EXTCODESIZE(child), and EXTCODEHASH(child) as deterministic witness fields.",
-        "Only the smallest zero-data non-empty variants are admitted; non-zero data, larger code-size ratios, and value-bearing non-empty variants remain blocked until separate witness contracts are mapped.",
+        blocked_neighbor_note,
         "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, child code size, and child code hash are deterministic final observables.",
     ]
 
@@ -735,13 +744,17 @@ def _build_create_empty_child_runtime(opcode: str, *, value: int = 0) -> str:
 
 
 def _build_create_child_code_runtime(opcode: str, *, initcode_size: int, data_kind: str) -> str:
-    if data_kind != "zero":
+    child_code = _create_child_code_payload(initcode_size=initcode_size, data_kind=data_kind)
+    if data_kind == "zero":
+        builder = _BytecodeBuilder()
+        builder.push_int(initcode_size)
+        builder.push_int(0)
+        builder.op(0xF3)  # child initcode: RETURN(0, initcode_size) from zero memory
+        initcode = builder.finish()
+    elif data_kind == "non_zero":
+        initcode = child_code
+    else:
         raise ValueError(f"unsupported create child code data kind: {data_kind}")
-    builder = _BytecodeBuilder()
-    builder.push_int(initcode_size)
-    builder.push_int(0)
-    builder.op(0xF3)  # child initcode: RETURN(0, initcode_size) from zero memory
-    initcode = builder.finish()
 
     runtime = _BytecodeBuilder()
     runtime.push_int(len(initcode))

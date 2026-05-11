@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal, Mapping
 
-from adapter.assembler import _word_hex
+from adapter.assembler import _push_int, _word_hex
 
 SYSTEM_WITNESS_VERSION = 1
 RETURN_REVERT_SELF_CALL_SHAPE = "return_revert_self_call"
@@ -252,8 +252,8 @@ def _validate_create_child_code_declaration(value: Mapping[str, Any]) -> None:
     if not isinstance(initcode_size, int) or initcode_size <= 0:
         raise ValueError("observe.system_witness.initcode_size must be a positive integer for create_child_code")
     data_kind = value.get("data_kind")
-    if data_kind != "zero":
-        raise ValueError("observe.system_witness.data_kind must be 'zero' for create_child_code")
+    if data_kind not in {"zero", "non_zero"}:
+        raise ValueError("observe.system_witness.data_kind must be 'zero' or 'non_zero' for create_child_code")
     salt = value.get("salt")
     if opcode == "CREATE" and salt is not None:
         raise ValueError("observe.system_witness.salt must be omitted for CREATE create_child_code")
@@ -303,7 +303,21 @@ def _collect_create_child_code_system_witness_from_storage(
 def _create_child_code_payload(*, initcode_size: int, data_kind: str) -> bytes:
     if data_kind == "zero":
         return b"\x00" * initcode_size
+    if data_kind == "non_zero":
+        initcode_prefix = _create_child_non_zero_initcode_prefix(initcode_size)
+        return initcode_prefix + bytes(index % 256 for index in range(initcode_size - len(initcode_prefix)))
     raise ValueError(f"unsupported create_child_code data kind: {data_kind!r}")
+
+
+def _create_child_non_zero_initcode_prefix(initcode_size: int) -> bytes:
+    if initcode_size <= 0:
+        raise ValueError("create_child_code initcode_size must be positive")
+    prefix = _push_int(initcode_size) + bytes([0x80, 0x5F, 0x5F, 0x39, 0x5F, 0xF3])
+    if len(prefix) > initcode_size:
+        raise ValueError(
+            f"create_child_code non_zero initcode_size {initcode_size} is smaller than initcode prefix {len(prefix)}"
+        )
+    return prefix
 
 
 def _keccak256(data: bytes) -> bytes:

@@ -45,6 +45,7 @@ from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
 from adapter.signer import keccak256, load_private_key, private_key_to_address, sign_type_2_transaction
 from adapter.system_witness import (
+    _create_child_code_payload,
     collect_system_witness_from_storage,
     system_witness_storage_slots,
 )
@@ -613,7 +614,7 @@ class MockBackend:
         )
         if code != expected_runtime:
             raise ValueError(f"unsupported mock contract code path: {code}")
-        code_payload = b"\x00" * initcode_size
+        code_payload = _create_child_code_payload(initcode_size=initcode_size, data_kind=data_kind)
         storage["0x00"] = WORD_01
         storage["0x01"] = self._address_to_word("0xdddddddddddddddddddddddddddddddddddddddd")
         storage["0x02"] = self._hex_to_word(hex(initcode_size))

@@ -6,9 +6,12 @@ def _build_init_code(runtime_code: str) -> str:
     length = len(runtime_bytes)
     if length == 0:
         raise ValueError("runtime_code must not be empty")
-    if length > 0xFF:
-        raise ValueError("runtime_code too long for PUSH1 init helper")
-    return f"0x60{length:02x}600c60003960{length:02x}6000f3{runtime_hex}"
+    length_push = _push_int(length)
+    offset = len(length_push) + 5 + len(length_push) + 3
+    if offset > 0xFF:
+        raise ValueError(f"runtime_code init helper offset too large: {offset}")
+    init_code = length_push + bytes([0x60, offset, 0x60, 0x00, 0x39]) + length_push + bytes([0x60, 0x00, 0xF3]) + runtime_bytes
+    return "0x" + init_code.hex()
 
 def _push_int(value: int) -> bytes:
     if value < 0:
