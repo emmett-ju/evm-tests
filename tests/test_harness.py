@@ -5528,50 +5528,72 @@ class HarnessTests(unittest.TestCase):
             backend.execute_case(broken_case, "negative-malformed-system-hex")
 
     def test_cli_run_mock_system_manifest_bounds_malformed_system_case_as_proof_error(self) -> None:
-        payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
-        payload["cases"][0]["steps"][0]["bytecode_runtime"] = payload["cases"][0]["steps"][0]["bytecode_runtime"].replace(
-            "57", "56", 1
-        )
-        payload["cases"][0]["steps"][0]["bytecode_init"] = "0x60" + payload["cases"][0]["steps"][0]["bytecode_runtime"][2:]
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp_path = Path(tmpdir)
-            state_dir = tmp_path / "state"
-            report_path = tmp_path / "report.json"
-            manifest_path = tmp_path / "broken-system.json"
-            manifest_path.write_text(json.dumps(payload))
-            args = [
-                "run",
-                "--profile",
-                str(ROOT / "profiles/mock.toml"),
-                "--manifest",
-                str(manifest_path),
-                "--state-dir",
-                str(state_dir),
-                "--report",
-                str(report_path),
-            ]
-            self.assertEqual(main(args), 0)
-            report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 10)
-            broken = next(
-                result
-                for result in report["results"]
-                if result["case_id"] == "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data"
-            )
-            self.assertFalse(broken["success"])
-            self.assertEqual(
-                broken["diffs"],
-                ["proof error: malformed system wrapper shape: missing canonical wrapper JUMPI"],
-            )
-            self.assertEqual(broken["observed"], {})
-            self.assertEqual(broken["context"], {})
-            passing = [
-                result
-                for result in report["results"]
-                if result["case_id"] != "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data"
-            ]
-            self.assertTrue(all(result["success"] for result in passing))
-            self.assertTrue(all(result["diffs"] == [] for result in passing))
+        scenarios = [
+            {
+                "label": "missing canonical wrapper JUMPI",
+                "case_id": "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
+                "runtime_factory": lambda runtime: runtime.replace("57", "56", 1),
+                "expected_diff": "proof error: malformed system wrapper shape: missing canonical wrapper JUMPI",
+            },
+            {
+                "label": "oversized returndata declaration",
+                "case_id": "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data",
+                "runtime_factory": lambda runtime: runtime.replace("62100000", "62100001", 1),
+                "expected_diff": "proof error: system returndata declaration exceeds admitted maximum: 1048577 > 1048576",
+            },
+            {
+                "label": "malformed runtime hex",
+                "case_id": "upstream.benchmark.system.test_return_revert.return.empty",
+                "runtime_factory": lambda runtime: "0xzz",
+                "expected_diff": "proof error: malformed system runtime hex",
+            },
+        ]
+
+        for scenario in scenarios:
+            with self.subTest(case=scenario["case_id"], label=scenario["label"]):
+                payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
+                target_case = next(
+                    case for case in payload["cases"] if case["case_id"] == scenario["case_id"]
+                )
+                runtime = scenario["runtime_factory"](target_case["steps"][0]["bytecode_runtime"])
+                target_case["steps"][0]["bytecode_runtime"] = runtime
+                target_case["steps"][0]["bytecode_init"] = "0x60" + runtime[2:]
+
+                with tempfile.TemporaryDirectory() as tmpdir:
+                    tmp_path = Path(tmpdir)
+                    state_dir = tmp_path / "state"
+                    report_path = tmp_path / "report.json"
+                    manifest_path = tmp_path / "broken-system.json"
+                    manifest_path.write_text(json.dumps(payload))
+                    args = [
+                        "run",
+                        "--profile",
+                        str(ROOT / "profiles/mock.toml"),
+                        "--manifest",
+                        str(manifest_path),
+                        "--state-dir",
+                        str(state_dir),
+                        "--report",
+                        str(report_path),
+                    ]
+                    self.assertEqual(main(args), 0)
+                    report = json.loads(report_path.read_text())
+
+                self.assertEqual(report["manifest"], "upstream-system-mapped")
+                self.assertEqual(len(report["results"]), 10)
+                broken = next(
+                    result for result in report["results"] if result["case_id"] == scenario["case_id"]
+                )
+                self.assertFalse(broken["success"])
+                self.assertEqual(broken["diffs"], [scenario["expected_diff"]])
+                self.assertEqual(broken["observed"], {})
+                self.assertEqual(broken["context"], {})
+                passing = [
+                    result for result in report["results"] if result["case_id"] != scenario["case_id"]
+                ]
+                self.assertEqual(len(passing), 9)
+                self.assertTrue(all(result["success"] for result in passing))
+                self.assertTrue(all(result["diffs"] == [] for result in passing))
 
     def test_mock_backend_rejects_unsupported_log_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
