@@ -1638,6 +1638,50 @@ class HarnessTests(unittest.TestCase):
             self.assertIn("upstream.benchmark.block_context.test_blockhash.random", blocked_case_ids)
             self.assertIn("upstream.benchmark.block_context.test_block_context_ops.blobbasefee", blocked_case_ids)
 
+    def test_block_context_inventory_locks_blobbasefee_as_blocked_boundary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_path = Path(tmpdir) / "upstream_block_context_templates.json"
+            inventory_path = Path(tmpdir) / "upstream_block_context_inventory.json"
+            manifest_path = Path(tmpdir) / "upstream_block_context_mapped.json"
+            templates = generate_upstream_block_context_templates(
+                repo_root=ROOT,
+                output_path=generated_path,
+                inventory_path=inventory_path,
+            )
+            manifest = generate_upstream_block_context_manifest(
+                repo_root=ROOT,
+                template_path=generated_path,
+                output_path=manifest_path,
+            )
+            inventory = json.loads(inventory_path.read_text())
+
+        blob_entry = next(
+            entry
+            for entry in inventory["entries"]
+            if entry["case_id"] == "upstream.benchmark.block_context.test_block_context_ops.blobbasefee"
+        )
+        self.assertEqual(
+            blob_entry,
+            {
+                "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_block_context_ops[opcode=BLOBBASEFEE]",
+                "case_id": "upstream.benchmark.block_context.test_block_context_ops.blobbasefee",
+                "admitted": False,
+                "mode": None,
+                "reasons": [
+                    "requires blob-base-fee opcode support plus a blob-capable profile witness not yet proven"
+                ],
+                "source": "test_block_context_ops",
+            },
+        )
+        self.assertNotIn(
+            "upstream.benchmark.block_context.test_block_context_ops.blobbasefee",
+            [case["case_id"] for case in templates["cases"]],
+        )
+        self.assertNotIn(
+            "upstream.benchmark.block_context.test_block_context_ops.blobbasefee",
+            [case["case_id"] for case in manifest["cases"]],
+        )
+
     def test_block_context_template_scanner_fails_loudly_on_missing_function(self) -> None:
         source = ROOT / "third_party/execution-specs/tests/benchmark/compute/instruction/test_block_context.py"
         original = source.read_text()
