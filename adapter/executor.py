@@ -139,7 +139,7 @@ class MockBackend:
                 }
                 contract_state = self._address_state(contracts, contract_address)
                 contract_state["code"] = step["bytecode_runtime"]
-                contract_state["balance"] = self._hex_to_word(step.get("value", "0x0"))
+                contract_state["balance"] = step.get("value", "0x0").lower()
                 if "initial_storage" in step:
                     contract_state["storage"] = dict(step["initial_storage"])
             elif action == "invoke_contract":
@@ -284,15 +284,32 @@ class MockBackend:
                     value = step.get("value", "0x0")
                     storage["0x00"] = self._hex_to_word(value)
                 elif code == "0x3060005500":
+                    storage["0x00"] = self._address_to_word(target_address)
+                elif code == "0x3360005500":
                     storage["0x00"] = self._address_to_word(self.admin_account)
+                elif code == "0x3660005500":
+                    calldata = data[2:] if data.startswith("0x") else data
+                    storage["0x00"] = self._hex_to_word(hex(len(calldata) // 2))
+                elif code == "0x5f3560005500":
+                    calldata = data[2:] if data.startswith("0x") else data
+                    storage["0x00"] = "0x" + calldata[:64].ljust(64, "0").lower()
+                elif code == "0x3260005500":
+                    storage["0x00"] = self._address_to_word(self.admin_account)
+                elif code == "0x3a60005500":
+                    storage["0x00"] = self._hex_to_word(gas_price)
                 elif code == SELFBALANCE_RUNTIME:
                     contract_balance = contract_state.get("balance", ZERO_STORAGE_WORD)
                     storage["0x00"] = self._hex_to_word(contract_balance)
                 elif code == CODESIZE_RUNTIME:
                     storage["0x00"] = WORD_05
                 elif code == BALANCE_RUNTIME:
-                    contract_balance = admin_state.get("balance", ZERO_STORAGE_WORD)
-                    storage["0x00"] = self._hex_to_word(contract_balance)
+                    payload = data[2:] if data.startswith("0x") else data
+                    if len(payload) > 64:
+                        raise ValueError(f"unsupported balance calldata payload: {data!r}")
+                    balance_address = "0x" + payload[-40:].rjust(40, "0")
+                    balance_state = self._address_state(contracts, balance_address)
+                    balance_value = balance_state.get("balance", "0x0")
+                    storage["0x00"] = self._hex_to_word(balance_value)
                 else:
                     raise ValueError(f"unsupported mock contract code path: {code}")
             elif action == "wait_receipt":
@@ -453,36 +470,51 @@ class MockBackend:
         data: str,
     ) -> None:
         mode = keccak_probe.get("mode")
-        if mode == "basic":
+        if mode in {"basic", "keccak"}:
             expected_runtime = _build_basic_keccak_runtime(
-                keccak_probe["mem_size"],
-                keccak_probe["msg_size"],
-                keccak_probe["offset"],
-                keccak_probe["memory_seed_kind"],
-                keccak_probe["memory_update"],
+                offset=keccak_probe["offset"],
+                mem_update=keccak_probe["mem_update"],
             )
             if code != expected_runtime:
                 raise ValueError(f"unsupported mock contract code path: {code}")
-            storage.update(simulate_basic_keccak_case(keccak_probe))
+            calldata = bytes.fromhex((data[2:] if data.startswith("0x") else data) or "")
+            digest, memory_witness_word, pre_witness_msize = simulate_basic_keccak_case(
+                calldata=calldata,
+                offset=keccak_probe["offset"],
+                mem_update=keccak_probe["mem_update"],
+            )
+            storage["0x00"] = digest
+            storage["0x01"] = self._hex_to_word(hex(memory_witness_word))
+            storage["0x02"] = self._hex_to_word(hex(pre_witness_msize))
             return
         if mode == "diff_mem_msg_sizes":
             expected_runtime = _build_diff_mem_msg_sizes_runtime(
-                keccak_probe["mem_size"],
-                keccak_probe["msg_size"],
+                mem_size=keccak_probe["mem_size"],
+                msg_size=keccak_probe["msg_size"],
             )
             if code != expected_runtime:
                 raise ValueError(f"unsupported mock contract code path: {code}")
-            storage.update(simulate_diff_mem_msg_sizes_case(keccak_probe))
+            digest, pre_witness_msize = simulate_diff_mem_msg_sizes_case(
+                mem_size=keccak_probe["mem_size"],
+                msg_size=keccak_probe["msg_size"],
+            )
+            storage["0x00"] = digest
+            storage["0x01"] = self._hex_to_word(hex(keccak_probe["msg_size"]))
+            storage["0x02"] = self._hex_to_word(hex(pre_witness_msize))
             return
         if mode == "max_permutations":
-            expected_runtime = _build_max_permutations_runtime(keccak_probe["input_length"])
+            witness_input_length = keccak_probe.get("witness_input_length", keccak_probe.get("input_length"))
+            if witness_input_length is None:
+                raise ValueError("keccak max_permutations probe is missing witness_input_length")
+            expected_runtime = _build_max_permutations_runtime(witness_input_length)
             if code != expected_runtime:
                 raise ValueError(f"unsupported mock contract code path: {code}")
             payload = data[2:] if data.startswith("0x") else data
-            digest = keccak256(bytes.fromhex(payload))
+            digest = "0x" + keccak256(b"\x00" * witness_input_length).hex()
+            rounded_memory_size = ((witness_input_length + 31) // 32) * 32
             storage["0x00"] = digest
-            storage["0x01"] = self._hex_to_word(hex(keccak_probe["input_length"]))
-            storage["0x02"] = self._hex_to_word(hex(keccak_probe["rounded_memory_size"]))
+            storage["0x01"] = self._hex_to_word(hex(witness_input_length))
+            storage["0x02"] = self._hex_to_word(hex(rounded_memory_size))
             return
         raise ValueError(f"unsupported keccak probe mode: {mode}")
 

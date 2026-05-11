@@ -1967,10 +1967,7 @@ class HarnessTests(unittest.TestCase):
             report_path = tmp_path / "report.json"
             manifest_path.write_text(json.dumps(payload, indent=2, sort_keys=True))
 
-            with self.assertRaisesRegex(
-                ValueError,
-                r"declared receipt_logs witness does not match observe\.log_probe: receipt_logs\[0\]\.topics\[0\]: expected '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', got '0x0000000000000000000000000000000000000000000000000000000000000000'",
-            ):
+            self.assertEqual(
                 main(
                     [
                         "run",
@@ -1983,8 +1980,25 @@ class HarnessTests(unittest.TestCase):
                         "--report",
                         str(report_path),
                     ]
-                )
-            self.assertFalse(report_path.exists())
+                ),
+                0,
+            )
+            report = json.loads(report_path.read_text())
+            broken = next(
+                result
+                for result in report["results"]
+                if result["case_id"]
+                == "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true"
+            )
+            self.assertFalse(broken["success"])
+            self.assertEqual(
+                broken["diffs"],
+                [
+                    "proof error: declared receipt_logs witness does not match observe.log_probe: receipt_logs[0].topics[0]: expected '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', got '0x0000000000000000000000000000000000000000000000000000000000000000'"
+                ],
+            )
+            self.assertEqual(broken["observed"], {})
+            self.assertEqual(broken["context"], {})
 
     def test_cli_run_mock_upstream_log_manifest_rejects_log_probe_opcode_topic_count_mismatch(self) -> None:
         payload = json.loads((ROOT / "suites/manifests/upstream_log_mapped.json").read_text())
@@ -2003,10 +2017,7 @@ class HarnessTests(unittest.TestCase):
             report_path = tmp_path / "report.json"
             manifest_path.write_text(json.dumps(payload, indent=2, sort_keys=True))
 
-            with self.assertRaisesRegex(
-                ValueError,
-                r"observe\.log_probe\.topic_count does not match opcode LOG0: expected 0, got 1",
-            ):
+            self.assertEqual(
                 main(
                     [
                         "run",
@@ -2019,8 +2030,25 @@ class HarnessTests(unittest.TestCase):
                         "--report",
                         str(report_path),
                     ]
-                )
-            self.assertFalse(report_path.exists())
+                ),
+                0,
+            )
+            report = json.loads(report_path.read_text())
+            broken = next(
+                result
+                for result in report["results"]
+                if result["case_id"]
+                == "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true"
+            )
+            self.assertFalse(broken["success"])
+            self.assertEqual(
+                broken["diffs"],
+                [
+                    "proof error: observe.log_probe.topic_count does not match opcode LOG0: expected 0, got 1"
+                ],
+            )
+            self.assertEqual(broken["observed"], {})
+            self.assertEqual(broken["context"], {})
 
     def test_write_report_compacts_only_receipt_log_payloads_above_inline_threshold(self) -> None:
         exact_256 = "0x" + ("ab" * 256)
@@ -4105,6 +4133,56 @@ class HarnessTests(unittest.TestCase):
             self.assertTrue(durable_path.exists())
             self.assertEqual(json.loads(report_path.read_text()), json.loads(durable_path.read_text()))
 
+    def test_cli_run_operational_manifests_preserve_closeout_evidence(self) -> None:
+        scenarios = [
+            ("upstream_block_context_mapped.json", "upstream-block-context-mapped", 7),
+            ("upstream_log_mapped.json", "upstream-log-mapped", 110),
+            ("upstream_system_mapped.json", "upstream-system-mapped", 10),
+        ]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            for manifest_filename, manifest_name, expected_results in scenarios:
+                with self.subTest(manifest=manifest_name):
+                    case_dir = tmp_path / manifest_name
+                    state_dir = case_dir / "state"
+                    report_path = case_dir / "report.json"
+                    stdout = StringIO()
+                    with redirect_stdout(stdout):
+                        exit_code = main(
+                            [
+                                "run",
+                                "--profile",
+                                str(ROOT / "profiles/mock.toml"),
+                                "--manifest",
+                                str(ROOT / "suites/manifests" / manifest_filename),
+                                "--state-dir",
+                                str(state_dir),
+                                "--report",
+                                str(report_path),
+                            ]
+                        )
+                    self.assertEqual(exit_code, 0)
+                    payload = json.loads(stdout.getvalue())
+                    durable_path = Path(payload["durable_report"])
+                    self.assertEqual(payload["report"], str(report_path))
+                    self.assertEqual(
+                        durable_path,
+                        case_dir / "evidence" / "mock-devnet" / manifest_name / "report.json",
+                    )
+                    self.assertEqual(
+                        set(payload["report_artifacts"]),
+                        {str(report_path), str(durable_path)},
+                    )
+                    self.assertTrue(report_path.exists())
+                    self.assertTrue(durable_path.exists())
+                    report = json.loads(report_path.read_text())
+                    self.assertEqual(report["manifest"], manifest_name)
+                    self.assertEqual(report["chain_profile"], "mock-devnet")
+                    self.assertEqual(len(report["results"]), expected_results)
+                    self.assertTrue(all(result["success"] for result in report["results"]))
+                    self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
+                    self.assertEqual(report, json.loads(durable_path.read_text()))
+
     def test_jsonrpc_backend_prepares_send_transaction_defaults(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         profile.admin_key_source = "rpc_unlocked"
@@ -5285,12 +5363,22 @@ class HarnessTests(unittest.TestCase):
                 "--report",
                 str(report_path),
             ]
-            with self.assertRaisesRegex(
-                ValueError,
-                "missing mock block-context witness config: block_context.timestamp is required",
-            ):
-                main(args)
-            self.assertFalse(report_path.exists())
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(report["manifest"], "upstream-block-context-mapped")
+            self.assertEqual(len(report["results"]), 7)
+            self.assertTrue(all(not result["success"] for result in report["results"]))
+            self.assertTrue(
+                all(
+                    result["diffs"]
+                    == [
+                        "proof error: missing mock block-context witness config: block_context.timestamp is required"
+                    ]
+                    for result in report["results"]
+                )
+            )
+            self.assertTrue(all(result["observed"] == {} for result in report["results"]))
+            self.assertTrue(all(result["context"] == {} for result in report["results"]))
 
     def test_cli_run_mock_upstream_account_query_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
