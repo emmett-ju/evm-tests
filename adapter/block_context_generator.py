@@ -11,9 +11,11 @@ from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
 
 
-BLOCKHASH_BLOCKED_REASON = "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
+BLOCKHASH_HISTORICAL_BLOCKED_REASON = "requires controllable historical block-hash witness not available through the current RPC-only harness"
+BLOCKHASH_DYNAMIC_BLOCKED_REASON = "requires gas-derived dynamic block index plus historical block-hash witness not available through the current RPC-only harness"
 BLOBBASEFEE_BLOCKED_REASON = "requires blob-base-fee opcode support plus a blob-capable profile witness not yet proven"
 
+BLOCK_CONTEXT_BLOCKHASH_CURRENT_RUNTIME = "0x43405f5500"
 BLOCK_CONTEXT_COINBASE_RUNTIME = "0x4160005500"
 BLOCK_CONTEXT_TIMESTAMP_RUNTIME = "0x4260005500"
 BLOCK_CONTEXT_NUMBER_RUNTIME = "0x4360005500"
@@ -24,6 +26,7 @@ BLOCK_CONTEXT_BASEFEE_RUNTIME = "0x4860005500"
 
 BlockContextTemplateMode = Literal[
     "basefee",
+    "blockhash_current",
     "chainid",
     "coinbase",
     "gaslimit",
@@ -66,6 +69,19 @@ BLOCK_CONTEXT_MODE_SPECS: dict[BlockContextTemplateMode, dict[str, str]] = {
         ),
         "runtime_code": BLOCK_CONTEXT_BASEFEE_RUNTIME,
         "expected_word": "$block_basefee_word",
+    },
+    "blockhash_current": {
+        "description": "Mapped from execution-specs BLOCKHASH current-block benchmark onto an RPC-only deploy/call/storage-assert flow.",
+        "namespace_seed": "upstream-block-context-blockhash-current",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark BLOCKHASH with the current block number.",
+                "RPC mapping: runtime stores BLOCKHASH(NUMBER) in slot0 after deployment and invocation.",
+                "Admitted narrowly because the EVM specifies BLOCKHASH for the current block returns zero, making the proof independent of historical block fixtures while still exercising the opcode path.",
+            ]
+        ),
+        "runtime_code": BLOCK_CONTEXT_BLOCKHASH_CURRENT_RUNTIME,
+        "expected_word": "0x0000000000000000000000000000000000000000000000000000000000000000",
     },
     "chainid": {
         "description": "Mapped from execution-specs CHAINID onto an RPC-only deploy/call/storage-assert flow.",
@@ -301,13 +317,19 @@ def _scan_blockhash_cases(text: str) -> list[AutoBlockContextInventoryEntry]:
         AutoBlockContextInventoryEntry(
             upstream_ref=f"tests/benchmark/compute/instruction/test_block_context.py::test_blockhash[index={label}]",
             case_id=f"upstream.benchmark.block_context.test_blockhash.{label}",
-            admitted=False,
-            mode=None,
-            reasons=[BLOCKHASH_BLOCKED_REASON],
+            admitted=label == "current_block",
+            mode="blockhash_current" if label == "current_block" else None,
+            reasons=[] if label == "current_block" else [_blockhash_blocked_reason(label)],
             source="test_blockhash",
         )
         for label in labels
     ]
+
+
+def _blockhash_blocked_reason(label: str) -> str:
+    if label == "random":
+        return BLOCKHASH_DYNAMIC_BLOCKED_REASON
+    return BLOCKHASH_HISTORICAL_BLOCKED_REASON
 
 
 def _resolve_zero_param_mode(opcode: str) -> tuple[BlockContextTemplateMode | None, list[str]]:

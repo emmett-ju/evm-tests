@@ -76,7 +76,7 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
+        "requires controllable historical block-hash witness not available through the current RPC-only harness"
       ],
       "source": "test_blockhash"
     },
@@ -86,18 +86,16 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
+        "requires controllable historical block-hash witness not available through the current RPC-only harness"
       ],
       "source": "test_blockhash"
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_blockhash[index=current_block]",
       "case_id": "upstream.benchmark.block_context.test_blockhash.current_block",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
-      ],
+      "admitted": true,
+      "mode": "blockhash_current",
+      "reasons": [],
       "source": "test_blockhash"
     },
     {
@@ -106,7 +104,7 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
+        "requires controllable historical block-hash witness not available through the current RPC-only harness"
       ],
       "source": "test_blockhash"
     },
@@ -116,7 +114,7 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
+        "requires gas-derived dynamic block index plus historical block-hash witness not available through the current RPC-only harness"
       ],
       "source": "test_blockhash"
     }

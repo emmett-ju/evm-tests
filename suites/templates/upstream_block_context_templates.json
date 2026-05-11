@@ -86,6 +86,18 @@
         "Admitted because the block timestamp is a truthful runtime environment value that can be observed from the actual execution result without special fixtures."
       ],
       "mode": "timestamp"
+    },
+    {
+      "case_id": "upstream.benchmark.block_context.test_blockhash.current_block",
+      "description": "Mapped from execution-specs BLOCKHASH current-block benchmark onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-block-context-blockhash-current",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_block_context.py::test_blockhash[index=current_block]",
+      "notes": [
+        "Upstream intent: benchmark BLOCKHASH with the current block number.",
+        "RPC mapping: runtime stores BLOCKHASH(NUMBER) in slot0 after deployment and invocation.",
+        "Admitted narrowly because the EVM specifies BLOCKHASH for the current block returns zero, making the proof independent of historical block fixtures while still exercising the opcode path."
+      ],
+      "mode": "blockhash_current"
     }
   ]
 }

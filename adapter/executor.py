@@ -11,6 +11,7 @@ from urllib.parse import urlsplit
 
 from adapter.block_context_generator import (
     BLOCK_CONTEXT_BASEFEE_RUNTIME,
+    BLOCK_CONTEXT_BLOCKHASH_CURRENT_RUNTIME,
     BLOCK_CONTEXT_CHAINID_RUNTIME,
     BLOCK_CONTEXT_COINBASE_RUNTIME,
     BLOCK_CONTEXT_GASLIMIT_RUNTIME,
@@ -444,6 +445,10 @@ class MockBackend:
             if code != BLOCK_CONTEXT_BASEFEE_RUNTIME:
                 raise ValueError(f"unsupported mock contract code path: {code}")
             return self._hex_to_word(block_context["basefee"])
+        if mode == "blockhash_current":
+            if code != BLOCK_CONTEXT_BLOCKHASH_CURRENT_RUNTIME:
+                raise ValueError(f"unsupported mock contract code path: {code}")
+            return ZERO_STORAGE_WORD
         if mode == "chainid":
             if code != BLOCK_CONTEXT_CHAINID_RUNTIME:
                 raise ValueError(f"unsupported mock contract code path: {code}")

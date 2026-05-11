@@ -302,6 +302,7 @@ class HarnessTests(unittest.TestCase):
                     "upstream.benchmark.block_context.test_block_context_ops.number",
                     "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
                     "upstream.benchmark.block_context.test_block_context_ops.timestamp",
+                    "upstream.benchmark.block_context.test_blockhash.current_block",
                 ],
             },
             {
@@ -668,6 +669,7 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.block_context.test_block_context_ops.number",
                 "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
                 "upstream.benchmark.block_context.test_block_context_ops.timestamp",
+                "upstream.benchmark.block_context.test_blockhash.current_block",
             ],
         )
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
@@ -675,7 +677,7 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
         self.assertEqual(
             {case.observe["block_context_probe"]["mode"] for case in selected},
-            {"basefee", "chainid", "coinbase", "gaslimit", "number", "prevrandao", "timestamp"},
+            {"basefee", "blockhash_current", "chainid", "coinbase", "gaslimit", "number", "prevrandao", "timestamp"},
         )
 
     def test_selector_rejects_basefee_block_context_case_when_profile_lacks_feature_flag(self) -> None:
@@ -692,6 +694,7 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.block_context.test_block_context_ops.number",
                 "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
                 "upstream.benchmark.block_context.test_block_context_ops.timestamp",
+                "upstream.benchmark.block_context.test_blockhash.current_block",
             ],
         )
         blocked = {decision.case.case_id: decision.reasons for decision in decisions if not decision.selected}
@@ -956,7 +959,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(generated, checked_in)
             self.assertEqual(generated, json.loads(manifest_path.read_text()))
             self.assertEqual(generated["name"], "upstream-block-context-mapped")
-            self.assertEqual(len(generated["cases"]), 7)
+            self.assertEqual(len(generated["cases"]), 8)
             self.assertEqual({case["family"] for case in generated["cases"]}, {"state/block-context"})
             self.assertEqual(
                 [case["case_id"] for case in generated["cases"]],
@@ -966,6 +969,7 @@ class HarnessTests(unittest.TestCase):
                 {case["expected"]["storage"]["0x00"] for case in generated["cases"]},
                 {
                     "$block_basefee_word",
+                    "0x0000000000000000000000000000000000000000000000000000000000000000",
                     "$chain_id_word",
                     "$block_coinbase_word",
                     "$block_gaslimit_word",
@@ -1594,7 +1598,7 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertEqual(generated, checked_in)
             self.assertEqual(generated["name"], "upstream-block-context-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 7)
+            self.assertEqual(len(generated["cases"]), 8)
             self.assertEqual(
                 [case["case_id"] for case in generated["cases"]],
                 [
@@ -1605,6 +1609,7 @@ class HarnessTests(unittest.TestCase):
                     "upstream.benchmark.block_context.test_block_context_ops.number",
                     "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
                     "upstream.benchmark.block_context.test_block_context_ops.timestamp",
+                    "upstream.benchmark.block_context.test_blockhash.current_block",
                 ],
             )
             inventory = json.loads(inventory_path.read_text())
@@ -1613,8 +1618,8 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(len(inventory["entries"]), 13)
             admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
-            self.assertEqual(len(admitted), 7)
-            self.assertEqual(len(blocked), 6)
+            self.assertEqual(len(admitted), 8)
+            self.assertEqual(len(blocked), 5)
             self.assertEqual([entry["case_id"] for entry in admitted], [case["case_id"] for case in generated["cases"]])
             case_ids = [entry["case_id"] for entry in inventory["entries"]]
             self.assertEqual(len(case_ids), len(set(case_ids)))
@@ -1623,7 +1628,8 @@ class HarnessTests(unittest.TestCase):
                 blocked_reason_counts,
                 Counter(
                     {
-                        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness": 5,
+                        "requires controllable historical block-hash witness not available through the current RPC-only harness": 3,
+                        "requires gas-derived dynamic block index plus historical block-hash witness not available through the current RPC-only harness": 1,
                         "requires blob-base-fee opcode support plus a blob-capable profile witness not yet proven": 1,
                     }
                 ),
@@ -2949,7 +2955,7 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertEqual(generated, checked_in)
             self.assertEqual(generated["name"], "upstream-block-context-mapped")
-            self.assertEqual(len(generated["cases"]), 7)
+            self.assertEqual(len(generated["cases"]), 8)
             self.assertEqual(generated["cases"][0]["family"], "state/block-context")
 
     def test_cli_generate_memory_manifest_writes_expected_output(self) -> None:
@@ -3112,16 +3118,17 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-block-context-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 7)
+            self.assertEqual(len(generated["cases"]), 8)
             self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
-            self.assertEqual(len(blocked), 6)
+            self.assertEqual(len(blocked), 5)
             self.assertEqual(
                 Counter(reason for entry in blocked for reason in entry["reasons"]),
                 Counter(
                     {
-                        "requires block environment control": 5,
-                        "requires blob-capable profile support not yet enabled": 1,
+                        "requires controllable historical block-hash witness not available through the current RPC-only harness": 3,
+                        "requires gas-derived dynamic block index plus historical block-hash witness not available through the current RPC-only harness": 1,
+                        "requires blob-base-fee opcode support plus a blob-capable profile witness not yet proven": 1,
                     }
                 ),
             )
@@ -3310,7 +3317,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["name"], "upstream-block-context-auto-inventory")
             self.assertEqual(inventory["family"], "block-context")
             self.assertEqual(len(inventory["entries"]), 13)
-            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 7)
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 8)
 
     def test_cli_scan_upstream_log_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -3878,7 +3885,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 455, "blocked": 158},
+            {"families": 14, "cases": 613, "admitted": 456, "blocked": 157},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -3913,7 +3920,7 @@ class HarnessTests(unittest.TestCase):
                 "stack": {"total": 65, "admitted": 65, "blocked": 0},
                 "control-flow": {"total": 7, "admitted": 7, "blocked": 0},
                 "account-query": {"total": 40, "admitted": 5, "blocked": 35},
-                "block-context": {"total": 13, "admitted": 7, "blocked": 6},
+                "block-context": {"total": 13, "admitted": 8, "blocked": 5},
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
                 "log": {"total": 140, "admitted": 110, "blocked": 30},
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
@@ -3953,11 +3960,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 450, "blocked": 123},
+                {"families": 13, "cases": 573, "admitted": 451, "blocked": 122},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 455, "blocked": 158},
+                {"families": 14, "cases": 613, "admitted": 456, "blocked": 157},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -4028,11 +4035,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 454, "blocked": 158},
+                {"families": 14, "cases": 612, "admitted": 455, "blocked": 157},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 455, "blocked": 158},
+                {"families": 14, "cases": 613, "admitted": 456, "blocked": 157},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -4052,7 +4059,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 454, "blocked": 158},
+                {"families": 14, "cases": 612, "admitted": 455, "blocked": 157},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -4175,7 +4182,7 @@ class HarnessTests(unittest.TestCase):
 
     def test_cli_run_operational_manifests_preserve_closeout_evidence(self) -> None:
         scenarios = [
-            ("upstream_block_context_mapped.json", "upstream-block-context-mapped", 7),
+            ("upstream_block_context_mapped.json", "upstream-block-context-mapped", 8),
             ("upstream_log_mapped.json", "upstream-log-mapped", 110),
             ("upstream_system_mapped.json", "upstream-system-mapped", 10),
         ]
@@ -4964,12 +4971,15 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 7)
+            self.assertEqual(len(report["results"]), 8)
 
             observed_by_case = {result["case_id"]: result for result in report["results"]}
             expected_storage = {
                 "upstream.benchmark.block_context.test_block_context_ops.basefee": {
                     "0x00": basefee_word,
+                },
+                "upstream.benchmark.block_context.test_blockhash.current_block": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
                 },
                 "upstream.benchmark.block_context.test_block_context_ops.chainid": {
                     "0x00": chainid_word,
@@ -5373,7 +5383,7 @@ class HarnessTests(unittest.TestCase):
             report = json.loads(report_path.read_text())
             self.assertEqual(report["manifest"], "upstream-block-context-mapped")
             self.assertEqual(report["chain_profile"], "mock-devnet")
-            self.assertEqual(len(report["results"]), 7)
+            self.assertEqual(len(report["results"]), 8)
             self.assertTrue(all(result["success"] for result in report["results"]))
             self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
             observed_by_case = {result["case_id"]: result for result in report["results"]}
@@ -5381,6 +5391,7 @@ class HarnessTests(unittest.TestCase):
                 {case_id: result["observed"]["storage"]["0x00"] for case_id, result in observed_by_case.items()},
                 {
                     "upstream.benchmark.block_context.test_block_context_ops.basefee": basefee_word,
+                    "upstream.benchmark.block_context.test_blockhash.current_block": "0x0000000000000000000000000000000000000000000000000000000000000000",
                     "upstream.benchmark.block_context.test_block_context_ops.chainid": chainid_word,
                     "upstream.benchmark.block_context.test_block_context_ops.coinbase": coinbase_word,
                     "upstream.benchmark.block_context.test_block_context_ops.gaslimit": gaslimit_word,
@@ -5392,6 +5403,10 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(
                 observed_by_case["upstream.benchmark.block_context.test_block_context_ops.coinbase"]["expected"],
                 observed_by_case["upstream.benchmark.block_context.test_block_context_ops.coinbase"]["observed"],
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.block_context.test_blockhash.current_block"]["expected"],
+                observed_by_case["upstream.benchmark.block_context.test_blockhash.current_block"]["observed"],
             )
             self.assertEqual(
                 observed_by_case["upstream.benchmark.block_context.test_block_context_ops.prevrandao"]["context"]["$block_prevrandao"],
@@ -5428,7 +5443,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
             self.assertEqual(report["manifest"], "upstream-block-context-mapped")
-            self.assertEqual(len(report["results"]), 7)
+            self.assertEqual(len(report["results"]), 8)
             self.assertTrue(all(not result["success"] for result in report["results"]))
             self.assertTrue(
                 all(
