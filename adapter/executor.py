@@ -954,16 +954,25 @@ class JsonRpcBackend:
                 raise TimeoutError(
                     f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
                 ) from exc
-            raise RuntimeError(f"rpc transport error for {method}: {exc.reason}") from exc
+            raise RuntimeError(
+                f"rpc transport error for {method} against {endpoint_label}: {exc.reason}"
+            ) from exc
         except json.JSONDecodeError as exc:
             raise RuntimeError(f"rpc decode error for {method}: {exc}") from exc
         if not isinstance(body, dict):
             raise RuntimeError(f"rpc response for {method} must be a JSON object")
         if "error" in body:
-            raise RuntimeError(f"rpc error for {method}: {body['error']}")
+            raise RuntimeError(f"rpc error for {method}: {self._format_rpc_error(body['error'])}")
         if "result" not in body:
             raise RuntimeError(f"rpc response for {method} missing result field")
         return body["result"]
+
+    def _format_rpc_error(self, error: Any) -> str:
+        if isinstance(error, dict):
+            code = error.get("code", "<missing-code>")
+            message = error.get("message", "<missing-message>")
+            return f"code={code} message={message!r}"
+        return repr(error)
 
 
 class RpcExecutor:

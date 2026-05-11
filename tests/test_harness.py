@@ -10,6 +10,7 @@ import socket
 import subprocess
 import tempfile
 import unittest
+import urllib.error
 import urllib.request
 
 from adapter.bootstrap import StateBootstrapper
@@ -4601,6 +4602,117 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("against https://example.invalid", message)
         self.assertNotIn("secret", message)
         self.assertNotIn("token=abc", message)
+
+    def test_jsonrpc_backend_passes_explicit_timeout_to_urlopen(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        backend.rpc_timeout_seconds = 3
+        observed_timeouts: list[object] = []
+
+        class Response:
+            def __enter__(self) -> "Response":
+                return self
+
+            def __exit__(self, exc_type, exc, tb) -> bool:
+                return False
+
+            def read(self) -> bytes:
+                return b'{"jsonrpc":"2.0","id":1,"result":"0x1"}'
+
+        original_urlopen = urllib.request.urlopen
+
+        def fake_urlopen(*args: object, **kwargs: object) -> Response:
+            observed_timeouts.append(kwargs.get("timeout"))
+            return Response()
+
+        urllib.request.urlopen = fake_urlopen
+        try:
+            self.assertEqual(backend._rpc("eth_blockNumber", []), "0x1")
+        finally:
+            urllib.request.urlopen = original_urlopen
+
+        self.assertEqual(observed_timeouts, [3])
+
+    def test_jsonrpc_backend_rejects_transport_error_with_redacted_endpoint(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.rpc_url = "https://user:secret@example.invalid/path?token=abc"
+        backend = JsonRpcBackend(profile)
+
+        original_urlopen = urllib.request.urlopen
+
+        def fake_urlopen(*args: object, **kwargs: object) -> object:
+            raise urllib.error.URLError("connection refused")
+
+        urllib.request.urlopen = fake_urlopen
+        try:
+            with self.assertRaises(RuntimeError) as error:
+                backend._rpc("eth_blockNumber", [])
+        finally:
+            urllib.request.urlopen = original_urlopen
+
+        message = str(error.exception)
+        self.assertIn("rpc transport error for eth_blockNumber against https://example.invalid", message)
+        self.assertIn("connection refused", message)
+        self.assertNotIn("secret", message)
+        self.assertNotIn("token=abc", message)
+
+    def test_jsonrpc_backend_rejects_jsonrpc_error_response(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+
+        class Response:
+            def __enter__(self) -> "Response":
+                return self
+
+            def __exit__(self, exc_type, exc, tb) -> bool:
+                return False
+
+            def read(self) -> bytes:
+                return b'{"jsonrpc":"2.0","id":1,"error":{"code":-32000,"message":"execution reverted"}}'
+
+        original_urlopen = urllib.request.urlopen
+
+        def fake_urlopen(*args: object, **kwargs: object) -> Response:
+            return Response()
+
+        urllib.request.urlopen = fake_urlopen
+        try:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                r"rpc error for eth_call: code=-32000 message='execution reverted'",
+            ):
+                backend._rpc("eth_call", [])
+        finally:
+            urllib.request.urlopen = original_urlopen
+
+    def test_jsonrpc_backend_rejects_non_object_response(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+
+        class Response:
+            def __enter__(self) -> "Response":
+                return self
+
+            def __exit__(self, exc_type, exc, tb) -> bool:
+                return False
+
+            def read(self) -> bytes:
+                return b'[]'
+
+        original_urlopen = urllib.request.urlopen
+
+        def fake_urlopen(*args: object, **kwargs: object) -> Response:
+            return Response()
+
+        urllib.request.urlopen = fake_urlopen
+        try:
+            with self.assertRaisesRegex(
+                RuntimeError,
+                r"rpc response for eth_blockNumber must be a JSON object",
+            ):
+                backend._rpc("eth_blockNumber", [])
+        finally:
+            urllib.request.urlopen = original_urlopen
 
     def test_jsonrpc_backend_rejects_response_without_result_field(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
