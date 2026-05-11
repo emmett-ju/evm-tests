@@ -87,6 +87,11 @@ from adapter.system_generator import (
     generate_upstream_system_manifest,
     generate_upstream_system_templates,
 )
+from adapter.system_witness import (
+    build_create_empty_child_system_witness,
+    collect_system_witness_from_storage,
+    system_witness_storage_slots,
+)
 from adapter.tx_context_generator import (
     generate_upstream_tx_context_manifest,
     generate_upstream_tx_context_templates,
@@ -393,7 +398,7 @@ class HarnessTests(unittest.TestCase):
                 load_manifest(manifest_path)
         self.assertEqual(
             str(error.exception),
-            "case upstream.benchmark.system.test_create.create.0_bytes_without_value step 3: action 'invoke_contract' field 'data' must be a string",
+            "case upstream.benchmark.system.test_create.create.0_bytes_with_value step 3: action 'invoke_contract' field 'data' must be a string",
         )
 
     def test_validation_boundary_rejects_malformed_system_witness_declaration(self) -> None:
@@ -426,7 +431,7 @@ class HarnessTests(unittest.TestCase):
             manifest = load_manifest(manifest_path)
         self.assertEqual(manifest.cases[0].observe["system_witness"]["shape"], "create_empty_child")
 
-    def test_validation_boundary_rejects_malformed_create_empty_child_system_witness(self) -> None:
+    def test_validation_boundary_accepts_value_bearing_create_empty_child_system_witness_declaration(self) -> None:
         payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
         payload["cases"][0]["observe"]["system_witness"] = {
             "version": 1,
@@ -440,11 +445,39 @@ class HarnessTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             manifest_path = Path(tmpdir) / "upstream_system_mapped.json"
             manifest_path.write_text(json.dumps(payload))
+            manifest = load_manifest(manifest_path)
+        self.assertEqual(manifest.cases[0].observe["system_witness"]["value"], 1)
+        bundle = build_create_empty_child_system_witness(opcode="CREATE", value=1)
+        self.assertEqual(
+            bundle.expected["system_witness"],
+            {
+                "shape": "create_empty_child",
+                "success": True,
+                "created_address_nonzero": True,
+                "created_code_size": 0,
+                "created_balance": 1,
+            },
+        )
+
+    def test_validation_boundary_rejects_malformed_create_empty_child_system_witness(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
+        payload["cases"][0]["observe"]["system_witness"] = {
+            "version": 1,
+            "shape": "create_empty_child",
+            "subject": "$last_contract",
+            "opcode": "CREATE2",
+            "value": 2,
+            "initcode_size": 0,
+            "salt": 42,
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "upstream_system_mapped.json"
+            manifest_path.write_text(json.dumps(payload))
             with self.assertRaises(ValueError) as error:
                 load_manifest(manifest_path)
         self.assertEqual(
             str(error.exception),
-            "observe.system_witness.value must be 0 for create_empty_child",
+            "observe.system_witness.value must be 0 or 1 for create_empty_child",
         )
 
     def test_validation_boundary_rejects_create_empty_child_create_with_salt(self) -> None:
@@ -671,7 +704,9 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(
             [case.case_id for case in selected],
             [
+                "upstream.benchmark.system.test_create.create.0_bytes_with_value",
                 "upstream.benchmark.system.test_create.create.0_bytes_without_value",
+                "upstream.benchmark.system.test_create.create2.0_bytes_with_value",
                 "upstream.benchmark.system.test_create.create2.0_bytes_without_value",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
@@ -695,7 +730,10 @@ class HarnessTests(unittest.TestCase):
             if case.case_id.startswith("upstream.benchmark.system.test_create"):
                 self.assertEqual(witness["shape"], "create_empty_child")
                 self.assertEqual(expected_witness["shape"], "create_empty_child")
-                self.assertEqual(set(expected_witness), {"shape", "success", "created_address_nonzero", "created_code_size"})
+                if witness["value"] > 0:
+                    self.assertEqual(set(expected_witness), {"shape", "success", "created_address_nonzero", "created_code_size", "created_balance"})
+                else:
+                    self.assertEqual(set(expected_witness), {"shape", "success", "created_address_nonzero", "created_code_size"})
             else:
                 self.assertEqual(
                     witness,
@@ -708,8 +746,7 @@ class HarnessTests(unittest.TestCase):
                 self.assertEqual(set(expected_witness), {"shape", "success", "returndata_size", "returndata_digest"})
         self.assertFalse(
             any(
-                "0_bytes_with_value" in case.case_id
-                or "0_25x" in case.case_id
+                "0_25x" in case.case_id
                 or "0_50x" in case.case_id
                 or "0_75x" in case.case_id
                 or "max_code_size" in case.case_id
@@ -2632,14 +2669,16 @@ class HarnessTests(unittest.TestCase):
 
         admitted = [entry for entry in entries if entry["admitted"]]
         blocked = [entry for entry in entries if not entry["admitted"]]
-        self.assertEqual(len(admitted), 12, "system admitted count drifted")
-        self.assertEqual(len(blocked), 34, "system blocked count drifted")
+        self.assertEqual(len(admitted), 14, "system admitted count drifted")
+        self.assertEqual(len(blocked), 32, "system blocked count drifted")
 
         admitted_case_ids = [entry["case_id"] for entry in admitted]
         self.assertEqual(
             admitted_case_ids,
             [
+                "upstream.benchmark.system.test_create.create.0_bytes_with_value",
                 "upstream.benchmark.system.test_create.create.0_bytes_without_value",
+                "upstream.benchmark.system.test_create.create2.0_bytes_with_value",
                 "upstream.benchmark.system.test_create.create2.0_bytes_without_value",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
@@ -2659,7 +2698,7 @@ class HarnessTests(unittest.TestCase):
             Counter(
                 {
                     "requires multi-address external-call orchestration not yet mapped": 8,
-                    "requires create/create2 deployed-address witness not yet mapped": 18,
+                    "requires create/create2 deployed-address witness not yet mapped": 16,
                     "requires gas-capped create collision orchestration not yet mapped": 2,
                     "requires selfdestruct lifecycle witness not yet mapped": 6,
                 }
@@ -2670,7 +2709,7 @@ class HarnessTests(unittest.TestCase):
             Counter(
                 {
                     "test_contract_calling_many_addresses": 8,
-                    "test_create": 18,
+                    "test_create": 16,
                     "test_creates_collisions": 2,
                     "test_selfdestruct_created": 2,
                     "test_selfdestruct_existing": 2,
@@ -2682,7 +2721,7 @@ class HarnessTests(unittest.TestCase):
 
         template_case_ids = [case["case_id"] for case in templates_payload["cases"]]
         self.assertEqual(template_case_ids, admitted_case_ids)
-        self.assertEqual(len(templates_payload["cases"]), 12)
+        self.assertEqual(len(templates_payload["cases"]), 14)
 
         if manifest_payload is not None:
             checked_in_manifest_path = ROOT / "suites/manifests/upstream_system_mapped.json"
@@ -2690,9 +2729,30 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(manifest_payload, checked_in_manifest, "system manifest JSON drift")
             manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
             self.assertEqual(manifest_case_ids, admitted_case_ids)
-            self.assertEqual(len(manifest_payload["cases"]), 12)
+            self.assertEqual(len(manifest_payload["cases"]), 14)
             self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/system"})
             observed_by_case = {case["case_id"]: case for case in manifest_payload["cases"]}
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.system.test_create.create.0_bytes_with_value"
+                ]["expected"],
+                {
+                    "receipt_status": "0x1",
+                    "system_witness": {
+                        "shape": "create_empty_child",
+                        "success": True,
+                        "created_address_nonzero": True,
+                        "created_code_size": 0,
+                        "created_balance": 1,
+                    },
+                },
+            )
+            self.assertEqual(
+                observed_by_case[
+                    "upstream.benchmark.system.test_create.create.0_bytes_with_value"
+                ]["steps"][0]["value"],
+                "0x1",
+            )
             self.assertEqual(
                 observed_by_case[
                     "upstream.benchmark.system.test_create.create.0_bytes_without_value"
@@ -2754,8 +2814,7 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertFalse(
                 any(
-                    "0_bytes_with_value" in case_id
-                    or "0_25x" in case_id
+                    "0_25x" in case_id
                     or "0_50x" in case_id
                     or "0_75x" in case_id
                     or "max_code_size" in case_id
@@ -3566,7 +3625,7 @@ class HarnessTests(unittest.TestCase):
                 manifest_payload=generated,
             )
             self.assertEqual(generated["name"], "upstream-system-mapped")
-            self.assertEqual(len(generated["cases"]), 12)
+            self.assertEqual(len(generated["cases"]), 14)
             self.assertEqual(generated["cases"][0]["family"], "state/system")
 
     def test_cli_generate_keccak_manifest_writes_expected_output(self) -> None:
@@ -4070,7 +4129,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 458, "blocked": 155},
+            {"families": 14, "cases": 613, "admitted": 460, "blocked": 153},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -4109,7 +4168,7 @@ class HarnessTests(unittest.TestCase):
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
                 "log": {"total": 140, "admitted": 110, "blocked": 30},
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
-                "system": {"total": 46, "admitted": 12, "blocked": 34},
+                "system": {"total": 46, "admitted": 14, "blocked": 32},
                 "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
                 "memory": {"total": 143, "admitted": 95, "blocked": 48},
             },
@@ -4145,11 +4204,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 453, "blocked": 120},
+                {"families": 13, "cases": 573, "admitted": 455, "blocked": 118},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 458, "blocked": 155},
+                {"families": 14, "cases": 613, "admitted": 460, "blocked": 153},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -4220,11 +4279,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 457, "blocked": 155},
+                {"families": 14, "cases": 612, "admitted": 459, "blocked": 153},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 458, "blocked": 155},
+                {"families": 14, "cases": 613, "admitted": 460, "blocked": 153},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -4244,7 +4303,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 457, "blocked": 155},
+                {"families": 14, "cases": 612, "admitted": 459, "blocked": 153},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -4369,7 +4428,7 @@ class HarnessTests(unittest.TestCase):
         scenarios = [
             ("upstream_block_context_mapped.json", "upstream-block-context-mapped", 8),
             ("upstream_log_mapped.json", "upstream-log-mapped", 110),
-            ("upstream_system_mapped.json", "upstream-system-mapped", 12),
+            ("upstream_system_mapped.json", "upstream-system-mapped", 14),
         ]
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -4753,6 +4812,46 @@ class HarnessTests(unittest.TestCase):
         )
         self.assertEqual(ResultOracle().compare(return_case.expected, observed, context), [])
 
+    def test_create_empty_child_system_witness_storage_slots_include_balance_for_value(self) -> None:
+        zero_value_witness = {
+            "version": 1,
+            "shape": "create_empty_child",
+            "subject": "$last_contract",
+            "opcode": "CREATE",
+            "value": 0,
+            "initcode_size": 0,
+        }
+        value_witness = {
+            "version": 1,
+            "shape": "create_empty_child",
+            "subject": "$last_contract",
+            "opcode": "CREATE2",
+            "value": 1,
+            "initcode_size": 0,
+            "salt": 42,
+        }
+        self.assertEqual(system_witness_storage_slots(zero_value_witness), ("0x00", "0x01", "0x02"))
+        self.assertEqual(system_witness_storage_slots(value_witness), ("0x00", "0x01", "0x02", "0x03"))
+        self.assertEqual(
+            collect_system_witness_from_storage(
+                witness_config=value_witness,
+                storage={
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "0x01": "0x000000000000000000000000dddddddddddddddddddddddddddddddddddddddd",
+                    "0x02": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0x03": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+            ),
+            {
+                "shape": "create_empty_child",
+                "success": True,
+                "created_address_nonzero": True,
+                "created_code_size": 0,
+                "created_address": "0xdddddddddddddddddddddddddddddddddddddddd",
+                "created_balance": 1,
+            },
+        )
+
     def test_jsonrpc_backend_observes_create_empty_child_witness_storage_at_receipt_block(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
@@ -4841,6 +4940,71 @@ class HarnessTests(unittest.TestCase):
                 "created_address": "0xdddddddddddddddddddddddddddddddddddddddd",
             },
         )
+        self.assertEqual(ResultOracle().compare(create_case.expected, observed, context), [])
+
+    def test_jsonrpc_backend_observes_value_bearing_create_empty_child_witness_storage_at_receipt_block(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
+        create_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.system.test_create.create.0_bytes_without_value"
+        )
+        create_case.observe["system_witness"]["value"] = 1
+        create_case.expected["system_witness"]["created_balance"] = 1
+
+        class StubBackend(JsonRpcBackend):
+            def __init__(self, profile):
+                super().__init__(profile)
+                self.sent = 0
+                self.storage_calls: list[list[object]] = []
+
+            def _send_transaction(self, transaction: dict[str, Any]) -> str:
+                self.sent += 1
+                return f"0xtx{self.sent}"
+
+            def _wait_for_receipt(self, tx_hash: str, timeout_seconds: int = 60) -> dict[str, Any]:
+                if tx_hash == "0xtx1":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "contractAddress": "0xcccccccccccccccccccccccccccccccccccccccc",
+                        "blockNumber": "0x99",
+                    }
+                if tx_hash == "0xtx2":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "blockNumber": "0x2a",
+                    }
+                raise AssertionError(tx_hash)
+
+            def _rpc(self, method: str, params: list[object]) -> object:
+                if method == "eth_getStorageAt":
+                    self.storage_calls.append(params)
+                    slot = params[1]
+                    values = {
+                        "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                        "0x01": "0x000000000000000000000000dddddddddddddddddddddddddddddddddddddddd",
+                        "0x02": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "0x03": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    }
+                    return values[slot]
+                raise AssertionError(method)
+
+        backend = StubBackend(profile)
+        tx_hashes, observed, context = backend.execute_case(create_case, "jsonrpc-create-value-witness")
+        self.assertEqual(tx_hashes, ["0xtx1", "0xtx2"])
+        self.assertEqual(
+            backend.storage_calls,
+            [
+                ["0xcccccccccccccccccccccccccccccccccccccccc", "0x00", "0x2a"],
+                ["0xcccccccccccccccccccccccccccccccccccccccc", "0x01", "0x2a"],
+                ["0xcccccccccccccccccccccccccccccccccccccccc", "0x02", "0x2a"],
+                ["0xcccccccccccccccccccccccccccccccccccccccc", "0x03", "0x2a"],
+            ],
+        )
+        self.assertEqual(observed["system_witness"]["created_balance"], 1)
         self.assertEqual(ResultOracle().compare(create_case.expected, observed, context), [])
 
     def test_jsonrpc_backend_load_block_context_falls_back_to_profile_block_tag(self) -> None:
@@ -6477,7 +6641,7 @@ class HarnessTests(unittest.TestCase):
                     report = json.loads(report_path.read_text())
 
                 self.assertEqual(report["manifest"], "upstream-system-mapped")
-                self.assertEqual(len(report["results"]), 12)
+                self.assertEqual(len(report["results"]), 14)
                 broken = next(
                     result for result in report["results"] if result["case_id"] == scenario["case_id"]
                 )
@@ -6488,7 +6652,7 @@ class HarnessTests(unittest.TestCase):
                 passing = [
                     result for result in report["results"] if result["case_id"] != scenario["case_id"]
                 ]
-                self.assertEqual(len(passing), 11)
+                self.assertEqual(len(passing), 13)
                 self.assertTrue(all(result["success"] for result in passing))
                 self.assertTrue(all(result["diffs"] == [] for result in passing))
 
@@ -6657,9 +6821,20 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 12)
+            self.assertEqual(len(report["results"]), 14)
             observed_by_case = {result["case_id"]: result for result in report["results"]}
 
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.system.test_create.create.0_bytes_with_value"]["observed"]["system_witness"],
+                {
+                    "shape": "create_empty_child",
+                    "success": True,
+                    "created_address": "0xdddddddddddddddddddddddddddddddddddddddd",
+                    "created_address_nonzero": True,
+                    "created_code_size": 0,
+                    "created_balance": 1,
+                },
+            )
             self.assertEqual(
                 observed_by_case["upstream.benchmark.system.test_create.create.0_bytes_without_value"]["observed"]["system_witness"],
                 {
@@ -6678,6 +6853,17 @@ class HarnessTests(unittest.TestCase):
                     "created_address": "0xdddddddddddddddddddddddddddddddddddddddd",
                     "created_address_nonzero": True,
                     "created_code_size": 0,
+                },
+            )
+            self.assertEqual(
+                observed_by_case["upstream.benchmark.system.test_create.create2.0_bytes_with_value"]["observed"]["system_witness"],
+                {
+                    "shape": "create_empty_child",
+                    "success": True,
+                    "created_address": "0xdddddddddddddddddddddddddddddddddddddddd",
+                    "created_address_nonzero": True,
+                    "created_code_size": 0,
+                    "created_balance": 1,
                 },
             )
             self.assertEqual(
@@ -6781,7 +6967,7 @@ class HarnessTests(unittest.TestCase):
             report = json.loads(report_path.read_text())
             self.assertEqual(report["manifest"], "upstream-system-mapped")
             self.assertEqual(report["chain_profile"], "mock-devnet")
-            self.assertEqual(len(report["results"]), 12)
+            self.assertEqual(len(report["results"]), 14)
             self.assertTrue(all(result["success"] for result in report["results"]))
             self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
             observed_by_case = {result["case_id"]: result["observed"] for result in report["results"]}

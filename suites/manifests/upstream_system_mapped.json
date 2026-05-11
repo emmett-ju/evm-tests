@@ -7,6 +7,66 @@
   "cases": [
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_create.create.0_bytes_with_value",
+      "family": "state/system",
+      "description": "Mapped from execution-specs CREATE zero-byte create benchmark onto a single wrapper that stores create success, created address, and created code size.",
+      "namespace_seed": "upstream-system-test-create-create-0-bytes-with-value",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0 bytes with value]",
+      "notes": [
+        "Upstream intent: benchmark CREATE with zero-byte initcode and value 1.",
+        "RPC mapping: a single funded deployed wrapper performs one value 1 CREATE, then stores create success, the returned child address, EXTCODESIZE(child) and child balance as deterministic witness fields.",
+        "Only zero-byte variants are admitted; non-empty/max-code-size variants remain blocked until their code-size witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, zero child code size and child balance are deterministic final observables."
+      ],
+      "observe": {
+        "system_witness": {
+          "version": 1,
+          "shape": "create_empty_child",
+          "subject": "$last_contract",
+          "opcode": "CREATE",
+          "value": 1,
+          "initcode_size": 0
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6018600c60003960186000f35f5f6001f080600155803b600255803160035515155f5500",
+          "bytecode_runtime": "0x5f5f6001f080600155803b600255803160035515155f5500",
+          "gas": "0x186a0",
+          "value": "0x1"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x1e8480"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "system_witness": {
+          "shape": "create_empty_child",
+          "success": true,
+          "created_address_nonzero": true,
+          "created_code_size": 0,
+          "created_balance": 1
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.system.test_create.create.0_bytes_without_value",
       "family": "state/system",
       "description": "Mapped from execution-specs CREATE zero-byte create benchmark onto a single wrapper that stores create success, created address, and created code size.",
@@ -14,9 +74,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0 bytes without value]",
       "notes": [
         "Upstream intent: benchmark CREATE with zero-byte initcode and zero value.",
-        "RPC mapping: a single deployed wrapper performs one zero-value CREATE, then stores create success, the returned child address, and EXTCODESIZE(child) as deterministic witness fields.",
-        "Only the zero-byte without-value variant is admitted; value-bearing and non-empty/max-code-size variants remain blocked until their funding and code-size witness contracts are mapped.",
-        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, and zero child code size are deterministic final observables."
+        "RPC mapping: a single funded deployed wrapper performs one zero value CREATE, then stores create success, the returned child address, EXTCODESIZE(child) as deterministic witness fields.",
+        "Only zero-byte variants are admitted; non-empty/max-code-size variants remain blocked until their code-size witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, zero child code size are deterministic final observables."
       ],
       "observe": {
         "system_witness": {
@@ -65,6 +125,67 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.system.test_create.create2.0_bytes_with_value",
+      "family": "state/system",
+      "description": "Mapped from execution-specs CREATE2 zero-byte create benchmark onto a single wrapper that stores create success, created address, and created code size.",
+      "namespace_seed": "upstream-system-test-create-create2-0-bytes-with-value",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0 bytes with value]",
+      "notes": [
+        "Upstream intent: benchmark CREATE2 with zero-byte initcode and value 1.",
+        "RPC mapping: a single funded deployed wrapper performs one value 1 CREATE2 with CREATE2 salt 42, then stores create success, the returned child address, EXTCODESIZE(child) and child balance as deterministic witness fields.",
+        "Only zero-byte variants are admitted; non-empty/max-code-size variants remain blocked until their code-size witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, zero child code size and child balance are deterministic final observables."
+      ],
+      "observe": {
+        "system_witness": {
+          "version": 1,
+          "shape": "create_empty_child",
+          "subject": "$last_contract",
+          "opcode": "CREATE2",
+          "value": 1,
+          "initcode_size": 0,
+          "salt": 42
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601a600c600039601a6000f3602a5f5f6001f580600155803b600255803160035515155f5500",
+          "bytecode_runtime": "0x602a5f5f6001f580600155803b600255803160035515155f5500",
+          "gas": "0x186a0",
+          "value": "0x1"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x1e8480"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_status": "0x1",
+        "system_witness": {
+          "shape": "create_empty_child",
+          "success": true,
+          "created_address_nonzero": true,
+          "created_code_size": 0,
+          "created_balance": 1
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.system.test_create.create2.0_bytes_without_value",
       "family": "state/system",
       "description": "Mapped from execution-specs CREATE2 zero-byte create benchmark onto a single wrapper that stores create success, created address, and created code size.",
@@ -72,9 +193,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0 bytes without value]",
       "notes": [
         "Upstream intent: benchmark CREATE2 with zero-byte initcode and zero value.",
-        "RPC mapping: a single deployed wrapper performs one zero-value CREATE2 with CREATE2 salt 42, then stores create success, the returned child address, and EXTCODESIZE(child) as deterministic witness fields.",
-        "Only the zero-byte without-value variant is admitted; value-bearing and non-empty/max-code-size variants remain blocked until their funding and code-size witness contracts are mapped.",
-        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, and zero child code size are deterministic final observables."
+        "RPC mapping: a single funded deployed wrapper performs one zero value CREATE2 with CREATE2 salt 42, then stores create success, the returned child address, EXTCODESIZE(child) as deterministic witness fields.",
+        "Only zero-byte variants are admitted; non-empty/max-code-size variants remain blocked until their code-size witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, zero child code size are deterministic final observables."
       ],
       "observe": {
         "system_witness": {

@@ -230,7 +230,7 @@ def _render_return_revert_system_case(template: SystemMappingTemplate) -> dict[s
 def _render_create_empty_child_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
     create_value = _require_inventory_field(template.create_value, field="create_value")
     initcode_size = _require_inventory_field(template.create_initcode_size, field="create_initcode_size")
-    runtime_code = _build_create_empty_child_runtime(template.opcode)
+    runtime_code = _build_create_empty_child_runtime(template.opcode, value=create_value)
     witness = build_create_empty_child_system_witness(
         opcode=template.opcode,
         value=create_value,
@@ -266,6 +266,7 @@ def _render_system_case_payload(
             deploy_contract_step(
                 init_code=_build_init_code(runtime_code),
                 runtime_code=runtime_code,
+                value="0x" + format(template.create_value, "x") if template.create_value else None,
             ),
             wait_receipt_step(),
             invoke_contract_step(data_hex="0x", gas=invoke_gas),
@@ -348,7 +349,8 @@ def _scan_create(text: str) -> list[AutoSystemInventoryEntry]:
                 f"test_create[opcode={opcode}-variant={combo_label}]"
             )
             case_id = f"upstream.benchmark.system.test_create.{opcode.lower()}.{combo_slug}"
-            admitted = combo_label == "0 bytes without value"
+            admitted = combo_label in {"0 bytes without value", "0 bytes with value"}
+            create_value = 1 if combo_label == "0 bytes with value" else 0
             results.append(
                 AutoSystemInventoryEntry(
                     upstream_ref=upstream_ref,
@@ -358,7 +360,7 @@ def _scan_create(text: str) -> list[AutoSystemInventoryEntry]:
                     reasons=[] if admitted else [BLOCKED_CREATE_REASON],
                     source="test_create",
                     opcode=opcode if admitted else None,
-                    create_value=0 if admitted else None,
+                    create_value=create_value if admitted else None,
                     create_initcode_size=0 if admitted else None,
                     create_salt=42 if admitted and opcode == "CREATE2" else None,
                 )
@@ -498,7 +500,7 @@ def _create_empty_child_inventory_entry_to_template(entry: AutoSystemInventoryEn
         ),
         namespace_seed=_build_namespace_seed(entry.case_id),
         upstream_ref=entry.upstream_ref,
-        notes=_build_create_empty_child_notes(opcode=opcode),
+        notes=_build_create_empty_child_notes(opcode=opcode, value=create_value),
         mode="create_empty_child",
         opcode=opcode,
         create_value=create_value,
@@ -587,28 +589,30 @@ def _build_notes(*, opcode: str, return_size: int, return_non_zero_data: bool) -
     ]
 
 
-def _build_create_empty_child_notes(*, opcode: str) -> list[str]:
+def _build_create_empty_child_notes(*, opcode: str, value: int) -> list[str]:
     salt_note = " with CREATE2 salt 42" if opcode == "CREATE2" else ""
+    value_note = "zero value" if value == 0 else f"value {value}"
+    balance_note = "" if value == 0 else " and child balance"
     return [
-        f"Upstream intent: benchmark {opcode} with zero-byte initcode and zero value.",
-        f"RPC mapping: a single deployed wrapper performs one zero-value {opcode}{salt_note}, then stores create success, the returned child address, and EXTCODESIZE(child) as deterministic witness fields.",
-        "Only the zero-byte without-value variant is admitted; value-bearing and non-empty/max-code-size variants remain blocked until their funding and code-size witness contracts are mapped.",
-        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, and zero child code size are deterministic final observables.",
+        f"Upstream intent: benchmark {opcode} with zero-byte initcode and {value_note}.",
+        f"RPC mapping: a single funded deployed wrapper performs one {value_note} {opcode}{salt_note}, then stores create success, the returned child address, EXTCODESIZE(child){balance_note} as deterministic witness fields.",
+        "Only zero-byte variants are admitted; non-empty/max-code-size variants remain blocked until their code-size witness contracts are mapped.",
+        f"Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, zero child code size{balance_note} are deterministic final observables.",
     ]
 
 
-def _build_create_empty_child_runtime(opcode: str) -> str:
+def _build_create_empty_child_runtime(opcode: str, *, value: int = 0) -> str:
     builder = _BytecodeBuilder()
     if opcode == "CREATE":
         builder.push_int(0)  # size
         builder.push_int(0)  # offset
-        builder.push_int(0)  # value
+        builder.push_int(value)  # value
         builder.op(0xF0)  # CREATE
     elif opcode == "CREATE2":
         builder.push_int(42)  # salt
         builder.push_int(0)  # size
         builder.push_int(0)  # offset
-        builder.push_int(0)  # value
+        builder.push_int(value)  # value
         builder.op(0xF5)  # CREATE2
     else:
         raise ValueError(f"unsupported create-empty opcode: {opcode}")
@@ -621,6 +625,12 @@ def _build_create_empty_child_runtime(opcode: str) -> str:
     builder.op(0x3B)  # EXTCODESIZE
     builder.push_int(2)
     builder.op(0x55)  # SSTORE slot2 <- created code size
+
+    if value > 0:
+        builder.op(0x80)  # DUP1
+        builder.op(0x31)  # BALANCE
+        builder.push_int(3)
+        builder.op(0x55)  # SSTORE slot3 <- created balance
 
     builder.op(0x15)  # ISZERO
     builder.op(0x15)  # ISZERO

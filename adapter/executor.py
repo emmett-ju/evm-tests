@@ -583,12 +583,17 @@ class MockBackend:
         witness_config: dict[str, Any],
         code: str | None,
     ) -> None:
-        expected_runtime = _build_create_empty_child_runtime(witness_config["opcode"])
+        expected_runtime = _build_create_empty_child_runtime(
+            witness_config["opcode"],
+            value=int(witness_config.get("value", 0)),
+        )
         if code != expected_runtime:
             raise ValueError(f"unsupported mock contract code path: {code}")
         storage["0x00"] = WORD_01
         storage["0x01"] = self._address_to_word("0xdddddddddddddddddddddddddddddddddddddddd")
         storage["0x02"] = ZERO_STORAGE_WORD
+        if int(witness_config.get("value", 0)) > 0:
+            storage["0x03"] = self._hex_to_word(hex(int(witness_config["value"])))
 
     def _is_system_self_call_runtime(self, code: str | None) -> bool:
         try:

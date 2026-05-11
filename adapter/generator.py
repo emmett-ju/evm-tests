@@ -821,6 +821,7 @@ def deploy_contract_step(
     runtime_code: str,
     initial_storage: dict[str, str] | None = None,
     gas: str = "0x186a0",
+    value: str | None = None,
 ) -> dict[str, Any]:
     return {
         "action": "deploy_contract",
@@ -828,6 +829,7 @@ def deploy_contract_step(
         "bytecode_runtime": runtime_code,
         **({"initial_storage": initial_storage} if initial_storage is not None else {}),
         "gas": gas,
+        **({"value": value} if value is not None else {}),
     }
 
 

@@ -32,6 +32,7 @@ class CreateEmptyChildSystemWitness:
     created_address_nonzero: bool
     created_code_size: int
     created_address: str
+    created_balance: int | None = None
 
 
 def build_return_revert_system_witness(
@@ -84,16 +85,17 @@ def build_create_empty_child_system_witness(
     if salt is not None:
         observe_witness["salt"] = salt
     validate_system_witness_declaration(observe_witness)
+    expected_witness: dict[str, Any] = {
+        "shape": CREATE_EMPTY_CHILD_SHAPE,
+        "success": True,
+        "created_address_nonzero": True,
+        "created_code_size": 0,
+    }
+    if value > 0:
+        expected_witness["created_balance"] = value
     return SystemWitnessBundle(
         observe={"system_witness": observe_witness},
-        expected={
-            "system_witness": {
-                "shape": CREATE_EMPTY_CHILD_SHAPE,
-                "success": True,
-                "created_address_nonzero": True,
-                "created_code_size": 0,
-            }
-        },
+        expected={"system_witness": expected_witness},
     )
 
 
@@ -130,7 +132,10 @@ def collect_system_witness_from_storage(
             storage=storage,
         )
     if shape == CREATE_EMPTY_CHILD_SHAPE:
-        return _collect_create_empty_child_system_witness_from_storage(storage)
+        return _collect_create_empty_child_system_witness_from_storage(
+            witness_config=witness_config,
+            storage=storage,
+        )
     raise ValueError(f"unsupported system witness shape: {shape!r}")
 
 
@@ -159,6 +164,8 @@ def return_revert_storage_transport_expected(*, opcode: str, returndata_size: in
 
 def system_witness_storage_slots(witness_config: Mapping[str, Any]) -> tuple[str, ...]:
     validate_system_witness_declaration(witness_config)
+    if witness_config["shape"] == CREATE_EMPTY_CHILD_SHAPE and int(witness_config.get("value", 0)) > 0:
+        return ("0x00", "0x01", "0x02", "0x03")
     return ("0x00", "0x01", "0x02")
 
 
@@ -166,8 +173,9 @@ def _validate_create_empty_child_declaration(value: Mapping[str, Any]) -> None:
     opcode = value.get("opcode")
     if opcode not in {"CREATE", "CREATE2"}:
         raise ValueError("observe.system_witness.opcode must be 'CREATE' or 'CREATE2' for create_empty_child")
-    if value.get("value") != 0:
-        raise ValueError("observe.system_witness.value must be 0 for create_empty_child")
+    witness_value = value.get("value")
+    if witness_value not in {0, 1}:
+        raise ValueError("observe.system_witness.value must be 0 or 1 for create_empty_child")
     if value.get("initcode_size") != 0:
         raise ValueError("observe.system_witness.initcode_size must be 0 for create_empty_child")
     salt = value.get("salt")
@@ -177,18 +185,25 @@ def _validate_create_empty_child_declaration(value: Mapping[str, Any]) -> None:
         raise ValueError("observe.system_witness.salt must be 42 for CREATE2 create_empty_child")
 
 
-def _collect_create_empty_child_system_witness_from_storage(storage: Mapping[str, str]) -> dict[str, Any]:
+def _collect_create_empty_child_system_witness_from_storage(
+    *,
+    witness_config: Mapping[str, Any],
+    storage: Mapping[str, str],
+) -> dict[str, Any]:
     success = _word_to_bool(storage.get("0x00"))
     created_address_word = _require_word(storage.get("0x01"), "system witness created address word")
     created_address = "0x" + created_address_word[26:]
     created_code_size = _word_to_int(storage.get("0x02"))
-    return {
+    collected: dict[str, Any] = {
         "shape": CREATE_EMPTY_CHILD_SHAPE,
         "success": success,
         "created_address_nonzero": int(created_address_word, 16) != 0,
         "created_code_size": created_code_size,
         "created_address": created_address,
     }
+    if int(witness_config.get("value", 0)) > 0:
+        collected["created_balance"] = _word_to_int(storage.get("0x03"))
+    return collected
 
 
 def _keccak256(data: bytes) -> bytes:
