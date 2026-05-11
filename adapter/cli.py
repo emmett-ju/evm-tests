@@ -323,20 +323,33 @@ def main(argv: list[str] | None = None) -> int:
         results = []
         for case in selected_cases:
             namespace = bootstrapper.prepare_case_namespace(case).namespace
-            tx_hashes, observed, context = executor.run_case(case, namespace)
-            resolved_expected = oracle.resolve_expected(case.expected, context, case.observe)
-            diffs = oracle.compare(case.expected, observed, context, case.observe)
-            results.append(
-                result_from_execution(
-                    case,
-                    namespace,
-                    tx_hashes,
-                    context,
-                    observed,
-                    diffs,
-                    expected=resolved_expected,
+            try:
+                tx_hashes, observed, context = executor.run_case(case, namespace)
+                resolved_expected = oracle.resolve_expected(case.expected, context, case.observe)
+                diffs = oracle.compare(case.expected, observed, context, case.observe)
+                results.append(
+                    result_from_execution(
+                        case,
+                        namespace,
+                        tx_hashes,
+                        context,
+                        observed,
+                        diffs,
+                        expected=resolved_expected,
+                    )
                 )
-            )
+            except ValueError as error:
+                results.append(
+                    result_from_execution(
+                        case,
+                        namespace,
+                        [],
+                        {},
+                        {},
+                        [f"proof error: {error}"],
+                        expected=case.expected,
+                    )
+                )
         report = Report(
             manifest=manifest.name,
             execution_specs_ref=manifest.execution_specs_ref,

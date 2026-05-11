@@ -53,6 +53,20 @@ SELFBALANCE_RUNTIME = "0x4760005500"
 CODESIZE_RUNTIME = "0x3860005500"
 BALANCE_RUNTIME = "0x5f353160005500"
 SYSTEM_SELF_CALL_WRAPPER_SUFFIX = bytes.fromhex("5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500")
+SYSTEM_ADMITTED_MAX_RETURNDATA_BYTES = 1024 * 1024
+SYSTEM_RUNTIME_HEADER = bytes.fromhex("365f14")
+SYSTEM_FILL_FF_WORD = bytes.fromhex("7f" + "ff" * 32)
+
+
+class SystemExecutionError(ValueError):
+    """Raised when an admitted-system runtime looks intentional but is malformed."""
+
+
+@dataclass(frozen=True, slots=True)
+class SystemSelfCallWitness:
+    success: bool
+    returndata_size: int
+    returndata_word: bytes
 
 
 class Backend(Protocol):
@@ -492,52 +506,92 @@ class MockBackend:
         ]
 
     def _is_system_self_call_runtime(self, code: str | None) -> bool:
-        if code is None or not code.startswith("0x"):
+        try:
+            self._parse_system_self_call_witness(code)
+        except SystemExecutionError:
+            return True
+        except ValueError:
             return False
-        raw = bytes.fromhex(code[2:])
-        return len(raw) >= len(SYSTEM_SELF_CALL_WRAPPER_SUFFIX) and raw.endswith(
-            SYSTEM_SELF_CALL_WRAPPER_SUFFIX
-        )
+        return True
 
     def _simulate_system_self_call_probe(self, storage: dict[str, str], code: str | None) -> None:
-        if code is None or not code.startswith("0x"):
-            raise ValueError(f"unsupported mock contract code path: {code}")
-        raw = bytes.fromhex(code[2:])
-        if len(raw) < len(SYSTEM_SELF_CALL_WRAPPER_SUFFIX) or not raw.endswith(SYSTEM_SELF_CALL_WRAPPER_SUFFIX):
-            raise ValueError(f"unsupported mock contract code path: {code}")
-        inner = raw[: len(raw) - len(SYSTEM_SELF_CALL_WRAPPER_SUFFIX)]
-        if len(inner) < 4 or not inner.startswith(bytes.fromhex("365f1460")):
-            raise ValueError(f"unsupported mock contract code path: {code}")
-        opcode_index = max(inner.rfind(b"\xf3"), inner.rfind(b"\xfd"))
-        if opcode_index < 0:
-            raise ValueError(f"unsupported mock contract code path: {code}")
-        inner_opcode = inner[opcode_index]
-        if inner_opcode not in {0xF3, 0xFD}:
-            raise ValueError(f"unsupported mock contract code path: {code}")
-        if opcode_index < 1 or inner[opcode_index - 1] != 0x5F:
-            raise ValueError(f"unsupported mock contract code path: {code}")
-        push_end = opcode_index - 2
-        if push_end < 0:
-            raise ValueError(f"unsupported mock contract code path: {code}")
-        if inner[push_end] == 0x5F:
-            data_length = 0
-        else:
-            candidate = None
-            for start in range(max(0, push_end - 32), push_end + 1):
-                opcode = inner[start]
-                if 0x60 <= opcode <= 0x7F and start + (opcode - 0x5F) == push_end:
-                    candidate = (start, opcode)
-            if candidate is None:
-                raise ValueError(f"unsupported mock contract code path: {code}")
-            push_start, push_opcode = candidate
-            push_len = push_opcode - 0x5F
-            data_length = int.from_bytes(inner[push_start + 1 : push_start + 1 + push_len], "big")
-        has_fill_prefix = bytes.fromhex("7f" + "ff" * 32) in inner
-        payload = (b"\xff" * data_length) if has_fill_prefix else (b"\x00" * data_length)
-        success = inner_opcode == 0xF3
-        storage["0x00"] = WORD_01 if success else ZERO_STORAGE_WORD
-        storage["0x01"] = self._hex_to_word(hex(data_length))
+        witness = self._parse_system_self_call_witness(code)
+        payload = witness.returndata_word * witness.returndata_size
+        storage["0x00"] = WORD_01 if witness.success else ZERO_STORAGE_WORD
+        storage["0x01"] = self._hex_to_word(hex(witness.returndata_size))
         storage["0x02"] = "0x" + keccak256(payload).hex()
+
+    def _parse_system_self_call_witness(self, code: str | None) -> SystemSelfCallWitness:
+        if code is None or not isinstance(code, str) or not code.startswith("0x"):
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        try:
+            raw = bytes.fromhex(code[2:])
+        except ValueError as exc:
+            raise SystemExecutionError("malformed system runtime hex") from exc
+        if len(raw) < len(SYSTEM_RUNTIME_HEADER) + len(SYSTEM_SELF_CALL_WRAPPER_SUFFIX):
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        if not raw.startswith(SYSTEM_RUNTIME_HEADER) or not raw.endswith(SYSTEM_SELF_CALL_WRAPPER_SUFFIX):
+            raise ValueError(f"unsupported mock contract code path: {code}")
+
+        inner = raw[: len(raw) - len(SYSTEM_SELF_CALL_WRAPPER_SUFFIX)]
+        jump_opcode_index = len(SYSTEM_RUNTIME_HEADER) + 2
+        if inner[jump_opcode_index] != 0x57:
+            raise SystemExecutionError("malformed system wrapper shape: missing canonical wrapper JUMPI")
+        child_start = jump_opcode_index + 1
+        child = inner[child_start:]
+        if not child:
+            raise SystemExecutionError("malformed system wrapper shape: empty child branch")
+
+        if child[-1] == 0xF3:
+            success = True
+        elif child[-1] == 0xFD:
+            success = False
+        else:
+            raise SystemExecutionError("malformed system wrapper shape: child branch must terminate in RETURN or REVERT")
+
+        child_prefix = child[:-1]
+        returndata_size, size_opcode_index = self._decode_system_child_returndata_size(child_prefix)
+        if returndata_size > SYSTEM_ADMITTED_MAX_RETURNDATA_BYTES:
+            raise SystemExecutionError(
+                f"system returndata declaration exceeds admitted maximum: {returndata_size} > {SYSTEM_ADMITTED_MAX_RETURNDATA_BYTES}"
+            )
+
+        child_body = child_prefix[:size_opcode_index]
+        returndata_word = b"\xff" if child_body else b"\x00"
+        if returndata_size == 0 and child_body:
+            raise SystemExecutionError(
+                "malformed system wrapper shape: zero-length returndata declaration must not include a fill prefix"
+            )
+        return SystemSelfCallWitness(
+            success=success,
+            returndata_size=returndata_size,
+            returndata_word=returndata_word,
+        )
+
+    def _decode_system_child_returndata_size(self, child: bytes) -> tuple[int, int]:
+        if len(child) < 2 or child[-1] != 0x5F:
+            raise SystemExecutionError(
+                "malformed system wrapper shape: child branch must end with canonical PUSH-size/PUSH0 sequence"
+            )
+        size_end = len(child) - 1
+        size_opcode_index = self._find_system_size_push_start(child, size_end - 1)
+        size_opcode = child[size_opcode_index]
+        if size_opcode == 0x5F:
+            return 0, size_opcode_index
+        push_len = size_opcode - 0x5F
+        size_bytes = child[size_opcode_index + 1 : size_opcode_index + 1 + push_len]
+        return int.from_bytes(size_bytes, "big"), size_opcode_index
+
+    def _find_system_size_push_start(self, code: bytes, push_end: int) -> int:
+        for start in range(max(0, push_end - 32), push_end + 1):
+            opcode = code[start]
+            if opcode == 0x5F and start == push_end:
+                return start
+            if 0x60 <= opcode <= 0x7F and start + (opcode - 0x5F) == push_end:
+                return start
+        raise SystemExecutionError(
+            "malformed system wrapper shape: could not decode canonical returndata size operand"
+        )
 
     def _hex_to_word(self, value: str) -> str:
         if isinstance(value, str) and value.startswith("0x"):

@@ -19,6 +19,7 @@ from adapter.executor import (
     SELFBALANCE_RUNTIME,
     JsonRpcBackend,
     MockBackend,
+    SystemExecutionError,
 )
 from adapter.generator import (
     generate_upstream_storage_manifest,
@@ -5478,6 +5479,99 @@ class HarnessTests(unittest.TestCase):
         broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-system-runtime")
+
+    def test_mock_backend_rejects_malformed_system_wrapper_shape(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
+        broken_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.system.test_return_revert.return.empty"
+        )
+        runtime = broken_case.steps[0]["bytecode_runtime"]
+        broken_case.steps[0]["bytecode_runtime"] = runtime.replace("57", "56", 1)
+        broken_case.steps[0]["bytecode_init"] = "0x60" + broken_case.steps[0]["bytecode_runtime"][2:]
+        with self.assertRaisesRegex(
+            SystemExecutionError,
+            r"malformed system wrapper shape: missing canonical wrapper JUMPI",
+        ):
+            backend.execute_case(broken_case, "negative-malformed-system-wrapper")
+
+    def test_mock_backend_rejects_oversized_system_returndata_declaration(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
+        broken_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data"
+        )
+        runtime = broken_case.steps[0]["bytecode_runtime"]
+        broken_case.steps[0]["bytecode_runtime"] = runtime.replace("62100000", "62100001", 1)
+        broken_case.steps[0]["bytecode_init"] = "0x60" + broken_case.steps[0]["bytecode_runtime"][2:]
+        with self.assertRaisesRegex(
+            SystemExecutionError,
+            r"system returndata declaration exceeds admitted maximum: 1048577 > 1048576",
+        ):
+            backend.execute_case(broken_case, "negative-oversized-system-returndata")
+
+    def test_mock_backend_rejects_malformed_system_runtime_hex(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
+        broken_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.system.test_return_revert.return.empty"
+        )
+        broken_case.steps[0]["bytecode_runtime"] = "0xzz"
+        broken_case.steps[0]["bytecode_init"] = "0x60zz"
+        with self.assertRaisesRegex(SystemExecutionError, r"malformed system runtime hex"):
+            backend.execute_case(broken_case, "negative-malformed-system-hex")
+
+    def test_cli_run_mock_system_manifest_bounds_malformed_system_case_as_proof_error(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
+        payload["cases"][0]["steps"][0]["bytecode_runtime"] = payload["cases"][0]["steps"][0]["bytecode_runtime"].replace(
+            "57", "56", 1
+        )
+        payload["cases"][0]["steps"][0]["bytecode_init"] = "0x60" + payload["cases"][0]["steps"][0]["bytecode_runtime"][2:]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            manifest_path = tmp_path / "broken-system.json"
+            manifest_path.write_text(json.dumps(payload))
+            args = [
+                "run",
+                "--profile",
+                str(ROOT / "profiles/mock.toml"),
+                "--manifest",
+                str(manifest_path),
+                "--state-dir",
+                str(state_dir),
+                "--report",
+                str(report_path),
+            ]
+            self.assertEqual(main(args), 0)
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 10)
+            broken = next(
+                result
+                for result in report["results"]
+                if result["case_id"] == "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data"
+            )
+            self.assertFalse(broken["success"])
+            self.assertEqual(
+                broken["diffs"],
+                ["proof error: malformed system wrapper shape: missing canonical wrapper JUMPI"],
+            )
+            self.assertEqual(broken["observed"], {})
+            self.assertEqual(broken["context"], {})
+            passing = [
+                result
+                for result in report["results"]
+                if result["case_id"] != "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data"
+            ]
+            self.assertTrue(all(result["success"] for result in passing))
+            self.assertTrue(all(result["diffs"] == [] for result in passing))
 
     def test_mock_backend_rejects_unsupported_log_runtime_code_path(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
