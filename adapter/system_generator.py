@@ -407,10 +407,8 @@ def _scan_create(text: str) -> list[AutoSystemInventoryEntry]:
             )
             case_id = f"upstream.benchmark.system.test_create.{opcode.lower()}.{combo_slug}"
             is_empty_admitted = combo_label in {"0 bytes without value", "0 bytes with value"}
-            is_child_code_admitted = combo_label in {
-                "0.25x max code size with non-zero data",
-                "0.25x max code size with zero data",
-            }
+            create_child_code_size = _create_child_code_size_for_label(combo_label)
+            is_child_code_admitted = create_child_code_size in {6144, 12288}
             admitted = is_empty_admitted or is_child_code_admitted
             create_value = 1 if combo_label == "0 bytes with value" else 0
             create_data_kind = "non_zero" if "non-zero data" in combo_label else "zero" if is_child_code_admitted else None
@@ -430,12 +428,32 @@ def _scan_create(text: str) -> list[AutoSystemInventoryEntry]:
                     source="test_create",
                     opcode=opcode if admitted else None,
                     create_value=create_value if admitted else None,
-                    create_initcode_size=6144 if is_child_code_admitted else 0 if is_empty_admitted else None,
+                    create_initcode_size=create_child_code_size if is_child_code_admitted else 0 if is_empty_admitted else None,
                     create_data_kind=create_data_kind,
                     create_salt=42 if admitted and opcode == "CREATE2" else None,
                 )
             )
     return results
+
+
+def _create_child_code_size_for_label(combo_label: str) -> int | None:
+    ratio_to_size = {
+        "0.25x": 6144,
+        "0.50x": 12288,
+        "0.75x": 18432,
+        "max": 24576,
+    }
+    if "max code size" not in combo_label:
+        return None
+    if combo_label.startswith("0.25x"):
+        return ratio_to_size["0.25x"]
+    if combo_label.startswith("0.50x"):
+        return ratio_to_size["0.50x"]
+    if combo_label.startswith("0.75x"):
+        return ratio_to_size["0.75x"]
+    if combo_label.startswith("max code size"):
+        return ratio_to_size["max"]
+    raise ValueError(f"unsupported create max-code-size label: {combo_label}")
 
 
 def _scan_creates_collisions(text: str) -> list[AutoSystemInventoryEntry]:

@@ -84,6 +84,46 @@
       "create_salt": null
     },
     {
+      "case_id": "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_non_zero_data",
+      "description": "Mapped from execution-specs CREATE non-empty non-zero data create benchmark onto a single wrapper that stores create success, created address, created code size, and created code hash.",
+      "namespace_seed": "upstream-system-test-create-create-0-50x-max-code-size-with-non-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.50x max code size with non-zero data]",
+      "notes": [
+        "Upstream intent: benchmark CREATE with 12288-byte non-zero initcode that deploys 12288-byte child code.",
+        "RPC mapping: a single deployed wrapper performs one zero value CREATE, then stores create success, the returned child address, EXTCODESIZE(child), and EXTCODEHASH(child) as deterministic witness fields.",
+        "Only the smallest non-zero-data and zero-data non-empty variants are admitted; larger code-size ratios and value-bearing non-empty variants remain blocked until separate witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, child code size, and child code hash are deterministic final observables."
+      ],
+      "mode": "create_child_code",
+      "opcode": "CREATE",
+      "return_size": null,
+      "return_non_zero_data": null,
+      "create_value": 0,
+      "create_initcode_size": 12288,
+      "create_data_kind": "non_zero",
+      "create_salt": null
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_zero_data",
+      "description": "Mapped from execution-specs CREATE non-empty zero data create benchmark onto a single wrapper that stores create success, created address, created code size, and created code hash.",
+      "namespace_seed": "upstream-system-test-create-create-0-50x-max-code-size-with-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE-variant=0.50x max code size with zero data]",
+      "notes": [
+        "Upstream intent: benchmark CREATE with 12288-byte zero initcode that deploys 12288-byte child code.",
+        "RPC mapping: a single deployed wrapper performs one zero value CREATE, then stores create success, the returned child address, EXTCODESIZE(child), and EXTCODEHASH(child) as deterministic witness fields.",
+        "Only the smallest non-zero-data and zero-data non-empty variants are admitted; larger code-size ratios and value-bearing non-empty variants remain blocked until separate witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, child code size, and child code hash are deterministic final observables."
+      ],
+      "mode": "create_child_code",
+      "opcode": "CREATE",
+      "return_size": null,
+      "return_non_zero_data": null,
+      "create_value": 0,
+      "create_initcode_size": 12288,
+      "create_data_kind": "zero",
+      "create_salt": null
+    },
+    {
       "case_id": "upstream.benchmark.system.test_create.create2.0_bytes_with_value",
       "description": "Mapped from execution-specs CREATE2 zero-byte create benchmark onto a single wrapper that stores create success, created address, and created code size.",
       "namespace_seed": "upstream-system-test-create-create2-0-bytes-with-value",
@@ -160,6 +200,46 @@
       "return_non_zero_data": null,
       "create_value": 0,
       "create_initcode_size": 6144,
+      "create_data_kind": "zero",
+      "create_salt": 42
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_non_zero_data",
+      "description": "Mapped from execution-specs CREATE2 non-empty non-zero data create benchmark onto a single wrapper that stores create success, created address, created code size, and created code hash.",
+      "namespace_seed": "upstream-system-test-create-create2-0-50x-max-code-size-with-non-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.50x max code size with non-zero data]",
+      "notes": [
+        "Upstream intent: benchmark CREATE2 with 12288-byte non-zero initcode that deploys 12288-byte child code.",
+        "RPC mapping: a single deployed wrapper performs one zero value CREATE2 with CREATE2 salt 42, then stores create success, the returned child address, EXTCODESIZE(child), and EXTCODEHASH(child) as deterministic witness fields.",
+        "Only the smallest non-zero-data and zero-data non-empty variants are admitted; larger code-size ratios and value-bearing non-empty variants remain blocked until separate witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, child code size, and child code hash are deterministic final observables."
+      ],
+      "mode": "create_child_code",
+      "opcode": "CREATE2",
+      "return_size": null,
+      "return_non_zero_data": null,
+      "create_value": 0,
+      "create_initcode_size": 12288,
+      "create_data_kind": "non_zero",
+      "create_salt": 42
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_zero_data",
+      "description": "Mapped from execution-specs CREATE2 non-empty zero data create benchmark onto a single wrapper that stores create success, created address, created code size, and created code hash.",
+      "namespace_seed": "upstream-system-test-create-create2-0-50x-max-code-size-with-zero-data",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_create[opcode=CREATE2-variant=0.50x max code size with zero data]",
+      "notes": [
+        "Upstream intent: benchmark CREATE2 with 12288-byte zero initcode that deploys 12288-byte child code.",
+        "RPC mapping: a single deployed wrapper performs one zero value CREATE2 with CREATE2 salt 42, then stores create success, the returned child address, EXTCODESIZE(child), and EXTCODEHASH(child) as deterministic witness fields.",
+        "Only the smallest non-zero-data and zero-data non-empty variants are admitted; larger code-size ratios and value-bearing non-empty variants remain blocked until separate witness contracts are mapped.",
+        "Admitted because final receipt status plus wrapper-exposed create success, nonzero child address, child code size, and child code hash are deterministic final observables."
+      ],
+      "mode": "create_child_code",
+      "opcode": "CREATE2",
+      "return_size": null,
+      "return_non_zero_data": null,
+      "create_value": 0,
+      "create_initcode_size": 12288,
       "create_data_kind": "zero",
       "create_salt": 42
     },
