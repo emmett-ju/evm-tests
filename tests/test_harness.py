@@ -1623,8 +1623,8 @@ class HarnessTests(unittest.TestCase):
                 blocked_reason_counts,
                 Counter(
                     {
-                        "requires block environment control": 5,
-                        "requires blob-capable profile support not yet enabled": 1,
+                        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness": 5,
+                        "requires blob-base-fee opcode support plus a blob-capable profile witness not yet proven": 1,
                     }
                 ),
             )

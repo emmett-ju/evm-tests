@@ -18,7 +18,7 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires blob-capable profile support not yet enabled"
+        "requires blob-base-fee opcode support plus a blob-capable profile witness not yet proven"
       ],
       "source": "test_block_context_ops"
     },
@@ -76,7 +76,7 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires block environment control"
+        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
       ],
       "source": "test_blockhash"
     },
@@ -86,7 +86,7 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires block environment control"
+        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
       ],
       "source": "test_blockhash"
     },
@@ -96,7 +96,7 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires block environment control"
+        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
       ],
       "source": "test_blockhash"
     },
@@ -106,7 +106,7 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires block environment control"
+        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
       ],
       "source": "test_blockhash"
     },
@@ -116,7 +116,7 @@
       "admitted": false,
       "mode": null,
       "reasons": [
-        "requires block environment control"
+        "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
       ],
       "source": "test_blockhash"
     }

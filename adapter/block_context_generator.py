@@ -11,8 +11,8 @@ from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
 
 
-BLOCKHASH_BLOCKED_REASON = "requires block environment control"
-BLOBBASEFEE_BLOCKED_REASON = "requires blob-capable profile support not yet enabled"
+BLOCKHASH_BLOCKED_REASON = "requires controllable 256-block history or historical block-hash witness not available through the current RPC-only harness"
+BLOBBASEFEE_BLOCKED_REASON = "requires blob-base-fee opcode support plus a blob-capable profile witness not yet proven"
 
 BLOCK_CONTEXT_COINBASE_RUNTIME = "0x4160005500"
 BLOCK_CONTEXT_TIMESTAMP_RUNTIME = "0x4260005500"
