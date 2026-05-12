@@ -8,6 +8,7 @@
 - 理解当前 harness 的核心工作机制。
 - 识别哪些 upstream family 已经迁移，哪些还没有。
 - 继续扩展新的 execution-specs family，而不需要先重新梳理历史上下文。
+- 判断当前 benchmark family 覆盖是否值得继续扩展；最新覆盖状态见 `docs/benchmark-coverage-status.md`。
 
 ## 项目背景
 这个项目的目标，不是把 `execution-specs` 原样搬过来跑一遍，而是把其中能够在专用 RPC 链上表达的执行层用例，迁移成一套可重复运行的本地 harness。

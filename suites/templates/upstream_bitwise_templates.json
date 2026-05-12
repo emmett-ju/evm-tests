@@ -123,6 +123,20 @@
       ]
     },
     {
+      "case_id": "upstream.benchmark.bitwise.test_clz_diff.clz",
+      "description": "Mapped from execution-specs CLZ-diff benchmark onto an RPC-only deterministic witness flow.",
+      "namespace_seed": "upstream-bitwise-clz-diff",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_clz_diff",
+      "notes": [
+        "Upstream intent: benchmark CLZ across a max-code-size-bounded sequence of different immediate inputs.",
+        "RPC mapping: replay the upstream-derived finite CLZ input schedule as a benchmark-shape witness, accumulate each CLZ result into a final storage word, and validate the exact runtime bytes in the mock backend.",
+        "Admitted as a deterministic witness of the current benchmark shape only; it does not claim throughput parity. This witness currently replays 1224 CLZ inputs derived from the upstream max-code-size loop."
+      ],
+      "mode": "test_clz_diff",
+      "opcode": "CLZ",
+      "args": []
+    },
+    {
       "case_id": "upstream.benchmark.bitwise.test_clz_same.clz",
       "description": "Mapped from execution-specs CLZ onto an RPC-only deploy/call/storage-assert flow.",
       "namespace_seed": "upstream-bitwise-clz",

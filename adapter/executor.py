@@ -247,12 +247,18 @@ class MockBackend:
                 bitwise_probe = case.observe.get("bitwise_probe")
                 if bitwise_probe is not None:
                     from adapter.assembler import _word_hex
-                    from adapter.bitwise_generator import _build_bitwise_runtime, _build_shift_witness_runtime
+                    from adapter.bitwise_generator import (
+                        _build_bitwise_runtime,
+                        _build_clz_diff_witness_runtime,
+                        _build_shift_witness_runtime,
+                    )
 
                     mode = bitwise_probe.get("mode")
                     opcode = bitwise_probe["opcode"]
                     if mode == "test_shifts":
                         expected_runtime = _build_shift_witness_runtime(opcode)
+                    elif mode == "test_clz_diff":
+                        expected_runtime = _build_clz_diff_witness_runtime()
                     else:
                         expected_runtime = _build_bitwise_runtime(opcode, tuple(bitwise_probe["args"]))
                     if code != expected_runtime:

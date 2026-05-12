@@ -98,14 +98,12 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_clz_diff",
       "case_id": "upstream.benchmark.bitwise.test_clz_diff.clz",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-sensitive benchmark shape not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_clz_diff",
+      "reasons": [],
       "source": "test_clz_diff",
-      "opcode": null,
-      "args": null
+      "opcode": "CLZ",
+      "args": []
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_bitwise.py::test_clz_same",

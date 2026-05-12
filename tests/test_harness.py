@@ -1542,8 +1542,9 @@ class HarnessTests(unittest.TestCase):
             checked_in = json.loads((ROOT / "suites/manifests/upstream_bitwise_mapped.json").read_text())
             self.assertEqual(generated, checked_in)
             self.assertEqual(generated["name"], "upstream-bitwise-mapped")
-            self.assertEqual(len(generated["cases"]), 11)
+            self.assertEqual(len(generated["cases"]), 12)
             case_ids = {case["case_id"] for case in generated["cases"]}
+            self.assertIn("upstream.benchmark.bitwise.test_clz_diff.clz", case_ids)
             self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", case_ids)
             self.assertIn("upstream.benchmark.bitwise.test_shifts.sar", case_ids)
 
@@ -1761,7 +1762,7 @@ class HarnessTests(unittest.TestCase):
             "system": (46, 35, 11),
             "block-context": (13, 8, 5),
             "tx-context": (4, 2, 2),
-            "bitwise": (12, 11, 1),
+            "bitwise": (12, 12, 0),
         }
         for family, (total_count, admitted_count, blocked_count) in expected_counts.items():
             entries = inventories[family]
@@ -1874,14 +1875,14 @@ class HarnessTests(unittest.TestCase):
         )
 
         bitwise_blocked = [entry for entry in inventories["bitwise"] if not entry["admitted"]]
-        self.assertEqual(
-            [entry["case_id"] for entry in bitwise_blocked],
-            ["upstream.benchmark.bitwise.test_clz_diff.clz"],
+        self.assertEqual(bitwise_blocked, [])
+        bitwise_clz_diff = next(
+            entry
+            for entry in inventories["bitwise"]
+            if entry["case_id"] == "upstream.benchmark.bitwise.test_clz_diff.clz"
         )
-        self.assertEqual(
-            Counter(reason for entry in bitwise_blocked for reason in entry["reasons"]),
-            Counter({"requires gas-sensitive benchmark shape not yet mapped": 1}),
-        )
+        self.assertEqual(bitwise_clz_diff["mode"], "test_clz_diff")
+        self.assertEqual(bitwise_clz_diff["reasons"], [])
 
     def test_call_context_template_scanner_matches_checked_in_template(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1983,23 +1984,15 @@ class HarnessTests(unittest.TestCase):
                 inventory_path=inventory_path,
             )
             self.assertEqual(generated["name"], "upstream-bitwise-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 11)
+            self.assertEqual(len(generated["cases"]), 12)
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(inventory["name"], "upstream-bitwise-auto-inventory")
             self.assertEqual(inventory["family"], "bitwise")
             self.assertEqual(len(inventory["entries"]), 12)
             admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
-            self.assertEqual(len(admitted), 11)
-            self.assertEqual(len(blocked), 1)
-            self.assertEqual(
-                blocked[0]["case_id"],
-                "upstream.benchmark.bitwise.test_clz_diff.clz",
-            )
-            self.assertEqual(
-                blocked[0]["reasons"],
-                ["requires gas-sensitive benchmark shape not yet mapped"],
-            )
+            self.assertEqual(len(admitted), 12)
+            self.assertEqual(blocked, [])
             case_ids = [entry["case_id"] for entry in inventory["entries"]]
             self.assertEqual(len(case_ids), len(set(case_ids)))
             self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", case_ids)
@@ -3680,17 +3673,16 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-bitwise-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 11)
+            self.assertEqual(len(generated["cases"]), 12)
             self.assertEqual(inventory["name"], "upstream-bitwise-auto-inventory")
             self.assertEqual(inventory["family"], "bitwise")
             self.assertEqual(len(inventory["entries"]), 12)
-            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 11)
-            blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
-            self.assertEqual(len(blocked), 1)
-            self.assertEqual(blocked[0]["upstream_ref"], "tests/benchmark/compute/instruction/test_bitwise.py::test_clz_diff")
-            self.assertEqual(blocked[0]["case_id"], "upstream.benchmark.bitwise.test_clz_diff.clz")
-            self.assertEqual(blocked[0]["reasons"], ["requires gas-sensitive benchmark shape not yet mapped"])
-            self.assertEqual(blocked[0]["source"], "test_clz_diff")
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 12)
+            self.assertEqual([entry for entry in inventory["entries"] if not entry["admitted"]], [])
+            clz_diff = next(entry for entry in inventory["entries"] if entry["case_id"] == "upstream.benchmark.bitwise.test_clz_diff.clz")
+            self.assertEqual(clz_diff["upstream_ref"], "tests/benchmark/compute/instruction/test_bitwise.py::test_clz_diff")
+            self.assertEqual(clz_diff["mode"], "test_clz_diff")
+            self.assertEqual(clz_diff["source"], "test_clz_diff")
 
     def test_cli_scan_upstream_comparison_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -4137,7 +4129,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(inventory["name"], "upstream-bitwise-auto-inventory")
             self.assertEqual(inventory["family"], "bitwise")
             self.assertEqual(len(inventory["entries"]), 12)
-            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 11)
+            self.assertEqual(len([entry for entry in inventory["entries"] if entry["admitted"]]), 12)
 
     def test_cli_scan_upstream_comparison_inventory_only_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -4326,8 +4318,9 @@ class HarnessTests(unittest.TestCase):
             )
             generated = json.loads(output_path.read_text())
             self.assertEqual(generated["name"], "upstream-bitwise-mapped")
-            self.assertEqual(len(generated["cases"]), 11)
+            self.assertEqual(len(generated["cases"]), 12)
             case_ids = {case["case_id"] for case in generated["cases"]}
+            self.assertIn("upstream.benchmark.bitwise.test_clz_diff.clz", case_ids)
             self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", case_ids)
             self.assertIn("upstream.benchmark.bitwise.test_shifts.sar", case_ids)
             for case in generated["cases"]:
@@ -4782,9 +4775,9 @@ class HarnessTests(unittest.TestCase):
                 "arithmetic": {"total": 65, "admitted": 65, "blocked": 0, "blocked_reasons": {}},
                 "bitwise": {
                     "total": 12,
-                    "admitted": 11,
-                    "blocked": 1,
-                    "blocked_reasons": {"requires gas-sensitive benchmark shape not yet mapped": 1},
+                    "admitted": 12,
+                    "blocked": 0,
+                    "blocked_reasons": {},
                 },
                 "comparison": {"total": 6, "admitted": 6, "blocked": 0, "blocked_reasons": {}},
                 "stack": {"total": 65, "admitted": 65, "blocked": 0, "blocked_reasons": {}},
@@ -4799,13 +4792,13 @@ class HarnessTests(unittest.TestCase):
                 "admitted": sum(item["admitted"] for item in phase3_families.values()),
                 "blocked": sum(item["blocked"] for item in phase3_families.values()),
             },
-            {"families": 6, "cases": 190, "admitted": 189, "blocked": 1},
+            {"families": 6, "cases": 190, "admitted": 190, "blocked": 0},
         )
 
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 536, "blocked": 77},
+            {"families": 14, "cases": 613, "admitted": 537, "blocked": 76},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -4835,7 +4828,7 @@ class HarnessTests(unittest.TestCase):
             },
             {
                 "arithmetic": {"total": 65, "admitted": 65, "blocked": 0},
-                "bitwise": {"total": 12, "admitted": 11, "blocked": 1},
+                "bitwise": {"total": 12, "admitted": 12, "blocked": 0},
                 "comparison": {"total": 6, "admitted": 6, "blocked": 0},
                 "stack": {"total": 65, "admitted": 65, "blocked": 0},
                 "control-flow": {"total": 7, "admitted": 7, "blocked": 0},
@@ -4880,11 +4873,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 526, "blocked": 47},
+                {"families": 13, "cases": 573, "admitted": 527, "blocked": 46},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 536, "blocked": 77},
+                {"families": 14, "cases": 613, "admitted": 537, "blocked": 76},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -4955,11 +4948,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 535, "blocked": 77},
+                {"families": 14, "cases": 612, "admitted": 536, "blocked": 76},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 536, "blocked": 77},
+                {"families": 14, "cases": 613, "admitted": 537, "blocked": 76},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -4979,7 +4972,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 535, "blocked": 77},
+                {"families": 14, "cases": 612, "admitted": 536, "blocked": 76},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -4990,6 +4983,18 @@ class HarnessTests(unittest.TestCase):
                 },
                 {"total": 39, "admitted": 9, "blocked": 30},
             )
+
+    def test_benchmark_coverage_status_doc_matches_checked_in_summary(self) -> None:
+        summary = summarize_inventory_dir(ROOT / "suites/templates")
+        doc = (ROOT / "docs/benchmark-coverage-status.md").read_text()
+        totals = summary["totals"]
+        self.assertIn(f"| Families scanned | {totals['families']} |", doc)
+        self.assertIn(f"| Total cases | {totals['cases']} |", doc)
+        self.assertIn(f"| Admitted cases | {totals['admitted']} |", doc)
+        self.assertIn(f"| Blocked cases | {totals['blocked']} |", doc)
+        self.assertIn("| bitwise | 12 | Completed by the CLZ-diff witness", doc)
+        self.assertIn("the 76 blocked cases should remain blocked", doc)
+        self.assertIn("docs/benchmark-coverage-status.md", (ROOT / "docs/project-handoff.md").read_text())
 
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -6932,7 +6937,7 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 11)
+            self.assertEqual(len(report["results"]), 12)
 
             observed_by_case = {result["case_id"]: result for result in report["results"]}
             representative_storage = {
@@ -7294,7 +7299,7 @@ class HarnessTests(unittest.TestCase):
             report = json.loads(report_path.read_text())
             self.assertEqual(report["manifest"], "upstream-bitwise-mapped")
             self.assertEqual(report["chain_profile"], "mock-devnet")
-            self.assertEqual(len(report["results"]), 11)
+            self.assertEqual(len(report["results"]), 12)
             self.assertTrue(all(result["success"] for result in report["results"]))
             self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
             observed_by_case = {result["case_id"]: result for result in report["results"]}

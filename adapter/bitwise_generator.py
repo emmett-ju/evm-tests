@@ -20,6 +20,10 @@ SHIFT_WITNESS_INVOKE_GAS = "0x0f4240"
 UPSTREAM_MAX_CODE_SIZE = 24_576
 UPSTREAM_SHIFT_PREFIX_LEN = 34
 UPSTREAM_SHIFT_SUFFIX_LEN = 4
+UPSTREAM_CLZ_DIFF_PREFIX_LEN = 1
+UPSTREAM_CLZ_DIFF_SUFFIX_LEN = 2
+CLZ_DIFF_DEPLOY_GAS = "0x989680"
+CLZ_DIFF_INVOKE_GAS = "0x0f4240"
 SHIFT_INITIAL_VALUE = (1 << 256) - 1
 SHIFT_AMOUNTS: tuple[int, ...] = tuple(x + (x >= 8) + (x >= 15) for x in range(1, 16))
 
@@ -53,6 +57,13 @@ class ShiftWitness:
     opcode: str
     rounds: int
     final_value: int
+    schedule: tuple[tuple[int, int], ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ClzDiffWitness:
+    rounds: int
+    final_accumulator: int
     schedule: tuple[tuple[int, int], ...]
 
 
@@ -300,10 +311,12 @@ def _scan_standalone_cases(text: str) -> list[AutoBitwiseInventoryEntry]:
             AutoBitwiseInventoryEntry(
                 upstream_ref="tests/benchmark/compute/instruction/test_bitwise.py::test_clz_diff",
                 case_id="upstream.benchmark.bitwise.test_clz_diff.clz",
-                admitted=False,
-                mode=None,
-                reasons=[BLOCKED_REASON],
+                admitted=True,
+                mode="test_clz_diff",
+                reasons=[],
                 source="test_clz_diff",
+                opcode="CLZ",
+                args=(),
             )
         )
     if len(entries) != 3:
@@ -346,6 +359,28 @@ def _bitwise_inventory_entry_to_template(entry: AutoBitwiseInventoryEntry) -> Bi
             ],
             mode="test_shifts",
             opcode=opcode,
+            args=(),
+        )
+    if entry.source == "test_clz_diff":
+        witness = _compute_clz_diff_witness()
+        return BitwiseMappingTemplate(
+            case_id=entry.case_id,
+            description="Mapped from execution-specs CLZ-diff benchmark onto an RPC-only deterministic witness flow.",
+            namespace_seed="upstream-bitwise-clz-diff",
+            upstream_ref=entry.upstream_ref,
+            notes=[
+                "Upstream intent: benchmark CLZ across a max-code-size-bounded sequence of different immediate inputs.",
+                (
+                    "RPC mapping: replay the upstream-derived finite CLZ input schedule as a benchmark-shape witness, "
+                    "accumulate each CLZ result into a final storage word, and validate the exact runtime bytes in the mock backend."
+                ),
+                (
+                    f"Admitted as a deterministic witness of the current benchmark shape only; it does not claim throughput parity. "
+                    f"This witness currently replays {witness.rounds} CLZ inputs derived from the upstream max-code-size loop."
+                ),
+            ],
+            mode="test_clz_diff",
+            opcode="CLZ",
             args=(),
         )
     return BitwiseMappingTemplate(
@@ -458,6 +493,45 @@ def _select_shift_amount(rng: random.Random, value: int, shift_fn) -> tuple[int,
             return new_value, index
 
 
+@lru_cache(maxsize=None)
+def _compute_clz_diff_witness() -> ClzDiffWitness:
+    schedule: list[tuple[int, int]] = []
+    code_body_len = UPSTREAM_MAX_CODE_SIZE - UPSTREAM_CLZ_DIFF_PREFIX_LEN - UPSTREAM_CLZ_DIFF_SUFFIX_LEN
+    code_body_bytes = 0
+    accumulator = 0
+    for i in range(code_body_len):
+        value = ((1 << 256) - 1) >> (i % 256)
+        clz_result = _simulate_bitwise("CLZ", (value,))
+        op_len = len(_push_int(value)) + 2  # CLZ + POP in the upstream benchmark body.
+        if code_body_bytes + op_len > code_body_len:
+            break
+        schedule.append((value, clz_result))
+        accumulator = (accumulator + clz_result) % (1 << 256)
+        code_body_bytes += op_len
+    return ClzDiffWitness(
+        rounds=len(schedule),
+        final_accumulator=accumulator,
+        schedule=tuple(schedule),
+    )
+
+
+def _build_clz_diff_witness_runtime() -> str:
+    witness = _compute_clz_diff_witness()
+    code = bytearray()
+    code += _push_int(0)  # accumulator
+    for value, _ in witness.schedule:
+        code += _push_int(value)
+        code.append(OPCODES["CLZ"])
+        code.append(0x01)  # ADD accumulator += CLZ(value)
+    code += _push_int(0)
+    code.append(0x55)  # SSTORE slot0 <- accumulated CLZ witness
+    code.append(0x00)  # STOP
+    runtime = "0x" + code.hex()
+    if len(bytes.fromhex(runtime.removeprefix("0x"))) > UPSTREAM_MAX_CODE_SIZE:
+        raise ValueError("CLZ-diff witness runtime exceeds max code size")
+    return runtime
+
+
 OPCODES: dict[str, int] = {
     "AND": 0x16,
     "OR": 0x17,
@@ -549,6 +623,23 @@ def render_bitwise_case(template: BitwiseMappingTemplate) -> dict[str, Any]:
         }
         deploy_gas = SHIFT_WITNESS_DEPLOY_GAS
         invoke_gas = SHIFT_WITNESS_INVOKE_GAS
+    elif template.mode == "test_clz_diff":
+        witness = _compute_clz_diff_witness()
+        expected_val = witness.final_accumulator
+        runtime_code = _build_clz_diff_witness_runtime()
+        init_code = _build_large_init_code(runtime_code)
+        observe = {
+            "storage_address": "$last_contract",
+            "bitwise_probe": {
+                "mode": template.mode,
+                "opcode": template.opcode,
+                "args": list(template.args),
+                "expected_result": expected_val,
+                "witness_rounds": witness.rounds,
+            },
+        }
+        deploy_gas = CLZ_DIFF_DEPLOY_GAS
+        invoke_gas = CLZ_DIFF_INVOKE_GAS
     else:
         expected_val = _simulate_bitwise(template.opcode, template.args)
         runtime_code = _build_bitwise_runtime(template.opcode, template.args)
