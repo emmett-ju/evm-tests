@@ -285,7 +285,7 @@ class MockBackend:
                     self._simulate_create_collision_probe(storage, system_witness, code)
                     continue
                 if system_witness is not None and system_witness.get("shape") == "selfdestruct_single":
-                    self._simulate_selfdestruct_single_probe(storage, system_witness, code)
+                    self._simulate_selfdestruct_single_probe(storage, system_witness, code, data)
                     continue
 
                 if self._is_system_self_call_runtime(code):
@@ -658,6 +658,7 @@ class MockBackend:
         storage: dict[str, str],
         witness_config: dict[str, Any],
         code: str | None,
+        data: str,
     ) -> None:
         scenario = witness_config.get("scenario")
         value = int(witness_config.get("value", 0))
@@ -676,15 +677,37 @@ class MockBackend:
             expected_runtime = _build_selfdestruct_existing_runtime(value=value)
             if code != expected_runtime:
                 raise ValueError(f"unsupported mock contract code path: {code}")
-            storage["0x00"] = WORD_01
-            storage["0x01"] = self._address_to_word("0xdddddddddddddddddddddddddddddddddddddddd")
-            storage["0x02"] = WORD_02
+            mode = self._decode_selfdestruct_existing_mode(data)
+            if mode == 0:
+                storage["0x00"] = WORD_01
+                storage["0x01"] = self._address_to_word("0xdddddddddddddddddddddddddddddddddddddddd")
+                storage["0x02"] = WORD_02
+                return
+            if storage.get("0x01", ZERO_STORAGE_WORD) == ZERO_STORAGE_WORD:
+                raise ValueError("selfdestruct existing execution mode requires prior setup mode storage")
             storage["0x03"] = WORD_01
             storage["0x04"] = WORD_02
             if value > 0:
                 storage["0x05"] = self._hex_to_word(hex(value))
             return
         raise ValueError(f"unsupported selfdestruct_single scenario: {scenario!r}")
+
+    def _decode_selfdestruct_existing_mode(self, data: str) -> int:
+        if not isinstance(data, str) or not data.startswith("0x"):
+            raise ValueError(f"unsupported selfdestruct existing calldata payload: {data!r}")
+        payload = data[2:]
+        if len(payload) > 64 or len(payload) % 2 != 0:
+            raise ValueError(f"unsupported selfdestruct existing calldata payload: {data!r}")
+        if not payload:
+            mode = 0
+        else:
+            try:
+                mode = int(payload.rjust(64, "0"), 16)
+            except ValueError as exc:
+                raise ValueError(f"unsupported selfdestruct existing calldata payload: {data!r}") from exc
+        if mode not in {0, 1}:
+            raise ValueError(f"unsupported selfdestruct existing mode: {mode}")
+        return mode
 
 
     def _is_system_self_call_runtime(self, code: str | None) -> bool:

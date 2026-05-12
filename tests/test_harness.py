@@ -7214,6 +7214,39 @@ class HarnessTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
             backend.execute_case(broken_case, "negative-unsupported-system-runtime")
 
+    def test_mock_backend_rejects_malformed_selfdestruct_existing_runtime_code_path(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
+        broken_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_true"
+        )
+        broken_case.steps[0]["bytecode_runtime"] = "0xdeadbeef"
+        broken_case.steps[0]["bytecode_init"] = "0x60deadbeef"
+        with self.assertRaisesRegex(ValueError, "unsupported mock contract code path: 0xdeadbeef"):
+            backend.execute_case(broken_case, "negative-unsupported-selfdestruct-existing-runtime")
+
+    def test_mock_backend_requires_selfdestruct_existing_setup_before_execution(self) -> None:
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
+        broken_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_false"
+        )
+        broken_case.steps = [
+            broken_case.steps[0],
+            broken_case.steps[1],
+            broken_case.steps[4],
+            broken_case.steps[5],
+        ]
+        with self.assertRaisesRegex(
+            ValueError,
+            "selfdestruct existing execution mode requires prior setup mode storage",
+        ):
+            backend.execute_case(broken_case, "negative-selfdestruct-existing-without-setup")
+
     def test_mock_backend_rejects_malformed_system_wrapper_shape(self) -> None:
         backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
@@ -7360,7 +7393,7 @@ class HarnessTests(unittest.TestCase):
                     report = json.loads(report_path.read_text())
 
                 self.assertEqual(report["manifest"], "upstream-system-mapped")
-                self.assertEqual(len(report["results"]), 33)
+                self.assertEqual(len(report["results"]), 35)
                 broken = next(
                     result for result in report["results"] if result["case_id"] == scenario["case_id"]
                 )
@@ -7371,7 +7404,7 @@ class HarnessTests(unittest.TestCase):
                 passing = [
                     result for result in report["results"] if result["case_id"] != scenario["case_id"]
                 ]
-                self.assertEqual(len(passing), 32)
+                self.assertEqual(len(passing), 34)
                 self.assertTrue(all(result["success"] for result in passing))
                 self.assertTrue(all(result["diffs"] == [] for result in passing))
 
@@ -7540,7 +7573,7 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 33)
+            self.assertEqual(len(report["results"]), 35)
             observed_by_case = {result["case_id"]: result for result in report["results"]}
 
             self.assertEqual(
@@ -7707,7 +7740,7 @@ class HarnessTests(unittest.TestCase):
             report = json.loads(report_path.read_text())
             self.assertEqual(report["manifest"], "upstream-system-mapped")
             self.assertEqual(report["chain_profile"], "mock-devnet")
-            self.assertEqual(len(report["results"]), 33)
+            self.assertEqual(len(report["results"]), 35)
             self.assertTrue(all(result["success"] for result in report["results"]))
             self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
             observed_by_case = {result["case_id"]: result["observed"] for result in report["results"]}
