@@ -16,6 +16,7 @@ from adapter.system_witness import (
     build_create_collision_system_witness,
     build_create_empty_child_system_witness,
     build_return_revert_system_witness,
+    build_selfdestruct_single_system_witness,
 )
 
 
@@ -25,7 +26,7 @@ BLOCKED_CREATE_COLLISION_REASON = "requires gas-capped create collision orchestr
 BLOCKED_CREATE_COLLISION_CREATE_REASON = "requires mutable pre-allocation of future CREATE addresses not available through the current RPC-only harness"
 BLOCKED_SELFDESTRUCT_REASON = "requires selfdestruct lifecycle witness not yet mapped"
 
-SystemTemplateMode = Literal["return_revert_self_call", "create_empty_child", "create_child_code", "create_collision"]
+SystemTemplateMode = Literal["return_revert_self_call", "create_empty_child", "create_child_code", "create_collision", "selfdestruct_single"]
 SYSTEM_DEFAULT_DEPLOY_GAS = 0x186A0
 SYSTEM_DEPLOY_BASE_GAS = 32_000
 SYSTEM_DEPLOY_CODE_DEPOSIT_GAS_PER_BYTE = 200
@@ -49,6 +50,8 @@ class SystemMappingTemplate:
     create_data_kind: str | None = None
     create_salt: int | None = None
     proxy_call_gas: int | None = None
+    selfdestruct_scenario: str | None = None
+    hardfork_semantics: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,6 +70,8 @@ class AutoSystemInventoryEntry:
     create_data_kind: str | None = None
     create_salt: int | None = None
     proxy_call_gas: int | None = None
+    selfdestruct_scenario: str | None = None
+    hardfork_semantics: str | None = None
 
 
 class _BytecodeBuilder:
@@ -223,6 +228,8 @@ def render_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
         return _render_create_child_code_system_case(template)
     if template.mode == "create_collision":
         return _render_create_collision_system_case(template)
+    if template.mode == "selfdestruct_single":
+        return _render_selfdestruct_single_system_case(template)
     raise ValueError(f"unsupported system template mode: {template.mode}")
 
 
@@ -299,6 +306,25 @@ def _render_create_collision_system_case(template: SystemMappingTemplate) -> dic
         initcode_size=template.create_initcode_size or 0,
         salt=template.create_salt or 0,
         proxy_call_gas=proxy_call_gas,
+    )
+    return _render_system_case_payload(
+        template=template,
+        runtime_code=runtime_code,
+        witness=witness,
+        invoke_gas="0x1e8480",
+        deploy_gas=_deploy_gas_for_runtime(runtime_code),
+    )
+
+
+def _render_selfdestruct_single_system_case(template: SystemMappingTemplate) -> dict[str, Any]:
+    value = _require_inventory_field(template.create_value, field="create_value")
+    scenario = _require_inventory_field(template.selfdestruct_scenario, field="selfdestruct_scenario")
+    hardfork_semantics = _require_inventory_field(template.hardfork_semantics, field="hardfork_semantics")
+    runtime_code = _build_selfdestruct_created_runtime(value=value)
+    witness = build_selfdestruct_single_system_witness(
+        scenario=scenario,
+        value=value,
+        hardfork_semantics=hardfork_semantics,
     )
     return _render_system_case_payload(
         template=template,
@@ -551,14 +577,14 @@ def _scan_selfdestruct_existing(text: str) -> list[AutoSystemInventoryEntry]:
 
 
 def _scan_selfdestruct_created(text: str) -> list[AutoSystemInventoryEntry]:
-    return _scan_value_bearing_cases(text, function_name="test_selfdestruct_created")
+    return _scan_value_bearing_cases(text, function_name="test_selfdestruct_created", admitted=True)
 
 
 def _scan_selfdestruct_initcode(text: str) -> list[AutoSystemInventoryEntry]:
     return _scan_value_bearing_cases(text, function_name="test_selfdestruct_initcode")
 
 
-def _scan_value_bearing_cases(text: str, *, function_name: str) -> list[AutoSystemInventoryEntry]:
+def _scan_value_bearing_cases(text: str, *, function_name: str, admitted: bool = False) -> list[AutoSystemInventoryEntry]:
     block = _extract_param_block(text, function_name=function_name)
     values = [
         _parse_bool_literal(value)
@@ -568,10 +594,13 @@ def _scan_value_bearing_cases(text: str, *, function_name: str) -> list[AutoSyst
         AutoSystemInventoryEntry(
             upstream_ref=f"tests/benchmark/compute/instruction/test_system.py::{function_name}[value_bearing={value}]",
             case_id=f"upstream.benchmark.system.{function_name}.value_bearing_{str(value).lower()}",
-            admitted=False,
-            mode=None,
-            reasons=[BLOCKED_SELFDESTRUCT_REASON],
+            admitted=admitted,
+            mode="selfdestruct_single" if admitted else None,
+            reasons=[] if admitted else [BLOCKED_SELFDESTRUCT_REASON],
             source=function_name,
+            create_value=1 if admitted and value else 0 if admitted else None,
+            selfdestruct_scenario="created" if admitted else None,
+            hardfork_semantics="cancun" if admitted else None,
         )
         for value in values
     ]
@@ -586,6 +615,8 @@ def _inventory_entry_to_template(entry: AutoSystemInventoryEntry) -> SystemMappi
         return _create_child_code_inventory_entry_to_template(entry)
     if entry.mode == "create_collision":
         return _create_collision_inventory_entry_to_template(entry)
+    if entry.mode == "selfdestruct_single":
+        return _selfdestruct_single_inventory_entry_to_template(entry)
     raise ValueError(f"unsupported admitted system mode: {entry.mode}")
 
 
@@ -684,6 +715,27 @@ def _create_collision_inventory_entry_to_template(entry: AutoSystemInventoryEntr
     )
 
 
+def _selfdestruct_single_inventory_entry_to_template(entry: AutoSystemInventoryEntry) -> SystemMappingTemplate:
+    create_value = _require_inventory_field(entry.create_value, field="create_value")
+    scenario = _require_inventory_field(entry.selfdestruct_scenario, field="selfdestruct_scenario")
+    hardfork_semantics = _require_inventory_field(entry.hardfork_semantics, field="hardfork_semantics")
+    return SystemMappingTemplate(
+        case_id=entry.case_id,
+        description=(
+            "Mapped from execution-specs SELFDESTRUCT-created benchmark onto a single wrapper that creates a child, "
+            "calls it so SELFDESTRUCT executes in the same transaction, and stores final-state witness fields."
+        ),
+        namespace_seed=_build_namespace_seed(entry.case_id),
+        upstream_ref=entry.upstream_ref,
+        notes=_build_selfdestruct_single_notes(scenario=scenario, value=create_value, hardfork_semantics=hardfork_semantics),
+        mode="selfdestruct_single",
+        opcode="SELFDESTRUCT",
+        create_value=create_value,
+        selfdestruct_scenario=scenario,
+        hardfork_semantics=hardfork_semantics,
+    )
+
+
 def _load_system_template_entry(entry: object, *, index: int) -> SystemMappingTemplate:
     if not isinstance(entry, dict):
         raise ValueError(f"system template entry {index} must be an object")
@@ -765,6 +817,19 @@ def _load_system_template_entry(entry: object, *, index: int) -> SystemMappingTe
             create_salt=int(entry["create_salt"]),
             proxy_call_gas=int(entry["proxy_call_gas"]),
         )
+    if mode == "selfdestruct_single":
+        for field in ("create_value", "selfdestruct_scenario", "hardfork_semantics"):
+            if field not in entry:
+                raise ValueError(f"system template entry {index} missing required field: {field}")
+        if opcode != "SELFDESTRUCT":
+            raise ValueError(f"unsupported system template opcode for selfdestruct_single: {opcode}")
+        return SystemMappingTemplate(
+            **common,
+            mode="selfdestruct_single",
+            create_value=int(entry["create_value"]),
+            selfdestruct_scenario=str(entry["selfdestruct_scenario"]),
+            hardfork_semantics=str(entry["hardfork_semantics"]),
+        )
     raise ValueError(f"unsupported system template mode: {mode}")
 
 
@@ -826,6 +891,72 @@ def _build_create_collision_notes(*, opcode: str, proxy_call_gas: int) -> list[s
         "CREATE collision remains blocked because upstream depends on mutable pre-allocation of future CREATE addresses, which the current RPC-only harness cannot reproduce.",
         "Admitted because final receipt status plus wrapper-exposed proxy deploy success, first create result, child code size, collision call failure, and collision returndata size are deterministic final observables.",
     ]
+
+
+def _build_selfdestruct_single_notes(*, scenario: str, value: int, hardfork_semantics: str) -> list[str]:
+    value_note = "zero value" if value == 0 else "value 1"
+    return [
+        f"Upstream intent: benchmark SELFDESTRUCT for a {scenario} child with {value_note} under {hardfork_semantics} semantics.",
+        "RPC mapping: a single wrapper creates a child whose runtime is CALLER; SELFDESTRUCT, calls it in the same transaction, then stores create success, child address, call success, and post-call child code size.",
+        "The created-child scenario is admitted because same-transaction create plus SELFDESTRUCT has deterministic final-state evidence under Cancun without requiring traces or mutable prestate.",
+        "Existing-account and initcode SELFDESTRUCT variants remain blocked until their lifecycle and CREATE-result semantics are mapped separately.",
+        "Admitted because final receipt status plus wrapper-exposed child address, call success, post-call code size, and optional beneficiary balance are deterministic final observables.",
+    ]
+
+
+def _build_selfdestruct_created_runtime(*, value: int = 0) -> str:
+    if value not in {0, 1}:
+        raise ValueError("selfdestruct created value must be 0 or 1")
+    child_runtime = bytes([0x33, 0xFF])  # CALLER; SELFDESTRUCT
+    child_initcode = bytes.fromhex(_build_init_code("0x" + child_runtime.hex())[2:])
+
+    builder = _BytecodeBuilder()
+    builder.push_int(len(child_initcode))
+    builder.push_label("child_initcode")
+    builder.push_int(0)
+    builder.op(0x39)  # CODECOPY(0, child_initcode_offset, child_initcode_size)
+    builder.push_int(len(child_initcode))
+    builder.push_int(0)
+    builder.push_int(value)
+    builder.op(0xF0)  # CREATE child
+
+    builder.op(0x80)  # DUP1 child_address
+    builder.op(0x15)
+    builder.op(0x15)
+    builder.push_int(0)
+    builder.op(0x55)  # slot0 <- create_success
+
+    builder.op(0x80)  # DUP1 child_address
+    builder.push_int(1)
+    builder.op(0x55)  # slot1 <- child_address
+
+    builder.push_int(0)  # out_size
+    builder.push_int(0)  # out_offset
+    builder.push_int(0)  # in_size
+    builder.push_int(0)  # in_offset
+    builder.push_int(0)  # value
+    builder.op(0x85)  # DUP6 child_address
+    builder.op(0x5A)  # GAS
+    builder.op(0xF1)  # CALL child; child selfdestructs to wrapper
+    builder.push_int(2)
+    builder.op(0x55)  # slot2 <- selfdestruct_call_success
+
+    builder.op(0x80)  # DUP1 child_address
+    builder.op(0x3B)  # EXTCODESIZE(child) after call
+    builder.push_int(3)
+    builder.op(0x55)  # slot3 <- child_code_size_after
+
+    if value > 0:
+        builder.op(0x30)  # ADDRESS
+        builder.op(0x31)  # BALANCE(wrapper)
+        builder.push_int(4)
+        builder.op(0x55)  # slot4 <- beneficiary_balance_after
+
+    builder.op(0x50)  # POP child_address
+    builder.op(0x00)  # STOP
+    builder.labels["child_initcode"] = len(builder.code)
+    builder.extend(child_initcode)
+    return "0x" + builder.finish().hex()
 
 
 def _build_create_empty_child_runtime(opcode: str, *, value: int = 0) -> str:

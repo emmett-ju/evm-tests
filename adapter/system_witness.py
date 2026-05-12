@@ -10,8 +10,9 @@ RETURN_REVERT_SELF_CALL_SHAPE = "return_revert_self_call"
 CREATE_EMPTY_CHILD_SHAPE = "create_empty_child"
 CREATE_CHILD_CODE_SHAPE = "create_child_code"
 CREATE_COLLISION_SHAPE = "create_collision"
-SUPPORTED_SYSTEM_WITNESS_SHAPES = (CREATE_CHILD_CODE_SHAPE, CREATE_COLLISION_SHAPE, CREATE_EMPTY_CHILD_SHAPE, RETURN_REVERT_SELF_CALL_SHAPE)
-SystemWitnessShape = Literal["return_revert_self_call", "create_empty_child", "create_child_code", "create_collision"]
+SELFDESTRUCT_SINGLE_SHAPE = "selfdestruct_single"
+SUPPORTED_SYSTEM_WITNESS_SHAPES = (CREATE_CHILD_CODE_SHAPE, CREATE_COLLISION_SHAPE, CREATE_EMPTY_CHILD_SHAPE, RETURN_REVERT_SELF_CALL_SHAPE, SELFDESTRUCT_SINGLE_SHAPE)
+SystemWitnessShape = Literal["return_revert_self_call", "create_empty_child", "create_child_code", "create_collision", "selfdestruct_single"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,6 +56,17 @@ class CreateCollisionSystemWitness:
     collision_call_success: bool
     collision_returndata_size: int
     first_created_address: str
+
+
+@dataclass(frozen=True, slots=True)
+class SelfdestructSingleSystemWitness:
+    scenario: str
+    create_success: bool
+    child_address_nonzero: bool
+    selfdestruct_call_success: bool
+    child_code_size_after: int
+    child_address: str
+    beneficiary_balance_after: int | None = None
 
 
 def build_return_revert_system_witness(
@@ -195,6 +207,38 @@ def build_create_collision_system_witness(
     )
 
 
+def build_selfdestruct_single_system_witness(
+    *,
+    subject: str = "$last_contract",
+    scenario: str = "created",
+    value: int = 0,
+    hardfork_semantics: str = "cancun",
+) -> SystemWitnessBundle:
+    observe_witness: dict[str, Any] = {
+        "version": SYSTEM_WITNESS_VERSION,
+        "shape": SELFDESTRUCT_SINGLE_SHAPE,
+        "subject": subject,
+        "scenario": scenario,
+        "value": value,
+        "hardfork_semantics": hardfork_semantics,
+    }
+    validate_system_witness_declaration(observe_witness)
+    expected_witness: dict[str, Any] = {
+        "shape": SELFDESTRUCT_SINGLE_SHAPE,
+        "scenario": scenario,
+        "create_success": True,
+        "child_address_nonzero": True,
+        "selfdestruct_call_success": True,
+        "child_code_size_after": 0,
+    }
+    if value > 0:
+        expected_witness["beneficiary_balance_after"] = value
+    return SystemWitnessBundle(
+        observe={"system_witness": observe_witness},
+        expected={"system_witness": expected_witness},
+    )
+
+
 def validate_system_witness_declaration(value: Any) -> None:
     if not isinstance(value, dict):
         raise ValueError("observe.system_witness must be an object")
@@ -217,6 +261,8 @@ def validate_system_witness_declaration(value: Any) -> None:
         _validate_create_child_code_declaration(value)
     if shape == CREATE_COLLISION_SHAPE:
         _validate_create_collision_declaration(value)
+    if shape == SELFDESTRUCT_SINGLE_SHAPE:
+        _validate_selfdestruct_single_declaration(value)
 
 
 def collect_system_witness_from_storage(
@@ -243,6 +289,11 @@ def collect_system_witness_from_storage(
         )
     if shape == CREATE_COLLISION_SHAPE:
         return _collect_create_collision_system_witness_from_storage(
+            witness_config=witness_config,
+            storage=storage,
+        )
+    if shape == SELFDESTRUCT_SINGLE_SHAPE:
+        return _collect_selfdestruct_single_system_witness_from_storage(
             witness_config=witness_config,
             storage=storage,
         )
@@ -280,6 +331,10 @@ def system_witness_storage_slots(witness_config: Mapping[str, Any]) -> tuple[str
         return ("0x00", "0x01", "0x02", "0x03")
     if witness_config["shape"] == CREATE_COLLISION_SHAPE:
         return ("0x00", "0x01", "0x02", "0x03", "0x04", "0x05")
+    if witness_config["shape"] == SELFDESTRUCT_SINGLE_SHAPE:
+        if int(witness_config.get("value", 0)) > 0:
+            return ("0x00", "0x01", "0x02", "0x03", "0x04")
+        return ("0x00", "0x01", "0x02", "0x03")
     return ("0x00", "0x01", "0x02")
 
 
@@ -331,6 +386,16 @@ def _validate_create_collision_declaration(value: Mapping[str, Any]) -> None:
     proxy_call_gas = value.get("proxy_call_gas")
     if not isinstance(proxy_call_gas, int) or proxy_call_gas <= 0:
         raise ValueError("observe.system_witness.proxy_call_gas must be a positive integer for create_collision")
+
+def _validate_selfdestruct_single_declaration(value: Mapping[str, Any]) -> None:
+    if value.get("scenario") != "created":
+        raise ValueError("observe.system_witness.scenario must be 'created' for selfdestruct_single in this milestone")
+    witness_value = value.get("value")
+    if witness_value not in {0, 1}:
+        raise ValueError("observe.system_witness.value must be 0 or 1 for selfdestruct_single")
+    if value.get("hardfork_semantics") != "cancun":
+        raise ValueError("observe.system_witness.hardfork_semantics must be 'cancun' for selfdestruct_single")
+
 
 def _collect_create_empty_child_system_witness_from_storage(
     *,
@@ -387,6 +452,26 @@ def _collect_create_collision_system_witness_from_storage(
         "collision_call_success": _word_to_bool(storage.get("0x04")),
         "collision_returndata_size": _word_to_int(storage.get("0x05")),
     }
+
+def _collect_selfdestruct_single_system_witness_from_storage(
+    *,
+    witness_config: Mapping[str, Any],
+    storage: Mapping[str, str],
+) -> dict[str, Any]:
+    child_address_word = _require_word(storage.get("0x01"), "system witness selfdestruct child address word")
+    collected: dict[str, Any] = {
+        "shape": SELFDESTRUCT_SINGLE_SHAPE,
+        "scenario": str(witness_config["scenario"]),
+        "create_success": _word_to_bool(storage.get("0x00")),
+        "child_address_nonzero": int(child_address_word, 16) != 0,
+        "child_address": "0x" + child_address_word[26:],
+        "selfdestruct_call_success": _word_to_bool(storage.get("0x02")),
+        "child_code_size_after": _word_to_int(storage.get("0x03")),
+    }
+    if int(witness_config.get("value", 0)) > 0:
+        collected["beneficiary_balance_after"] = _word_to_int(storage.get("0x04"))
+    return collected
+
 
 def _create_child_code_payload(*, initcode_size: int, data_kind: str) -> bytes:
     if data_kind == "zero":

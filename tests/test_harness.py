@@ -418,7 +418,7 @@ class HarnessTests(unittest.TestCase):
                 load_manifest(manifest_path)
         self.assertEqual(
             str(error.exception),
-            "observe.system_witness.shape must be one of ['create_child_code', 'create_collision', 'create_empty_child', 'return_revert_self_call']; unsupported system witness shape: 'bogus_system_shape'",
+            "observe.system_witness.shape must be one of ['create_child_code', 'create_collision', 'create_empty_child', 'return_revert_self_call', 'selfdestruct_single']; unsupported system witness shape: 'bogus_system_shape'",
         )
 
     def test_validation_boundary_accepts_create_empty_child_system_witness_declaration(self) -> None:
@@ -664,6 +664,57 @@ class HarnessTests(unittest.TestCase):
             "observe.system_witness.opcode must be 'CREATE2' for create_collision under the RPC-only proof model",
         )
 
+    def test_validation_boundary_accepts_selfdestruct_single_system_witness_declaration(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
+        payload["cases"][0]["observe"]["system_witness"] = {
+            "version": 1,
+            "shape": "selfdestruct_single",
+            "subject": "$last_contract",
+            "scenario": "created",
+            "value": 1,
+            "hardfork_semantics": "cancun",
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "upstream_system_mapped.json"
+            manifest_path.write_text(json.dumps(payload))
+            manifest = load_manifest(manifest_path)
+        self.assertEqual(manifest.cases[0].observe["system_witness"]["shape"], "selfdestruct_single")
+        from adapter.system_witness import build_selfdestruct_single_system_witness
+
+        bundle = build_selfdestruct_single_system_witness(scenario="created", value=1)
+        self.assertEqual(
+            bundle.expected["system_witness"],
+            {
+                "shape": "selfdestruct_single",
+                "scenario": "created",
+                "create_success": True,
+                "child_address_nonzero": True,
+                "selfdestruct_call_success": True,
+                "child_code_size_after": 0,
+                "beneficiary_balance_after": 1,
+            },
+        )
+
+    def test_validation_boundary_rejects_selfdestruct_single_existing_scenario(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
+        payload["cases"][0]["observe"]["system_witness"] = {
+            "version": 1,
+            "shape": "selfdestruct_single",
+            "subject": "$last_contract",
+            "scenario": "existing",
+            "value": 0,
+            "hardfork_semantics": "cancun",
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "upstream_system_mapped.json"
+            manifest_path.write_text(json.dumps(payload))
+            with self.assertRaises(ValueError) as error:
+                load_manifest(manifest_path)
+        self.assertEqual(
+            str(error.exception),
+            "observe.system_witness.scenario must be 'created' for selfdestruct_single in this milestone",
+        )
+
     def test_selector_allows_real_jsonrpc_smoke_case(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/juchain_smoke.json")
@@ -885,6 +936,8 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
                 "upstream.benchmark.system.test_return_revert.revert.empty",
+                "upstream.benchmark.system.test_selfdestruct_created.value_bearing_false",
+                "upstream.benchmark.system.test_selfdestruct_created.value_bearing_true",
             ],
         )
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
@@ -908,6 +961,12 @@ class HarnessTests(unittest.TestCase):
                     self.assertEqual(witness["shape"], "create_collision")
                     self.assertEqual(expected_witness["shape"], "create_collision")
                     self.assertEqual(set(expected_witness), {"shape", "proxy_deploy_success", "first_create_call_success", "first_created_address_nonzero", "first_created_code_size", "collision_call_success", "collision_returndata_size"})
+            elif witness["shape"] == "selfdestruct_single":
+                self.assertEqual(expected_witness["shape"], "selfdestruct_single")
+                expected_fields = {"shape", "scenario", "create_success", "child_address_nonzero", "selfdestruct_call_success", "child_code_size_after"}
+                if witness["value"] > 0:
+                    expected_fields.add("beneficiary_balance_after")
+                self.assertEqual(set(expected_witness), expected_fields)
             else:
                 self.assertEqual(
                     witness,
@@ -920,7 +979,7 @@ class HarnessTests(unittest.TestCase):
                 self.assertEqual(set(expected_witness), {"shape", "success", "returndata_size", "returndata_digest"})
         self.assertFalse(
             any(
-                "test_selfdestruct" in case.case_id
+                ("test_selfdestruct" in case.case_id and "test_selfdestruct_created" not in case.case_id)
                 or "test_contract_calling_many_addresses" in case.case_id
                 or case.case_id == "upstream.benchmark.system.test_creates_collisions.create"
                 for case in selected
@@ -2839,8 +2898,8 @@ class HarnessTests(unittest.TestCase):
 
         admitted = [entry for entry in entries if entry["admitted"]]
         blocked = [entry for entry in entries if not entry["admitted"]]
-        self.assertEqual(len(admitted), 31, "system admitted count drifted")
-        self.assertEqual(len(blocked), 15, "system blocked count drifted")
+        self.assertEqual(len(admitted), 33, "system admitted count drifted")
+        self.assertEqual(len(blocked), 13, "system blocked count drifted")
 
         admitted_case_ids = [entry["case_id"] for entry in admitted]
         self.assertEqual(
@@ -2877,16 +2936,18 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
                 "upstream.benchmark.system.test_return_revert.revert.empty",
+                "upstream.benchmark.system.test_selfdestruct_created.value_bearing_false",
+                "upstream.benchmark.system.test_selfdestruct_created.value_bearing_true",
             ],
         )
-        self.assertEqual({entry["mode"] for entry in admitted}, {"create_child_code", "create_collision", "create_empty_child", "return_revert_self_call"})
+        self.assertEqual({entry["mode"] for entry in admitted}, {"create_child_code", "create_collision", "create_empty_child", "return_revert_self_call", "selfdestruct_single"})
         self.assertEqual(
             Counter(reason for entry in blocked for reason in entry["reasons"]),
             Counter(
                 {
                     "requires multi-address external-call orchestration not yet mapped": 8,
                                         "requires mutable pre-allocation of future CREATE addresses not available through the current RPC-only harness": 1,
-                    "requires selfdestruct lifecycle witness not yet mapped": 6,
+                    "requires selfdestruct lifecycle witness not yet mapped": 4,
                 }
             ),
         )
@@ -2896,7 +2957,6 @@ class HarnessTests(unittest.TestCase):
                 {
                     "test_contract_calling_many_addresses": 8,
                     "test_creates_collisions": 1,
-                    "test_selfdestruct_created": 2,
                     "test_selfdestruct_existing": 2,
                     "test_selfdestruct_initcode": 2,
                 }
@@ -2906,7 +2966,7 @@ class HarnessTests(unittest.TestCase):
 
         template_case_ids = [case["case_id"] for case in templates_payload["cases"]]
         self.assertEqual(template_case_ids, admitted_case_ids)
-        self.assertEqual(len(templates_payload["cases"]), 31)
+        self.assertEqual(len(templates_payload["cases"]), 33)
 
         if manifest_payload is not None:
             checked_in_manifest_path = ROOT / "suites/manifests/upstream_system_mapped.json"
@@ -2914,7 +2974,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(manifest_payload, checked_in_manifest, "system manifest JSON drift")
             manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
             self.assertEqual(manifest_case_ids, admitted_case_ids)
-            self.assertEqual(len(manifest_payload["cases"]), 31)
+            self.assertEqual(len(manifest_payload["cases"]), 33)
             self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/system"})
             observed_by_case = {case["case_id"]: case for case in manifest_payload["cases"]}
             self.assertEqual(
@@ -3088,6 +3148,36 @@ class HarnessTests(unittest.TestCase):
                     },
                 },
             )
+            for case_id, value in (
+                ("upstream.benchmark.system.test_selfdestruct_created.value_bearing_false", 0),
+                ("upstream.benchmark.system.test_selfdestruct_created.value_bearing_true", 1),
+            ):
+                expected_witness = {
+                    "shape": "selfdestruct_single",
+                    "scenario": "created",
+                    "create_success": True,
+                    "child_address_nonzero": True,
+                    "selfdestruct_call_success": True,
+                    "child_code_size_after": 0,
+                }
+                if value > 0:
+                    expected_witness["beneficiary_balance_after"] = 1
+                self.assertEqual(
+                    observed_by_case[case_id]["observe"]["system_witness"],
+                    {
+                        "version": 1,
+                        "shape": "selfdestruct_single",
+                        "subject": "$last_contract",
+                        "scenario": "created",
+                        "value": value,
+                        "hardfork_semantics": "cancun",
+                    },
+                )
+                self.assertEqual(
+                    observed_by_case[case_id]["expected"],
+                    {"receipt_status": "0x1", "system_witness": expected_witness},
+                )
+
             self.assertEqual(
                 observed_by_case[
                     "upstream.benchmark.system.test_return_revert.return.empty"
@@ -3121,7 +3211,7 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertFalse(
                 any(
-                    "test_selfdestruct" in case_id
+                    ("test_selfdestruct" in case_id and "test_selfdestruct_created" not in case_id)
                     or "test_contract_calling_many_addresses" in case_id
                     or case_id == "upstream.benchmark.system.test_creates_collisions.create"
                     for case_id in manifest_case_ids
@@ -3928,7 +4018,7 @@ class HarnessTests(unittest.TestCase):
                 manifest_payload=generated,
             )
             self.assertEqual(generated["name"], "upstream-system-mapped")
-            self.assertEqual(len(generated["cases"]), 31)
+            self.assertEqual(len(generated["cases"]), 33)
             self.assertEqual(generated["cases"][0]["family"], "state/system")
 
     def test_cli_generate_keccak_manifest_writes_expected_output(self) -> None:
@@ -4432,7 +4522,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 477, "blocked": 136},
+            {"families": 14, "cases": 613, "admitted": 479, "blocked": 134},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -4471,7 +4561,7 @@ class HarnessTests(unittest.TestCase):
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
                 "log": {"total": 140, "admitted": 110, "blocked": 30},
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
-                "system": {"total": 46, "admitted": 31, "blocked": 15},
+                "system": {"total": 46, "admitted": 33, "blocked": 13},
                 "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
                 "memory": {"total": 143, "admitted": 95, "blocked": 48},
             },
@@ -4507,11 +4597,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 472, "blocked": 101},
+                {"families": 13, "cases": 573, "admitted": 474, "blocked": 99},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 477, "blocked": 136},
+                {"families": 14, "cases": 613, "admitted": 479, "blocked": 134},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -4582,11 +4672,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 476, "blocked": 136},
+                {"families": 14, "cases": 612, "admitted": 478, "blocked": 134},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 477, "blocked": 136},
+                {"families": 14, "cases": 613, "admitted": 479, "blocked": 134},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -4606,7 +4696,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 476, "blocked": 136},
+                {"families": 14, "cases": 612, "admitted": 478, "blocked": 134},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -4731,7 +4821,7 @@ class HarnessTests(unittest.TestCase):
         scenarios = [
             ("upstream_block_context_mapped.json", "upstream-block-context-mapped", 8),
             ("upstream_log_mapped.json", "upstream-log-mapped", 110),
-            ("upstream_system_mapped.json", "upstream-system-mapped", 31),
+            ("upstream_system_mapped.json", "upstream-system-mapped", 33),
         ]
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -5244,6 +5334,51 @@ class HarnessTests(unittest.TestCase):
                 "first_created_code_size": 0,
                 "collision_call_success": False,
                 "collision_returndata_size": 0,
+            },
+        )
+
+    def test_selfdestruct_single_system_witness_storage_slots(self) -> None:
+        zero_value_witness = {
+            "version": 1,
+            "shape": "selfdestruct_single",
+            "subject": "$last_contract",
+            "scenario": "created",
+            "value": 0,
+            "hardfork_semantics": "cancun",
+        }
+        value_witness = dict(zero_value_witness, value=1)
+        self.assertEqual(system_witness_storage_slots(zero_value_witness), ("0x00", "0x01", "0x02", "0x03"))
+        self.assertEqual(system_witness_storage_slots(value_witness), ("0x00", "0x01", "0x02", "0x03", "0x04"))
+
+    def test_collect_selfdestruct_single_system_witness_from_storage(self) -> None:
+        witness = {
+            "version": 1,
+            "shape": "selfdestruct_single",
+            "subject": "$last_contract",
+            "scenario": "created",
+            "value": 1,
+            "hardfork_semantics": "cancun",
+        }
+        self.assertEqual(
+            collect_system_witness_from_storage(
+                witness_config=witness,
+                storage={
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "0x01": "0x000000000000000000000000dddddddddddddddddddddddddddddddddddddddd",
+                    "0x02": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "0x03": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0x04": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+            ),
+            {
+                "shape": "selfdestruct_single",
+                "scenario": "created",
+                "create_success": True,
+                "child_address_nonzero": True,
+                "child_address": "0xdddddddddddddddddddddddddddddddddddddddd",
+                "selfdestruct_call_success": True,
+                "child_code_size_after": 0,
+                "beneficiary_balance_after": 1,
             },
         )
 
@@ -7126,7 +7261,7 @@ class HarnessTests(unittest.TestCase):
                     report = json.loads(report_path.read_text())
 
                 self.assertEqual(report["manifest"], "upstream-system-mapped")
-                self.assertEqual(len(report["results"]), 31)
+                self.assertEqual(len(report["results"]), 33)
                 broken = next(
                     result for result in report["results"] if result["case_id"] == scenario["case_id"]
                 )
@@ -7137,7 +7272,7 @@ class HarnessTests(unittest.TestCase):
                 passing = [
                     result for result in report["results"] if result["case_id"] != scenario["case_id"]
                 ]
-                self.assertEqual(len(passing), 30)
+                self.assertEqual(len(passing), 32)
                 self.assertTrue(all(result["success"] for result in passing))
                 self.assertTrue(all(result["diffs"] == [] for result in passing))
 
@@ -7306,7 +7441,7 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 31)
+            self.assertEqual(len(report["results"]), 33)
             observed_by_case = {result["case_id"]: result for result in report["results"]}
 
             self.assertEqual(
@@ -7473,7 +7608,7 @@ class HarnessTests(unittest.TestCase):
             report = json.loads(report_path.read_text())
             self.assertEqual(report["manifest"], "upstream-system-mapped")
             self.assertEqual(report["chain_profile"], "mock-devnet")
-            self.assertEqual(len(report["results"]), 31)
+            self.assertEqual(len(report["results"]), 33)
             self.assertTrue(all(result["success"] for result in report["results"]))
             self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
             observed_by_case = {result["case_id"]: result["observed"] for result in report["results"]}

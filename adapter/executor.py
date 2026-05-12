@@ -49,7 +49,7 @@ from adapter.system_witness import (
     collect_system_witness_from_storage,
     system_witness_storage_slots,
 )
-from adapter.system_generator import _build_create_child_code_runtime, _build_create_collision_runtime, _build_create_empty_child_runtime
+from adapter.system_generator import _build_create_child_code_runtime, _build_create_collision_runtime, _build_create_empty_child_runtime, _build_selfdestruct_created_runtime
 
 ZERO_STORAGE_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
 WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
@@ -276,6 +276,9 @@ class MockBackend:
                     continue
                 if system_witness is not None and system_witness.get("shape") == "create_collision":
                     self._simulate_create_collision_probe(storage, system_witness, code)
+                    continue
+                if system_witness is not None and system_witness.get("shape") == "selfdestruct_single":
+                    self._simulate_selfdestruct_single_probe(storage, system_witness, code)
                     continue
 
                 if self._is_system_self_call_runtime(code):
@@ -641,6 +644,26 @@ class MockBackend:
         storage["0x03"] = ZERO_STORAGE_WORD
         storage["0x04"] = ZERO_STORAGE_WORD
         storage["0x05"] = ZERO_STORAGE_WORD
+
+
+    def _simulate_selfdestruct_single_probe(
+        self,
+        storage: dict[str, str],
+        witness_config: dict[str, Any],
+        code: str | None,
+    ) -> None:
+        if witness_config.get("scenario") != "created":
+            raise ValueError(f"unsupported selfdestruct_single scenario: {witness_config.get('scenario')!r}")
+        value = int(witness_config.get("value", 0))
+        expected_runtime = _build_selfdestruct_created_runtime(value=value)
+        if code != expected_runtime:
+            raise ValueError(f"unsupported mock contract code path: {code}")
+        storage["0x00"] = WORD_01
+        storage["0x01"] = self._address_to_word("0xdddddddddddddddddddddddddddddddddddddddd")
+        storage["0x02"] = WORD_01
+        storage["0x03"] = ZERO_STORAGE_WORD
+        if value > 0:
+            storage["0x04"] = self._hex_to_word(hex(value))
 
 
     def _is_system_self_call_runtime(self, code: str | None) -> bool:
