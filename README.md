@@ -112,32 +112,40 @@ Use `backend = "mock"` only for local harness self-tests.
 
 ## Quick start
 
-Run the regression suite:
+Show the available operational targets:
+
+```bash
+make help
+```
+
+Run the local regression suite directly when developing code:
 
 ```bash
 python3 -m unittest discover -s tests -v
 ```
 
-List a manifest:
+Run every upstream-mapped manifest against a real RPC profile:
 
 ```bash
-python -m adapter.cli list --manifest suites/manifests/upstream_smoke.json
+make rpc-all PROFILE=profiles/juchain.toml STATE_DIR=.state REPORT_DIR=reports/rpc
 ```
 
-Bootstrap and run smoke manifests:
+Run one upstream family against a real RPC profile:
 
 ```bash
-python -m adapter.cli bootstrap --profile profiles/mock.toml --state-dir .state
-python -m adapter.cli run --profile profiles/mock.toml --manifest suites/manifests/custom_storage_smoke.json --state-dir .state
-python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_smoke.json --state-dir .state
-python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_deploy_smoke.json --state-dir .state
-python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_storage_smoke.json --state-dir .state
+make rpc-subset PROFILE=profiles/juchain.toml FAMILY=bitwise STATE_DIR=.state REPORT_DIR=reports/rpc
 ```
 
-Run an upstream-mapped family manifest:
+Run an explicit manifest path:
 
 ```bash
-python -m adapter.cli run --profile profiles/mock.toml --manifest suites/manifests/upstream_storage_mapped.json --state-dir .state
+make rpc-subset PROFILE=profiles/juchain.toml MANIFEST=suites/manifests/upstream_storage_mapped.json STATE_DIR=.state REPORT=reports/rpc/storage.json
+```
+
+Use the mock profile for local smoke checks that should not hit an external chain:
+
+```bash
+make rpc-subset PROFILE=profiles/mock.toml FAMILY=bitwise REPORT_DIR=/tmp/evm-rpc-reports
 ```
 
 Summarize checked-in upstream inventories:
@@ -150,7 +158,21 @@ python -m adapter.cli summarize-upstream-inventory \
 
 ## Regenerating upstream-derived artifacts
 
-Each benchmark family follows the same pattern:
+Use the safe sync entry point for routine upstream-derived artifact refreshes:
+
+```bash
+make sync-upstream
+```
+
+For a non-mutating generation check:
+
+```bash
+make sync-upstream SYNC_CHECK_ONLY=1
+```
+
+The sync script stages regenerated templates, inventories, and manifests for all supported benchmark families in a temporary directory first. It validates the staged manifests and inventory summary before copying anything back into `suites/templates/` or `suites/manifests/`. If generation or validation fails, the checked-in artifacts are left unchanged.
+
+Family-local scanner and manifest commands still exist for targeted development and debugging. They follow this pattern:
 
 ```bash
 python -m adapter.cli scan-upstream-<family> \
@@ -160,22 +182,6 @@ python -m adapter.cli scan-upstream-<family> \
 python -m adapter.cli generate-<family>-manifest \
   --template suites/templates/upstream_<family>_templates.json \
   --output suites/manifests/upstream_<family>_mapped.json
-```
-
-Examples:
-
-```bash
-python -m adapter.cli scan-upstream-storage --template-output suites/templates/upstream_storage_templates.json --inventory-output suites/templates/upstream_storage_inventory.json
-python -m adapter.cli generate-storage-manifest --template suites/templates/upstream_storage_templates.json --output suites/manifests/upstream_storage_mapped.json
-
-python -m adapter.cli scan-upstream-memory --template-output suites/templates/upstream_memory_templates.json --inventory-output suites/templates/upstream_memory_inventory.json
-python -m adapter.cli generate-memory-manifest --template suites/templates/upstream_memory_templates.json --output suites/manifests/upstream_memory_mapped.json
-
-python -m adapter.cli scan-upstream-call-context --template-output suites/templates/upstream_call_context_templates.json --inventory-output suites/templates/upstream_call_context_inventory.json
-python -m adapter.cli generate-call-context-manifest --template suites/templates/upstream_call_context_templates.json --output suites/manifests/upstream_call_context_mapped.json
-
-python -m adapter.cli scan-upstream-tx-context --template-output suites/templates/upstream_tx_context_templates.json --inventory-output suites/templates/upstream_tx_context_inventory.json
-python -m adapter.cli generate-tx-context-manifest --template suites/templates/upstream_tx_context_templates.json --output suites/manifests/upstream_tx_context_mapped.json
 ```
 
 After regenerating checked-in artifacts, run the relevant parity tests and then the full test suite.

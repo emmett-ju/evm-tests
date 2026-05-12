@@ -106,6 +106,8 @@ from adapter.profile import describe_admin_key_source, load_chain_profile
 from adapter.report import durable_report_path, write_report
 from adapter.selector import TestSelector
 from adapter.signer import keccak256, private_key_to_address, sign_type_2_transaction
+from scripts.assert_report_success import main as assert_report_success_main
+from scripts.sync_upstream_artifacts import FAMILY_SPECS, sync_to_staging
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -2746,6 +2748,54 @@ class HarnessTests(unittest.TestCase):
                     ]
                 )
 
+    def test_assert_report_success_exits_nonzero_for_failed_report(self) -> None:
+        passed = ExecutionResult(
+            case_id="passing-case",
+            namespace="ns-pass",
+            success=True,
+            tx_hashes=[],
+            context={},
+            observed={},
+            expected={},
+            diffs=[],
+        )
+        failed = ExecutionResult(
+            case_id="failing-case",
+            namespace="ns-fail",
+            success=False,
+            tx_hashes=[],
+            context={},
+            observed={},
+            expected={},
+            diffs=["boom"],
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_path = Path(tmpdir) / "report.json"
+            write_report(
+                Report(
+                    manifest="test-manifest",
+                    execution_specs_ref="test-ref",
+                    suite_version="0.1.0",
+                    chain_profile="mock-devnet",
+                    chain_profile_version="1",
+                    results=[passed],
+                ),
+                report_path,
+            )
+            self.assertEqual(assert_report_success_main([str(report_path)]), 0)
+            write_report(
+                Report(
+                    manifest="test-manifest",
+                    execution_specs_ref="test-ref",
+                    suite_version="0.1.0",
+                    chain_profile="mock-devnet",
+                    chain_profile_version="1",
+                    results=[passed, failed],
+                ),
+                report_path,
+            )
+            self.assertEqual(assert_report_success_main([str(report_path)]), 1)
+
     def test_write_report_compacts_only_receipt_log_payloads_above_inline_threshold(self) -> None:
         exact_256 = "0x" + ("ab" * 256)
         exact_257 = "0x" + ("cd" * 257)
@@ -4983,6 +5033,26 @@ class HarnessTests(unittest.TestCase):
                 },
                 {"total": 39, "admitted": 9, "blocked": 30},
             )
+
+    def test_sync_upstream_artifacts_stages_all_families_without_applying(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            staged_templates = tmp_path / "templates"
+            staged_manifests = tmp_path / "manifests"
+            staged_templates.mkdir()
+            staged_manifests.mkdir()
+            storage_inventory_before = (ROOT / "suites/templates/upstream_storage_inventory.json").read_text()
+
+            payload = sync_to_staging(ROOT, staged_templates, staged_manifests)
+
+            self.assertEqual(payload["summary"], {"families": 14, "cases": 613, "admitted": 537, "blocked": 76})
+            self.assertEqual(len(payload["families"]), len(FAMILY_SPECS))
+            for spec in FAMILY_SPECS:
+                self.assertTrue((staged_templates / spec.template_file).exists(), spec.template_file)
+                self.assertTrue((staged_templates / spec.inventory_file).exists(), spec.inventory_file)
+                self.assertTrue((staged_manifests / spec.manifest_file).exists(), spec.manifest_file)
+                load_manifest(staged_manifests / spec.manifest_file)
+            self.assertEqual((ROOT / "suites/templates/upstream_storage_inventory.json").read_text(), storage_inventory_before)
 
     def test_benchmark_coverage_status_doc_matches_checked_in_summary(self) -> None:
         summary = summarize_inventory_dir(ROOT / "suites/templates")
