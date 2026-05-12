@@ -12,13 +12,14 @@ from adapter.manifest import resolve_execution_specs_ref
 from adapter.assembler import _build_init_code, _push_int, _word_hex
 
 MemoryTemplateMode = Literal[
+    "mcopy",
     "memory_access",
     "msize",
 ]
 
 WORD_2A = 42
 WORD_2B = 43
-BLOCKED_MCOPY_REASON = "requires unsupported memory copy observation not yet mapped"
+BLOCKED_MCOPY_REASON = "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,6 +34,8 @@ class MemoryMappingTemplate:
     offset: int | None
     offset_initialized: bool | None
     mem_size: int
+    copy_size: int | None = None
+    fixed_src_dst: bool | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,6 +140,8 @@ def load_memory_templates(path: str | Path) -> tuple[MemoryMappingTemplate, ...]
             offset=entry["offset"],
             offset_initialized=entry["offset_initialized"],
             mem_size=entry["mem_size"],
+            copy_size=entry.get("copy_size"),
+            fixed_src_dst=entry.get("fixed_src_dst"),
         )
         for entry in data["cases"]
     )
@@ -247,6 +252,7 @@ def _scan_mcopy_cases(text: str) -> list[AutoMemoryInventoryEntry]:
     for mem_size in mem_sizes:
         for copy_size in copy_sizes:
             for fixed_src_dst in fixed_src_dst_values:
+                admitted = fixed_src_dst or copy_size == 0
                 results.append(
                     AutoMemoryInventoryEntry(
                         upstream_ref=(
@@ -257,9 +263,9 @@ def _scan_mcopy_cases(text: str) -> list[AutoMemoryInventoryEntry]:
                             "upstream.benchmark.memory.mcopy."
                             f"mem_size_{mem_size}.copy_size_{copy_size}.{'fixed' if fixed_src_dst else 'dynamic'}.success"
                         ),
-                        admitted=False,
-                        mode=None,
-                        reasons=[BLOCKED_MCOPY_REASON],
+                        admitted=admitted,
+                        mode="mcopy" if admitted else None,
+                        reasons=[] if admitted else [BLOCKED_MCOPY_REASON],
                         source="mcopy",
                         opcode="MCOPY",
                         mem_size=mem_size,
@@ -284,6 +290,22 @@ def _memory_inventory_entry_to_template(entry: AutoMemoryInventoryEntry) -> Memo
             f"Upstream intent: benchmark MSIZE after setup expands memory using MLOAD at offset {entry.mem_size}.",
             "RPC mapping: runtime performs the same memory-touch shape, then persists MSIZE into storage slot0.",
             "Admitted because the resulting memory-size word is directly observable in final storage.",
+        ]
+    elif entry.mode == "mcopy":
+        assert entry.copy_size is not None and entry.fixed_src_dst is not None
+        target_kind = "fixed source/destination 0" if entry.fixed_src_dst else "dynamic source/destination with zero copy size"
+        description = (
+            f"Mapped from execution-specs MCOPY with mem_size {entry.mem_size}, copy_size {entry.copy_size}, "
+            f"and {target_kind} onto an RPC-only deploy/call/storage-assert flow."
+        )
+        namespace_seed = (
+            f"upstream-memory-mcopy-mem{entry.mem_size}-copy{entry.copy_size}-"
+            f"{'fixed' if entry.fixed_src_dst else 'dynamic-zero'}"
+        )
+        notes = [
+            f"Upstream intent: benchmark MCOPY with mem_size={entry.mem_size}, copy_size={entry.copy_size}, fixed_src_dst={entry.fixed_src_dst}.",
+            "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
+            "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE.",
         ]
     else:
         assert entry.offset is not None and entry.offset_initialized is not None
@@ -311,6 +333,8 @@ def _memory_inventory_entry_to_template(entry: AutoMemoryInventoryEntry) -> Memo
         offset=entry.offset,
         offset_initialized=entry.offset_initialized,
         mem_size=entry.mem_size,
+        copy_size=entry.copy_size,
+        fixed_src_dst=entry.fixed_src_dst,
     )
 
 
@@ -324,6 +348,29 @@ def render_memory_case(template: MemoryMappingTemplate) -> dict[str, Any]:
             "memory_probe": {
                 "mode": "msize",
                 "mem_size": template.mem_size,
+            },
+        }
+    elif template.mode == "mcopy":
+        assert template.copy_size is not None and template.fixed_src_dst is not None
+        slot0, slot1 = _simulate_mcopy_case(
+            template.mem_size,
+            template.copy_size,
+            template.fixed_src_dst,
+        )
+        expected = {"storage": {"0x00": _word_hex(slot0), "0x01": _word_hex(slot1)}}
+        runtime_code = _build_mcopy_runtime(
+            template.mem_size,
+            template.copy_size,
+            template.fixed_src_dst,
+        )
+        invoke_gas = _memory_gas_hex(max(template.mem_size, template.copy_size))
+        observe = {
+            "storage_address": "$last_contract",
+            "memory_probe": {
+                "mode": "mcopy",
+                "mem_size": template.mem_size,
+                "copy_size": template.copy_size,
+                "fixed_src_dst": template.fixed_src_dst,
             },
         }
     else:
@@ -424,6 +471,35 @@ def _build_msize_runtime(mem_size: int) -> str:
     return "0x" + code.hex()
 
 
+def _build_mcopy_runtime(mem_size: int, copy_size: int, fixed_src_dst: bool) -> str:
+    code = bytearray()
+    code += _push_int(copy_size)
+    if fixed_src_dst:
+        code += _push_int(0)
+        code += _push_int(0)
+    else:
+        code.append(0x5A)  # GAS
+        code += _push_int(7)
+        code.append(0x06)  # MOD
+        code.append(0x5A)  # GAS
+        code += _push_int(7)
+        code.append(0x06)  # MOD
+    code.append(0x5E)  # MCOPY
+    code.append(0x59)  # MSIZE
+    code += _push_int(0)
+    code.append(0x55)  # SSTORE
+    if mem_size > 0:
+        for offset in (0, mem_size // 2, mem_size - 1):
+            code.append(0x5A)  # GAS
+            code += _push_int(offset)
+            code.append(0x53)  # MSTORE8
+    code.append(0x59)  # MSIZE
+    code += _push_int(1)
+    code.append(0x55)  # SSTORE
+    code.append(0x00)  # STOP
+    return "0x" + code.hex()
+
+
 def _simulate_memory_access_case(
     opcode: str,
     offset: int,
@@ -454,6 +530,18 @@ def _simulate_msize_case(mem_size: int) -> int:
     return memory.msize()
 
 
+def _simulate_mcopy_case(mem_size: int, copy_size: int, fixed_src_dst: bool) -> tuple[int, int]:
+    memory = _MemoryState()
+    src_dst = 0 if fixed_src_dst else 6
+    memory.mcopy(src_dst, src_dst, copy_size)
+    slot0 = memory.msize()
+    if mem_size > 0:
+        memory.mstore8(0, 0)
+        memory.mstore8(mem_size // 2, 0)
+        memory.mstore8(mem_size - 1, 0)
+    return slot0, memory.msize()
+
+
 class _MemoryState:
     def __init__(self) -> None:
         self._memory = bytearray()
@@ -475,6 +563,14 @@ class _MemoryState:
     def mload(self, offset: int) -> int:
         self._ensure(offset + 32)
         return int.from_bytes(self._memory[offset : offset + 32], "big")
+
+    def mcopy(self, destination_offset: int, source_offset: int, size: int) -> None:
+        if size == 0:
+            return
+        self._ensure(source_offset + size)
+        self._ensure(destination_offset + size)
+        segment = bytes(self._memory[source_offset : source_offset + size])
+        self._memory[destination_offset : destination_offset + size] = segment
 
     def msize(self) -> int:
         return len(self._memory)

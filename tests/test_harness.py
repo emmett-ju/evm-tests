@@ -801,10 +801,12 @@ class HarnessTests(unittest.TestCase):
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_memory_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
-        self.assertEqual(len(selected), 95)
+        self.assertEqual(len(selected), 125)
         selected_ids = [case.case_id for case in selected]
         self.assertIn("upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success", selected_ids)
         self.assertIn("upstream.benchmark.memory.msize.mem_size_1.success", selected_ids)
+        self.assertIn("upstream.benchmark.memory.mcopy.mem_size_0.copy_size_32.fixed.success", selected_ids)
+        self.assertIn("upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_0.dynamic.success", selected_ids)
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
@@ -1625,8 +1627,8 @@ class HarnessTests(unittest.TestCase):
 
     def test_memory_templates_load(self) -> None:
         templates = load_memory_templates(ROOT / "suites/templates/upstream_memory_templates.json")
-        self.assertEqual(len(templates), 95)
-        self.assertEqual(templates[0].mode, "memory_access")
+        self.assertEqual(len(templates), 125)
+        self.assertEqual(templates[0].mode, "mcopy")
 
     def test_call_context_templates_load(self) -> None:
         templates = load_call_context_templates(ROOT / "suites/templates/upstream_call_context_templates.json")
@@ -1676,8 +1678,148 @@ class HarnessTests(unittest.TestCase):
             inventory = json.loads(inventory_path.read_text())
             admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
-            self.assertEqual(len(admitted), 95)
-            self.assertGreater(len(blocked), 0)
+            self.assertEqual(len(admitted), 125)
+            self.assertEqual(len(blocked), 18)
+
+    def test_m022_remaining_blocked_cluster_audit_lock(self) -> None:
+        def load_inventory(family_slug: str) -> dict[str, object]:
+            return json.loads(
+                (ROOT / "suites/templates" / f"upstream_{family_slug}_inventory.json").read_text()
+            )
+
+        def entries_for(family_slug: str) -> list[dict[str, object]]:
+            return list(load_inventory(family_slug)["entries"])
+
+        inventories = {
+            "memory": entries_for("memory"),
+            "account-query": entries_for("account_query"),
+            "log": entries_for("log"),
+            "system": entries_for("system"),
+            "block-context": entries_for("block_context"),
+            "tx-context": entries_for("tx_context"),
+            "bitwise": entries_for("bitwise"),
+        }
+
+        expected_counts = {
+            "memory": (143, 125, 18),
+            "account-query": (40, 5, 35),
+            "log": (140, 110, 30),
+            "system": (46, 35, 11),
+            "block-context": (13, 8, 5),
+            "tx-context": (4, 2, 2),
+            "bitwise": (12, 11, 1),
+        }
+        for family, (total_count, admitted_count, blocked_count) in expected_counts.items():
+            entries = inventories[family]
+            admitted = [entry for entry in entries if entry["admitted"]]
+            blocked = [entry for entry in entries if not entry["admitted"]]
+            self.assertEqual(len(entries), total_count, family)
+            self.assertEqual(len(admitted), admitted_count, family)
+            self.assertEqual(len(blocked), blocked_count, family)
+            case_ids = [entry["case_id"] for entry in entries]
+            self.assertEqual(len(case_ids), len(set(case_ids)), family)
+
+        memory_blocked = [entry for entry in inventories["memory"] if not entry["admitted"]]
+        memory_admitted_mcopy = [
+            entry
+            for entry in inventories["memory"]
+            if entry["admitted"] and entry["source"] == "mcopy"
+        ]
+        self.assertEqual(Counter(entry["source"] for entry in memory_blocked), Counter({"mcopy": 18}))
+        self.assertEqual(
+            Counter(reason for entry in memory_blocked for reason in entry["reasons"]),
+            Counter({"requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped": 18}),
+        )
+        self.assertEqual(Counter(entry["fixed_src_dst"] for entry in memory_blocked), Counter({False: 18}))
+        self.assertEqual(Counter(entry["copy_size"] for entry in memory_blocked), Counter({32: 6, 256: 6, 1024: 6}))
+        self.assertEqual(len(memory_admitted_mcopy), 30)
+        self.assertEqual(sum(1 for entry in memory_admitted_mcopy if entry["fixed_src_dst"] is True), 24)
+        self.assertEqual(
+            sum(
+                1
+                for entry in memory_admitted_mcopy
+                if entry["fixed_src_dst"] is False and entry["copy_size"] == 0
+            ),
+            6,
+        )
+
+        account_blocked = [entry for entry in inventories["account-query"] if not entry["admitted"]]
+        self.assertEqual(
+            Counter(entry["source"] for entry in account_blocked),
+            Counter({"codecopy_benchmark": 20, "codecopy": 10, "extcodecopy_warm": 5}),
+        )
+        self.assertEqual(
+            Counter(reason for entry in account_blocked for reason in entry["reasons"]),
+            Counter(
+                {
+                    "requires byte-range code-copy observation not yet mapped": 30,
+                    "requires external-account code-copy fixtures and byte-range observation not yet mapped": 5,
+                }
+            ),
+        )
+
+        log_blocked = [entry for entry in inventories["log"] if not entry["admitted"]]
+        self.assertEqual(Counter(entry["source"] for entry in log_blocked), Counter({"test_log": 30}))
+        self.assertEqual(
+            Counter(reason for entry in log_blocked for reason in entry["reasons"]),
+            Counter({"requires gas-derived dynamic log offset observation not yet mapped": 30}),
+        )
+        self.assertEqual(
+            sum(1 for entry in log_blocked if entry["log_size"] == 0),
+            10,
+        )
+        self.assertEqual(
+            sum(
+                1
+                for entry in log_blocked
+                if entry["log_size"] == 1048576 and entry["memory_seed_kind"] == "zero"
+            ),
+            10,
+        )
+
+        system_blocked = [entry for entry in inventories["system"] if not entry["admitted"]]
+        self.assertEqual(
+            Counter(entry["source"] for entry in system_blocked),
+            Counter({"test_contract_calling_many_addresses": 8, "test_selfdestruct_initcode": 2, "test_creates_collisions": 1}),
+        )
+        self.assertEqual(
+            Counter(reason for entry in system_blocked for reason in entry["reasons"]),
+            Counter(
+                {
+                    "requires multi-address external-call orchestration not yet mapped": 8,
+                    "requires selfdestruct lifecycle witness not yet mapped": 2,
+                    "requires mutable pre-allocation of future CREATE addresses not available through the current RPC-only harness": 1,
+                }
+            ),
+        )
+
+        block_context_blocked = [entry for entry in inventories["block-context"] if not entry["admitted"]]
+        self.assertEqual(
+            Counter(reason for entry in block_context_blocked for reason in entry["reasons"]),
+            Counter(
+                {
+                    "requires controllable historical block-hash witness not available through the current RPC-only harness": 3,
+                    "requires gas-derived dynamic block index plus historical block-hash witness not available through the current RPC-only harness": 1,
+                    "requires blob-base-fee opcode support plus a blob-capable profile witness not yet proven": 1,
+                }
+            ),
+        )
+
+        tx_context_blocked = [entry for entry in inventories["tx-context"] if not entry["admitted"]]
+        self.assertEqual(
+            Counter(reason for entry in tx_context_blocked for reason in entry["reasons"]),
+            Counter({"requires blob transaction construction and BLOBHASH environment not yet mapped": 2}),
+        )
+
+        bitwise_blocked = [entry for entry in inventories["bitwise"] if not entry["admitted"]]
+        self.assertEqual(
+            [entry["case_id"] for entry in bitwise_blocked],
+            ["upstream.benchmark.bitwise.test_clz_diff.clz"],
+        )
+        self.assertEqual(
+            Counter(reason for entry in bitwise_blocked for reason in entry["reasons"]),
+            Counter({"requires gas-sensitive benchmark shape not yet mapped": 1}),
+        )
 
     def test_call_context_template_scanner_matches_checked_in_template(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -3656,7 +3798,7 @@ class HarnessTests(unittest.TestCase):
             )
             generated = json.loads(output_path.read_text())
             self.assertEqual(generated["name"], "upstream-memory-mapped")
-            self.assertEqual(len(generated["cases"]), 95)
+            self.assertEqual(len(generated["cases"]), 125)
 
     def test_cli_generate_account_query_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -3709,7 +3851,7 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-memory-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 95)
+            self.assertEqual(len(generated["cases"]), 125)
             self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
 
     def test_cli_generate_call_context_manifest_writes_expected_output(self) -> None:
@@ -4574,7 +4716,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 481, "blocked": 132},
+            {"families": 14, "cases": 613, "admitted": 511, "blocked": 102},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -4615,7 +4757,7 @@ class HarnessTests(unittest.TestCase):
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
                 "system": {"total": 46, "admitted": 35, "blocked": 11},
                 "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
-                "memory": {"total": 143, "admitted": 95, "blocked": 48},
+                "memory": {"total": 143, "admitted": 125, "blocked": 18},
             },
         )
         self.assertEqual(
@@ -4649,11 +4791,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 476, "blocked": 97},
+                {"families": 13, "cases": 573, "admitted": 506, "blocked": 67},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 481, "blocked": 132},
+                {"families": 14, "cases": 613, "admitted": 511, "blocked": 102},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -4724,11 +4866,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 480, "blocked": 132},
+                {"families": 14, "cases": 612, "admitted": 510, "blocked": 102},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 481, "blocked": 132},
+                {"families": 14, "cases": 613, "admitted": 511, "blocked": 102},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -4748,7 +4890,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 480, "blocked": 132},
+                {"families": 14, "cases": 612, "admitted": 510, "blocked": 102},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -6210,9 +6352,9 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 95)
+            self.assertEqual(len(report["results"]), 125)
             
-            # Spot-check a few representative cases instead of all 95
+            # Spot-check representative memory-access, MSIZE, and MCOPY cases instead of all 125.
             expected_storage = {
                 "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_0.success": {
                     "0x00": "0x000000000000000000000000000000000000000000000000000000000000002b",
@@ -6228,6 +6370,14 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.memory.msize.mem_size_1.success": {
                     "0x00": "0x0000000000000000000000000000000000000000000000000000000000000040",
                 },
+                "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_32.fixed.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
+                },
+                "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_0.dynamic.success": {
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
+                },
             }
             
             observed_by_case = {result["case_id"]: result for result in report["results"]}
@@ -6239,6 +6389,49 @@ class HarnessTests(unittest.TestCase):
             for result in report["results"]:
                 self.assertEqual(result["diffs"], [])
                 self.assertIs(result["success"], True)
+
+    def test_mock_backend_rejects_tampered_mcopy_runtime(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_memory_mapped.json").read_text())
+        target_case = next(
+            case
+            for case in payload["cases"]
+            if case["case_id"] == "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_32.fixed.success"
+        )
+        target_case["steps"][0]["bytecode_runtime"] = "0x00"
+        target_case["steps"][0]["bytecode_init"] = _build_init_code("0x00")
+        payload["cases"] = [target_case]
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            manifest_path = tmp_path / "tampered_upstream_memory_mapped.json"
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            manifest_path.write_text(json.dumps(payload, indent=2, sort_keys=True))
+            self.assertEqual(
+                main(
+                    [
+                        "run",
+                        "--profile",
+                        str(ROOT / "profiles/mock.toml"),
+                        "--manifest",
+                        str(manifest_path),
+                        "--state-dir",
+                        str(state_dir),
+                        "--report",
+                        str(report_path),
+                    ]
+                ),
+                0,
+            )
+            report = json.loads(report_path.read_text())
+            self.assertEqual(len(report["results"]), 1)
+            result = report["results"][0]
+            self.assertFalse(result["success"])
+            self.assertEqual(result["observed"], {})
+            self.assertEqual(
+                result["diffs"],
+                ["proof error: unsupported mock memory MCOPY contract code path: 0x00"],
+            )
 
     def test_mock_backend_runs_upstream_mapped_stack_cases(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

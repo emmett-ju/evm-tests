@@ -189,9 +189,30 @@ class MockBackend:
                 
                 memory_probe = case.observe.get("memory_probe")
                 if memory_probe is not None:
-                    from adapter.memory_generator import _simulate_memory_access_case, _simulate_msize_case, _word_hex
+                    from adapter.memory_generator import (
+                        _build_mcopy_runtime,
+                        _simulate_mcopy_case,
+                        _simulate_memory_access_case,
+                        _simulate_msize_case,
+                        _word_hex,
+                    )
                     if memory_probe["mode"] == "msize":
                         storage["0x00"] = _word_hex(_simulate_msize_case(memory_probe["mem_size"]))
+                    elif memory_probe["mode"] == "mcopy":
+                        expected_runtime = _build_mcopy_runtime(
+                            memory_probe["mem_size"],
+                            memory_probe["copy_size"],
+                            memory_probe["fixed_src_dst"],
+                        )
+                        if code != expected_runtime:
+                            raise ValueError(f"unsupported mock memory MCOPY contract code path: {code}")
+                        slot0, slot1 = _simulate_mcopy_case(
+                            memory_probe["mem_size"],
+                            memory_probe["copy_size"],
+                            memory_probe["fixed_src_dst"],
+                        )
+                        storage["0x00"] = _word_hex(slot0)
+                        storage["0x01"] = _word_hex(slot1)
                     else:
                         slot0, slot1 = _simulate_memory_access_case(
                             memory_probe["opcode"],
