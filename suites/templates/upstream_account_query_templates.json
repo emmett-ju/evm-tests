@@ -4,6 +4,76 @@
   "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_account_query.py",
   "cases": [
     {
+      "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_bytes.success",
+      "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 0 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-0-bytes-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0 bytes]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 0 byte(s).",
+        "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+      ],
+      "mode": "codecopy_fixed",
+      "copy_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_25x_max_code_size.success",
+      "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 6144 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-0-25x-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0.25x max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 6144 byte(s).",
+        "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+      ],
+      "mode": "codecopy_fixed",
+      "copy_size": 6144
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_50x_max_code_size.success",
+      "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 12288 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-0-50x-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0.50x max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 12288 byte(s).",
+        "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+      ],
+      "mode": "codecopy_fixed",
+      "copy_size": 12288
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_75x_max_code_size.success",
+      "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 18432 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-0-75x-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0.75x max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 18432 byte(s).",
+        "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+      ],
+      "mode": "codecopy_fixed",
+      "copy_size": 18432
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_max_code_size.success",
+      "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 24576 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 24576 byte(s).",
+        "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+      ],
+      "mode": "codecopy_fixed",
+      "copy_size": 24576
+    },
+    {
       "case_id": "upstream.benchmark.account_query.codesize.success",
       "description": "Admitted execution-specs CODESIZE benchmark variant.",
       "namespace_seed": "upstream-account-query-codesize",
@@ -13,7 +83,8 @@
         "Admitted because deployed runtime bytecode size is directly observable from the deployed contract code.",
         "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
       ],
-      "mode": "codesize"
+      "mode": "codesize",
+      "copy_size": null
     },
     {
       "case_id": "upstream.benchmark.account_query.balance.cold.present_accounts.success",
@@ -25,7 +96,8 @@
         "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
         "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
       ],
-      "mode": "balance_cold_present_accounts"
+      "mode": "balance_cold_present_accounts",
+      "copy_size": null
     },
     {
       "case_id": "upstream.benchmark.account_query.balance.cold.absent_accounts.success",
@@ -37,7 +109,8 @@
         "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
         "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
       ],
-      "mode": "balance_cold_absent_accounts"
+      "mode": "balance_cold_absent_accounts",
+      "copy_size": null
     },
     {
       "case_id": "upstream.benchmark.account_query.selfbalance.contract_balance_0.success",
@@ -49,7 +122,8 @@
         "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control.",
         "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
       ],
-      "mode": "selfbalance_contract_balance_0"
+      "mode": "selfbalance_contract_balance_0",
+      "copy_size": null
     },
     {
       "case_id": "upstream.benchmark.account_query.selfbalance.contract_balance_1.success",
@@ -61,7 +135,8 @@
         "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control.",
         "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
       ],
-      "mode": "selfbalance_contract_balance_1"
+      "mode": "selfbalance_contract_balance_1",
+      "copy_size": null
     }
   ]
 }

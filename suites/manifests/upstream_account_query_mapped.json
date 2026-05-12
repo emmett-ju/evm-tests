@@ -7,6 +7,271 @@
   "cases": [
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_bytes.success",
+      "family": "state/account-query",
+      "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 0 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-0-bytes-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0 bytes]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 0 byte(s).",
+        "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "account_query_probe": {
+          "mode": "codecopy_fixed",
+          "copy_size": 0
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6010600c60003960106000f35f5f5f395f5f2080600155505f5f5500",
+          "bytecode_runtime": "0x5f5f5f395f5f2080600155505f5f5500",
+          "value": "0x0",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x01": "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_25x_max_code_size.success",
+      "family": "state/account-query",
+      "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 6144 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-0-25x-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0.25x max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 6144 byte(s).",
+        "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "account_query_probe": {
+          "mode": "codecopy_fixed",
+          "copy_size": 6144
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6016600c60003960166000f36118005f5f396118005f2080600155506118005f5500",
+          "bytecode_runtime": "0x6118005f5f396118005f2080600155506118005f5500",
+          "value": "0x0",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000001800",
+          "0x01": "0x9973cbd80834dd54392145e3d4d2d2dd2919605a210efec186fcaf55adc8dc24"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_50x_max_code_size.success",
+      "family": "state/account-query",
+      "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 12288 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-0-50x-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0.50x max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 12288 byte(s).",
+        "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "account_query_probe": {
+          "mode": "codecopy_fixed",
+          "copy_size": 12288
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6016600c60003960166000f36130005f5f396130005f2080600155506130005f5500",
+          "bytecode_runtime": "0x6130005f5f396130005f2080600155506130005f5500",
+          "value": "0x0",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000003000",
+          "0x01": "0x6ef01be4929cc92287a19dabc519b0f7fd191311c3a202504532f6b007e9eeed"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_75x_max_code_size.success",
+      "family": "state/account-query",
+      "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 18432 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-0-75x-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0.75x max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 18432 byte(s).",
+        "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "account_query_probe": {
+          "mode": "codecopy_fixed",
+          "copy_size": 18432
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6016600c60003960166000f36148005f5f396148005f2080600155506148005f5500",
+          "bytecode_runtime": "0x6148005f5f396148005f2080600155506148005f5500",
+          "value": "0x0",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000004800",
+          "0x01": "0x23b1a1a64ccf41022851a18a4debcc09f0bdb0843bc22886cccb8cfc4459b6ff"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_max_code_size.success",
+      "family": "state/account-query",
+      "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 24576 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 24576 byte(s).",
+        "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "account_query_probe": {
+          "mode": "codecopy_fixed",
+          "copy_size": 24576
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6016600c60003960166000f36160005f5f396160005f2080600155506160005f5500",
+          "bytecode_runtime": "0x6160005f5f396160005f2080600155506160005f5500",
+          "value": "0x0",
+          "gas": "0x400000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x400000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000006000",
+          "0x01": "0xd6cd419a9bc71796d3a117c17a78e1b583fa29c9149760306a828b2f05f1d0a9"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.account_query.codesize.success",
       "family": "state/account-query",
       "description": "Admitted execution-specs CODESIZE benchmark variant.",

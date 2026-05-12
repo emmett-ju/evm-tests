@@ -3,12 +3,15 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import asdict, dataclass
+from decimal import Decimal
 from pathlib import Path
 from typing import Any, Literal
 
+from adapter.assembler import _push_int, _word_hex
 from adapter.generator import deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
+from adapter.signer import keccak256
 
 
 BLOCKED_CODECOPY_REASON = "requires byte-range code-copy observation not yet mapped"
@@ -26,6 +29,7 @@ WORD_00 = "0x0000000000000000000000000000000000000000000000000000000000000000"
 WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
 WORD_05 = "0x0000000000000000000000000000000000000000000000000000000000000005"
 WORD_2A = "0x000000000000000000000000000000000000000000000000000000000000002a"
+UPSTREAM_MAX_CODE_SIZE = 24_576
 
 AccountQueryTemplateMode = Literal[
     "selfbalance_contract_balance_0",
@@ -33,6 +37,7 @@ AccountQueryTemplateMode = Literal[
     "codesize",
     "balance_cold_absent_accounts",
     "balance_cold_present_accounts",
+    "codecopy_fixed",
 ]
 
 
@@ -44,6 +49,7 @@ class AccountQueryMappingTemplate:
     upstream_ref: str
     notes: list[str]
     mode: AccountQueryTemplateMode
+    copy_size: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,6 +60,7 @@ class AutoAccountQueryInventoryEntry:
     mode: str | None
     reasons: list[str]
     source: str
+    copy_size: int | None = None
 
 
 ACCOUNT_QUERY_MODE_SPECS: dict[AccountQueryTemplateMode, dict[str, str]] = {
@@ -298,6 +305,28 @@ def render_account_query_case(template: AccountQueryMappingTemplate) -> dict[str
             ],
             expected={"storage": {"0x00": WORD_2A}},
         )
+    if template.mode == "codecopy_fixed":
+        copy_size = _require_template_copy_size(template)
+        runtime_code = _build_codecopy_fixed_runtime(copy_size)
+        return build_account_query_case(
+            template,
+            steps=[
+                deploy_account_query_contract_step(
+                    runtime_code=runtime_code,
+                    gas=_codecopy_invoke_gas(copy_size),
+                ),
+                wait_receipt_step(),
+                invoke_contract_step(data_hex="0x", gas=_codecopy_invoke_gas(copy_size)),
+                wait_receipt_step(),
+            ],
+            expected={
+                "storage": {
+                    "0x00": _word_hex(copy_size),
+                    "0x01": _codecopy_fixed_digest(runtime_code, copy_size),
+                }
+            },
+            observe_extra={"account_query_probe": {"mode": "codecopy_fixed", "copy_size": copy_size}},
+        )
     raise ValueError(f"unsupported account-query mapping mode: {template.mode}")
 
 
@@ -306,7 +335,11 @@ def build_account_query_case(
     *,
     steps: list[dict[str, Any]],
     expected: dict[str, Any],
+    observe_extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    observe = {"storage_address": "$last_contract"}
+    if observe_extra:
+        observe.update(observe_extra)
     return {
         "kind": "upstream_mapped",
         "case_id": template.case_id,
@@ -315,7 +348,7 @@ def build_account_query_case(
         "namespace_seed": template.namespace_seed,
         "upstream_ref": template.upstream_ref,
         "notes": template.notes,
-        "observe": {"storage_address": "$last_contract"},
+        "observe": observe,
         "filters": {},
         "steps": steps,
         "expected": expected,
@@ -352,11 +385,17 @@ def _load_account_query_template_entry(entry: object, *, index: int) -> AccountQ
         if field not in entry:
             raise ValueError(f"account query template entry {index} missing required field: {field}")
     mode = entry["mode"]
-    if mode not in ACCOUNT_QUERY_MODE_SPECS:
+    if mode not in ACCOUNT_QUERY_MODE_SPECS and mode != "codecopy_fixed":
         raise ValueError(f"unsupported account query template mode: {mode}")
     notes = entry["notes"]
     if not isinstance(notes, list) or not all(isinstance(note, str) for note in notes):
         raise ValueError(f"account query template entry {index} field 'notes' must be a list of strings")
+    copy_size = entry.get("copy_size")
+    if mode == "codecopy_fixed":
+        if not isinstance(copy_size, int) or isinstance(copy_size, bool) or copy_size < 0:
+            raise ValueError(f"account query template entry {index} field 'copy_size' must be a non-negative integer")
+    elif copy_size is not None:
+        raise ValueError(f"account query template entry {index} field 'copy_size' is only supported for codecopy_fixed")
     return AccountQueryMappingTemplate(
         case_id=str(entry["case_id"]),
         description=str(entry["description"]),
@@ -364,6 +403,7 @@ def _load_account_query_template_entry(entry: object, *, index: int) -> AccountQ
         upstream_ref=str(entry["upstream_ref"]),
         notes=list(notes),
         mode=mode,
+        copy_size=copy_size,
     )
 
 
@@ -437,10 +477,11 @@ def _scan_codecopy_cases(text: str) -> list[AutoAccountQueryInventoryEntry]:
                         "upstream.benchmark.account_query.codecopy."
                         f"{fixed_slug}.max_code_size_ratio_{ratio_slug}.success"
                     ),
-                    admitted=False,
-                    mode=None,
-                    reasons=[BLOCKED_CODECOPY_REASON],
+                    admitted=fixed_src_dst,
+                    mode="codecopy_fixed" if fixed_src_dst else None,
+                    reasons=[] if fixed_src_dst else [BLOCKED_CODECOPY_REASON],
                     source="codecopy",
+                    copy_size=_codecopy_size_for_ratio(_ratio_value) if fixed_src_dst else None,
                 )
             )
     if len(results) != 10:
@@ -557,6 +598,22 @@ def _resolve_balance_mode(opcode: str, absent_accounts: bool) -> tuple[AccountQu
 
 def _inventory_entry_to_template(entry: AutoAccountQueryInventoryEntry) -> AccountQueryMappingTemplate:
     assert entry.mode is not None
+    if entry.mode == "codecopy_fixed":
+        copy_size = _require_copy_size(entry)
+        return AccountQueryMappingTemplate(
+            case_id=entry.case_id,
+            description=f"Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying {copy_size} byte(s).",
+            namespace_seed=_build_namespace_seed(entry.case_id),
+            upstream_ref=entry.upstream_ref,
+            notes=[
+                f"Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying {copy_size} byte(s).",
+                "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
+                "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
+                "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped.",
+            ],
+            mode="codecopy_fixed",
+            copy_size=copy_size,
+        )
     spec = ACCOUNT_QUERY_MODE_SPECS[entry.mode]
     return AccountQueryMappingTemplate(
         case_id=entry.case_id,
@@ -566,6 +623,67 @@ def _inventory_entry_to_template(entry: AutoAccountQueryInventoryEntry) -> Accou
         notes=json.loads(spec["notes"]),
         mode=entry.mode,
     )
+
+
+def _codecopy_size_for_ratio(ratio_literal: str) -> int:
+    ratio = Decimal(ratio_literal.replace("_", "").strip())
+    size = int(Decimal(UPSTREAM_MAX_CODE_SIZE) * ratio)
+    if size < 0 or size > UPSTREAM_MAX_CODE_SIZE:
+        raise ValueError(f"unsupported CODECOPY max_code_size_ratio: {ratio_literal}")
+    return size
+
+
+def _build_namespace_seed(case_id: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", case_id.removeprefix("upstream.benchmark.account_query.").lower()).strip("-")
+    return f"upstream-account-query-{slug}"
+
+
+def _require_copy_size(entry: AutoAccountQueryInventoryEntry) -> int:
+    if entry.copy_size is None:
+        raise ValueError(f"missing account-query CODECOPY copy_size for {entry.case_id}")
+    return entry.copy_size
+
+
+def _require_template_copy_size(template: AccountQueryMappingTemplate) -> int:
+    if template.copy_size is None:
+        raise ValueError(f"missing account-query CODECOPY copy_size for {template.case_id}")
+    return template.copy_size
+
+
+def _build_codecopy_fixed_runtime(copy_size: int) -> str:
+    if copy_size < 0 or copy_size > UPSTREAM_MAX_CODE_SIZE:
+        raise ValueError(f"unsupported CODECOPY copy_size: {copy_size}")
+    code = bytearray()
+    code += _push_int(copy_size)
+    code += _push_int(0)
+    code += _push_int(0)
+    code.append(0x39)  # CODECOPY(0, 0, copy_size)
+    code += _push_int(copy_size)
+    code += _push_int(0)
+    code.append(0x20)  # KECCAK256(memory[0:copy_size])
+    code.append(0x80)  # duplicate digest for storage
+    code += _push_int(1)
+    code.append(0x55)  # slot1 <- digest
+    code.append(0x50)  # discard duplicate digest
+    code += _push_int(copy_size)
+    code += _push_int(0)
+    code.append(0x55)  # slot0 <- copied byte count
+    code.append(0x00)
+    return "0x" + code.hex()
+
+
+def _codecopy_fixed_digest(runtime_code: str, copy_size: int) -> str:
+    runtime = bytes.fromhex(runtime_code.removeprefix("0x"))
+    copied = runtime[:copy_size] + (b"\x00" * max(0, copy_size - len(runtime)))
+    return "0x" + keccak256(copied).hex()
+
+
+def _codecopy_invoke_gas(copy_size: int) -> str:
+    if copy_size >= UPSTREAM_MAX_CODE_SIZE:
+        return "0x400000"
+    if copy_size >= 1024:
+        return "0x200000"
+    return "0xc350"
 
 
 def _build_init_code(runtime_code: str) -> str:
@@ -600,11 +718,17 @@ def _load_account_query_template_entry(entry: object, *, index: int) -> AccountQ
         if field not in entry:
             raise ValueError(f"account query template entry {index} missing required field: {field}")
     mode = entry["mode"]
-    if mode not in ACCOUNT_QUERY_MODE_SPECS:
+    if mode not in ACCOUNT_QUERY_MODE_SPECS and mode != "codecopy_fixed":
         raise ValueError(f"unsupported account query template mode: {mode}")
     notes = entry["notes"]
     if not isinstance(notes, list) or not all(isinstance(note, str) for note in notes):
         raise ValueError(f"account query template entry {index} field 'notes' must be a list of strings")
+    copy_size = entry.get("copy_size")
+    if mode == "codecopy_fixed":
+        if not isinstance(copy_size, int) or isinstance(copy_size, bool) or copy_size < 0:
+            raise ValueError(f"account query template entry {index} field 'copy_size' must be a non-negative integer")
+    elif copy_size is not None:
+        raise ValueError(f"account query template entry {index} field 'copy_size' is only supported for codecopy_fixed")
     return AccountQueryMappingTemplate(
         case_id=str(entry["case_id"]),
         description=str(entry["description"]),
@@ -612,6 +736,7 @@ def _load_account_query_template_entry(entry: object, *, index: int) -> AccountQ
         upstream_ref=str(entry["upstream_ref"]),
         notes=list(notes),
         mode=mode,
+        copy_size=copy_size,
     )
 
 

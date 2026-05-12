@@ -12,7 +12,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy"
+      "source": "codecopy",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0.25x max code size]",
@@ -22,7 +23,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy"
+      "source": "codecopy",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0.50x max code size]",
@@ -32,7 +34,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy"
+      "source": "codecopy",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0.75x max code size]",
@@ -42,7 +45,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy"
+      "source": "codecopy",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=max code size]",
@@ -52,57 +56,53 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy"
+      "source": "codecopy",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0 bytes]",
       "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_bytes.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
-      "source": "codecopy"
+      "admitted": true,
+      "mode": "codecopy_fixed",
+      "reasons": [],
+      "source": "codecopy",
+      "copy_size": 0
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0.25x max code size]",
       "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_25x_max_code_size.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
-      "source": "codecopy"
+      "admitted": true,
+      "mode": "codecopy_fixed",
+      "reasons": [],
+      "source": "codecopy",
+      "copy_size": 6144
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0.50x max code size]",
       "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_50x_max_code_size.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
-      "source": "codecopy"
+      "admitted": true,
+      "mode": "codecopy_fixed",
+      "reasons": [],
+      "source": "codecopy",
+      "copy_size": 12288
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0.75x max code size]",
       "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_75x_max_code_size.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
-      "source": "codecopy"
+      "admitted": true,
+      "mode": "codecopy_fixed",
+      "reasons": [],
+      "source": "codecopy",
+      "copy_size": 18432
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=max code size]",
       "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_max_code_size.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
-      "source": "codecopy"
+      "admitted": true,
+      "mode": "codecopy_fixed",
+      "reasons": [],
+      "source": "codecopy",
+      "copy_size": 24576
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=0]",
@@ -112,7 +112,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=1024]",
@@ -122,7 +123,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=256]",
@@ -132,7 +134,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=32]",
@@ -142,7 +145,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=0]",
@@ -152,7 +156,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=1024]",
@@ -162,7 +167,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=256]",
@@ -172,7 +178,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=32]",
@@ -182,7 +189,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=0]",
@@ -192,7 +200,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=1024]",
@@ -202,7 +211,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=256]",
@@ -212,7 +222,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=32]",
@@ -222,7 +233,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=0]",
@@ -232,7 +244,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=1024]",
@@ -242,7 +255,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=256]",
@@ -252,7 +266,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=32]",
@@ -262,7 +277,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=0]",
@@ -272,7 +288,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=1024]",
@@ -282,7 +299,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=256]",
@@ -292,7 +310,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=32]",
@@ -302,7 +321,8 @@
       "reasons": [
         "requires byte-range code-copy observation not yet mapped"
       ],
-      "source": "codecopy_benchmark"
+      "source": "codecopy_benchmark",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codesize",
@@ -310,7 +330,8 @@
       "admitted": true,
       "mode": "codesize",
       "reasons": [],
-      "source": "codesize"
+      "source": "codesize",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_ext_account_query_cold[absent_accounts=False-opcode=BALANCE]",
@@ -318,7 +339,8 @@
       "admitted": true,
       "mode": "balance_cold_present_accounts",
       "reasons": [],
-      "source": "ext_account_query_cold"
+      "source": "ext_account_query_cold",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_ext_account_query_cold[absent_accounts=True-opcode=BALANCE]",
@@ -326,7 +348,8 @@
       "admitted": true,
       "mode": "balance_cold_absent_accounts",
       "reasons": [],
-      "source": "ext_account_query_cold"
+      "source": "ext_account_query_cold",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_extcodecopy_warm[copy_size=0]",
@@ -336,7 +359,8 @@
       "reasons": [
         "requires external-account code-copy fixtures and byte-range observation not yet mapped"
       ],
-      "source": "extcodecopy_warm"
+      "source": "extcodecopy_warm",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_extcodecopy_warm[copy_size=1024]",
@@ -346,7 +370,8 @@
       "reasons": [
         "requires external-account code-copy fixtures and byte-range observation not yet mapped"
       ],
-      "source": "extcodecopy_warm"
+      "source": "extcodecopy_warm",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_extcodecopy_warm[copy_size=256]",
@@ -356,7 +381,8 @@
       "reasons": [
         "requires external-account code-copy fixtures and byte-range observation not yet mapped"
       ],
-      "source": "extcodecopy_warm"
+      "source": "extcodecopy_warm",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_extcodecopy_warm[copy_size=32]",
@@ -366,7 +392,8 @@
       "reasons": [
         "requires external-account code-copy fixtures and byte-range observation not yet mapped"
       ],
-      "source": "extcodecopy_warm"
+      "source": "extcodecopy_warm",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_extcodecopy_warm[copy_size=512]",
@@ -376,7 +403,8 @@
       "reasons": [
         "requires external-account code-copy fixtures and byte-range observation not yet mapped"
       ],
-      "source": "extcodecopy_warm"
+      "source": "extcodecopy_warm",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_selfbalance[contract_balance=0]",
@@ -384,7 +412,8 @@
       "admitted": true,
       "mode": "selfbalance_contract_balance_0",
       "reasons": [],
-      "source": "selfbalance"
+      "source": "selfbalance",
+      "copy_size": null
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_selfbalance[contract_balance=1]",
@@ -392,7 +421,8 @@
       "admitted": true,
       "mode": "selfbalance_contract_balance_1",
       "reasons": [],
-      "source": "selfbalance"
+      "source": "selfbalance",
+      "copy_size": null
     }
   ]
 }

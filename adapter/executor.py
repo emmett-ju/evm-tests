@@ -19,6 +19,7 @@ from adapter.block_context_generator import (
     BLOCK_CONTEXT_PREVRANDAO_RUNTIME,
     BLOCK_CONTEXT_TIMESTAMP_RUNTIME,
 )
+from adapter.account_query_generator import _build_codecopy_fixed_runtime, _codecopy_fixed_digest
 from adapter.control_flow_generator import (
     _build_gas_runtime,
     _build_jump_runtime,
@@ -229,6 +230,19 @@ class MockBackend:
                     from adapter.assembler import _word_hex
                     storage["0x00"] = _word_hex(arithmetic_probe["expected_result"])
                     continue
+
+                account_query_probe = case.observe.get("account_query_probe")
+                if account_query_probe is not None:
+                    mode = account_query_probe.get("mode")
+                    if mode == "codecopy_fixed":
+                        copy_size = int(account_query_probe["copy_size"])
+                        expected_runtime = _build_codecopy_fixed_runtime(copy_size)
+                        if code != expected_runtime:
+                            raise ValueError(f"unsupported mock contract code path: {code}")
+                        storage["0x00"] = self._hex_to_word(hex(copy_size))
+                        storage["0x01"] = _codecopy_fixed_digest(expected_runtime, copy_size)
+                        continue
+                    raise ValueError(f"unsupported account-query probe mode: {mode}")
 
                 bitwise_probe = case.observe.get("bitwise_probe")
                 if bitwise_probe is not None:
