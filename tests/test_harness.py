@@ -718,10 +718,11 @@ class HarnessTests(unittest.TestCase):
             {
                 "shape": "selfdestruct_single",
                 "scenario": "existing",
-                "create_success": True,
+                "setup_create_success": True,
                 "child_address_nonzero": True,
+                "child_code_size_before": 1,
                 "selfdestruct_call_success": True,
-                "child_code_size_after": 0,
+                "child_code_size_after": 1,
                 "beneficiary_balance_after": 1,
             },
         )
@@ -996,7 +997,11 @@ class HarnessTests(unittest.TestCase):
                     self.assertEqual(set(expected_witness), {"shape", "proxy_deploy_success", "first_create_call_success", "first_created_address_nonzero", "first_created_code_size", "collision_call_success", "collision_returndata_size"})
             elif witness["shape"] == "selfdestruct_single":
                 self.assertEqual(expected_witness["shape"], "selfdestruct_single")
-                expected_fields = {"shape", "scenario", "create_success", "child_address_nonzero", "selfdestruct_call_success", "child_code_size_after"}
+                expected_fields = {"shape", "scenario", "child_address_nonzero", "selfdestruct_call_success", "child_code_size_after"}
+                if witness["scenario"] == "existing":
+                    expected_fields.update({"setup_create_success", "child_code_size_before"})
+                else:
+                    expected_fields.add("create_success")
                 if witness["value"] > 0:
                     expected_fields.add("beneficiary_balance_after")
                 self.assertEqual(set(expected_witness), expected_fields)
@@ -5428,8 +5433,8 @@ class HarnessTests(unittest.TestCase):
             "hardfork_semantics": "cancun",
         }
         value_witness = dict(zero_value_witness, value=1)
-        self.assertEqual(system_witness_storage_slots(zero_value_witness), ("0x00", "0x01", "0x02", "0x03"))
-        self.assertEqual(system_witness_storage_slots(value_witness), ("0x00", "0x01", "0x02", "0x03", "0x04"))
+        self.assertEqual(system_witness_storage_slots(zero_value_witness), ("0x00", "0x01", "0x02", "0x03", "0x04"))
+        self.assertEqual(system_witness_storage_slots(value_witness), ("0x00", "0x01", "0x02", "0x03", "0x04", "0x05"))
 
     def test_collect_selfdestruct_existing_system_witness_from_storage(self) -> None:
         witness = {
@@ -5449,14 +5454,16 @@ class HarnessTests(unittest.TestCase):
                     "0x02": "0x0000000000000000000000000000000000000000000000000000000000000001",
                     "0x03": "0x0000000000000000000000000000000000000000000000000000000000000001",
                     "0x04": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "0x05": "0x0000000000000000000000000000000000000000000000000000000000000001",
                 },
             ),
             {
                 "shape": "selfdestruct_single",
                 "scenario": "existing",
-                "create_success": True,
+                "setup_create_success": True,
                 "child_address_nonzero": True,
                 "child_address": "0xdddddddddddddddddddddddddddddddddddddddd",
+                "child_code_size_before": 1,
                 "selfdestruct_call_success": True,
                 "child_code_size_after": 1,
                 "beneficiary_balance_after": 1,
