@@ -720,9 +720,9 @@ class HarnessTests(unittest.TestCase):
                 "scenario": "existing",
                 "setup_create_success": True,
                 "child_address_nonzero": True,
-                "child_code_size_before": 1,
+                "child_code_size_before": 2,
                 "selfdestruct_call_success": True,
-                "child_code_size_after": 1,
+                "child_code_size_after": 2,
                 "beneficiary_balance_after": 1,
             },
         )
