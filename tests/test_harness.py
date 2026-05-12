@@ -695,13 +695,44 @@ class HarnessTests(unittest.TestCase):
             },
         )
 
-    def test_validation_boundary_rejects_selfdestruct_single_existing_scenario(self) -> None:
+    def test_validation_boundary_accepts_selfdestruct_existing_system_witness_declaration(self) -> None:
         payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
         payload["cases"][0]["observe"]["system_witness"] = {
             "version": 1,
             "shape": "selfdestruct_single",
             "subject": "$last_contract",
             "scenario": "existing",
+            "value": 1,
+            "hardfork_semantics": "cancun",
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "upstream_system_mapped.json"
+            manifest_path.write_text(json.dumps(payload))
+            manifest = load_manifest(manifest_path)
+        self.assertEqual(manifest.cases[0].observe["system_witness"]["scenario"], "existing")
+        from adapter.system_witness import build_selfdestruct_single_system_witness
+
+        bundle = build_selfdestruct_single_system_witness(scenario="existing", value=1)
+        self.assertEqual(
+            bundle.expected["system_witness"],
+            {
+                "shape": "selfdestruct_single",
+                "scenario": "existing",
+                "create_success": True,
+                "child_address_nonzero": True,
+                "selfdestruct_call_success": True,
+                "child_code_size_after": 0,
+                "beneficiary_balance_after": 1,
+            },
+        )
+
+    def test_validation_boundary_rejects_selfdestruct_initcode_system_witness_declaration(self) -> None:
+        payload = json.loads((ROOT / "suites/manifests/upstream_system_mapped.json").read_text())
+        payload["cases"][0]["observe"]["system_witness"] = {
+            "version": 1,
+            "shape": "selfdestruct_single",
+            "subject": "$last_contract",
+            "scenario": "initcode",
             "value": 0,
             "hardfork_semantics": "cancun",
         }
@@ -712,7 +743,7 @@ class HarnessTests(unittest.TestCase):
                 load_manifest(manifest_path)
         self.assertEqual(
             str(error.exception),
-            "observe.system_witness.scenario must be 'created' for selfdestruct_single in this milestone",
+            "observe.system_witness.scenario must be 'created' or 'existing' for selfdestruct_single; unsupported scenario: 'initcode'",
         )
 
     def test_selector_allows_real_jsonrpc_smoke_case(self) -> None:
@@ -938,6 +969,8 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.system.test_return_revert.revert.empty",
                 "upstream.benchmark.system.test_selfdestruct_created.value_bearing_false",
                 "upstream.benchmark.system.test_selfdestruct_created.value_bearing_true",
+                "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_false",
+                "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_true",
             ],
         )
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
@@ -979,7 +1012,7 @@ class HarnessTests(unittest.TestCase):
                 self.assertEqual(set(expected_witness), {"shape", "success", "returndata_size", "returndata_digest"})
         self.assertFalse(
             any(
-                ("test_selfdestruct" in case.case_id and "test_selfdestruct_created" not in case.case_id)
+                "test_selfdestruct_initcode" in case.case_id
                 or "test_contract_calling_many_addresses" in case.case_id
                 or case.case_id == "upstream.benchmark.system.test_creates_collisions.create"
                 for case in selected
@@ -2898,8 +2931,8 @@ class HarnessTests(unittest.TestCase):
 
         admitted = [entry for entry in entries if entry["admitted"]]
         blocked = [entry for entry in entries if not entry["admitted"]]
-        self.assertEqual(len(admitted), 33, "system admitted count drifted")
-        self.assertEqual(len(blocked), 13, "system blocked count drifted")
+        self.assertEqual(len(admitted), 35, "system admitted count drifted")
+        self.assertEqual(len(blocked), 11, "system blocked count drifted")
 
         admitted_case_ids = [entry["case_id"] for entry in admitted]
         self.assertEqual(
@@ -2938,6 +2971,8 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.system.test_return_revert.revert.empty",
                 "upstream.benchmark.system.test_selfdestruct_created.value_bearing_false",
                 "upstream.benchmark.system.test_selfdestruct_created.value_bearing_true",
+                "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_false",
+                "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_true",
             ],
         )
         self.assertEqual({entry["mode"] for entry in admitted}, {"create_child_code", "create_collision", "create_empty_child", "return_revert_self_call", "selfdestruct_single"})
@@ -2946,8 +2981,8 @@ class HarnessTests(unittest.TestCase):
             Counter(
                 {
                     "requires multi-address external-call orchestration not yet mapped": 8,
-                                        "requires mutable pre-allocation of future CREATE addresses not available through the current RPC-only harness": 1,
-                    "requires selfdestruct lifecycle witness not yet mapped": 4,
+                    "requires mutable pre-allocation of future CREATE addresses not available through the current RPC-only harness": 1,
+                    "requires selfdestruct lifecycle witness not yet mapped": 2,
                 }
             ),
         )
@@ -2957,7 +2992,6 @@ class HarnessTests(unittest.TestCase):
                 {
                     "test_contract_calling_many_addresses": 8,
                     "test_creates_collisions": 1,
-                    "test_selfdestruct_existing": 2,
                     "test_selfdestruct_initcode": 2,
                 }
             ),
@@ -2966,7 +3000,7 @@ class HarnessTests(unittest.TestCase):
 
         template_case_ids = [case["case_id"] for case in templates_payload["cases"]]
         self.assertEqual(template_case_ids, admitted_case_ids)
-        self.assertEqual(len(templates_payload["cases"]), 33)
+        self.assertEqual(len(templates_payload["cases"]), 35)
 
         if manifest_payload is not None:
             checked_in_manifest_path = ROOT / "suites/manifests/upstream_system_mapped.json"
@@ -2974,7 +3008,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(manifest_payload, checked_in_manifest, "system manifest JSON drift")
             manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
             self.assertEqual(manifest_case_ids, admitted_case_ids)
-            self.assertEqual(len(manifest_payload["cases"]), 33)
+            self.assertEqual(len(manifest_payload["cases"]), 35)
             self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/system"})
             observed_by_case = {case["case_id"]: case for case in manifest_payload["cases"]}
             self.assertEqual(
@@ -3148,17 +3182,19 @@ class HarnessTests(unittest.TestCase):
                     },
                 },
             )
-            for case_id, value in (
-                ("upstream.benchmark.system.test_selfdestruct_created.value_bearing_false", 0),
-                ("upstream.benchmark.system.test_selfdestruct_created.value_bearing_true", 1),
+            for case_id, scenario, value in (
+                ("upstream.benchmark.system.test_selfdestruct_created.value_bearing_false", "created", 0),
+                ("upstream.benchmark.system.test_selfdestruct_created.value_bearing_true", "created", 1),
+                ("upstream.benchmark.system.test_selfdestruct_existing.value_bearing_false", "existing", 0),
+                ("upstream.benchmark.system.test_selfdestruct_existing.value_bearing_true", "existing", 1),
             ):
                 expected_witness = {
                     "shape": "selfdestruct_single",
-                    "scenario": "created",
+                    "scenario": scenario,
                     "create_success": True,
                     "child_address_nonzero": True,
                     "selfdestruct_call_success": True,
-                    "child_code_size_after": 0,
+                    "child_code_size_after": 0 if scenario == "created" else 1,
                 }
                 if value > 0:
                     expected_witness["beneficiary_balance_after"] = 1
@@ -3168,7 +3204,7 @@ class HarnessTests(unittest.TestCase):
                         "version": 1,
                         "shape": "selfdestruct_single",
                         "subject": "$last_contract",
-                        "scenario": "created",
+                        "scenario": scenario,
                         "value": value,
                         "hardfork_semantics": "cancun",
                     },
@@ -3211,7 +3247,7 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertFalse(
                 any(
-                    ("test_selfdestruct" in case_id and "test_selfdestruct_created" not in case_id)
+                    "test_selfdestruct_initcode" in case_id
                     or "test_contract_calling_many_addresses" in case_id
                     or case_id == "upstream.benchmark.system.test_creates_collisions.create"
                     for case_id in manifest_case_ids
@@ -5378,6 +5414,51 @@ class HarnessTests(unittest.TestCase):
                 "child_address": "0xdddddddddddddddddddddddddddddddddddddddd",
                 "selfdestruct_call_success": True,
                 "child_code_size_after": 0,
+                "beneficiary_balance_after": 1,
+            },
+        )
+
+    def test_selfdestruct_existing_system_witness_storage_slots(self) -> None:
+        zero_value_witness = {
+            "version": 1,
+            "shape": "selfdestruct_single",
+            "subject": "$last_contract",
+            "scenario": "existing",
+            "value": 0,
+            "hardfork_semantics": "cancun",
+        }
+        value_witness = dict(zero_value_witness, value=1)
+        self.assertEqual(system_witness_storage_slots(zero_value_witness), ("0x00", "0x01", "0x02", "0x03"))
+        self.assertEqual(system_witness_storage_slots(value_witness), ("0x00", "0x01", "0x02", "0x03", "0x04"))
+
+    def test_collect_selfdestruct_existing_system_witness_from_storage(self) -> None:
+        witness = {
+            "version": 1,
+            "shape": "selfdestruct_single",
+            "subject": "$last_contract",
+            "scenario": "existing",
+            "value": 1,
+            "hardfork_semantics": "cancun",
+        }
+        self.assertEqual(
+            collect_system_witness_from_storage(
+                witness_config=witness,
+                storage={
+                    "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "0x01": "0x000000000000000000000000dddddddddddddddddddddddddddddddddddddddd",
+                    "0x02": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "0x03": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "0x04": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                },
+            ),
+            {
+                "shape": "selfdestruct_single",
+                "scenario": "existing",
+                "create_success": True,
+                "child_address_nonzero": True,
+                "child_address": "0xdddddddddddddddddddddddddddddddddddddddd",
+                "selfdestruct_call_success": True,
+                "child_code_size_after": 1,
                 "beneficiary_balance_after": 1,
             },
         )
