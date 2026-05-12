@@ -1,65 +1,281 @@
 # EVM RPC Tests
 
-This repository contains a Python 3.12 harness for running selected execution-layer tests against a dedicated, non-resettable EVM chain via RPC.
+This repository contains a Python 3.12 harness for running selected Ethereum `execution-specs` benchmark cases against a dedicated, non-resettable EVM chain via RPC.
 
-## Layout
+The goal is not to run upstream `execution-specs` byte-for-byte through `t8n`. The goal is to migrate every upstream benchmark case that can be proven in an RPC-only environment through final observable behavior: storage, balance, code, receipts, logs, and runtime context captured by the harness. Cases that cannot be proven honestly stay in inventory with an explicit blocked reason.
+
+## Reader guide
+
+Use this README to:
+
+- understand the harness architecture and support boundary;
+- run mapped manifests against the mock backend or a real RPC chain;
+- regenerate checked-in upstream templates, inventories, and manifests;
+- add or extend a benchmark family without losing parity with upstream;
+- understand the migration roadmap and why unsupported cases remain blocked.
+
+For current benchmark coverage totals and deferred-family rationale, see [`docs/benchmark-coverage-status.md`](docs/benchmark-coverage-status.md). That document is the stable coverage ledger; this README intentionally keeps detailed counts out of the main flow so they do not drift.
+
+## Repository layout
 
 - `third_party/execution-specs/`: read-only upstream checkout, managed as a git submodule.
-- `adapter/`: local chain profiles, selectors, bootstrap logic, RPC executors, oracles, and CLI.
-- `suites/`: local manifests for upstream-mapped cases and chain-specific cases.
+- `adapter/`: chain profiles, selectors, bootstrap logic, RPC/mock executors, oracles, scanners, manifest generators, and CLI commands.
+- `suites/templates/`: checked-in upstream-derived template and inventory snapshots.
+- `suites/manifests/`: runnable manifests generated from local templates.
+- `profiles/`: mock and real-chain profile examples.
+- `tests/`: regression tests for scanners, manifests, CLI flows, mock execution, oracles, and checked-in artifact parity.
+- `docs/benchmark-coverage-status.md`: current benchmark coverage summary and deferral notes.
 
-## Docs
+## Core model
 
-- 项目接手说明：`docs/project-handoff.md`
-- upstream 迁移计划：`docs/upstream-execution-specs-migration-plan.md`
-- Phase 0 inventory 设计：`docs/phase0-inventory-design.md`
+The harness is organized around three artifact layers:
 
-## Quick Start
+1. **Upstream source**
+   - `execution-specs` remains read-only.
+   - Family scanners inspect upstream benchmark source and derive local case metadata.
 
-```bash
-python3 -m unittest discover -s tests -v
-python -m adapter.cli list --manifest suites/manifests/upstream_smoke.json
-python -m adapter.cli bootstrap --profile profiles/mock.toml --state-dir .state
-python -m adapter.cli run --profile profiles/mock.toml --manifest suites/manifests/custom_storage_smoke.json --state-dir .state
-python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_smoke.json --state-dir .state
-python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_deploy_smoke.json --state-dir .state
-python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_storage_smoke.json --state-dir .state
-python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/upstream_storage_mapped.json --state-dir .state
-python -m adapter.cli scan-upstream-storage --template-output suites/templates/upstream_storage_templates.json --inventory-output suites/templates/upstream_storage_inventory.json
-python -m adapter.cli generate-storage-manifest --template suites/templates/upstream_storage_templates.json --output suites/manifests/upstream_storage_mapped.json
-python -m adapter.cli scan-upstream-memory --template-output suites/templates/upstream_memory_templates.json --inventory-output suites/templates/upstream_memory_inventory.json
-python -m adapter.cli generate-memory-manifest --template suites/templates/upstream_memory_templates.json --output suites/manifests/upstream_memory_mapped.json
-python -m adapter.cli scan-upstream-call-context --template-output suites/templates/upstream_call_context_templates.json --inventory-output suites/templates/upstream_call_context_inventory.json
-python -m adapter.cli generate-call-context-manifest --template suites/templates/upstream_call_context_templates.json --output suites/manifests/upstream_call_context_mapped.json
-python -m adapter.cli scan-upstream-tx-context --template-output suites/templates/upstream_tx_context_templates.json --inventory-output suites/templates/upstream_tx_context_inventory.json
-python -m adapter.cli generate-tx-context-manifest --template suites/templates/upstream_tx_context_templates.json --output suites/manifests/upstream_tx_context_mapped.json
+2. **Adapter logic**
+   - Family-local scanners classify cases as admitted or blocked.
+   - Manifest generators render admitted cases into local runnable manifests.
+   - Executors run manifests through either a mock backend or a JSON-RPC backend.
+   - The oracle compares expected and observed final results.
+
+3. **Suites**
+   - Templates describe admitted cases before profile-specific execution.
+   - Inventories describe the full scanned family, including blocked reasons.
+   - Manifests are the executable test sets consumed by the CLI.
+
+The standard path is:
+
+```text
+scan upstream family -> write templates + inventory -> generate manifest -> run manifest -> compare observed final state -> write report
 ```
 
-`scan-upstream-storage` 会直接扫描 upstream `execution-specs` 的 `test_storage.py`，把可自动映射的 case 生成到本地模板，把当前不能自动承接的 case 写到 inventory 并带过滤原因。
-`scan-upstream-memory` 对 `test_memory.py` 做同样的自动分类，当前优先承接可直接通过 storage 观察结果的 `MLOAD/MSTORE/MSTORE8/MSIZE` 子集。
-`scan-upstream-call-context` 当前优先承接可直接通过 storage 与运行时上下文断言的 `ADDRESS/CALLER/CALLVALUE/CALLDATASIZE/CALLDATALOAD` 子集；更复杂的 `CALLDATACOPY/RETURNDATA*` 仍先进入 inventory。
-`scan-upstream-tx-context` 当前先承接可直接通过运行时发送者语义断言的 `ORIGIN`；`GASPRICE/BLOBHASH` 先进入 inventory，因为它们还需要额外的 fee/blob 交易策略。
+## Support boundary
 
-For real-chain runs, create a local `.env` file from `.env.example`:
+A benchmark case is supportable when its truth can be proven by the current harness without pretending to have upstream-only control surfaces.
+
+Allowed proof surfaces include:
+
+- storage;
+- account balance;
+- deployed code;
+- receipt status;
+- receipt contract address;
+- receipt logs;
+- runtime context captured during execution.
+
+Cases remain blocked when they require capabilities outside the current harness, such as:
+
+- mutable genesis or arbitrary prestate construction;
+- exact block assembly or long historical block windows;
+- trace equivalence;
+- precise gas benchmark parity;
+- blob transaction construction where the active profile cannot prove it;
+- multi-address lifecycle orchestration that the harness does not yet model;
+- byte-range or dynamic-memory observations that are not surfaced through final state, receipt, or logs.
+
+Blocked entries are not failures. They are part of the support contract: the harness must not claim coverage it cannot prove.
+
+## Backends
+
+### Mock backend
+
+The mock backend is for local regression and scanner/manifest/oracle integration tests. It is not a full EVM implementation. It recognizes supported harness bytecode shapes, validates runtime/probe contracts where required, and fails closed on unsupported paths.
+
+Use it for fast development:
+
+```bash
+python -m adapter.cli run \
+  --profile profiles/mock.toml \
+  --manifest suites/manifests/custom_storage_smoke.json \
+  --state-dir .state
+```
+
+### JSON-RPC backend
+
+The JSON-RPC backend runs against a real dedicated chain. The chain is assumed to be non-resettable and not genesis-configurable.
+
+For real-chain runs, create a local `.env` file from `.env.example` and provide the required private key variables. The CLI and profile loader read `.env` automatically.
 
 ```bash
 cp .env.example .env
 ```
 
-Then set `JUCHAIN_PRIVATE_KEY` in `.env`. The CLI and profile loader read `.env` automatically.
-
-For real chains, `backend` can be omitted in the profile and defaults to `jsonrpc`.
-Use `backend = "mock"` only for local harness self-tests.
-
 For `jsonrpc` profiles, `admin_key_source` is optional:
 
-- omit it or set `rpc_unlocked` if the RPC node can send from `admin_account`
-- set `env:YOUR_PRIVATE_KEY_VAR` or `file:/abs/path/to/key.hex` for local EIP-1559 signing
-- use pre-signed `eth_sendRawTransaction` steps if signing happens outside this harness
+- omit it or set `rpc_unlocked` when the RPC node can send from `admin_account`;
+- set `env:YOUR_PRIVATE_KEY_VAR` or `file:/abs/path/to/key.hex` for local EIP-1559 signing;
+- use pre-signed `eth_sendRawTransaction` steps when signing happens outside this harness.
 
-## Upstream Submodule
+Use `backend = "mock"` only for local harness self-tests.
+
+## Quick start
+
+Run the regression suite:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+List a manifest:
+
+```bash
+python -m adapter.cli list --manifest suites/manifests/upstream_smoke.json
+```
+
+Bootstrap and run smoke manifests:
+
+```bash
+python -m adapter.cli bootstrap --profile profiles/mock.toml --state-dir .state
+python -m adapter.cli run --profile profiles/mock.toml --manifest suites/manifests/custom_storage_smoke.json --state-dir .state
+python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_smoke.json --state-dir .state
+python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_deploy_smoke.json --state-dir .state
+python -m adapter.cli run --profile profiles/juchain.toml --manifest suites/manifests/juchain_storage_smoke.json --state-dir .state
+```
+
+Run an upstream-mapped family manifest:
+
+```bash
+python -m adapter.cli run --profile profiles/mock.toml --manifest suites/manifests/upstream_storage_mapped.json --state-dir .state
+```
+
+Summarize checked-in upstream inventories:
+
+```bash
+python -m adapter.cli summarize-upstream-inventory \
+  --inventory-dir suites/templates \
+  --output /tmp/upstream_inventory_summary.json
+```
+
+## Regenerating upstream-derived artifacts
+
+Each benchmark family follows the same pattern:
+
+```bash
+python -m adapter.cli scan-upstream-<family> \
+  --template-output suites/templates/upstream_<family>_templates.json \
+  --inventory-output suites/templates/upstream_<family>_inventory.json
+
+python -m adapter.cli generate-<family>-manifest \
+  --template suites/templates/upstream_<family>_templates.json \
+  --output suites/manifests/upstream_<family>_mapped.json
+```
+
+Examples:
+
+```bash
+python -m adapter.cli scan-upstream-storage --template-output suites/templates/upstream_storage_templates.json --inventory-output suites/templates/upstream_storage_inventory.json
+python -m adapter.cli generate-storage-manifest --template suites/templates/upstream_storage_templates.json --output suites/manifests/upstream_storage_mapped.json
+
+python -m adapter.cli scan-upstream-memory --template-output suites/templates/upstream_memory_templates.json --inventory-output suites/templates/upstream_memory_inventory.json
+python -m adapter.cli generate-memory-manifest --template suites/templates/upstream_memory_templates.json --output suites/manifests/upstream_memory_mapped.json
+
+python -m adapter.cli scan-upstream-call-context --template-output suites/templates/upstream_call_context_templates.json --inventory-output suites/templates/upstream_call_context_inventory.json
+python -m adapter.cli generate-call-context-manifest --template suites/templates/upstream_call_context_templates.json --output suites/manifests/upstream_call_context_mapped.json
+
+python -m adapter.cli scan-upstream-tx-context --template-output suites/templates/upstream_tx_context_templates.json --inventory-output suites/templates/upstream_tx_context_inventory.json
+python -m adapter.cli generate-tx-context-manifest --template suites/templates/upstream_tx_context_templates.json --output suites/manifests/upstream_tx_context_mapped.json
+```
+
+After regenerating checked-in artifacts, run the relevant parity tests and then the full test suite.
+
+## Inventory contract
+
+Inventories are the project’s coverage ledger. They should be regenerated from upstream source, not hand-edited.
+
+A family inventory records:
+
+- a stable family name;
+- the upstream source scanned;
+- every discovered case;
+- each local `case_id`;
+- whether the case is admitted;
+- the scanner mode/source classification;
+- blocked reasons for cases that cannot be admitted.
+
+A typical entry has this shape:
+
+```json
+{
+  "upstream_ref": "tests/...::test_xxx[...]",
+  "case_id": "upstream.benchmark.<family>....",
+  "admitted": true,
+  "mode": "optional-template-mode",
+  "reasons": [],
+  "source": "scanner-subgroup"
+}
+```
+
+For blocked entries, `reasons` must be non-empty and should describe the missing capability, not a vague implementation status. Prefer stable phrases such as:
+
+- `requires genesis state`
+- `requires block environment control`
+- `requires trace equivalence`
+- `requires precise gas fixture`
+- `requires blob transaction support`
+- `requires unsupported runtime observation`
+- `requires unsupported multi-tx orchestration`
+- `requires unsupported account or code prestate model`
+
+Existing family-local scanners may use more specific reason strings where those strings are part of checked-in parity; update tests and regenerated artifacts together if those strings change.
+
+## Adding or extending a benchmark family
+
+Use the smallest honest vertical slice:
+
+1. Identify the upstream benchmark family and read its source.
+2. Define the support boundary for the family using final observable proof surfaces.
+3. Add or extend a family-local scanner.
+4. Generate or update the checked-in inventory.
+5. Add template generation only for admitted cases.
+6. Generate the runnable manifest from templates.
+7. Add mock backend semantics for the admitted runtime/probe shapes.
+8. Keep the runtime proof fail-closed: do not trust manifest metadata alone when deployed runtime bytes can be reconstructed and checked.
+9. Add or update parity tests for scanner output, manifest generation, CLI commands, mock execution, and coverage summaries.
+10. Run the full regression suite and `git diff --check`.
+
+Do not copy upstream cases into manifests manually. Do not mark a case admitted just because the scanner can identify it. Admission requires a runnable manifest, expected proof, backend semantics, and regression coverage.
+
+## Runtime placeholders and observations
+
+Some expected values depend on runtime context rather than static template values. The oracle supports placeholders that are resolved after execution and before final comparison.
+
+Common placeholders include:
+
+- `$last_contract_word`
+- `$admin_account_word`
+
+Use placeholders when the expected value is deterministic but only known after deployment or transaction execution. Prefer adding a clear runtime observation or placeholder over hard-coding environment-specific values into templates.
+
+## Migration roadmap
+
+The project has progressed from hand-written smoke cases into family-local scanners, checked-in inventories, generated manifests, and regression-protected coverage summaries.
+
+Future work should follow this order:
+
+1. **Preserve the coverage ledger.** Keep every family inventory regenerable from upstream source and locked by tests.
+2. **Close supportable subsets before inventing new abstractions.** Extend admitted cases only when final observable proof is available.
+3. **Add reusable observation primitives when repeated blocked reasons justify them.** Examples include richer receipt-log checks, byte-window witnesses, runtime-context placeholders, and multi-address orchestration.
+4. **Treat high-complexity families as harness capability work.** Block-context, log, system, blob-related, and dynamic memory/log cases should not be forced into approximate mappings.
+5. **Seal coverage only when every target family has inventory, every admitted case has a runnable manifest and tests, and every blocked case has a stable capability reason.**
+
+The current benchmark coverage status and the explicit list of deferred families live in [`docs/benchmark-coverage-status.md`](docs/benchmark-coverage-status.md).
+
+## Practical rules for maintainers
+
+- Keep upstream as a read-only submodule.
+- Prefer family-local scanner modules and CLI commands over a premature generic benchmark-scanner framework.
+- Keep checked-in templates, inventories, manifests, and tests in sync.
+- Treat explanatory note strings in generated artifacts as parity-sensitive unless tests are updated intentionally.
+- Make mock backend support narrow and fail-closed; it should validate supported harness shapes, not emulate the full EVM.
+- Use final state, receipts, logs, and captured context as proof. Do not claim trace or gas benchmark parity unless the harness actually proves it.
+- When in doubt, block the case with a precise reason and document the missing capability.
+
+## Upstream submodule
 
 This workspace expects a git submodule at `third_party/execution-specs/`.
+
 If you need to initialize it in a fresh clone:
 
 ```bash

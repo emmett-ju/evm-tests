@@ -4994,7 +4994,7 @@ class HarnessTests(unittest.TestCase):
         self.assertIn(f"| Blocked cases | {totals['blocked']} |", doc)
         self.assertIn("| bitwise | 12 | Completed by the CLZ-diff witness", doc)
         self.assertIn("the 76 blocked cases should remain blocked", doc)
-        self.assertIn("docs/benchmark-coverage-status.md", (ROOT / "docs/project-handoff.md").read_text())
+        self.assertIn("docs/benchmark-coverage-status.md", (ROOT / "README.md").read_text())
 
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
