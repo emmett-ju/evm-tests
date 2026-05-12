@@ -4558,7 +4558,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 479, "blocked": 134},
+            {"families": 14, "cases": 613, "admitted": 481, "blocked": 132},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -4597,7 +4597,7 @@ class HarnessTests(unittest.TestCase):
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
                 "log": {"total": 140, "admitted": 110, "blocked": 30},
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
-                "system": {"total": 46, "admitted": 33, "blocked": 13},
+                "system": {"total": 46, "admitted": 35, "blocked": 11},
                 "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
                 "memory": {"total": 143, "admitted": 95, "blocked": 48},
             },
@@ -4633,11 +4633,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 474, "blocked": 99},
+                {"families": 13, "cases": 573, "admitted": 476, "blocked": 97},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 479, "blocked": 134},
+                {"families": 14, "cases": 613, "admitted": 481, "blocked": 132},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -4708,11 +4708,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 478, "blocked": 134},
+                {"families": 14, "cases": 612, "admitted": 480, "blocked": 132},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 479, "blocked": 134},
+                {"families": 14, "cases": 613, "admitted": 481, "blocked": 132},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -4732,7 +4732,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 478, "blocked": 134},
+                {"families": 14, "cases": 612, "admitted": 480, "blocked": 132},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
