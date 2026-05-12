@@ -80,6 +80,18 @@ def validate_log_probe_declaration(log_probe: Any) -> dict[str, Any]:
                 "observe.log_probe.topic_word must be a hex string when topic_count is greater than zero"
             )
 
+    offset_mode = log_probe.get("offset_mode", "fixed_zero")
+    if not isinstance(offset_mode, str) or not offset_mode:
+        raise ValueError("observe.log_probe.offset_mode must be a non-empty string when present")
+    if offset_mode not in ("fixed_zero", "dynamic_gas_mod_7"):
+        raise ValueError(f"unsupported observe.log_probe.offset_mode: {offset_mode}")
+    if offset_mode == "dynamic_gas_mod_7" and not (
+        log_size == 0 or (memory_seed_kind == "zero" and memory_seed_size == 0)
+    ):
+        raise ValueError(
+            "observe.log_probe.offset_mode dynamic_gas_mod_7 requires an offset-independent payload"
+        )
+
     return {
         "opcode": opcode,
         "topic_count": topic_count,
@@ -88,4 +100,5 @@ def validate_log_probe_declaration(log_probe: Any) -> dict[str, Any]:
         "memory_seed_kind": memory_seed_kind,
         "memory_seed_size": memory_seed_size,
         "witness_mode": witness_mode,
+        "offset_mode": offset_mode,
     }

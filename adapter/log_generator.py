@@ -21,6 +21,7 @@ EXACT_LOG_DATA_MAX_BYTES = 256
 
 LogTemplateMode = Literal[
     "test_log_fixed_offset",
+    "test_log_dynamic_offset",
     "test_log_benchmark",
 ]
 LogWitnessMode = Literal["exact", "digest"]
@@ -220,6 +221,7 @@ def render_log_case(template: LogMappingTemplate) -> dict[str, Any]:
                 "memory_seed_kind": template.memory_seed_kind,
                 "memory_seed_size": template.memory_seed_size,
                 "witness_mode": template.witness_mode,
+                **({"offset_mode": "dynamic_gas_mod_7"} if template.mode == "test_log_dynamic_offset" else {}),
             }
         },
         "filters": {},
@@ -257,7 +259,7 @@ def _load_log_template_entry(entry: object, *, index: int) -> LogMappingTemplate
         if field not in entry:
             raise ValueError(f"log template entry {index} missing required field: {field}")
     mode = entry["mode"]
-    if mode not in ("test_log_fixed_offset", "test_log_benchmark"):
+    if mode not in ("test_log_fixed_offset", "test_log_dynamic_offset", "test_log_benchmark"):
         raise ValueError(f"unsupported log template mode: {mode}")
     witness_mode = entry["witness_mode"]
     if witness_mode not in ("exact", "digest"):
@@ -320,13 +322,28 @@ def _scan_test_log_cases(text: str) -> list[AutoLogInventoryEntry]:
                     topic_word = _resolve_topic_word(topic_count=topic_count, zeros_topic=zeros_topic)
                     witness_mode = _resolve_witness_mode(size_value)
                     memory_seed_kind: LogMemorySeedKind = "ff" if non_zero_data else "zero"
+                    dynamic_offset_admitted = (
+                        not fixed_offset
+                        and (
+                            size_value == 0
+                            or (size_value == 1024 * 1024 and not non_zero_data)
+                        )
+                    )
+                    admitted = fixed_offset or dynamic_offset_admitted
+                    mode: LogTemplateMode | None
+                    if fixed_offset:
+                        mode = "test_log_fixed_offset"
+                    elif dynamic_offset_admitted:
+                        mode = "test_log_dynamic_offset"
+                    else:
+                        mode = None
                     results.append(
                         AutoLogInventoryEntry(
                             upstream_ref=upstream_ref,
                             case_id=case_id,
-                            admitted=fixed_offset,
-                            mode="test_log_fixed_offset" if fixed_offset else None,
-                            reasons=[] if fixed_offset else [DYNAMIC_OFFSET_BLOCKED_REASON],
+                            admitted=admitted,
+                            mode=mode,
+                            reasons=[] if admitted else [DYNAMIC_OFFSET_BLOCKED_REASON],
                             source="test_log",
                             opcode=opcode,
                             topic_count=topic_count,
@@ -421,6 +438,11 @@ def _build_description(entry: AutoLogInventoryEntry) -> str:
             f"Mapped from execution-specs {opcode} fixed-offset log benchmark onto a receipt-log witness "
             f"with {topic_count} topic(s), {log_size} payload bytes, and {witness_mode} payload proof."
         )
+    if entry.mode == "test_log_dynamic_offset":
+        return (
+            f"Mapped from execution-specs {opcode} dynamic-offset log benchmark onto an offset-independent "
+            f"receipt-log witness with {topic_count} topic(s), {log_size} payload bytes, and {witness_mode} payload proof."
+        )
     return (
         f"Mapped from execution-specs {opcode} log benchmark mem/log-size matrix onto a receipt-log witness "
         f"with {topic_count} topic(s), log_size={log_size}, and {witness_mode} payload proof."
@@ -462,6 +484,22 @@ def _build_notes(entry: AutoLogInventoryEntry) -> list[str]:
                 "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
             )
         return notes
+    if entry.mode == "test_log_dynamic_offset":
+        notes = [
+            f"Upstream intent: benchmark {opcode} with offset=GAS % 7, {topic_note}, and log_size={log_size}.",
+            (
+                "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload."
+                if log_size == 0
+                else "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload."
+            ),
+            witness_note,
+            "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped.",
+        ]
+        if topic_count == 0:
+            notes.append(
+                "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
+            )
+        return notes
     return [
         f"Upstream intent: benchmark {opcode} over a fixed offset with mem_size={memory_seed_size}, log_size={log_size}, and {topic_note}.",
         (
@@ -488,7 +526,12 @@ def _build_log_runtime(template: LogMappingTemplate) -> str:
         for _ in range(template.topic_count):
             builder.push_int(topic_value)
     builder.push_int(template.log_size)
-    builder.push_int(0)
+    if template.mode == "test_log_dynamic_offset":
+        builder.op(0x5A)  # GAS
+        builder.push_int(7)
+        builder.op(0x06)  # MOD, producing GAS % 7
+    else:
+        builder.push_int(0)
     builder.op(0xA0 + template.topic_count)
     builder.op(0x00)
     return "0x" + builder.finish().hex()
@@ -526,13 +569,14 @@ def _build_fill_ff_prefix(size: int) -> bytes:
 
 def build_validated_log_probe_template(log_probe: dict[str, Any]) -> LogMappingTemplate:
     normalized = validate_log_probe_declaration(log_probe)
+    offset_mode = normalized.get("offset_mode", "fixed_zero")
     return LogMappingTemplate(
         case_id="observe.log_probe",
         description="Derived receipt-log expectation from runtime contract",
         namespace_seed="observe-log-probe",
         upstream_ref="observe.log_probe",
         notes=[],
-        mode="test_log_fixed_offset",
+        mode="test_log_dynamic_offset" if offset_mode == "dynamic_gas_mod_7" else "test_log_fixed_offset",
         opcode=str(normalized["opcode"]),
         topic_count=int(normalized["topic_count"]),
         topic_word=normalized["topic_word"],

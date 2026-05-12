@@ -7,11 +7,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=0_bytes_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG0",
       "topic_count": 0,
@@ -39,11 +37,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=0_bytes_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG0",
       "topic_count": 0,
@@ -135,11 +131,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG0",
       "topic_count": 0,
@@ -167,11 +161,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG0",
       "topic_count": 0,
@@ -199,11 +191,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=0_bytes_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG1",
       "topic_count": 1,
@@ -231,11 +221,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=0_bytes_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG1",
       "topic_count": 1,
@@ -327,11 +315,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG1",
       "topic_count": 1,
@@ -359,11 +345,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG1",
       "topic_count": 1,
@@ -391,11 +375,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=0_bytes_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log2.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG2",
       "topic_count": 2,
@@ -423,11 +405,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=0_bytes_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log2.size_0_bytes_data.topic_zeros_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG2",
       "topic_count": 2,
@@ -519,11 +499,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG2",
       "topic_count": 2,
@@ -551,11 +529,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG2",
       "topic_count": 2,
@@ -583,11 +559,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=0_bytes_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log3.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG3",
       "topic_count": 3,
@@ -615,11 +589,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=0_bytes_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log3.size_0_bytes_data.topic_zeros_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG3",
       "topic_count": 3,
@@ -711,11 +683,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG3",
       "topic_count": 3,
@@ -743,11 +713,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG3",
       "topic_count": 3,
@@ -775,11 +743,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=0_bytes_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log4.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG4",
       "topic_count": 4,
@@ -807,11 +773,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=0_bytes_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log4.size_0_bytes_data.topic_zeros_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG4",
       "topic_count": 4,
@@ -903,11 +867,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG4",
       "topic_count": 4,
@@ -935,11 +897,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_false",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic log offset observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "test_log_dynamic_offset",
+      "reasons": [],
       "source": "test_log",
       "opcode": "LOG4",
       "topic_count": 4,
