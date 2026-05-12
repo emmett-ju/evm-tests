@@ -729,14 +729,14 @@
     },
     {
       "case_id": "upstream.benchmark.system.test_selfdestruct_created.value_bearing_false",
-      "description": "Mapped from execution-specs SELFDESTRUCT-created benchmark onto a single wrapper that creates a child, calls it so SELFDESTRUCT executes in the same transaction, and stores final-state witness fields.",
+      "description": "Mapped from execution-specs SELFDESTRUCT created-child benchmark onto a single persistent wrapper that creates a child, calls it so SELFDESTRUCT executes in the same transaction and stores final-state witness fields.",
       "namespace_seed": "upstream-system-test-selfdestruct-created-value-bearing-false",
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_created[value_bearing=False]",
       "notes": [
         "Upstream intent: benchmark SELFDESTRUCT for a created child with zero value under cancun semantics.",
         "RPC mapping: a single wrapper creates a child whose runtime is CALLER; SELFDESTRUCT, calls it in the same transaction, then stores create success, child address, call success, and post-call child code size.",
         "The created-child scenario is admitted because same-transaction create plus SELFDESTRUCT has deterministic final-state evidence under Cancun without requiring traces or mutable prestate.",
-        "Existing-account and initcode SELFDESTRUCT variants remain blocked until their lifecycle and CREATE-result semantics are mapped separately.",
+        "Existing-account SELFDESTRUCT variants use a separate setup/execution wrapper; initcode SELFDESTRUCT variants remain blocked until their CREATE-result semantics are mapped separately.",
         "Admitted because final receipt status plus wrapper-exposed child address, call success, post-call code size, and optional beneficiary balance are deterministic final observables."
       ],
       "mode": "selfdestruct_single",
@@ -753,14 +753,14 @@
     },
     {
       "case_id": "upstream.benchmark.system.test_selfdestruct_created.value_bearing_true",
-      "description": "Mapped from execution-specs SELFDESTRUCT-created benchmark onto a single wrapper that creates a child, calls it so SELFDESTRUCT executes in the same transaction, and stores final-state witness fields.",
+      "description": "Mapped from execution-specs SELFDESTRUCT created-child benchmark onto a single persistent wrapper that creates a child, calls it so SELFDESTRUCT executes in the same transaction and stores final-state witness fields.",
       "namespace_seed": "upstream-system-test-selfdestruct-created-value-bearing-true",
       "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_created[value_bearing=True]",
       "notes": [
         "Upstream intent: benchmark SELFDESTRUCT for a created child with value 1 under cancun semantics.",
         "RPC mapping: a single wrapper creates a child whose runtime is CALLER; SELFDESTRUCT, calls it in the same transaction, then stores create success, child address, call success, and post-call child code size.",
         "The created-child scenario is admitted because same-transaction create plus SELFDESTRUCT has deterministic final-state evidence under Cancun without requiring traces or mutable prestate.",
-        "Existing-account and initcode SELFDESTRUCT variants remain blocked until their lifecycle and CREATE-result semantics are mapped separately.",
+        "Existing-account SELFDESTRUCT variants use a separate setup/execution wrapper; initcode SELFDESTRUCT variants remain blocked until their CREATE-result semantics are mapped separately.",
         "Admitted because final receipt status plus wrapper-exposed child address, call success, post-call code size, and optional beneficiary balance are deterministic final observables."
       ],
       "mode": "selfdestruct_single",
@@ -773,6 +773,56 @@
       "create_salt": null,
       "proxy_call_gas": null,
       "selfdestruct_scenario": "created",
+      "hardfork_semantics": "cancun"
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_false",
+      "description": "Mapped from execution-specs SELFDESTRUCT existing-account benchmark onto a single persistent wrapper that first creates and stores a persistent child in setup mode, then calls the stored child in execution mode and stores final-state witness fields.",
+      "namespace_seed": "upstream-system-test-selfdestruct-existing-value-bearing-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_existing[value_bearing=False]",
+      "notes": [
+        "Upstream intent: benchmark SELFDESTRUCT for an existing child with zero value under cancun semantics.",
+        "RPC mapping: a single persistent wrapper uses two ordinary invocations: setup mode CREATE2s and stores a child whose runtime is CALLER; SELFDESTRUCT, then execution mode CALLs the stored child.",
+        "Setup mode stores setup_create_success, child address, and EXTCODESIZE(child) before execution; execution mode stores call success, post-call EXTCODESIZE(child), and optional beneficiary balance.",
+        "The existing-account scenario is admitted because post-Cancun SELFDESTRUCT preserves pre-existing code, making setup/execution lifecycle evidence deterministic without traces or mutable prestate.",
+        "Initcode SELFDESTRUCT variants remain blocked until their CREATE-result semantics are mapped separately.",
+        "Admitted because final receipt status plus wrapper-exposed setup create success, child address, pre/post child code sizes, call success, and optional beneficiary balance are deterministic final observables."
+      ],
+      "mode": "selfdestruct_single",
+      "opcode": "SELFDESTRUCT",
+      "return_size": null,
+      "return_non_zero_data": null,
+      "create_value": 0,
+      "create_initcode_size": null,
+      "create_data_kind": null,
+      "create_salt": null,
+      "proxy_call_gas": null,
+      "selfdestruct_scenario": "existing",
+      "hardfork_semantics": "cancun"
+    },
+    {
+      "case_id": "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_true",
+      "description": "Mapped from execution-specs SELFDESTRUCT existing-account benchmark onto a single persistent wrapper that first creates and stores a persistent child in setup mode, then calls the stored child in execution mode and stores final-state witness fields.",
+      "namespace_seed": "upstream-system-test-selfdestruct-existing-value-bearing-true",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_system.py::test_selfdestruct_existing[value_bearing=True]",
+      "notes": [
+        "Upstream intent: benchmark SELFDESTRUCT for an existing child with value 1 under cancun semantics.",
+        "RPC mapping: a single persistent wrapper uses two ordinary invocations: setup mode CREATE2s and stores a child whose runtime is CALLER; SELFDESTRUCT, then execution mode CALLs the stored child.",
+        "Setup mode stores setup_create_success, child address, and EXTCODESIZE(child) before execution; execution mode stores call success, post-call EXTCODESIZE(child), and optional beneficiary balance.",
+        "The existing-account scenario is admitted because post-Cancun SELFDESTRUCT preserves pre-existing code, making setup/execution lifecycle evidence deterministic without traces or mutable prestate.",
+        "Initcode SELFDESTRUCT variants remain blocked until their CREATE-result semantics are mapped separately.",
+        "Admitted because final receipt status plus wrapper-exposed setup create success, child address, pre/post child code sizes, call success, and optional beneficiary balance are deterministic final observables."
+      ],
+      "mode": "selfdestruct_single",
+      "opcode": "SELFDESTRUCT",
+      "return_size": null,
+      "return_non_zero_data": null,
+      "create_value": 1,
+      "create_initcode_size": null,
+      "create_data_kind": null,
+      "create_salt": null,
+      "proxy_call_gas": null,
+      "selfdestruct_scenario": "existing",
       "hardfork_semantics": "cancun"
     }
   ]

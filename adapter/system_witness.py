@@ -230,11 +230,11 @@ def build_selfdestruct_single_system_witness(
         "scenario": scenario,
         "child_address_nonzero": True,
         "selfdestruct_call_success": True,
-        "child_code_size_after": 0 if scenario == "created" else 1,
+        "child_code_size_after": 0 if scenario == "created" else 2,
     }
     if scenario == "existing":
         expected_witness["setup_create_success"] = True
-        expected_witness["child_code_size_before"] = 1
+        expected_witness["child_code_size_before"] = 2
     else:
         expected_witness["create_success"] = True
     if value > 0:

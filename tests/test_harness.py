@@ -3196,11 +3196,15 @@ class HarnessTests(unittest.TestCase):
                 expected_witness = {
                     "shape": "selfdestruct_single",
                     "scenario": scenario,
-                    "create_success": True,
                     "child_address_nonzero": True,
                     "selfdestruct_call_success": True,
-                    "child_code_size_after": 0 if scenario == "created" else 1,
+                    "child_code_size_after": 0 if scenario == "created" else 2,
                 }
+                if scenario == "existing":
+                    expected_witness["setup_create_success"] = True
+                    expected_witness["child_code_size_before"] = 2
+                else:
+                    expected_witness["create_success"] = True
                 if value > 0:
                     expected_witness["beneficiary_balance_after"] = 1
                 self.assertEqual(
@@ -3218,6 +3222,13 @@ class HarnessTests(unittest.TestCase):
                     observed_by_case[case_id]["expected"],
                     {"receipt_status": "0x1", "system_witness": expected_witness},
                 )
+                if scenario == "existing":
+                    self.assertEqual(
+                        [step["action"] for step in observed_by_case[case_id]["steps"]],
+                        ["deploy_contract", "wait_receipt", "invoke_contract", "wait_receipt", "invoke_contract", "wait_receipt"],
+                    )
+                    self.assertEqual(observed_by_case[case_id]["steps"][2]["data"], "0x" + "00" * 32)
+                    self.assertEqual(observed_by_case[case_id]["steps"][4]["data"], "0x" + "00" * 31 + "01")
 
             self.assertEqual(
                 observed_by_case[
@@ -4059,7 +4070,7 @@ class HarnessTests(unittest.TestCase):
                 manifest_payload=generated,
             )
             self.assertEqual(generated["name"], "upstream-system-mapped")
-            self.assertEqual(len(generated["cases"]), 33)
+            self.assertEqual(len(generated["cases"]), 35)
             self.assertEqual(generated["cases"][0]["family"], "state/system")
 
     def test_cli_generate_keccak_manifest_writes_expected_output(self) -> None:
@@ -4862,7 +4873,7 @@ class HarnessTests(unittest.TestCase):
         scenarios = [
             ("upstream_block_context_mapped.json", "upstream-block-context-mapped", 8),
             ("upstream_log_mapped.json", "upstream-log-mapped", 110),
-            ("upstream_system_mapped.json", "upstream-system-mapped", 33),
+            ("upstream_system_mapped.json", "upstream-system-mapped", 35),
         ]
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
@@ -5451,9 +5462,9 @@ class HarnessTests(unittest.TestCase):
                 storage={
                     "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
                     "0x01": "0x000000000000000000000000dddddddddddddddddddddddddddddddddddddddd",
-                    "0x02": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "0x02": "0x0000000000000000000000000000000000000000000000000000000000000002",
                     "0x03": "0x0000000000000000000000000000000000000000000000000000000000000001",
-                    "0x04": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "0x04": "0x0000000000000000000000000000000000000000000000000000000000000002",
                     "0x05": "0x0000000000000000000000000000000000000000000000000000000000000001",
                 },
             ),
@@ -5463,9 +5474,9 @@ class HarnessTests(unittest.TestCase):
                 "setup_create_success": True,
                 "child_address_nonzero": True,
                 "child_address": "0xdddddddddddddddddddddddddddddddddddddddd",
-                "child_code_size_before": 1,
+                "child_code_size_before": 2,
                 "selfdestruct_call_success": True,
-                "child_code_size_after": 1,
+                "child_code_size_after": 2,
                 "beneficiary_balance_after": 1,
             },
         )

@@ -49,10 +49,17 @@ from adapter.system_witness import (
     collect_system_witness_from_storage,
     system_witness_storage_slots,
 )
-from adapter.system_generator import _build_create_child_code_runtime, _build_create_collision_runtime, _build_create_empty_child_runtime, _build_selfdestruct_created_runtime
+from adapter.system_generator import (
+    _build_create_child_code_runtime,
+    _build_create_collision_runtime,
+    _build_create_empty_child_runtime,
+    _build_selfdestruct_created_runtime,
+    _build_selfdestruct_existing_runtime,
+)
 
 ZERO_STORAGE_WORD = "0x0000000000000000000000000000000000000000000000000000000000000000"
 WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
+WORD_02 = "0x0000000000000000000000000000000000000000000000000000000000000002"
 WORD_05 = "0x0000000000000000000000000000000000000000000000000000000000000005"
 WORD_20 = "0x0000000000000000000000000000000000000000000000000000000000000020"
 WORD_2A = "0x000000000000000000000000000000000000000000000000000000000000002a"
@@ -652,18 +659,32 @@ class MockBackend:
         witness_config: dict[str, Any],
         code: str | None,
     ) -> None:
-        if witness_config.get("scenario") != "created":
-            raise ValueError(f"unsupported selfdestruct_single scenario: {witness_config.get('scenario')!r}")
+        scenario = witness_config.get("scenario")
         value = int(witness_config.get("value", 0))
-        expected_runtime = _build_selfdestruct_created_runtime(value=value)
-        if code != expected_runtime:
-            raise ValueError(f"unsupported mock contract code path: {code}")
-        storage["0x00"] = WORD_01
-        storage["0x01"] = self._address_to_word("0xdddddddddddddddddddddddddddddddddddddddd")
-        storage["0x02"] = WORD_01
-        storage["0x03"] = ZERO_STORAGE_WORD
-        if value > 0:
-            storage["0x04"] = self._hex_to_word(hex(value))
+        if scenario == "created":
+            expected_runtime = _build_selfdestruct_created_runtime(value=value)
+            if code != expected_runtime:
+                raise ValueError(f"unsupported mock contract code path: {code}")
+            storage["0x00"] = WORD_01
+            storage["0x01"] = self._address_to_word("0xdddddddddddddddddddddddddddddddddddddddd")
+            storage["0x02"] = WORD_01
+            storage["0x03"] = ZERO_STORAGE_WORD
+            if value > 0:
+                storage["0x04"] = self._hex_to_word(hex(value))
+            return
+        if scenario == "existing":
+            expected_runtime = _build_selfdestruct_existing_runtime(value=value)
+            if code != expected_runtime:
+                raise ValueError(f"unsupported mock contract code path: {code}")
+            storage["0x00"] = WORD_01
+            storage["0x01"] = self._address_to_word("0xdddddddddddddddddddddddddddddddddddddddd")
+            storage["0x02"] = WORD_02
+            storage["0x03"] = WORD_01
+            storage["0x04"] = WORD_02
+            if value > 0:
+                storage["0x05"] = self._hex_to_word(hex(value))
+            return
+        raise ValueError(f"unsupported selfdestruct_single scenario: {scenario!r}")
 
 
     def _is_system_self_call_runtime(self, code: str | None) -> bool:
