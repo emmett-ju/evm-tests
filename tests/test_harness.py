@@ -5255,8 +5255,15 @@ class HarnessTests(unittest.TestCase):
         self.assertIn(f"| Admitted cases | {totals['admitted']} |", doc)
         self.assertIn(f"| Blocked cases | {totals['blocked']} |", doc)
         self.assertIn("| bitwise | 12 | Completed by the CLZ-diff witness", doc)
+        self.assertIn("## Fork capability coverage contract", doc)
+        self.assertIn("Juchain's execution layer is expected to support Prague/Osaka capabilities", doc)
+        self.assertIn("Covered now when `feature_flags.clz=true`", doc)
+        self.assertIn("Planned first: BLS12-381 and P256VERIFY", doc)
+        self.assertIn("Deferred: MODEXP gas boundary, EIP-7702, blob/cell, and block access lists", doc)
         self.assertIn("the 76 blocked cases should remain blocked", doc)
-        self.assertIn("docs/benchmark-coverage-status.md", (ROOT / "README.md").read_text())
+        readme = (ROOT / "README.md").read_text()
+        self.assertIn("docs/benchmark-coverage-status.md", readme)
+        self.assertIn("Prague/Osaka fork capability coverage contract", readme)
 
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -14,7 +14,7 @@ Use this README to:
 - add or extend a benchmark family without losing parity with upstream;
 - understand the migration roadmap and why unsupported cases remain blocked.
 
-For current benchmark coverage totals and deferred-family rationale, see [`docs/benchmark-coverage-status.md`](docs/benchmark-coverage-status.md). That document is the stable coverage ledger; this README intentionally keeps detailed counts out of the main flow so they do not drift.
+For current benchmark coverage totals, deferred-family rationale, and the Prague/Osaka fork capability coverage contract, see [`docs/benchmark-coverage-status.md`](docs/benchmark-coverage-status.md). That document is the stable coverage ledger; this README intentionally keeps detailed counts out of the main flow so they do not drift.
 
 ## Repository layout
 
