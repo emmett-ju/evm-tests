@@ -150,6 +150,14 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(profile.backend, "jsonrpc")
         self.assertEqual(describe_admin_key_source(profile), "env_private_key")
 
+    def test_juchain_profile_enables_clz_without_changing_hardfork(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        self.assertEqual(profile.hardfork, "cancun")
+        self.assertTrue(profile.supports_feature("clz"))
+        self.assertFalse(profile.supports_feature("bls12_381_precompiles"))
+        self.assertFalse(profile.supports_feature("p256verify_precompile"))
+        self.assertFalse(profile.supports_feature("modexp_eip7883"))
+
     def test_selector_filters_block_control_case(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/mock.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_smoke.json")
@@ -889,13 +897,35 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual({case.family for case in selected}, {"state/bitwise"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
+    def test_selector_selects_juchain_bitwise_clz_cases_when_feature_flag_enabled(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_bitwise_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        selected_ids = [case.case_id for case in selected]
+        self.assertEqual(len(selected), 12)
+        self.assertEqual(len(selected_ids), len(set(selected_ids)))
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual({case.family for case in selected}, {"state/bitwise"})
+        self.assertIn("upstream.benchmark.bitwise.test_clz_diff.clz", selected_ids)
+        self.assertIn("upstream.benchmark.bitwise.test_clz_same.clz", selected_ids)
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
     def test_selector_rejects_clz_bitwise_cases_when_profile_lacks_feature_flag(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/mock.toml")
         profile.feature_flags["clz"] = False
         manifest = load_manifest(ROOT / "suites/manifests/upstream_bitwise_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
         selected_ids = [case.case_id for case in selected]
+        all_ids = {case.case_id for case in manifest.cases}
+        blocked_ids = {decision.case.case_id for decision in decisions if not decision.selected}
+        expected_clz_ids = {
+            "upstream.benchmark.bitwise.test_clz_diff.clz",
+            "upstream.benchmark.bitwise.test_clz_same.clz",
+        }
         self.assertEqual(len(selected), 10)
+        self.assertEqual(len(selected_ids), len(set(selected_ids)))
+        self.assertEqual(all_ids - set(selected_ids), expected_clz_ids)
+        self.assertEqual(blocked_ids, expected_clz_ids)
         self.assertIn("upstream.benchmark.bitwise.test_bitwise.and", selected_ids)
         self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", selected_ids)
         self.assertIn("upstream.benchmark.bitwise.test_shifts.sar", selected_ids)
@@ -5257,13 +5287,28 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("| bitwise | 12 | Completed by the CLZ-diff witness", doc)
         self.assertIn("## Fork capability coverage contract", doc)
         self.assertIn("Juchain's execution layer is expected to support Prague/Osaka capabilities", doc)
-        self.assertIn("Covered now when `feature_flags.clz=true`", doc)
+        self.assertIn("Proven on Juchain when `feature_flags.clz=true`", doc)
+        self.assertIn("RPC-observable final-storage proof", doc)
+        self.assertIn("upstream.benchmark.bitwise.test_clz_same.clz", doc)
+        self.assertIn("upstream.benchmark.bitwise.test_clz_diff.clz", doc)
+        self.assertIn("does not claim broader Osaka CLZ scenario coverage", doc)
         self.assertIn("Planned first: BLS12-381 and P256VERIFY", doc)
         self.assertIn("Deferred: MODEXP gas boundary, EIP-7702, blob/cell, and block access lists", doc)
         self.assertIn("the 76 blocked cases should remain blocked", doc)
         readme = (ROOT / "README.md").read_text()
         self.assertIn("docs/benchmark-coverage-status.md", readme)
         self.assertIn("Prague/Osaka fork capability coverage contract", readme)
+
+    def test_benchmark_coverage_status_documents_proven_clz(self) -> None:
+        doc = (ROOT / "docs/benchmark-coverage-status.md").read_text()
+        self.assertIn("Proven on Juchain when `feature_flags.clz=true`", doc)
+        self.assertIn("RPC-observable final-storage proof", doc)
+        self.assertIn("Profiles without that proof skip CLZ with an explicit capability diagnostic", doc)
+        self.assertIn("upstream.benchmark.bitwise.test_clz_same.clz", doc)
+        self.assertIn("upstream.benchmark.bitwise.test_clz_diff.clz", doc)
+        self.assertIn("does not claim broader Osaka CLZ scenario coverage", doc)
+        self.assertIn("BLS12-381 and P256VERIFY", doc)
+        self.assertIn("MODEXP gas boundary", doc)
 
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

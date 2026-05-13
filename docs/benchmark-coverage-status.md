@@ -29,7 +29,7 @@ Current fork capability status:
 | Fork surface | Current status | Coverage contract |
 |---|---|---|
 | Cancun baseline | Covered where cases are already admitted in the first-family inventory. | Existing RPC-observable storage, balance, code, receipt, log, and runtime-context witnesses remain the source of truth for Cancun-era behavior. |
-| Osaka CLZ | Covered now when `feature_flags.clz=true`. | The `bitwise` CLZ cases are selected only for profiles that opt in to `clz`; profiles without that proof skip CLZ with an explicit capability diagnostic. |
+| Osaka CLZ | Proven on Juchain when `feature_flags.clz=true`. | The two mapped `bitwise` CLZ cases (`upstream.benchmark.bitwise.test_clz_same.clz` and `upstream.benchmark.bitwise.test_clz_diff.clz`) are selected only for profiles that opt in to `clz` after an RPC-observable final-storage proof. Profiles without that proof skip CLZ with an explicit capability diagnostic, and this does not claim broader Osaka CLZ scenario coverage beyond those two benchmark-shape witnesses. |
 | Prague/Osaka precompiles | Planned first: BLS12-381 and P256VERIFY. | Future precompile probes must be represented by individual feature flags such as `bls12_381_precompiles` and `p256verify_precompile`, then proven by minimal final-observable calls before being counted as covered. |
 | Prague/Osaka transaction and block features | Deferred: MODEXP gas boundary, EIP-7702, blob/cell, and block access lists. | These remain out of coverage until the harness has truthful proof surfaces for their required gas-boundary, authorization, blob/cell, or block-access-list behavior. |
 
