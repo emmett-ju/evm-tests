@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import socket
+import ssl
 import time
 import urllib.error
 import urllib.request
@@ -74,6 +75,14 @@ SYSTEM_SELF_CALL_WRAPPER_SUFFIX = bytes.fromhex("5b5f5f60015f5f305af15f553d80600
 SYSTEM_ADMITTED_MAX_RETURNDATA_BYTES = 1024 * 1024
 SYSTEM_RUNTIME_HEADER = bytes.fromhex("365f14")
 SYSTEM_FILL_FF_WORD = bytes.fromhex("7f" + "ff" * 32)
+TX_BASE_INTRINSIC_GAS = 21_000
+TX_CREATE_INTRINSIC_GAS = 32_000
+TX_ZERO_DATA_INTRINSIC_GAS = 4
+TX_NONZERO_DATA_INTRINSIC_GAS = 16
+TX_INITCODE_WORD_INTRINSIC_GAS = 2
+TX_ZERO_DATA_FLOOR_TOKEN = 1
+TX_NONZERO_DATA_FLOOR_TOKEN = 4
+TX_DATA_FLOOR_GAS_PER_TOKEN = 10
 
 
 class SystemExecutionError(ValueError):
@@ -107,6 +116,12 @@ def _safe_rpc_endpoint_label(rpc_url: str) -> str:
     return "<redacted-rpc-endpoint>"
 
 
+def _after_placeholder(before_placeholder: str) -> str:
+    if before_placeholder.endswith("_before"):
+        return before_placeholder.removesuffix("_before") + "_after"
+    return before_placeholder + "_after"
+
+
 @dataclass(slots=True)
 class MockBackend:
     admin_account: str = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -128,6 +143,10 @@ class MockBackend:
         admin_state = self._address_state(contracts, self.admin_account)
         admin_state.setdefault("balance", ZERO_STORAGE_WORD)
         block_context: dict[str, str] | None = None
+        context: dict[str, Any] = {
+            "$admin_account": self.admin_account,
+            "$chain_id": hex(self.chain_id),
+        }
         for idx, step in enumerate(case.steps):
             action = step["action"]
             if action == "set_storage":
@@ -148,7 +167,16 @@ class MockBackend:
                 tx_hash = f"0xmock{idx:02x}{len(case.namespace_seed):04x}"
                 tx_hashes.append(tx_hash)
                 recipient_state = self._address_state(contracts, step["to"])
-                recipient_state["balance"] = self._hex_to_word(step["value"])
+                previous_balance = recipient_state.get("balance", "0x0")
+                capture_balance_before = step.get("capture_balance_before")
+                if capture_balance_before is not None:
+                    context[capture_balance_before] = previous_balance
+                    context[_after_placeholder(capture_balance_before)] = hex(
+                        self._hex_to_quantity(previous_balance) + self._hex_to_quantity(step["value"])
+                    )
+                recipient_state["balance"] = self._hex_to_word(
+                    hex(self._hex_to_quantity(previous_balance) + self._hex_to_quantity(step["value"]))
+                )
                 last_receipt = {"transactionHash": tx_hash, "status": "0x1"}
             elif action == "deploy_contract":
                 tx_hash = f"0xmock{idx:02x}{len(case.case_id):04x}"
@@ -394,10 +422,6 @@ class MockBackend:
             else:
                 raise ValueError(f"unsupported mock action: {action}")
         observed = self._observe(case, contracts, last_receipt, last_contract_address)
-        context = {
-            "$admin_account": self.admin_account,
-            "$chain_id": hex(self.chain_id),
-        }
         if last_contract_address is not None:
             context["$last_contract"] = last_contract_address
         if last_receipt is not None and last_receipt.get("effectiveGasPrice") is not None:
@@ -780,8 +804,13 @@ class MockBackend:
             raise ValueError(f"unsupported mock contract code path: {code}")
 
         inner = raw[: len(raw) - len(SYSTEM_SELF_CALL_WRAPPER_SUFFIX)]
-        jump_opcode_index = len(SYSTEM_RUNTIME_HEADER) + 2
-        if inner[jump_opcode_index] != 0x57:
+        label_push_index = len(SYSTEM_RUNTIME_HEADER)
+        label_push_opcode = inner[label_push_index]
+        if label_push_opcode not in {0x60, 0x61}:
+            raise SystemExecutionError("malformed system wrapper shape: missing canonical wrapper JUMPI")
+        label_push_size = label_push_opcode - 0x5F
+        jump_opcode_index = label_push_index + 1 + label_push_size
+        if jump_opcode_index >= len(inner) or inner[jump_opcode_index] != 0x57:
             raise SystemExecutionError("malformed system wrapper shape: missing canonical wrapper JUMPI")
         child_start = jump_opcode_index + 1
         child = inner[child_start:]
@@ -911,46 +940,61 @@ class JsonRpcBackend:
         last_receipt: dict[str, Any] | None = None
         last_contract_address: str | None = None
         block_context: dict[str, str] | None = None
+        expected_receipt_by_tx_hash: dict[str, str] = {}
+        context: dict[str, Any] = {
+            "$admin_account": self.profile.admin_account,
+        }
         for step in case.steps:
             action = step["action"]
             if action == "rpc_call":
                 self._rpc(step["method"], step.get("params", []))
             elif action == "eth_sendRawTransaction":
-                tx_hashes.append(self._rpc("eth_sendRawTransaction", [step["raw_transaction"]]))
+                tx_hash = self._rpc("eth_sendRawTransaction", [step["raw_transaction"]])
+                tx_hashes.append(tx_hash)
+                expected_receipt_by_tx_hash[tx_hash] = "0x1"
             elif action == "eth_sendTransaction":
-                tx_hashes.append(self._send_transaction(step["transaction"]))
+                tx_hash = self._send_transaction(step["transaction"])
+                tx_hashes.append(tx_hash)
+                expected_receipt_by_tx_hash[tx_hash] = step["transaction"].get("expected_receipt_status", "0x1")
             elif action == "transfer_native":
-                tx_hashes.append(
-                    self._send_transaction(
-                        {
-                            "to": step["to"],
-                            "value": step["value"],
-                            "data": step.get("data", "0x"),
-                            "gas": step.get("gas"),
-                        }
+                capture_balance_before = step.get("capture_balance_before")
+                if capture_balance_before is not None:
+                    previous_balance = self._rpc("eth_getBalance", [step["to"], "latest"])
+                    context[capture_balance_before] = previous_balance
+                    context[_after_placeholder(capture_balance_before)] = hex(
+                        self._hex_to_int(previous_balance) + self._hex_to_int(step["value"])
                     )
+                tx_hash = self._send_transaction(
+                    {
+                        "to": step["to"],
+                        "value": step["value"],
+                        "data": step.get("data", "0x"),
+                        "gas": step.get("gas"),
+                    }
                 )
+                tx_hashes.append(tx_hash)
+                expected_receipt_by_tx_hash[tx_hash] = step.get("expected_receipt_status", "0x1")
             elif action == "deploy_contract":
-                tx_hashes.append(
-                    self._send_transaction(
-                        {
-                            "data": step["bytecode_init"],
-                            "gas": step.get("gas"),
-                            "value": step.get("value", "0x0"),
-                        }
-                    )
+                tx_hash = self._send_transaction(
+                    {
+                        "data": step["bytecode_init"],
+                        "gas": step.get("gas"),
+                        "value": step.get("value", "0x0"),
+                    }
                 )
+                tx_hashes.append(tx_hash)
+                expected_receipt_by_tx_hash[tx_hash] = step.get("expected_receipt_status", "0x1")
             elif action == "invoke_contract":
-                tx_hashes.append(
-                    self._send_transaction(
-                        {
-                            "to": self._resolve_address(step["to"], last_contract_address),
-                            "data": step["data"],
-                            "gas": step.get("gas"),
-                            "value": step.get("value", "0x0"),
-                        }
-                    )
+                tx_hash = self._send_transaction(
+                    {
+                        "to": self._resolve_address(step["to"], last_contract_address),
+                        "data": step["data"],
+                        "gas": step.get("gas"),
+                        "value": step.get("value", "0x0"),
+                    }
                 )
+                tx_hashes.append(tx_hash)
+                expected_receipt_by_tx_hash[tx_hash] = step.get("expected_receipt_status", "0x1")
             elif action == "wait_receipt":
                 tx_hash = step["tx_hash"]
                 if tx_hash == "$last":
@@ -961,6 +1005,13 @@ class JsonRpcBackend:
                     tx_hash,
                     timeout_seconds=step.get("timeout_seconds", 60),
                 )
+                expected_receipt_status = expected_receipt_by_tx_hash.get(tx_hash, "0x1")
+                actual_receipt_status = last_receipt.get("status")
+                if actual_receipt_status != expected_receipt_status:
+                    raise RuntimeError(
+                        "transaction receipt status mismatch before observation: "
+                        f"{tx_hash} expected {expected_receipt_status}, got {actual_receipt_status}"
+                    )
                 if case.observe.get("block_context_probe") is not None:
                     block_context = self._load_block_context(last_receipt)
                 if last_receipt.get("contractAddress"):
@@ -968,9 +1019,6 @@ class JsonRpcBackend:
             else:
                 raise ValueError(f"unsupported jsonrpc action: {action}")
         observed = self._observe(case, last_receipt, last_contract_address)
-        context = {
-            "$admin_account": self.profile.admin_account,
-        }
         if last_contract_address is not None:
             context["$last_contract"] = last_contract_address
         if last_receipt is not None and last_receipt.get("effectiveGasPrice") is not None:
@@ -1004,13 +1052,14 @@ class JsonRpcBackend:
             if storage_address == "$last_contract":
                 storage_address = last_contract_address
             storage_block_tag = "latest"
-            if observe_config.get("block_context_probe") is not None and last_receipt is not None:
-                storage_block_tag = last_receipt.get("blockNumber") or self.profile.block_context.rpc_block_tag
+            if last_receipt is not None:
+                storage_block_tag = last_receipt.get("blockNumber") or storage_block_tag
             observed["storage"] = {}
             for slot in expected_shape["storage"]:
-                observed["storage"][slot] = self._rpc(
-                    "eth_getStorageAt",
-                    [storage_address, slot, storage_block_tag],
+                observed["storage"][slot] = self._get_storage_at(
+                    storage_address,
+                    slot,
+                    storage_block_tag,
                 )
         if "system_witness" in expected_shape:
             witness_config = observe_config.get("system_witness")
@@ -1025,7 +1074,7 @@ class JsonRpcBackend:
             if last_receipt is not None:
                 storage_block_tag = last_receipt.get("blockNumber") or self.profile.block_context.rpc_block_tag
             transport = {
-                slot: self._rpc("eth_getStorageAt", [subject, slot, storage_block_tag])
+                slot: self._get_storage_at(subject, slot, storage_block_tag)
                 for slot in system_witness_storage_slots(witness_config)
             }
             observed["system_witness"] = collect_system_witness_from_storage(
@@ -1043,6 +1092,22 @@ class JsonRpcBackend:
                 [] if last_receipt is None else last_receipt.get("logs")
             )
         return observed
+
+    def _get_storage_at(self, address: str, slot: str, block_tag: str) -> str:
+        attempts = 5
+        last_error: RuntimeError | None = None
+        for attempt in range(attempts):
+            try:
+                return self._rpc("eth_getStorageAt", [address, slot, block_tag])
+            except RuntimeError as exc:
+                if "header not found" not in str(exc):
+                    raise
+                last_error = exc
+                if attempt + 1 == attempts:
+                    break
+                time.sleep(1)
+        assert last_error is not None
+        raise last_error
 
     def _resolve_address(self, value: str, last_contract_address: str | None) -> str:
         if value == "$last_contract":
@@ -1114,7 +1179,12 @@ class JsonRpcBackend:
         prepared = dict(transaction)
         prepared.setdefault("from", self.profile.admin_account)
         prepared.setdefault("chainId", hex(self.profile.chain_id))
-        prepared.setdefault("gas", hex(self.profile.gas_policy.gas_limit))
+        if not prepared.get("gas"):
+            prepared["gas"] = hex(self.profile.gas_policy.gas_limit)
+        prepared.setdefault("value", "0x0")
+        if not prepared.get("data"):
+            prepared["data"] = "0x"
+        prepared["gas"] = self._gas_with_intrinsic_floor(prepared)
         if self.profile.gas_policy.max_fee_per_gas is not None:
             prepared.setdefault("maxFeePerGas", hex(self.profile.gas_policy.max_fee_per_gas))
         if self.profile.gas_policy.max_priority_fee_per_gas is not None:
@@ -1122,11 +1192,55 @@ class JsonRpcBackend:
                 "maxPriorityFeePerGas",
                 hex(self.profile.gas_policy.max_priority_fee_per_gas),
             )
-        prepared.setdefault("value", "0x0")
-        prepared.setdefault("data", "0x")
         if "nonce" not in prepared:
             prepared["nonce"] = self._rpc("eth_getTransactionCount", [prepared["from"], "pending"])
         return prepared
+
+    def _gas_with_intrinsic_floor(self, transaction: dict[str, Any]) -> str:
+        declared_gas = self._hex_to_int(transaction.get("gas", "0x0"))
+        intrinsic_gas = self._transaction_intrinsic_gas(transaction)
+        floor_data_gas = self._transaction_floor_data_gas(transaction)
+        return hex(max(declared_gas, intrinsic_gas, floor_data_gas))
+
+    def _transaction_intrinsic_gas(self, transaction: dict[str, Any]) -> int:
+        data = self._hex_to_bytes(transaction.get("data", "0x"))
+        zero_bytes = data.count(0)
+        nonzero_bytes = len(data) - zero_bytes
+        intrinsic_gas = (
+            TX_BASE_INTRINSIC_GAS
+            + zero_bytes * TX_ZERO_DATA_INTRINSIC_GAS
+            + nonzero_bytes * TX_NONZERO_DATA_INTRINSIC_GAS
+        )
+        if not transaction.get("to"):
+            intrinsic_gas += TX_CREATE_INTRINSIC_GAS
+            intrinsic_gas += ((len(data) + 31) // 32) * TX_INITCODE_WORD_INTRINSIC_GAS
+        return intrinsic_gas
+
+    def _transaction_floor_data_gas(self, transaction: dict[str, Any]) -> int:
+        data = self._hex_to_bytes(transaction.get("data", "0x"))
+        zero_bytes = data.count(0)
+        nonzero_bytes = len(data) - zero_bytes
+        floor_data_tokens = (
+            zero_bytes * TX_ZERO_DATA_FLOOR_TOKEN
+            + nonzero_bytes * TX_NONZERO_DATA_FLOOR_TOKEN
+        )
+        floor_data_gas = TX_BASE_INTRINSIC_GAS + floor_data_tokens * TX_DATA_FLOOR_GAS_PER_TOKEN
+        if not transaction.get("to"):
+            floor_data_gas += TX_CREATE_INTRINSIC_GAS
+        return floor_data_gas
+
+    def _hex_to_bytes(self, value: str) -> bytes:
+        if value in ("0x", ""):
+            return b""
+        cleaned = value[2:] if value.startswith("0x") else value
+        if len(cleaned) % 2:
+            cleaned = "0" + cleaned
+        return bytes.fromhex(cleaned)
+
+    def _hex_to_int(self, value: str) -> int:
+        if value in ("0x", ""):
+            return 0
+        return int(value, 16)
 
     def _wait_for_receipt(self, tx_hash: str, timeout_seconds: int = 60) -> dict[str, Any]:
         deadline = time.time() + timeout_seconds
@@ -1142,52 +1256,67 @@ class JsonRpcBackend:
         )
 
     def _rpc(self, method: str, params: list[Any]) -> Any:
-        self.request_id += 1
-        payload = json.dumps(
-            {"jsonrpc": "2.0", "id": self.request_id, "method": method, "params": params}
-        ).encode()
-        request = urllib.request.Request(
-            self.profile.rpc_url,
-            data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-                "User-Agent": "evm-rpc-tests/0.1",
-            },
-        )
         endpoint_label = _safe_rpc_endpoint_label(self.profile.rpc_url)
-        try:
-            with urllib.request.urlopen(request, timeout=self.rpc_timeout_seconds) as response:
-                body = json.loads(response.read().decode())
-        except TimeoutError as exc:
-            raise TimeoutError(
-                f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
-            ) from exc
-        except socket.timeout as exc:
-            raise TimeoutError(
-                f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
-            ) from exc
-        except urllib.error.URLError as exc:
-            if isinstance(exc.reason, TimeoutError):
+        attempts = 3
+        for attempt in range(attempts):
+            self.request_id += 1
+            payload = json.dumps(
+                {"jsonrpc": "2.0", "id": self.request_id, "method": method, "params": params}
+            ).encode()
+            request = urllib.request.Request(
+                self.profile.rpc_url,
+                data=payload,
+                headers={
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "User-Agent": "evm-rpc-tests/0.1",
+                },
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=self.rpc_timeout_seconds) as response:
+                    body = json.loads(response.read().decode())
+            except TimeoutError as exc:
+                if method != "eth_sendRawTransaction" and attempt + 1 < attempts:
+                    time.sleep(1)
+                    continue
                 raise TimeoutError(
                     f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
                 ) from exc
-            if isinstance(exc.reason, socket.timeout):
+            except socket.timeout as exc:
+                if method != "eth_sendRawTransaction" and attempt + 1 < attempts:
+                    time.sleep(1)
+                    continue
                 raise TimeoutError(
                     f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
                 ) from exc
-            raise RuntimeError(
-                f"rpc transport error for {method} against {endpoint_label}: {exc.reason}"
-            ) from exc
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(f"rpc decode error for {method}: {exc}") from exc
-        if not isinstance(body, dict):
-            raise RuntimeError(f"rpc response for {method} must be a JSON object")
-        if "error" in body:
-            raise RuntimeError(f"rpc error for {method}: {self._format_rpc_error(body['error'])}")
-        if "result" not in body:
-            raise RuntimeError(f"rpc response for {method} missing result field")
-        return body["result"]
+            except urllib.error.URLError as exc:
+                if isinstance(
+                    exc.reason,
+                    (socket.gaierror, TimeoutError, socket.timeout, ssl.SSLError, ConnectionError),
+                ) and attempt + 1 < attempts:
+                    time.sleep(1)
+                    continue
+                if isinstance(exc.reason, TimeoutError):
+                    raise TimeoutError(
+                        f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
+                    ) from exc
+                if isinstance(exc.reason, socket.timeout):
+                    raise TimeoutError(
+                        f"rpc timeout for {method} after {self.rpc_timeout_seconds}s against {endpoint_label}"
+                    ) from exc
+                raise RuntimeError(
+                    f"rpc transport error for {method} against {endpoint_label}: {exc.reason}"
+                ) from exc
+            except json.JSONDecodeError as exc:
+                raise RuntimeError(f"rpc decode error for {method}: {exc}") from exc
+            if not isinstance(body, dict):
+                raise RuntimeError(f"rpc response for {method} must be a JSON object")
+            if "error" in body:
+                raise RuntimeError(f"rpc error for {method}: {self._format_rpc_error(body['error'])}")
+            if "result" not in body:
+                raise RuntimeError(f"rpc response for {method} missing result field")
+            return body["result"]
+        raise RuntimeError(f"rpc transport error for {method} against {endpoint_label}: exhausted retries")
 
     def _format_rpc_error(self, error: Any) -> str:
         if isinstance(error, dict):

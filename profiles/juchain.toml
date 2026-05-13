@@ -9,7 +9,7 @@ trace_support = true
 [gas_policy]
 gas_limit = 30000000
 max_fee_per_gas = 20000000000
-max_priority_fee_per_gas = 1000000000
+max_priority_fee_per_gas = 1000000007
 
 [namespace_policy]
 prefix = "evmtest"
@@ -18,6 +18,12 @@ reuse_strategy = "idempotent"
 [feature_flags]
 base_fee = true
 blob = false
+prevrandao = false
+large_log_payload = false
+max_create_child_code = false
+create_collision = false
+large_nonzero_returndata = false
+selfdestruct_created_clears_code = false
 
 [block_context]
 rpc_block_tag = "latest"

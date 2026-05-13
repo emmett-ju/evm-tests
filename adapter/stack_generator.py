@@ -211,7 +211,12 @@ def _build_stack_runtime(opcode: str) -> str:
     code = bytearray()
     magic = 42
     if opcode.startswith('PUSH'):
-        code += _push_int(magic)
+        n = int(opcode.removeprefix('PUSH'))
+        if n == 0:
+            code.append(OPCODES[opcode])
+        else:
+            code.append(OPCODES[opcode])
+            code += magic.to_bytes(n, "big")
     elif opcode.startswith('DUP'):
         n = int(opcode.removeprefix('DUP'))
         code += _push_int(magic)

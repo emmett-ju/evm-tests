@@ -229,6 +229,7 @@ def render_log_case(template: LogMappingTemplate) -> dict[str, Any]:
             deploy_contract_step(
                 init_code=_build_init_code(runtime_code),
                 runtime_code=runtime_code,
+                gas=_deploy_gas(template),
             ),
             wait_receipt_step(),
             invoke_contract_step(data_hex="0x", gas=_invoke_gas(template)),
@@ -541,6 +542,16 @@ def _build_fill_ff_prefix(size: int) -> bytes:
     builder = _BytecodeBuilder()
     full_word_bytes = (size // 32) * 32
     tail_bytes = size - full_word_bytes
+    if size <= 4096:
+        for offset in range(0, full_word_bytes, 32):
+            builder.push_int((1 << 256) - 1)
+            builder.push_int(offset)
+            builder.op(0x52)  # MSTORE
+        for offset in range(full_word_bytes, full_word_bytes + tail_bytes):
+            builder.push_int(0xFF)
+            builder.push_int(offset)
+            builder.op(0x53)  # MSTORE8
+        return builder.finish()
     if full_word_bytes > 0:
         builder.push_int(full_word_bytes)
         builder.mark("fill_words_loop")
@@ -614,11 +625,17 @@ def _payload_bytes(template: LogMappingTemplate) -> bytes:
     return (b"\xff" * filled) + (b"\x00" * (template.log_size - filled))
 
 
+def _deploy_gas(template: LogMappingTemplate) -> str:
+    if template.memory_seed_size > 0 or template.log_size >= 1024:
+        return "0x200000"
+    return "0x186a0"
+
+
 def _invoke_gas(template: LogMappingTemplate) -> str:
     if template.log_size >= 1024 * 1024:
-        return "0x2000000"
-    if template.memory_seed_size >= 1024 or template.log_size >= 1024:
-        return "0x200000"
+        return "0xff0000"
+    if template.memory_seed_size > 0 or template.log_size >= 1024:
+        return "0xff0000"
     return "0xc350"
 
 

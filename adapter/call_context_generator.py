@@ -6,20 +6,16 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Literal
 
+from adapter.assembler import _build_init_code
 from adapter.generator import build_case, deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
 
 
-CALL_CONTEXT_ADDRESS_INIT = "0x0f600c6000390f6000f33060005500"
 CALL_CONTEXT_ADDRESS_RUNTIME = "0x3060005500"
-CALL_CONTEXT_CALLER_INIT = "0x0f600c6000390f6000f33360005500"
 CALL_CONTEXT_CALLER_RUNTIME = "0x3360005500"
-CALL_CONTEXT_CALLVALUE_INIT = "0x0f600c6000390f6000f33460005500"
 CALL_CONTEXT_CALLVALUE_RUNTIME = "0x3460005500"
-CALL_CONTEXT_CALLDATASIZE_INIT = "0x0f600c6000390f6000f33660005500"
 CALL_CONTEXT_CALLDATASIZE_RUNTIME = "0x3660005500"
-CALL_CONTEXT_CALLDATALOAD_INIT = "0x11600c600039116000f35f3560005500"
 CALL_CONTEXT_CALLDATALOAD_RUNTIME = "0x5f3560005500"
 
 ADDRESS_WORD = "0x000000000000000000000000cccccccccccccccccccccccccccccccccccccccc"
@@ -605,21 +601,18 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "address":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_ADDRESS_INIT,
             runtime_code=CALL_CONTEXT_ADDRESS_RUNTIME,
             expected={"storage": {"0x00": "$last_contract_word"}},
         )
     if template.mode == "caller":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLER_INIT,
             runtime_code=CALL_CONTEXT_CALLER_RUNTIME,
             expected={"storage": {"0x00": "$admin_account_word"}},
         )
     if template.mode == "callvalue_zero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLVALUE_INIT,
             runtime_code=CALL_CONTEXT_CALLVALUE_RUNTIME,
             expected={"storage": {"0x00": VALUE_WORD_00}},
             invoke_value="0x0",
@@ -627,7 +620,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "callvalue_one":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLVALUE_INIT,
             runtime_code=CALL_CONTEXT_CALLVALUE_RUNTIME,
             expected={"storage": {"0x00": VALUE_WORD_01}},
             invoke_value="0x1",
@@ -635,7 +627,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldatasize_0_zero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
             runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
             expected={"storage": {"0x00": CALLDATASIZE_00}},
             data_hex="0x",
@@ -643,7 +634,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldatasize_0_nonzero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
             runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
             expected={"storage": {"0x00": CALLDATASIZE_00}},
             data_hex="0x",
@@ -651,7 +641,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldatasize_32_zero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
             runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
             expected={"storage": {"0x00": CALLDATASIZE_20}},
             data_hex="0x" + "00" * 32,
@@ -659,7 +648,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldatasize_32_nonzero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
             runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
             expected={"storage": {"0x00": CALLDATASIZE_20}},
             data_hex=CALLDATA_WORD_PATTERN,
@@ -667,7 +655,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldatasize_256_zero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
             runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
             expected={"storage": {"0x00": CALLDATASIZE_100}},
             data_hex="0x" + "00" * 256,
@@ -675,7 +662,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldatasize_256_nonzero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
             runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
             expected={"storage": {"0x00": CALLDATASIZE_100}},
             data_hex="0x" + bytes(i % 256 for i in range(256)).hex(),
@@ -683,7 +669,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldatasize_1024_zero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
             runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
             expected={"storage": {"0x00": CALLDATASIZE_400}},
             data_hex="0x" + "00" * 1024,
@@ -691,7 +676,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldatasize_1024_nonzero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATASIZE_INIT,
             runtime_code=CALL_CONTEXT_CALLDATASIZE_RUNTIME,
             expected={"storage": {"0x00": CALLDATASIZE_400}},
             data_hex="0x" + bytes(i % 256 for i in range(1024)).hex(),
@@ -699,7 +683,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldataload_0_zero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
             runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
             expected={"storage": {"0x00": CALLDATA_WORD_ZERO}},
             data_hex="0x",
@@ -707,7 +690,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldataload_0_nonzero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
             runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
             expected={"storage": {"0x00": CALLDATA_WORD_ZERO}},
             data_hex="0x",
@@ -715,7 +697,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldataload_32_zero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
             runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
             expected={"storage": {"0x00": CALLDATA_WORD_ZERO}},
             data_hex="0x" + "00" * 32,
@@ -723,7 +704,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldataload_32_nonzero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
             runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
             expected={"storage": {"0x00": CALLDATA_WORD_PATTERN}},
             data_hex=CALLDATA_WORD_PATTERN,
@@ -731,7 +711,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldataload_256_zero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
             runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
             expected={"storage": {"0x00": CALLDATA_WORD_ZERO}},
             data_hex="0x" + "00" * 256,
@@ -739,7 +718,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldataload_256_nonzero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
             runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
             expected={"storage": {"0x00": CALLDATA_WORD_PATTERN}},
             data_hex="0x" + bytes(i % 256 for i in range(256)).hex(),
@@ -747,7 +725,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldataload_1024_zero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
             runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
             expected={"storage": {"0x00": CALLDATA_WORD_ZERO}},
             data_hex="0x" + "00" * 1024,
@@ -755,7 +732,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
     if template.mode == "calldataload_1024_nonzero":
         return _build_call_context_case(
             template,
-            init_code=CALL_CONTEXT_CALLDATALOAD_INIT,
             runtime_code=CALL_CONTEXT_CALLDATALOAD_RUNTIME,
             expected={"storage": {"0x00": CALLDATA_WORD_PATTERN}},
             data_hex="0x" + bytes(i % 256 for i in range(1024)).hex(),
@@ -766,7 +742,6 @@ def render_call_context_case(template: CallContextMappingTemplate) -> dict[str, 
 def _build_call_context_case(
     template: CallContextMappingTemplate,
     *,
-    init_code: str,
     runtime_code: str,
     expected: dict[str, Any],
     data_hex: str = "0x",
@@ -775,7 +750,7 @@ def _build_call_context_case(
     case = build_case(
         template,  # type: ignore[arg-type]
         steps=[
-            deploy_contract_step(init_code=init_code, runtime_code=runtime_code),
+            deploy_contract_step(init_code=_build_init_code(runtime_code), runtime_code=runtime_code, gas="0x493e0"),
             wait_receipt_step(),
             {
                 **invoke_contract_step(data_hex=data_hex),

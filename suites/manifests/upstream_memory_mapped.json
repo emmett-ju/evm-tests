@@ -43,7 +43,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -96,7 +96,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -202,7 +202,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -255,7 +255,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -838,7 +838,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0x1e8480"
+          "gas": "0xff0000"
         },
         {
           "action": "wait_receipt",
@@ -891,7 +891,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0x1e8480"
+          "gas": "0xff0000"
         },
         {
           "action": "wait_receipt",
@@ -944,7 +944,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0x1e8480"
+          "gas": "0xff0000"
         },
         {
           "action": "wait_receipt",
@@ -997,7 +997,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0x1e8480"
+          "gas": "0xff0000"
         },
         {
           "action": "wait_receipt",
@@ -1050,7 +1050,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0x1e8480"
+          "gas": "0xff0000"
         },
         {
           "action": "wait_receipt",
@@ -1103,7 +1103,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1156,7 +1156,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1262,7 +1262,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1315,7 +1315,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1368,7 +1368,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1421,7 +1421,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1527,7 +1527,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1580,7 +1580,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1634,7 +1634,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1688,7 +1688,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1742,7 +1742,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1796,7 +1796,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1850,7 +1850,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1904,7 +1904,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -1958,7 +1958,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2012,7 +2012,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2066,7 +2066,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2120,7 +2120,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2174,7 +2174,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2228,7 +2228,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2282,7 +2282,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2336,7 +2336,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2390,7 +2390,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2444,7 +2444,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2498,7 +2498,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -2552,7 +2552,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -4550,7 +4550,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -4604,7 +4604,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -4658,7 +4658,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -4712,7 +4712,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -4766,7 +4766,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -4820,7 +4820,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -4874,7 +4874,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -4928,7 +4928,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -4982,7 +4982,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5036,7 +5036,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5090,7 +5090,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5144,7 +5144,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5198,7 +5198,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5252,7 +5252,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5306,7 +5306,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5360,7 +5360,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5414,7 +5414,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5468,7 +5468,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5522,7 +5522,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5576,7 +5576,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5630,7 +5630,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5684,7 +5684,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5738,7 +5738,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5792,7 +5792,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5846,7 +5846,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5900,7 +5900,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -5954,7 +5954,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6008,7 +6008,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6062,7 +6062,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6116,7 +6116,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6170,7 +6170,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6224,7 +6224,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6278,7 +6278,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6332,7 +6332,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6386,7 +6386,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6440,7 +6440,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6491,7 +6491,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6541,7 +6541,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0x1e8480"
+          "gas": "0xff0000"
         },
         {
           "action": "wait_receipt",
@@ -6641,7 +6641,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",
@@ -6691,7 +6691,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xc350"
+          "gas": "0x030d40"
         },
         {
           "action": "wait_receipt",

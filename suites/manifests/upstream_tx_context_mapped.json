@@ -24,7 +24,7 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33a60005500",
+          "bytecode_init": "0x6005600c60003960056000f33a60005500",
           "bytecode_runtime": "0x3a60005500",
           "gas": "0x186a0"
         },
@@ -70,7 +70,7 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33260005500",
+          "bytecode_init": "0x6005600c60003960056000f33260005500",
           "bytecode_runtime": "0x3260005500",
           "gas": "0x186a0"
         },

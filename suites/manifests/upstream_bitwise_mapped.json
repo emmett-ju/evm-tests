@@ -570,6 +570,7 @@
           "opcode": "SAR",
           "args": [],
           "expected_result": 115792089237316195411016781537914546325598405819225231207252873118985060614144,
+          "initial_value": 115792089237316195423570985008687907853269984665640564039457584007913129639935,
           "witness_rounds": 6134
         }
       },
@@ -589,7 +590,7 @@
         {
           "action": "invoke_contract",
           "to": "$last_contract",
-          "data": "0x",
+          "data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
           "gas": "0x0f4240"
         },
         {
@@ -623,6 +624,7 @@
           "opcode": "SHR",
           "args": [],
           "expected_result": 110427941548649020598956093796432407239217743554726184882600387580788736,
+          "initial_value": 115792089237316195423570985008687907853269984665640564039457584007913129639935,
           "witness_rounds": 6134
         }
       },
@@ -642,7 +644,7 @@
         {
           "action": "invoke_contract",
           "to": "$last_contract",
-          "data": "0x",
+          "data": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
           "gas": "0x0f4240"
         },
         {

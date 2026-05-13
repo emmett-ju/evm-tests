@@ -23,6 +23,8 @@ STORAGE_WRITE_CONTRACT_INIT_PRESENT_ONE_REVERT = (
 )
 STORAGE_WARM_SAME_RUNTIME = "0x60005460005500"
 STORAGE_WARM_NEW_RUNTIME = "0x602b60005500"
+STORAGE_WARM_SAME_INIT = "0x602a6000556007601160003960076000f3" + STORAGE_WARM_SAME_RUNTIME[2:]
+STORAGE_WARM_NEW_INIT = "0x602a6000556007601160003960076000f3" + STORAGE_WARM_NEW_RUNTIME[2:]
 SLOT0_VALUE_00 = "0x0000000000000000000000000000000000000000000000000000000000000000"
 SLOT0_VALUE_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
 SLOT0_VALUE_2A = "0x000000000000000000000000000000000000000000000000000000000000002a"
@@ -766,7 +768,7 @@ def render_storage_case(template: StorageMappingTemplate) -> dict[str, Any]:
             template,
             steps=[
                 deploy_contract_step(
-                    init_code=STORAGE_READ_CONTRACT_INIT,
+                    init_code=STORAGE_WARM_SAME_INIT,
                     runtime_code=STORAGE_WARM_SAME_RUNTIME,
                     initial_storage={"0x00": SLOT0_VALUE_2A},
                 ),
@@ -781,7 +783,7 @@ def render_storage_case(template: StorageMappingTemplate) -> dict[str, Any]:
             template,
             steps=[
                 deploy_contract_step(
-                    init_code=STORAGE_READ_CONTRACT_INIT,
+                    init_code=STORAGE_WARM_NEW_INIT,
                     runtime_code=STORAGE_WARM_NEW_RUNTIME,
                     initial_storage={"0x00": SLOT0_VALUE_2A},
                 ),

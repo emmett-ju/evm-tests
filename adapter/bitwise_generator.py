@@ -606,6 +606,7 @@ def _dup_opcode_for_shift_index(index: int) -> int:
 def render_bitwise_case(template: BitwiseMappingTemplate) -> dict[str, Any]:
     deploy_gas = "0x186a0"
     invoke_gas = "0xc350"
+    invoke_data = "0x"
     if template.mode == "test_shifts":
         witness = _compute_shift_witness(template.opcode)
         expected_val = witness.final_value
@@ -618,11 +619,13 @@ def render_bitwise_case(template: BitwiseMappingTemplate) -> dict[str, Any]:
                 "opcode": template.opcode,
                 "args": list(template.args),
                 "expected_result": expected_val,
+                "initial_value": SHIFT_INITIAL_VALUE,
                 "witness_rounds": witness.rounds,
             },
         }
         deploy_gas = SHIFT_WITNESS_DEPLOY_GAS
         invoke_gas = SHIFT_WITNESS_INVOKE_GAS
+        invoke_data = _word_hex(SHIFT_INITIAL_VALUE)
     elif template.mode == "test_clz_diff":
         witness = _compute_clz_diff_witness()
         expected_val = witness.final_accumulator
@@ -663,7 +666,7 @@ def render_bitwise_case(template: BitwiseMappingTemplate) -> dict[str, Any]:
                 gas=deploy_gas,
             ),
             wait_receipt_step(),
-            invoke_contract_step(data_hex="0x", gas=invoke_gas),
+            invoke_contract_step(data_hex=invoke_data, gas=invoke_gas),
             wait_receipt_step(),
         ],
         expected=expected,

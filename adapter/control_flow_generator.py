@@ -397,8 +397,8 @@ def _build_jump_pc_relative_runtime() -> str:
 
 def _build_jumpi_fallthrough_runtime() -> str:
     code = bytearray()
-    code += _push_int(8)
     code += _push_int(0)
+    code += _push_int(8)
     code.append(0x57)  # JUMPI
     code += _push_int(0)
     code += _push_int(0)
@@ -414,8 +414,8 @@ def _build_jumpi_fallthrough_runtime() -> str:
 
 def _build_jumpi_taken_runtime() -> str:
     code = bytearray()
-    code += _push_int(8)
     code.append(0x43)  # NUMBER
+    code += _push_int(8)
     code.append(0x57)  # JUMPI
     code += _push_int(0)
     code += _push_int(0)

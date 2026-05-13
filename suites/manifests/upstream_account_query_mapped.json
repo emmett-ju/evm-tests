@@ -32,7 +32,7 @@
           "bytecode_init": "0x6010600c60003960106000f35f5f5f395f5f2080600155505f5f5500",
           "bytecode_runtime": "0x5f5f5f395f5f2080600155505f5f5500",
           "value": "0x0",
-          "gas": "0xc350"
+          "gas": "0x186a0"
         },
         {
           "action": "wait_receipt",
@@ -85,7 +85,7 @@
           "bytecode_init": "0x6016600c60003960166000f36118005f5f396118005f2080600155506118005f5500",
           "bytecode_runtime": "0x6118005f5f396118005f2080600155506118005f5500",
           "value": "0x0",
-          "gas": "0x200000"
+          "gas": "0x186a0"
         },
         {
           "action": "wait_receipt",
@@ -138,7 +138,7 @@
           "bytecode_init": "0x6016600c60003960166000f36130005f5f396130005f2080600155506130005f5500",
           "bytecode_runtime": "0x6130005f5f396130005f2080600155506130005f5500",
           "value": "0x0",
-          "gas": "0x200000"
+          "gas": "0x186a0"
         },
         {
           "action": "wait_receipt",
@@ -191,7 +191,7 @@
           "bytecode_init": "0x6016600c60003960166000f36148005f5f396148005f2080600155506148005f5500",
           "bytecode_runtime": "0x6148005f5f396148005f2080600155506148005f5500",
           "value": "0x0",
-          "gas": "0x200000"
+          "gas": "0x186a0"
         },
         {
           "action": "wait_receipt",
@@ -244,7 +244,7 @@
           "bytecode_init": "0x6016600c60003960166000f36160005f5f396160005f2080600155506160005f5500",
           "bytecode_runtime": "0x6160005f5f396160005f2080600155506160005f5500",
           "value": "0x0",
-          "gas": "0x400000"
+          "gas": "0x186a0"
         },
         {
           "action": "wait_receipt",
@@ -338,7 +338,8 @@
           "action": "transfer_native",
           "to": "0x20000000000000000000000000000000000000b2",
           "value": "0x2a",
-          "gas": "0x5208"
+          "gas": "0x5208",
+          "capture_balance_before": "$present_target_balance_before"
         },
         {
           "action": "wait_receipt",
@@ -371,7 +372,7 @@
       ],
       "expected": {
         "storage": {
-          "0x00": "0x000000000000000000000000000000000000000000000000000000000000002a"
+          "0x00": "$present_target_balance_after_word"
         }
       }
     },

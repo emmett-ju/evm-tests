@@ -28,7 +28,6 @@ BALANCE_RUNTIME = "0x5f353160005500"
 WORD_00 = "0x0000000000000000000000000000000000000000000000000000000000000000"
 WORD_01 = "0x0000000000000000000000000000000000000000000000000000000000000001"
 WORD_05 = "0x0000000000000000000000000000000000000000000000000000000000000005"
-WORD_2A = "0x000000000000000000000000000000000000000000000000000000000000002a"
 UPSTREAM_MAX_CODE_SIZE = 24_576
 
 AccountQueryTemplateMode = Literal[
@@ -294,6 +293,7 @@ def render_account_query_case(template: AccountQueryMappingTemplate) -> dict[str
                     "to": PRESENT_TARGET_ADDRESS,
                     "value": PRESENT_TARGET_FUNDING_VALUE,
                     "gas": "0x5208",
+                    "capture_balance_before": "$present_target_balance_before",
                 },
                 wait_receipt_step(),
                 deploy_account_query_contract_step(
@@ -303,7 +303,7 @@ def render_account_query_case(template: AccountQueryMappingTemplate) -> dict[str
                 invoke_contract_step(data_hex=_address_to_word(PRESENT_TARGET_ADDRESS)),
                 wait_receipt_step(),
             ],
-            expected={"storage": {"0x00": WORD_2A}},
+            expected={"storage": {"0x00": "$present_target_balance_after_word"}},
         )
     if template.mode == "codecopy_fixed":
         copy_size = _require_template_copy_size(template)
@@ -311,10 +311,7 @@ def render_account_query_case(template: AccountQueryMappingTemplate) -> dict[str
         return build_account_query_case(
             template,
             steps=[
-                deploy_account_query_contract_step(
-                    runtime_code=runtime_code,
-                    gas=_codecopy_invoke_gas(copy_size),
-                ),
+                deploy_account_query_contract_step(runtime_code=runtime_code),
                 wait_receipt_step(),
                 invoke_contract_step(data_hex="0x", gas=_codecopy_invoke_gas(copy_size)),
                 wait_receipt_step(),

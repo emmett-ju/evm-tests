@@ -931,7 +931,7 @@ def _memory_gas_hex(size_hint: int) -> str:
         return "0x0f4240"  # 1,000,000
     if size_hint >= 1_024:
         return "0x061a80"  # 400,000
-    return "0xc350"  # 50,000
+    return "0x186a0"  # 100,000
 
 
 class _MemoryState:

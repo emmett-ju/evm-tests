@@ -178,8 +178,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x600e600c600039600e6000f360085f575f5f55005b60015f5500",
-          "bytecode_runtime": "0x60085f575f5f55005b60015f5500",
+          "bytecode_init": "0x600e600c600039600e6000f35f6008575f5f55005b60015f5500",
+          "bytecode_runtime": "0x5f6008575f5f55005b60015f5500",
           "gas": "0x186a0"
         },
         {
@@ -228,8 +228,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x600e600c600039600e6000f3600843575f5f55005b60015f5500",
-          "bytecode_runtime": "0x600843575f5f55005b60015f5500",
+          "bytecode_init": "0x600e600c600039600e6000f3436008575f5f55005b60015f5500",
+          "bytecode_runtime": "0x436008575f5f55005b60015f5500",
           "gas": "0x186a0"
         },
         {

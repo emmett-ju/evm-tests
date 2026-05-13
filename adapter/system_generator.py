@@ -90,8 +90,8 @@ class _BytecodeBuilder:
         self.extend(_push_int(value))
 
     def push_label(self, name: str) -> None:
-        self.code.extend((0x60, 0x00))
-        self.fixups.append((len(self.code) - 1, name))
+        self.code.extend((0x61, 0x00, 0x00))
+        self.fixups.append((len(self.code) - 2, name))
 
     def mark(self, name: str) -> None:
         self.labels[name] = len(self.code)
@@ -102,9 +102,10 @@ class _BytecodeBuilder:
             if name not in self.labels:
                 raise ValueError(f"unknown bytecode label: {name}")
             target = self.labels[name]
-            if target > 0xFF:
-                raise ValueError(f"bytecode label {name} out of PUSH1 range: {target}")
-            self.code[position] = target
+            if target > 0xFFFF:
+                raise ValueError(f"bytecode label {name} out of PUSH2 range: {target}")
+            self.code[position] = (target >> 8) & 0xFF
+            self.code[position + 1] = target & 0xFF
         return bytes(self.code)
 
 
@@ -251,6 +252,7 @@ def _render_return_revert_system_case(template: SystemMappingTemplate) -> dict[s
         runtime_code=runtime_code,
         witness=witness,
         invoke_gas=_invoke_gas(return_size),
+        deploy_gas=_deploy_gas_for_runtime(runtime_code),
     )
 
 
@@ -292,7 +294,7 @@ def _render_create_child_code_system_case(template: SystemMappingTemplate) -> di
         template=template,
         runtime_code=runtime_code,
         witness=witness,
-        invoke_gas="0x4c4b40",
+        invoke_gas="0xff0000",
         deploy_gas=_deploy_gas_for_runtime(runtime_code),
     )
 
@@ -393,6 +395,8 @@ def _runtime_byte_length(runtime_code: str) -> int:
 
 def _deploy_gas_for_runtime(runtime_code: str) -> str:
     runtime_bytes = _runtime_byte_length(runtime_code)
+    if runtime_bytes >= 20_000:
+        return "0xff0000"
     initcode_bytes = _runtime_byte_length(_build_init_code(runtime_code))
     budget = (
         SYSTEM_DEPLOY_BASE_GAS
@@ -1313,6 +1317,16 @@ def _build_fill_ff_prefix(size: int) -> bytes:
     builder = _BytecodeBuilder()
     full_word_bytes = (size // 32) * 32
     tail_bytes = size - full_word_bytes
+    if size <= 4096:
+        for offset in range(0, full_word_bytes, 32):
+            builder.push_int((1 << 256) - 1)
+            builder.push_int(offset)
+            builder.op(0x52)  # MSTORE
+        for offset in range(full_word_bytes, full_word_bytes + tail_bytes):
+            builder.push_int(0xFF)
+            builder.push_int(offset)
+            builder.op(0x53)  # MSTORE8
+        return builder.finish()
     if full_word_bytes > 0:
         builder.push_int(full_word_bytes)
         builder.mark("fill_words_loop")
@@ -1348,7 +1362,7 @@ def _payload_bytes(return_size: int, return_non_zero_data: bool) -> bytes:
 
 def _invoke_gas(return_size: int) -> str:
     if return_size >= 1024 * 1024:
-        return "0x2000000"
+        return "0xff0000"
     if return_size >= 1024:
         return "0x200000"
     return "0x1e8480"

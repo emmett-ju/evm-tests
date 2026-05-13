@@ -7,13 +7,12 @@ from pathlib import Path
 from typing import Any, Literal
 
 from adapter.generator import build_case, deploy_contract_step, invoke_contract_step, wait_receipt_step
+from adapter.assembler import _build_init_code
 from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
 
 
-TX_CONTEXT_ORIGIN_INIT = "0x0f600c6000390f6000f33260005500"
 TX_CONTEXT_ORIGIN_RUNTIME = "0x3260005500"
-TX_CONTEXT_GASPRICE_INIT = "0x0f600c6000390f6000f33a60005500"
 TX_CONTEXT_GASPRICE_RUNTIME = "0x3a60005500"
 
 TxContextTemplateMode = Literal["origin", "gasprice"]
@@ -268,7 +267,7 @@ def render_tx_context_case(template: TxContextMappingTemplate) -> dict[str, Any]
             template,  # type: ignore[arg-type]
             steps=[
                 deploy_contract_step(
-                    init_code=TX_CONTEXT_ORIGIN_INIT,
+                    init_code=_build_init_code(TX_CONTEXT_ORIGIN_RUNTIME),
                     runtime_code=TX_CONTEXT_ORIGIN_RUNTIME,
                 ),
                 wait_receipt_step(),
@@ -284,7 +283,7 @@ def render_tx_context_case(template: TxContextMappingTemplate) -> dict[str, Any]
             template,  # type: ignore[arg-type]
             steps=[
                 deploy_contract_step(
-                    init_code=TX_CONTEXT_GASPRICE_INIT,
+                    init_code=_build_init_code(TX_CONTEXT_GASPRICE_RUNTIME),
                     runtime_code=TX_CONTEXT_GASPRICE_RUNTIME,
                 ),
                 wait_receipt_step(),

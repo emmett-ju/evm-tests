@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import socket
+import ssl
 import subprocess
 import tempfile
 import unittest
@@ -314,6 +315,7 @@ class HarnessTests(unittest.TestCase):
                 "manifest_path": ROOT / "suites/manifests/custom_storage_smoke.json",
                 "profile": load_chain_profile(ROOT / "profiles/mock.toml"),
                 "expected_case_ids": ["custom.balance.and.storage"],
+                "expected_rejections": {},
             },
             {
                 "manifest_path": ROOT / "suites/manifests/upstream_block_context_mapped.json",
@@ -324,20 +326,26 @@ class HarnessTests(unittest.TestCase):
                     "upstream.benchmark.block_context.test_block_context_ops.coinbase",
                     "upstream.benchmark.block_context.test_block_context_ops.gaslimit",
                     "upstream.benchmark.block_context.test_block_context_ops.number",
-                    "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
                     "upstream.benchmark.block_context.test_block_context_ops.timestamp",
                     "upstream.benchmark.block_context.test_blockhash.current_block",
                 ],
+                "expected_rejections": {
+                    "upstream.benchmark.block_context.test_block_context_ops.prevrandao": [
+                        "block-context mode prevrandao requires feature_flags.prevrandao=true in chain profile"
+                    ]
+                },
             },
             {
                 "manifest_path": ROOT / "suites/manifests/upstream_log_mapped.json",
-                "profile": load_chain_profile(ROOT / "profiles/juchain.toml"),
+                "profile": load_chain_profile(ROOT / "profiles/mock.toml"),
                 "expected_case_ids": None,
+                "expected_rejections": {},
             },
             {
                 "manifest_path": ROOT / "suites/manifests/upstream_system_mapped.json",
-                "profile": load_chain_profile(ROOT / "profiles/juchain.toml"),
+                "profile": load_chain_profile(ROOT / "profiles/mock.toml"),
                 "expected_case_ids": None,
+                "expected_rejections": {},
             },
         ]
 
@@ -346,9 +354,10 @@ class HarnessTests(unittest.TestCase):
                 manifest = load_manifest(scenario["manifest_path"])
                 selected, decisions = TestSelector(scenario["profile"]).select(manifest)
                 self.assertEqual(manifest.validation_errors(scenario["profile"].backend), [])
-                self.assertEqual([decision for decision in decisions if not decision.selected], [])
+                blocked = {decision.case.case_id: decision.reasons for decision in decisions if not decision.selected}
+                self.assertEqual(blocked, scenario["expected_rejections"])
                 self.assertEqual([case.case_id for case in selected], scenario["expected_case_ids"] or [case.case_id for case in manifest.cases])
-                self.assertEqual(len(selected), len(manifest.cases))
+                self.assertEqual(len(selected), len(manifest.cases) - len(scenario["expected_rejections"]))
 
     def test_validation_boundary_rejects_malformed_block_context_manifest_shape(self) -> None:
         payload = json.loads((ROOT / "suites/manifests/upstream_block_context_mapped.json").read_text())
@@ -815,6 +824,13 @@ class HarnessTests(unittest.TestCase):
             ],
         )
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        warm_new_case = next(
+            case
+            for case in selected
+            if case.case_id == "upstream.benchmark.storage.warm.write_new_value.present_slots.success"
+        )
+        deploy_step = next(step for step in warm_new_case.steps if step["action"] == "deploy_contract")
+        self.assertTrue(deploy_step["bytecode_init"].endswith("602b60005500"))
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
     def test_selector_allows_upstream_mapped_memory_case(self) -> None:
@@ -826,6 +842,13 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success", selected_ids)
         self.assertIn("upstream.benchmark.memory.msize.mem_size_1.success", selected_ids)
         self.assertIn("upstream.benchmark.memory.mcopy.mem_size_0.copy_size_32.fixed.success", selected_ids)
+        mcopy_256_case = next(
+            case
+            for case in selected
+            if case.case_id == "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_256.fixed.success"
+        )
+        invoke_step = next(step for step in mcopy_256_case.steps if step["action"] == "invoke_contract")
+        self.assertEqual(invoke_step["gas"], "0x030d40")
         self.assertIn("upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_0.dynamic.success", selected_ids)
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
@@ -980,8 +1003,6 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_zero_data",
-                "upstream.benchmark.system.test_create.create.max_code_size_with_non_zero_data",
-                "upstream.benchmark.system.test_create.create.max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_bytes_with_value",
                 "upstream.benchmark.system.test_create.create2.0_bytes_without_value",
                 "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_non_zero_data",
@@ -990,28 +1011,53 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_zero_data",
-                "upstream.benchmark.system.test_create.create2.max_code_size_with_non_zero_data",
-                "upstream.benchmark.system.test_create.create2.max_code_size_with_zero_data",
-                "upstream.benchmark.system.test_creates_collisions.create2",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
-                "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.empty",
                 "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.revert.1kib_of_zero_data",
-                "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
                 "upstream.benchmark.system.test_return_revert.revert.empty",
-                "upstream.benchmark.system.test_selfdestruct_created.value_bearing_false",
-                "upstream.benchmark.system.test_selfdestruct_created.value_bearing_true",
                 "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_false",
                 "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_true",
             ],
         )
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual({case.family for case in selected}, {"state/system"})
-        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+        skipped = {decision.case.case_id: decision.reasons for decision in decisions if not decision.selected}
+        self.assertEqual(
+            skipped,
+            {
+                "upstream.benchmark.system.test_create.create.max_code_size_with_non_zero_data": [
+                    "max CREATE child-code payload requires feature_flags.max_create_child_code=true in chain profile"
+                ],
+                "upstream.benchmark.system.test_create.create.max_code_size_with_zero_data": [
+                    "max CREATE child-code payload requires feature_flags.max_create_child_code=true in chain profile"
+                ],
+                "upstream.benchmark.system.test_create.create2.max_code_size_with_non_zero_data": [
+                    "max CREATE child-code payload requires feature_flags.max_create_child_code=true in chain profile"
+                ],
+                "upstream.benchmark.system.test_create.create2.max_code_size_with_zero_data": [
+                    "max CREATE child-code payload requires feature_flags.max_create_child_code=true in chain profile"
+                ],
+                "upstream.benchmark.system.test_creates_collisions.create2": [
+                    "CREATE collision witness requires feature_flags.create_collision=true in chain profile"
+                ],
+                "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data": [
+                    "1MiB non-zero returndata requires feature_flags.large_nonzero_returndata=true in chain profile"
+                ],
+                "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data": [
+                    "1MiB non-zero returndata requires feature_flags.large_nonzero_returndata=true in chain profile"
+                ],
+                "upstream.benchmark.system.test_selfdestruct_created.value_bearing_false": [
+                    "created-contract selfdestruct cleanup requires feature_flags.selfdestruct_created_clears_code=true in chain profile"
+                ],
+                "upstream.benchmark.system.test_selfdestruct_created.value_bearing_true": [
+                    "created-contract selfdestruct cleanup requires feature_flags.selfdestruct_created_clears_code=true in chain profile"
+                ],
+            },
+        )
         for case in selected:
             self.assertEqual(case.expected["receipt_status"], "0x1")
             witness = case.observe["system_witness"]
@@ -1111,17 +1157,24 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.block_context.test_block_context_ops.coinbase",
                 "upstream.benchmark.block_context.test_block_context_ops.gaslimit",
                 "upstream.benchmark.block_context.test_block_context_ops.number",
-                "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
                 "upstream.benchmark.block_context.test_block_context_ops.timestamp",
                 "upstream.benchmark.block_context.test_blockhash.current_block",
             ],
         )
+        blocked = {decision.case.case_id: decision.reasons for decision in decisions if not decision.selected}
+        self.assertEqual(
+            blocked,
+            {
+                "upstream.benchmark.block_context.test_block_context_ops.prevrandao": [
+                    "block-context mode prevrandao requires feature_flags.prevrandao=true in chain profile"
+                ]
+            },
+        )
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual({case.family for case in selected}, {"state/block-context"})
-        self.assertEqual([decision for decision in decisions if not decision.selected], [])
         self.assertEqual(
             {case.observe["block_context_probe"]["mode"] for case in selected},
-            {"basefee", "blockhash_current", "chainid", "coinbase", "gaslimit", "number", "prevrandao", "timestamp"},
+            {"basefee", "blockhash_current", "chainid", "coinbase", "gaslimit", "number", "timestamp"},
         )
 
     def test_selector_rejects_basefee_block_context_case_when_profile_lacks_feature_flag(self) -> None:
@@ -1136,7 +1189,6 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.block_context.test_block_context_ops.coinbase",
                 "upstream.benchmark.block_context.test_block_context_ops.gaslimit",
                 "upstream.benchmark.block_context.test_block_context_ops.number",
-                "upstream.benchmark.block_context.test_block_context_ops.prevrandao",
                 "upstream.benchmark.block_context.test_block_context_ops.timestamp",
                 "upstream.benchmark.block_context.test_blockhash.current_block",
             ],
@@ -1147,8 +1199,32 @@ class HarnessTests(unittest.TestCase):
             {
                 "upstream.benchmark.block_context.test_block_context_ops.basefee": [
                     "block-context mode basefee requires feature_flags.base_fee=true in chain profile"
-                ]
+                ],
+                "upstream.benchmark.block_context.test_block_context_ops.prevrandao": [
+                    "block-context mode prevrandao requires feature_flags.prevrandao=true in chain profile"
+                ],
             },
+        )
+
+    def test_selector_rejects_large_log_payload_cases_when_profile_lacks_feature_flag(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.feature_flags["large_log_payload"] = False
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_log_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        blocked = {decision.case.case_id: decision.reasons for decision in decisions if not decision.selected}
+        self.assertEqual(len(selected), 100)
+        self.assertEqual(len(blocked), 30)
+        self.assertEqual(
+            set(tuple(reasons) for reasons in blocked.values()),
+            {("log payload requires feature_flags.large_log_payload=true in chain profile",)},
+        )
+        self.assertTrue(
+            all(
+                decision.case.observe["log_probe"].get("log_size", 0) >= 1024 * 1024
+                or decision.case.observe["log_probe"].get("memory_seed_size", 0) >= 1024 * 1024
+                for decision in decisions
+                if not decision.selected
+            )
         )
 
     def test_cli_list_reports_basefee_block_context_capability_rejection(self) -> None:
@@ -1351,6 +1427,15 @@ class HarnessTests(unittest.TestCase):
                 self.assertEqual(case["observe"]["account_query_probe"], {"mode": "codecopy_fixed", "copy_size": copy_size})
                 self.assertEqual(case["expected"]["storage"]["0x00"], f"0x{copy_size:064x}")
                 self.assertIn("0x01", case["expected"]["storage"])
+            present_case = manifest_by_id["upstream.benchmark.account_query.balance.cold.present_accounts.success"]
+            self.assertEqual(
+                present_case["steps"][0]["capture_balance_before"],
+                "$present_target_balance_before",
+            )
+            self.assertEqual(
+                present_case["expected"]["storage"]["0x00"],
+                "$present_target_balance_after_word",
+            )
             self.assertFalse(
                 any("extcodecopy" in case_id for case_id in manifest_case_ids),
                 "blocked account-query extcodecopy neighbors leaked into manifest",
@@ -5312,6 +5397,61 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(sent["nonce"], "0x7")
         self.assertEqual(sent["to"], "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
 
+    def test_jsonrpc_backend_raises_manifest_gas_to_largest_transaction_floor(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calldata_4096_nonzero = "0x" + "ff" * 4096
+
+        prepared = backend._prepare_transaction(
+            {
+                "from": profile.admin_account,
+                "chainId": hex(profile.chain_id),
+                "nonce": "0x1",
+                "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                "data": calldata_4096_nonzero,
+                "gas": "0xc350",
+            }
+        )
+
+        self.assertEqual(prepared["gas"], hex(21_000 + 4096 * 4 * 10))
+        self.assertLess(int(prepared["gas"], 16), profile.gas_policy.gas_limit)
+
+    def test_jsonrpc_backend_raises_manifest_gas_to_floor_data_cost(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calldata_1024_nonzero = "0x" + "ff" * 1024
+
+        prepared = backend._prepare_transaction(
+            {
+                "from": profile.admin_account,
+                "chainId": hex(profile.chain_id),
+                "nonce": "0x1",
+                "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                "data": calldata_1024_nonzero,
+                "gas": "0xc350",
+            }
+        )
+
+        self.assertEqual(prepared["gas"], hex(21_000 + 1024 * 4 * 10))
+        self.assertLess(int(prepared["gas"], 16), profile.gas_policy.gas_limit)
+
+    def test_jsonrpc_backend_preserves_manifest_gas_above_intrinsic_floor(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+
+        prepared = backend._prepare_transaction(
+            {
+                "from": profile.admin_account,
+                "chainId": hex(profile.chain_id),
+                "nonce": "0x1",
+                "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                "data": "0x",
+                "gas": "0x55f0",
+            }
+        )
+
+        self.assertEqual(prepared["gas"], "0x55f0")
+
     def test_jsonrpc_backend_signs_and_sends_raw_transaction_from_env_key(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         private_key_hex = "0x" + "11" * 32
@@ -5471,6 +5611,239 @@ class HarnessTests(unittest.TestCase):
                 "storage.0x00: expected '0x000000000000000000000000000000000000000000000000000000000000002b', got '0x000000000000000000000000000000000000000000000000000000000000002a'"
             ],
         )
+
+    def test_jsonrpc_backend_observes_plain_storage_at_receipt_block(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_arithmetic_mapped.json")
+        arithmetic_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_7"
+        )
+
+        class StubBackend(JsonRpcBackend):
+            def __init__(self, profile):
+                super().__init__(profile)
+                self.sent = 0
+                self.storage_calls: list[list[object]] = []
+
+            def _send_transaction(self, transaction: dict[str, Any]) -> str:
+                self.sent += 1
+                return f"0xtx{self.sent}"
+
+            def _wait_for_receipt(self, tx_hash: str, timeout_seconds: int = 60) -> dict[str, Any]:
+                if tx_hash == "0xtx1":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "contractAddress": "0xcccccccccccccccccccccccccccccccccccccccc",
+                        "blockNumber": "0x99",
+                    }
+                if tx_hash == "0xtx2":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "blockNumber": "0x2a",
+                    }
+                raise AssertionError(tx_hash)
+
+            def _rpc(self, method: str, params: list[object]) -> object:
+                if method == "eth_getStorageAt":
+                    self.storage_calls.append(params)
+                    return "0x00000000000000000000000000000000000000000000000000000000000041a7"
+                raise AssertionError(method)
+
+        backend = StubBackend(profile)
+        tx_hashes, observed, context = backend.execute_case(arithmetic_case, "jsonrpc-arithmetic-exp")
+        self.assertEqual(tx_hashes, ["0xtx1", "0xtx2"])
+        self.assertEqual(
+            backend.storage_calls,
+            [["0xcccccccccccccccccccccccccccccccccccccccc", "0x00", "0x2a"]],
+        )
+        self.assertEqual(
+            observed["storage"]["0x00"],
+            "0x00000000000000000000000000000000000000000000000000000000000041a7",
+        )
+        self.assertEqual(ResultOracle().compare(arithmetic_case.expected, observed, context), [])
+
+    def test_jsonrpc_backend_retries_dns_transport_failures_before_request_reaches_rpc(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calls = {"count": 0}
+
+        class Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self) -> bytes:
+                return json.dumps({"jsonrpc": "2.0", "id": 1, "result": "0x1"}).encode()
+
+        def fake_urlopen(request, timeout):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise urllib.error.URLError(socket.gaierror(8, "nodename nor servname provided, or not known"))
+            return Response()
+
+        original_urlopen = urllib.request.urlopen
+        try:
+            urllib.request.urlopen = fake_urlopen  # type: ignore[assignment]
+            self.assertEqual(backend._rpc("eth_chainId", []), "0x1")
+        finally:
+            urllib.request.urlopen = original_urlopen  # type: ignore[assignment]
+        self.assertEqual(calls["count"], 2)
+
+    def test_jsonrpc_backend_retries_urlopen_timeout_transport_failures_before_request_reaches_rpc(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calls = {"count": 0}
+
+        class Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self) -> bytes:
+                return json.dumps({"jsonrpc": "2.0", "id": 1, "result": "0x1"}).encode()
+
+        def fake_urlopen(request, timeout):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise urllib.error.URLError(TimeoutError("The handshake operation timed out"))
+            return Response()
+
+        original_urlopen = urllib.request.urlopen
+        try:
+            urllib.request.urlopen = fake_urlopen  # type: ignore[assignment]
+            self.assertEqual(backend._rpc("eth_chainId", []), "0x1")
+        finally:
+            urllib.request.urlopen = original_urlopen  # type: ignore[assignment]
+        self.assertEqual(calls["count"], 2)
+
+    def test_jsonrpc_backend_retries_ssl_transport_failures_before_request_reaches_rpc(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calls = {"count": 0}
+
+        class Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self) -> bytes:
+                return json.dumps({"jsonrpc": "2.0", "id": 1, "result": "0x1"}).encode()
+
+        def fake_urlopen(request, timeout):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise urllib.error.URLError(ssl.SSLError("UNEXPECTED_EOF_WHILE_READING"))
+            return Response()
+
+        original_urlopen = urllib.request.urlopen
+        try:
+            urllib.request.urlopen = fake_urlopen  # type: ignore[assignment]
+            self.assertEqual(backend._rpc("eth_chainId", []), "0x1")
+        finally:
+            urllib.request.urlopen = original_urlopen  # type: ignore[assignment]
+        self.assertEqual(calls["count"], 2)
+
+    def test_jsonrpc_backend_retries_read_only_rpc_timeouts(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calls = {"count": 0}
+
+        class Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self) -> bytes:
+                return json.dumps({"jsonrpc": "2.0", "id": 1, "result": "0x7"}).encode()
+
+        def fake_urlopen(request, timeout):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise TimeoutError("The read operation timed out")
+            return Response()
+
+        original_urlopen = urllib.request.urlopen
+        try:
+            urllib.request.urlopen = fake_urlopen  # type: ignore[assignment]
+            self.assertEqual(backend._rpc("eth_getTransactionCount", [profile.admin_account, "pending"]), "0x7")
+        finally:
+            urllib.request.urlopen = original_urlopen  # type: ignore[assignment]
+        self.assertEqual(calls["count"], 2)
+
+    def test_jsonrpc_backend_does_not_retry_raw_transaction_response_timeouts(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calls = {"count": 0}
+
+        def fake_urlopen(request, timeout):
+            calls["count"] += 1
+            raise TimeoutError("The read operation timed out")
+
+        original_urlopen = urllib.request.urlopen
+        try:
+            urllib.request.urlopen = fake_urlopen  # type: ignore[assignment]
+            with self.assertRaisesRegex(TimeoutError, "rpc timeout for eth_sendRawTransaction"):
+                backend._rpc("eth_sendRawTransaction", ["0xdeadbeef"])
+        finally:
+            urllib.request.urlopen = original_urlopen  # type: ignore[assignment]
+        self.assertEqual(calls["count"], 1)
+
+    def test_jsonrpc_backend_retries_storage_read_when_receipt_block_header_lags(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_arithmetic_mapped.json")
+        arithmetic_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.arithmetic.test_exp_bench_arithmetic.exp_5.base_7"
+        )
+
+        class StubBackend(JsonRpcBackend):
+            def __init__(self, profile):
+                super().__init__(profile)
+                self.sent = 0
+                self.storage_attempts = 0
+
+            def _send_transaction(self, transaction: dict[str, Any]) -> str:
+                self.sent += 1
+                return f"0xtx{self.sent}"
+
+            def _wait_for_receipt(self, tx_hash: str, timeout_seconds: int = 60) -> dict[str, Any]:
+                if tx_hash == "0xtx1":
+                    return {
+                        "transactionHash": tx_hash,
+                        "status": "0x1",
+                        "contractAddress": "0xcccccccccccccccccccccccccccccccccccccccc",
+                        "blockNumber": "0x99",
+                    }
+                if tx_hash == "0xtx2":
+                    return {"transactionHash": tx_hash, "status": "0x1", "blockNumber": "0x2a"}
+                raise AssertionError(tx_hash)
+
+            def _rpc(self, method: str, params: list[object]) -> object:
+                if method == "eth_getStorageAt":
+                    self.storage_attempts += 1
+                    if self.storage_attempts == 1:
+                        raise RuntimeError("rpc error for eth_getStorageAt: code=-32000 message='header not found'")
+                    return "0x00000000000000000000000000000000000000000000000000000000000041a7"
+                raise AssertionError(method)
+
+        backend = StubBackend(profile)
+        tx_hashes, observed, context = backend.execute_case(arithmetic_case, "jsonrpc-arithmetic-exp")
+        self.assertEqual(tx_hashes, ["0xtx1", "0xtx2"])
+        self.assertEqual(backend.storage_attempts, 2)
+        self.assertEqual(ResultOracle().compare(arithmetic_case.expected, observed, context), [])
 
     def test_jsonrpc_backend_observes_block_context_storage_at_receipt_block(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
@@ -6985,8 +7358,15 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("upstream.benchmark.account_query.extcodecopy", "\n".join(observed_by_case))
             for case_id, expected_slots in expected_storage.items():
                 result = observed_by_case[case_id]
-                self.assertEqual(result["observed"]["storage"], expected_slots)
-                self.assertEqual(result["expected"]["storage"], expected_slots)
+                for slot, expected_value in expected_slots.items():
+                    self.assertIn(slot, result["observed"]["storage"])
+                    if not expected_value.startswith("$"):
+                        self.assertEqual(result["observed"]["storage"][slot], expected_value)
+                if all(not expected_value.startswith("$") for expected_value in expected_slots.values()):
+                    self.assertEqual(result["expected"]["storage"], expected_slots)
+                else:
+                    for slot in expected_slots:
+                        self.assertIn(slot, result["expected"]["storage"])
                 self.assertEqual(result["diffs"], [])
                 self.assertTrue(result["tx_hashes"])
                 self.assertIs(result["success"], True)
@@ -7920,6 +8300,30 @@ class HarnessTests(unittest.TestCase):
             selected_runtimes,
             {CODESIZE_RUNTIME, BALANCE_RUNTIME, SELFBALANCE_RUNTIME, *expected_codecopy_runtimes},
         )
+
+    def test_account_query_present_balance_expected_tracks_existing_target_balance(self) -> None:
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
+        present_case = next(
+            case
+            for case in manifest.cases
+            if case.case_id == "upstream.benchmark.account_query.balance.cold.present_accounts.success"
+        )
+        backend = MockBackend(admin_account="0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        oracle = ResultOracle()
+
+        _, first_observed, first_context = backend.execute_case(present_case, "reused-present-balance")
+        first_expected = oracle.resolve_expected(present_case.expected, first_context, present_case.observe)
+        self.assertEqual(first_context["$present_target_balance_before"], "0x0")
+        self.assertEqual(first_context["$present_target_balance_after"], "0x2a")
+        self.assertEqual(first_expected["storage"]["0x00"], first_observed["storage"]["0x00"])
+        self.assertEqual(first_observed["storage"]["0x00"], "0x000000000000000000000000000000000000000000000000000000000000002a")
+
+        _, second_observed, second_context = backend.execute_case(present_case, "reused-present-balance")
+        second_expected = oracle.resolve_expected(present_case.expected, second_context, present_case.observe)
+        self.assertEqual(second_context["$present_target_balance_before"], "0x000000000000000000000000000000000000000000000000000000000000002a")
+        self.assertEqual(second_context["$present_target_balance_after"], "0x54")
+        self.assertEqual(second_expected["storage"]["0x00"], second_observed["storage"]["0x00"])
+        self.assertEqual(second_observed["storage"]["0x00"], "0x0000000000000000000000000000000000000000000000000000000000000054")
 
     def test_oracle_reports_wrong_present_balance_seed_for_account_query_case(self) -> None:
         manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")

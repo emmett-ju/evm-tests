@@ -363,7 +363,7 @@ def render_memory_case(template: MemoryMappingTemplate) -> dict[str, Any]:
             template.copy_size,
             template.fixed_src_dst,
         )
-        invoke_gas = _memory_gas_hex(max(template.mem_size, template.copy_size))
+        invoke_gas = max(_memory_gas_hex(max(template.mem_size, template.copy_size)), "0x030d40", key=lambda value: int(value, 16))
         observe = {
             "storage_address": "$last_contract",
             "memory_probe": {
@@ -578,14 +578,14 @@ class _MemoryState:
 
 def _memory_gas_hex(size_hint: int) -> str:
     if size_hint >= 1_000_000:
-        return "0x1e8480"  # 2,000,000
+        return "0xff0000"  # just below Juchain's 0x1000000 transaction gas cap
     if size_hint >= 100_000:
         return "0x0f4240"  # 1,000,000
     if size_hint >= 10_240:
         return "0x061a80"  # 400,000
     if size_hint >= 1_024:
         return "0x030d40"  # 200,000
-    return "0xc350"  # 50,000
+    return "0x030d40"  # 200,000
 
 
 def _extract_param_values(text: str, pattern: str) -> list[str]:

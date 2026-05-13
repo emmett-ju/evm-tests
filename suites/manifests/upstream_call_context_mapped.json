@@ -24,9 +24,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33060005500",
+          "bytecode_init": "0x6005600c60003960056000f33060005500",
           "bytecode_runtime": "0x3060005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -71,9 +71,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33360005500",
+          "bytecode_init": "0x6005600c60003960056000f33360005500",
           "bytecode_runtime": "0x3360005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -118,9 +118,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x11600c600039116000f35f3560005500",
+          "bytecode_init": "0x6006600c60003960066000f35f3560005500",
           "bytecode_runtime": "0x5f3560005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -165,9 +165,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x11600c600039116000f35f3560005500",
+          "bytecode_init": "0x6006600c60003960066000f35f3560005500",
           "bytecode_runtime": "0x5f3560005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -212,9 +212,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x11600c600039116000f35f3560005500",
+          "bytecode_init": "0x6006600c60003960066000f35f3560005500",
           "bytecode_runtime": "0x5f3560005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -259,9 +259,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x11600c600039116000f35f3560005500",
+          "bytecode_init": "0x6006600c60003960066000f35f3560005500",
           "bytecode_runtime": "0x5f3560005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -306,9 +306,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x11600c600039116000f35f3560005500",
+          "bytecode_init": "0x6006600c60003960066000f35f3560005500",
           "bytecode_runtime": "0x5f3560005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -353,9 +353,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x11600c600039116000f35f3560005500",
+          "bytecode_init": "0x6006600c60003960066000f35f3560005500",
           "bytecode_runtime": "0x5f3560005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -400,9 +400,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x11600c600039116000f35f3560005500",
+          "bytecode_init": "0x6006600c60003960066000f35f3560005500",
           "bytecode_runtime": "0x5f3560005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -447,9 +447,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x11600c600039116000f35f3560005500",
+          "bytecode_init": "0x6006600c60003960066000f35f3560005500",
           "bytecode_runtime": "0x5f3560005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -494,9 +494,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33660005500",
+          "bytecode_init": "0x6005600c60003960056000f33660005500",
           "bytecode_runtime": "0x3660005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -541,9 +541,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33660005500",
+          "bytecode_init": "0x6005600c60003960056000f33660005500",
           "bytecode_runtime": "0x3660005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -588,9 +588,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33660005500",
+          "bytecode_init": "0x6005600c60003960056000f33660005500",
           "bytecode_runtime": "0x3660005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -635,9 +635,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33660005500",
+          "bytecode_init": "0x6005600c60003960056000f33660005500",
           "bytecode_runtime": "0x3660005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -682,9 +682,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33660005500",
+          "bytecode_init": "0x6005600c60003960056000f33660005500",
           "bytecode_runtime": "0x3660005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -729,9 +729,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33660005500",
+          "bytecode_init": "0x6005600c60003960056000f33660005500",
           "bytecode_runtime": "0x3660005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -776,9 +776,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33660005500",
+          "bytecode_init": "0x6005600c60003960056000f33660005500",
           "bytecode_runtime": "0x3660005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -823,9 +823,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33660005500",
+          "bytecode_init": "0x6005600c60003960056000f33660005500",
           "bytecode_runtime": "0x3660005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -870,9 +870,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33460005500",
+          "bytecode_init": "0x6005600c60003960056000f33460005500",
           "bytecode_runtime": "0x3460005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
@@ -917,9 +917,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x0f600c6000390f6000f33460005500",
+          "bytecode_init": "0x6005600c60003960056000f33460005500",
           "bytecode_runtime": "0x3460005500",
-          "gas": "0x186a0"
+          "gas": "0x493e0"
         },
         {
           "action": "wait_receipt",
