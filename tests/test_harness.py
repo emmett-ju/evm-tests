@@ -135,6 +135,14 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(profile.name, "mock-devnet")
         self.assertEqual(profile.namespace_policy.prefix, "evmtest")
         self.assertEqual(profile.backend, "mock")
+        self.assertTrue(profile.supports_feature("clz"))
+        self.assertFalse(profile.supports_feature("bls12_381_precompiles"))
+        self.assertFalse(profile.supports_feature("p256verify_precompile"))
+        self.assertFalse(profile.supports_feature("modexp_eip7883"))
+        self.assertFalse(profile.supports_feature("calldata_floor_eip7623"))
+        self.assertFalse(profile.supports_feature("eip7702"))
+        self.assertFalse(profile.supports_feature("blob_cell_proofs"))
+        self.assertFalse(profile.supports_feature("block_access_lists"))
 
     def test_real_rpc_profile_defaults_to_jsonrpc_backend(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
@@ -865,6 +873,46 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("upstream.benchmark.stack.test_swap.swap16", selected_ids)
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
+    def test_selector_allows_upstream_mapped_bitwise_cases(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/mock.toml")
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_bitwise_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(len(selected), 12)
+        selected_ids = [case.case_id for case in selected]
+        self.assertIn("upstream.benchmark.bitwise.test_bitwise.and", selected_ids)
+        self.assertIn("upstream.benchmark.bitwise.test_clz_diff.clz", selected_ids)
+        self.assertIn("upstream.benchmark.bitwise.test_clz_same.clz", selected_ids)
+        self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", selected_ids)
+        self.assertIn("upstream.benchmark.bitwise.test_shifts.sar", selected_ids)
+        self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
+        self.assertEqual({case.family for case in selected}, {"state/bitwise"})
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
+    def test_selector_rejects_clz_bitwise_cases_when_profile_lacks_feature_flag(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/mock.toml")
+        profile.feature_flags["clz"] = False
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_bitwise_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        selected_ids = [case.case_id for case in selected]
+        self.assertEqual(len(selected), 10)
+        self.assertIn("upstream.benchmark.bitwise.test_bitwise.and", selected_ids)
+        self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", selected_ids)
+        self.assertIn("upstream.benchmark.bitwise.test_shifts.sar", selected_ids)
+        self.assertNotIn("upstream.benchmark.bitwise.test_clz_diff.clz", selected_ids)
+        self.assertNotIn("upstream.benchmark.bitwise.test_clz_same.clz", selected_ids)
+        blocked = {decision.case.case_id: decision.reasons for decision in decisions if not decision.selected}
+        self.assertEqual(
+            blocked,
+            {
+                "upstream.benchmark.bitwise.test_clz_diff.clz": [
+                    "bitwise opcode CLZ requires feature_flags.clz=true in chain profile"
+                ],
+                "upstream.benchmark.bitwise.test_clz_same.clz": [
+                    "bitwise opcode CLZ requires feature_flags.clz=true in chain profile"
+                ],
+            },
+        )
 
     def test_selector_allows_upstream_mapped_arithmetic_cases(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")

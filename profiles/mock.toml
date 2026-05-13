@@ -24,6 +24,14 @@ max_create_child_code = true
 create_collision = true
 large_nonzero_returndata = true
 selfdestruct_created_clears_code = true
+clz = true
+bls12_381_precompiles = false
+p256verify_precompile = false
+modexp_eip7883 = false
+calldata_floor_eip7623 = false
+eip7702 = false
+blob_cell_proofs = false
+block_access_lists = false
 
 [block_context]
 coinbase = "0x1111111111111111111111111111111111111111"

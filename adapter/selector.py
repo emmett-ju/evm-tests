@@ -61,6 +61,11 @@ class TestSelector:
                 and not self.profile.supports_feature("large_log_payload")
             ):
                 return ["log payload requires feature_flags.large_log_payload=true in chain profile"]
+        bitwise_probe = case.observe.get("bitwise_probe")
+        if bitwise_probe is not None:
+            opcode = bitwise_probe.get("opcode")
+            if opcode == "CLZ" and not self.profile.supports_feature("clz"):
+                return ["bitwise opcode CLZ requires feature_flags.clz=true in chain profile"]
         system_witness = case.observe.get("system_witness")
         if system_witness is not None:
             shape = system_witness.get("shape")
