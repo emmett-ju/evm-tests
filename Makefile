@@ -5,6 +5,7 @@ REPORT_DIR ?= reports/rpc
 FAMILY ?=
 MANIFEST ?=
 REPORT ?=
+SUMMARY ?=
 SYNC_CHECK_ONLY ?= 0
 
 UPSTREAM_FAMILIES := account_query arithmetic bitwise block_context call_context comparison control_flow keccak log memory stack storage system tx_context
@@ -25,6 +26,7 @@ help:
 		'  REPORT_DIR=reports/rpc                - per-family report directory' \
 		'  FAMILY=bitwise                        - family slug for rpc-subset; hyphen or underscore accepted' \
 		'  MANIFEST=suites/manifests/foo.json    - explicit manifest for rpc-subset' \
+		'  SUMMARY=reports/rpc/summary.json      - summary output path; defaults per target' \
 		'  SYNC_CHECK_ONLY=1                     - validate sync generation without applying artifacts'
 
 rpc-all:
@@ -36,7 +38,10 @@ rpc-all:
 		echo "==> $$manifest"; \
 		$(PYTHON) -m adapter.cli run --profile $(PROFILE) --manifest "$$manifest" --state-dir $(STATE_DIR) --report "$$report"; \
 		$(PYTHON) scripts/assert_report_success.py "$$report"; \
-	done
+	done; \
+	summary="$(SUMMARY)"; \
+	if [ -z "$$summary" ]; then summary="$(REPORT_DIR)/summary.json"; fi; \
+	$(PYTHON) scripts/summarize_rpc_reports.py --report-dir $(REPORT_DIR) --inventory-dir suites/templates --output "$$summary"
 
 rpc-subset:
 	@mkdir -p $(REPORT_DIR)
@@ -56,7 +61,10 @@ rpc-subset:
 	if [ -z "$$report" ]; then report="$(REPORT_DIR)/$${name}.json"; fi; \
 	echo "==> $$manifest"; \
 	$(PYTHON) -m adapter.cli run --profile $(PROFILE) --manifest "$$manifest" --state-dir $(STATE_DIR) --report "$$report"; \
-	$(PYTHON) scripts/assert_report_success.py "$$report"
+	$(PYTHON) scripts/assert_report_success.py "$$report"; \
+	summary="$(SUMMARY)"; \
+	if [ -z "$$summary" ]; then summary="$(REPORT_DIR)/$${name}-summary.json"; fi; \
+	$(PYTHON) scripts/summarize_rpc_reports.py --report "$$report" --inventory-dir suites/templates --output "$$summary"
 
 sync-upstream:
 	@if [ "$(SYNC_CHECK_ONLY)" = "1" ]; then \

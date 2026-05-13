@@ -107,6 +107,7 @@ from adapter.report import durable_report_path, write_report
 from adapter.selector import TestSelector
 from adapter.signer import keccak256, private_key_to_address, sign_type_2_transaction
 from scripts.assert_report_success import main as assert_report_success_main
+from scripts.summarize_rpc_reports import main as summarize_rpc_reports_main
 from scripts.sync_upstream_artifacts import FAMILY_SPECS, sync_to_staging
 
 
@@ -5033,6 +5034,64 @@ class HarnessTests(unittest.TestCase):
                 },
                 {"total": 39, "admitted": 9, "blocked": 30},
             )
+
+    def test_summarize_rpc_reports_includes_inventory_coverage_reference(self) -> None:
+        passed = ExecutionResult(
+            case_id="passing-case",
+            namespace="ns-pass",
+            success=True,
+            tx_hashes=[],
+            context={},
+            observed={},
+            expected={},
+            diffs=[],
+        )
+        failed = ExecutionResult(
+            case_id="failing-case",
+            namespace="ns-fail",
+            success=False,
+            tx_hashes=[],
+            context={},
+            observed={},
+            expected={},
+            diffs=["boom"],
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            report_path = tmp_path / "reports" / "sample.json"
+            output_path = tmp_path / "summary.json"
+            write_report(
+                Report(
+                    manifest="sample-manifest",
+                    execution_specs_ref="test-ref",
+                    suite_version="0.1.0",
+                    chain_profile="mock-devnet",
+                    chain_profile_version="1",
+                    results=[passed, failed],
+                ),
+                report_path,
+            )
+
+            self.assertEqual(
+                summarize_rpc_reports_main(
+                    [
+                        "--report",
+                        str(report_path),
+                        "--inventory-dir",
+                        str(ROOT / "suites/templates"),
+                        "--output",
+                        str(output_path),
+                    ]
+                ),
+                1,
+            )
+            summary = json.loads(output_path.read_text())
+
+        self.assertEqual(summary["totals"], {"families": 1, "selected": 2, "passed": 1, "failed": 1})
+        self.assertEqual(summary["coverage_reference"], {"families": 14, "cases": 613, "admitted": 537, "blocked": 76})
+        self.assertEqual(summary["families"][0]["failed_cases"], ["failing-case"])
+        self.assertFalse(summary["coverage_alignment"]["selected_equals_admitted"])
+        self.assertFalse(summary["coverage_alignment"]["failed_zero"])
 
     def test_sync_upstream_artifacts_stages_all_families_without_applying(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

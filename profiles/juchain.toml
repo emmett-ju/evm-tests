@@ -2,7 +2,7 @@ name = "juchain-testnet"
 rpc_url = "https://testnet-rpc.juchain.org"
 chain_id = 202599
 hardfork = "cancun"
-admin_account = "0x5a9B6AB4e8e13EEb5552d0181B73f8D75bBF83BC"
+admin_account = "0x9d50666A60E0573Eb8789Ff7AcadB4666C0A5E7B"
 admin_key_source = "env:JUCHAIN_PRIVATE_KEY"
 trace_support = true
 

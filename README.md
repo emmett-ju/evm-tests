@@ -124,22 +124,22 @@ Run the local regression suite directly when developing code:
 python3 -m unittest discover -s tests -v
 ```
 
-Run every upstream-mapped manifest against a real RPC profile:
+Run every upstream-mapped manifest against a real RPC profile. This writes one report per family and a combined summary at `reports/rpc/summary.json`:
 
 ```bash
 make rpc-all PROFILE=profiles/juchain.toml STATE_DIR=.state REPORT_DIR=reports/rpc
 ```
 
-Run one upstream family against a real RPC profile:
+Run one upstream family against a real RPC profile. This writes the family report plus a subset summary in the report directory:
 
 ```bash
 make rpc-subset PROFILE=profiles/juchain.toml FAMILY=bitwise STATE_DIR=.state REPORT_DIR=reports/rpc
 ```
 
-Run an explicit manifest path:
+Run an explicit manifest path and choose report/summary paths:
 
 ```bash
-make rpc-subset PROFILE=profiles/juchain.toml MANIFEST=suites/manifests/upstream_storage_mapped.json STATE_DIR=.state REPORT=reports/rpc/storage.json
+make rpc-subset PROFILE=profiles/juchain.toml MANIFEST=suites/manifests/upstream_storage_mapped.json STATE_DIR=.state REPORT=reports/rpc/storage.json SUMMARY=reports/rpc/storage-summary.json
 ```
 
 Use the mock profile for local smoke checks that should not hit an external chain:
