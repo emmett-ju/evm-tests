@@ -188,10 +188,10 @@ class HarnessTests(unittest.TestCase):
         # Count admitted cases
         admitted = [e for e in inventory["entries"] if e["admitted"]]
         # add_G1_bls.json (2) + pairing_check_bls.json (2) = 4
-        self.assertEqual(len(admitted), 4)
+        self.assertEqual(len(admitted), 2)
         
         # Verify manifest (templates in this context)
-        self.assertEqual(len(templates), 4)
+        self.assertEqual(len(templates), 2)
         for template in templates:
             self.assertIn("BLS12-381", template.description)
 
@@ -1042,7 +1042,7 @@ class HarnessTests(unittest.TestCase):
         profile.feature_flags["bls12_381_precompiles"] = True
         manifest = load_manifest(ROOT / "suites/manifests/upstream_precompile_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
-        self.assertEqual(len(selected), 4)
+        self.assertEqual(len(selected), 2)
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
     def test_mock_upstream_precompile_manifest_passes(self) -> None:
@@ -5158,7 +5158,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 14, "cases": 613, "admitted": 537, "blocked": 76},
+            {"families": 15, "cases": 1079, "admitted": 539, "blocked": 540},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -5237,7 +5237,7 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 537, "blocked": 76},
+                {"families": 15, "cases": 1079, "admitted": 539, "blocked": 540},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -5308,11 +5308,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 536, "blocked": 76},
+                {"families": 15, "cases": 1078, "admitted": 538, "blocked": 540},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 14, "cases": 613, "admitted": 537, "blocked": 76},
+                {"families": 15, "cases": 1079, "admitted": 539, "blocked": 540},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -5332,7 +5332,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 14, "cases": 612, "admitted": 536, "blocked": 76},
+                {"families": 15, "cases": 1078, "admitted": 538, "blocked": 540},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -5397,7 +5397,7 @@ class HarnessTests(unittest.TestCase):
             summary = json.loads(output_path.read_text())
 
         self.assertEqual(summary["totals"], {"families": 1, "selected": 2, "passed": 1, "failed": 1})
-        self.assertEqual(summary["coverage_reference"], {"families": 14, "cases": 613, "admitted": 537, "blocked": 76})
+        self.assertEqual(summary["coverage_reference"], {"families": 15, "cases": 1079, "admitted": 539, "blocked": 540})
         self.assertEqual(summary["families"][0]["failed_cases"], ["failing-case"])
         self.assertFalse(summary["coverage_alignment"]["selected_equals_admitted"])
         self.assertFalse(summary["coverage_alignment"]["failed_zero"])
@@ -5413,7 +5413,7 @@ class HarnessTests(unittest.TestCase):
 
             payload = sync_to_staging(ROOT, staged_templates, staged_manifests)
 
-            self.assertEqual(payload["summary"], {"families": 14, "cases": 613, "admitted": 537, "blocked": 76})
+            self.assertEqual(payload["summary"], {"families": 15, "cases": 1079, "admitted": 539, "blocked": 540})
             self.assertEqual(len(payload["families"]), len(FAMILY_SPECS))
             for spec in FAMILY_SPECS:
                 self.assertTrue((staged_templates / spec.template_file).exists(), spec.template_file)
@@ -5453,8 +5453,14 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("upstream.benchmark.bitwise.test_clz_same.clz", doc)
         self.assertIn("upstream.benchmark.bitwise.test_clz_diff.clz", doc)
         self.assertIn("does not claim broader Osaka CLZ scenario coverage", doc)
-        self.assertIn("BLS12-381 and P256VERIFY", doc)
+        self.assertIn("Proven on Juchain when `feature_flags.bls12_381_precompiles=true`", doc)
         self.assertIn("MODEXP gas boundary", doc)
+
+    def test_prague_osaka_precompile_docs_match_feature_contract(self) -> None:
+        doc = (ROOT / "docs/benchmark-coverage-status.md").read_text()
+        self.assertIn("Proven on Juchain when `feature_flags.bls12_381_precompiles=true`", doc)
+        self.assertIn("minimal admitted subset (`add_G1`)", doc)
+        self.assertIn("does not claim broad EIP-2537 compliance beyond those specific vectors", doc)
 
     def test_bootstrapper_is_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
