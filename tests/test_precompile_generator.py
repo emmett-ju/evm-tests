@@ -11,7 +11,7 @@ class TestPrecompileGenerator(unittest.TestCase):
     def test_precompile_generator_emits_minimal_bls_inventory(self):
         result = scan_vectors(self.vectors_dir)
         inventory = result["inventory"]
-        manifest = result["manifest"]
+        templates = result["templates"]
         
         # Verify inventory
         self.assertEqual(inventory["family"], "upstream-precompile")
@@ -33,13 +33,11 @@ class TestPrecompileGenerator(unittest.TestCase):
         add_g1_2 = next(e for e in inventory["entries"] if "add_G1.2" in e["case_id"])
         self.assertIn("case limit exceeded for minimal probe", add_g1_2["reasons"])
 
-        # Verify manifest
-        self.assertEqual(len(manifest["cases"]), 4)
-        for case in manifest["cases"]:
-            self.assertEqual(case["family"], "upstream-precompile")
-            self.assertEqual(case["kind"], "upstream_mapped")
-            self.assertIn("precompile_probe", case["observe"])
-            self.assertEqual(case["observe"]["precompile_probe"]["family"], "bls12_381")
+        # Verify templates
+        self.assertEqual(len(templates), 4)
+        for template in templates:
+            self.assertTrue(template.case_id.startswith("upstream.precompile.bls12_381"))
+            self.assertEqual(template.address, 0x0B if "add_G1" in template.case_id else 0x11)
 
     def test_precompile_wrapper_runtime_and_storage_witness_are_deterministic(self):
         # Representative G1ADD case

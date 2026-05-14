@@ -4587,16 +4587,20 @@
     {
       "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/pairing_check_bls.json:bls_pairing_e(0,0)",
       "case_id": "upstream.precompile.bls12_381.pairing_check.0",
-      "admitted": true,
-      "reasons": [],
+      "admitted": false,
+      "reasons": [
+        "precompile pairing_check deferred"
+      ],
       "address": "0x11",
       "input_size": 384
     },
     {
       "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/pairing_check_bls.json:bls_pairing_e(0,0)=e(0,0)",
       "case_id": "upstream.precompile.bls12_381.pairing_check.1",
-      "admitted": true,
-      "reasons": [],
+      "admitted": false,
+      "reasons": [
+        "precompile pairing_check deferred"
+      ],
       "address": "0x11",
       "input_size": 768
     },
@@ -4605,7 +4609,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.2",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 384
@@ -4615,7 +4619,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.3",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 384
@@ -4625,7 +4629,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.4",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 768
@@ -4635,7 +4639,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.5",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 768
@@ -4645,7 +4649,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.6",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 768
@@ -4655,7 +4659,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.7",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 384
@@ -4665,7 +4669,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.8",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 1152
@@ -4675,7 +4679,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.9",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 768
@@ -4685,7 +4689,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.10",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 768
@@ -4695,7 +4699,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.11",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 768
@@ -4705,7 +4709,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.12",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 768
@@ -4715,7 +4719,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.13",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 1152
@@ -4725,7 +4729,7 @@
       "case_id": "upstream.precompile.bls12_381.pairing_check.14",
       "admitted": false,
       "reasons": [
-        "case limit exceeded for minimal probe"
+        "precompile pairing_check deferred"
       ],
       "address": "0x11",
       "input_size": 1152

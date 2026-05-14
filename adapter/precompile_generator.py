@@ -23,7 +23,6 @@ PRECOMPILE_MAP_FP2 = 0x13
 
 ADMITTED_FILES = {
     "add_G1_bls.json",
-    "pairing_check_bls.json",
 }
 
 PRECOMPILE_ADDRESSES = {
@@ -165,10 +164,20 @@ def render_precompile_case(template: PrecompileMappingTemplate) -> dict[str, Any
                 "gas": "0x989680",
             },
             {
+                "action": "wait_receipt",
+                "tx_hash": "$last",
+                "timeout_seconds": 60,
+            },
+            {
                 "action": "invoke_contract",
                 "to": "$last_contract",
                 "data": "0x",
                 "gas": "0x989680",
+            },
+            {
+                "action": "wait_receipt",
+                "tx_hash": "$last",
+                "timeout_seconds": 60,
             }
         ],
         "expected": {

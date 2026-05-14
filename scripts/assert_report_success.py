@@ -16,6 +16,33 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     report_path = Path(args.report)
     payload = json.loads(report_path.read_text())
+
+    # If it's a summary file, check all reports within it
+    if "reports" in payload and isinstance(payload["reports"], list):
+        all_passed = True
+        for sub_report_path_str in payload["reports"]:
+            sub_report_path = Path(sub_report_path_str)
+            if not sub_report_path.exists():
+                print(f"warning: report {sub_report_path} listed in summary does not exist")
+                all_passed = False
+                continue
+            
+            sub_payload = json.loads(sub_report_path.read_text())
+            results = sub_payload.get("results")
+            if not isinstance(results, list):
+                print(f"report {sub_report_path} missing list field 'results'")
+                all_passed = False
+                continue
+
+            failed = [result for result in results if not _is_success(result)]
+            if failed:
+                print(f"report failed: {sub_report_path} ({len(failed)} failed / {len(results)} total)")
+                all_passed = False
+            else:
+                print(f"report ok: {sub_report_path} ({len(results)} passed)")
+
+        return 0 if all_passed else 1
+
     results = payload.get("results")
     if not isinstance(results, list):
         raise SystemExit(f"report {report_path} missing list field 'results'")

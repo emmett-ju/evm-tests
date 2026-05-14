@@ -14,11 +14,11 @@ Current first-family coverage is:
 
 | Status | Count |
 |---|---:|
-| Families scanned | 14 |
-| Total cases | 613 |
-| Admitted cases | 537 |
-| Blocked cases | 76 |
-| Coverage | 87.6% |
+| Families scanned | 15 |
+| Total cases | 1079 |
+| Admitted cases | 541 |
+| Blocked cases | 538 |
+| Coverage | 50.1% |
 
 ## Fork capability coverage contract
 
