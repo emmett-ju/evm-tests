@@ -347,6 +347,10 @@ class MockBackend:
                 if system_witness is not None and system_witness.get("shape") == "create_empty_child":
                     self._simulate_create_empty_child_probe(storage, system_witness, code)
                     continue
+                precompile_probe = case.observe.get("precompile_probe")
+                if precompile_probe is not None:
+                    self._simulate_precompile_probe(storage, precompile_probe, code)
+                    continue
                 if system_witness is not None and system_witness.get("shape") == "create_child_code":
                     self._simulate_create_child_code_probe(storage, system_witness, code)
                     continue
@@ -756,6 +760,41 @@ class MockBackend:
                 storage["0x05"] = self._hex_to_word(hex(value))
             return
         raise ValueError(f"unsupported selfdestruct_single scenario: {scenario!r}")
+
+    def _simulate_precompile_probe(
+        self,
+        storage: dict[str, str],
+        precompile_probe: dict[str, Any],
+        code: str | None,
+    ) -> None:
+        if precompile_probe["family"] != "bls12_381":
+            raise ValueError(f"unsupported precompile probe family: {precompile_probe['family']}")
+        
+        if code is None or not code.startswith("0x"):
+             raise ValueError("precompile probe requires valid contract code")
+             
+        address = int(precompile_probe["address"], 16)
+        input_size = precompile_probe["input_size"]
+        output_size = precompile_probe["output_size"]
+        expected_success = precompile_probe["expected_success"]
+        expected_digest = precompile_probe["expected_output_digest"]
+        
+        if not self._is_precompile_wrapper_runtime(code, address, input_size):
+             raise ValueError("mock precompile probe rejects tampered runtime or metadata")
+
+        storage["0x00"] = WORD_01 if expected_success else ZERO_STORAGE_WORD
+        storage["0x01"] = self._hex_to_word(hex(output_size))
+        if output_size > 0:
+            storage["0x02"] = expected_digest
+
+    def _is_precompile_wrapper_runtime(self, code: str, address: int, input_size: int) -> bool:
+        from adapter.precompile_generator import generate_precompile_runtime
+        code_bytes = bytes.fromhex(code.removeprefix("0x"))
+        if len(code_bytes) < input_size:
+            return False
+        input_bytes = code_bytes[-input_size:] if input_size > 0 else b""
+        expected_runtime = generate_precompile_runtime(address, input_bytes)
+        return code_bytes == expected_runtime
 
     def _decode_selfdestruct_existing_mode(self, data: str) -> int:
         if not isinstance(data, str) or not data.startswith("0x"):

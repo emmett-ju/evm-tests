@@ -1,6 +1,7 @@
 {
   "name": "upstream-storage-auto-inventory",
   "version": "1",
+  "family": "storage",
   "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_storage.py",
   "entries": [
     {

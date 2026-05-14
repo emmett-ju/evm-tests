@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import json
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from adapter.signer import keccak256
 from adapter.assembler import _push_int, _build_init_code
+from adapter.inventory import write_inventory_payload
+from adapter.manifest import resolve_execution_specs_ref
 
 # EIP-2537 Precompile Addresses
 PRECOMPILE_G1ADD = 0x0B
@@ -33,11 +38,163 @@ PRECOMPILE_ADDRESSES = {
     "map_fp2_to_G2": PRECOMPILE_MAP_FP2,
 }
 
-def generate_precompile_wrapper(
+@dataclass(frozen=True, slots=True)
+class PrecompileMappingTemplate:
+    case_id: str
+    description: str
+    namespace_seed: str
+    upstream_ref: str
+    notes: list[str]
+    address: int
+    input_hex: str
+    expected_hex: str
+    base_name: str
+
+def generate_upstream_precompile_templates(
+    *,
+    repo_root: str | Path,
+    source_path: str | Path | None = None,
+    output_path: str | Path | None = None,
+    inventory_path: str | Path | None = None,
+) -> dict[str, Any]:
+    if output_path is None and inventory_path is None:
+        raise ValueError("at least one of output_path or inventory_path is required")
+    repo_root_path = Path(repo_root).resolve()
+    source = (
+        Path(source_path).resolve()
+        if source_path is not None
+        else repo_root_path / "third_party" / "execution-specs" / "tests" / "prague" / "eip2537_bls_12_381_precompiles" / "vectors"
+    )
+    
+    result = scan_vectors(source)
+    inventory = result["inventory"]["entries"]
+    templates = result["templates"]
+    
+    payload = {
+        "name": "upstream-precompile-mapping-templates",
+        "version": "1",
+        "source": str(source.relative_to(repo_root_path)) if source.is_relative_to(repo_root_path) else str(source),
+        "cases": [asdict(template) for template in templates],
+    }
+    
+    if output_path is not None:
+        output = Path(output_path).resolve()
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(payload, indent=2) + "\n")
+        
+    if inventory_path is not None:
+        write_inventory_payload(
+            inventory_path,
+            family="upstream-precompile",
+            name="upstream-precompile-inventory",
+            source=payload["source"],
+            entries=inventory,
+        )
+    return payload
+
+def generate_upstream_precompile_manifest(
+    *,
+    repo_root: str | Path,
+    output_path: str | Path,
+    template_path: str | Path | None = None,
+    suite_version: str = "0.1.0",
+    chain_profile_version: str = "1",
+) -> dict[str, Any]:
+    repo_root_path = Path(repo_root).resolve()
+    output = Path(output_path).resolve()
+    template_file = (
+        Path(template_path).resolve()
+        if template_path is not None
+        else repo_root_path / "suites" / "templates" / "upstream_precompile_templates.json"
+    )
+    
+    data = json.loads(template_file.read_text())
+    templates = [
+        PrecompileMappingTemplate(**entry)
+        for entry in data["cases"]
+    ]
+    
+    execution_specs_ref = resolve_execution_specs_ref(
+        repo_root_path / "suites" / "manifests" / "upstream_precompile_mapped.json",
+        "submodule-pending",
+    )
+    
+    manifest = {
+        "name": "upstream-precompile-mapped",
+        "version": "1",
+        "execution_specs_ref": execution_specs_ref,
+        "suite_version": suite_version,
+        "chain_profile_version": chain_profile_version,
+        "cases": [render_precompile_case(template) for template in templates],
+    }
+    
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(manifest, indent=2) + "\n")
+    return manifest
+
+def render_precompile_case(template: PrecompileMappingTemplate) -> dict[str, Any]:
+    input_bytes = bytes.fromhex(template.input_hex.removeprefix("0x"))
+    expected_hex = template.expected_hex.removeprefix("0x")
+    
+    runtime_bytes = generate_precompile_runtime(template.address, input_bytes)
+    init_code = _build_init_code(runtime_bytes.hex())
+    
+    # Deterministic storage expectations
+    expected_storage = {
+        "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "0x01": "0x" + (len(expected_hex)//2).to_bytes(32, "big").hex(),
+    }
+    if expected_hex:
+        digest = get_output_digest(expected_hex)
+        expected_storage["0x02"] = digest
+    
+    return {
+        "kind": "upstream_mapped",
+        "case_id": template.case_id,
+        "family": "upstream-precompile",
+        "description": template.description,
+        "filters": {
+            "requires_genesis_state": False,
+        },
+        "namespace_seed": template.namespace_seed,
+        "steps": [
+            {
+                "action": "deploy_contract",
+                "bytecode_init": init_code,
+                "bytecode_runtime": "0x" + runtime_bytes.hex(),
+                "gas": "0x989680",
+            },
+            {
+                "action": "invoke_contract",
+                "to": "$last_contract",
+                "data": "0x",
+                "gas": "0x989680",
+            }
+        ],
+        "expected": {
+            "storage": expected_storage
+        },
+        "observe": {
+            "storage_address": "$last_contract",
+            "precompile_probe": {
+                "family": "bls12_381",
+                "precompile": template.base_name,
+                "address": hex(template.address),
+                "input_size": len(input_bytes),
+                "output_size": len(expected_hex)//2,
+                "expected_success": True,
+                "expected_output_digest": get_output_digest(expected_hex),
+                "required_feature": "bls12_381_precompiles"
+            }
+        },
+        "upstream_ref": template.upstream_ref
+    }
+
+def generate_precompile_runtime(
     precompile_address: int, 
     input_bytes: bytes, 
     gas: int = 10_000_000
-) -> str:
+) -> bytes:
     """
     Builds a deterministic wrapper runtime that:
     1. CODECOPYs embedded input to memory 0
@@ -123,8 +280,16 @@ def generate_precompile_wrapper(
     # Fix JUMPI offset
     ops[not_empty_label_idx] = bytes([0x61]) + not_empty_jumpdest.to_bytes(2, "big")
     
-    runtime_code = b"".join(ops) + input_bytes
-    return _build_init_code(runtime_code.hex())
+    return b"".join(ops) + input_bytes
+
+def generate_precompile_wrapper(
+    precompile_address: int, 
+    input_bytes: bytes, 
+    gas: int = 10_000_000
+) -> str:
+    runtime_bytes = generate_precompile_runtime(precompile_address, input_bytes, gas)
+    return _build_init_code(runtime_bytes.hex())
+
 
 def get_output_digest(expected_hex: str) -> str:
     if not expected_hex:
@@ -135,6 +300,7 @@ def get_output_digest(expected_hex: str) -> str:
 def scan_vectors(vectors_dir: Path) -> Dict[str, Any]:
     cases = []
     inventory_entries = []
+    templates = []
     
     # Get all json files in vectors_dir
     json_files = sorted(list(vectors_dir.glob("*.json")))
@@ -179,64 +345,25 @@ def scan_vectors(vectors_dir: Path) -> Dict[str, Any]:
             inventory_entries.append(inventory_entry)
             
             if is_admitted:
-                input_hex = item["Input"].removeprefix("0x")
-                input_bytes = bytes.fromhex(input_hex)
-                expected_hex = item.get("Expected", "").removeprefix("0x")
+                input_hex = item["Input"]
+                expected_hex = item.get("Expected", "")
                 
-                init_code = generate_precompile_wrapper(address, input_bytes)
-                
-                # Deterministic storage expectations
-                expected_storage = {
-                    "0x0000000000000000000000000000000000000000000000000000000000000000": "0x0000000000000000000000000000000000000000000000000000000000000001",
-                    "0x0000000000000000000000000000000000000000000000000000000000000001": "0x" + (len(expected_hex)//2).to_bytes(32, "big").hex(),
-                }
-                if expected_hex:
-                    digest = get_output_digest(expected_hex)
-                    expected_storage["0x0000000000000000000000000000000000000000000000000000000000000002"] = digest
-                
-                case = {
-                    "kind": "upstream_mapped",
-                    "case_id": case_id,
-                    "family": "upstream-precompile",
-                    "description": f"BLS12-381 {base_name} probe: {case_name}",
-                    "filters": {
-                        "requires_genesis_state": False,
-                    },
-                    "namespace_seed": case_id,
-                    "steps": [
-                        {
-                            "action": "deploy_contract",
-                            "bytecode_init": init_code,
-                            "bytecode_runtime": "0x",
-                            "gas": "0x989680",
-                        },
-                        {
-                            "action": "invoke_contract",
-                            "to": "deployed_contract_0",
-                            "data": "0x",
-                            "gas": "0x989680",
-                        }
+                template = PrecompileMappingTemplate(
+                    case_id=case_id,
+                    description=f"BLS12-381 {base_name} probe: {case_name}",
+                    namespace_seed=case_id,
+                    upstream_ref=upstream_ref,
+                    notes=[
+                        f"Upstream intent: probe BLS12-381 precompile {base_name}.",
+                        "RPC mapping: deploy a wrapper that calls the precompile and records success/returndata/output-digest to storage.",
+                        "Admitted as part of minimal Prague BLS12-381 probe."
                     ],
-                    "expected": {
-                        "storage": {
-                            "deployed_contract_0": expected_storage
-                        }
-                    },
-                    "observe": {
-                        "precompile_probe": {
-                            "family": "bls12_381",
-                            "precompile": base_name,
-                            "address": hex(address),
-                            "input_size": len(input_bytes),
-                            "output_size": len(expected_hex)//2,
-                            "expected_success": True,
-                            "expected_output_digest": get_output_digest(expected_hex),
-                            "required_feature": "bls12_381_precompiles"
-                        }
-                    },
-                    "upstream_ref": upstream_ref
-                }
-                cases.append(case)
+                    address=address,
+                    input_hex=input_hex,
+                    expected_hex=expected_hex,
+                    base_name=base_name,
+                )
+                templates.append(template)
                 
     return {
         "inventory": {
@@ -245,11 +372,7 @@ def scan_vectors(vectors_dir: Path) -> Dict[str, Any]:
             "family": "upstream-precompile",
             "entries": inventory_entries,
         },
-        "manifest": {
-            "name": "upstream-precompile-mapped",
-            "version": "1",
-            "cases": cases,
-        }
+        "templates": templates
     }
 
 if __name__ == "__main__":

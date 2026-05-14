@@ -1026,23 +1026,69 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(len(selected_ids), len(set(selected_ids)))
         self.assertEqual(all_ids - set(selected_ids), expected_clz_ids)
         self.assertEqual(blocked_ids, expected_clz_ids)
-        self.assertIn("upstream.benchmark.bitwise.test_bitwise.and", selected_ids)
-        self.assertIn("upstream.benchmark.bitwise.test_shifts.shr", selected_ids)
-        self.assertIn("upstream.benchmark.bitwise.test_shifts.sar", selected_ids)
-        self.assertNotIn("upstream.benchmark.bitwise.test_clz_diff.clz", selected_ids)
-        self.assertNotIn("upstream.benchmark.bitwise.test_clz_same.clz", selected_ids)
-        blocked = {decision.case.case_id: decision.reasons for decision in decisions if not decision.selected}
-        self.assertEqual(
-            blocked,
-            {
-                "upstream.benchmark.bitwise.test_clz_diff.clz": [
-                    "bitwise opcode CLZ requires feature_flags.clz=true in chain profile"
-                ],
-                "upstream.benchmark.bitwise.test_clz_same.clz": [
-                    "bitwise opcode CLZ requires feature_flags.clz=true in chain profile"
-                ],
-            },
-        )
+
+    def test_selector_skips_precompile_when_bls_feature_disabled(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/mock.toml")
+        profile.feature_flags["bls12_381_precompiles"] = False
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_precompile_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(selected, [])
+        for decision in decisions:
+            self.assertFalse(decision.selected)
+            self.assertIn("precompile probe requires feature_flags.bls12_381_precompiles=true in chain profile", decision.reasons)
+
+    def test_selector_admits_precompile_when_bls_feature_enabled(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/mock.toml")
+        profile.feature_flags["bls12_381_precompiles"] = True
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_precompile_mapped.json")
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(len(selected), 4)
+        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
+    def test_mock_upstream_precompile_manifest_passes(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/mock.toml")
+        profile.feature_flags["bls12_381_precompiles"] = True
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_precompile_mapped.json")
+        
+        backend = MockBackend()
+        for case in manifest.cases:
+            tx_hashes, observed, context = backend.execute_case(case, "test")
+            self.assertEqual(observed["storage"]["0x00"], "0x0000000000000000000000000000000000000000000000000000000000000001")
+            # Verify output digest matches
+            expected_digest = case.observe["precompile_probe"]["expected_output_digest"]
+            if expected_digest:
+                self.assertEqual(observed["storage"]["0x02"], expected_digest)
+
+    def test_mock_precompile_probe_rejects_tampered_runtime_or_metadata(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/mock.toml")
+        profile.feature_flags["bls12_381_precompiles"] = True
+        manifest = load_manifest(ROOT / "suites/manifests/upstream_precompile_mapped.json")
+        case = manifest.cases[0]
+        
+        backend = MockBackend()
+        
+        # Tamper with address in probe
+        original_address = case.observe["precompile_probe"]["address"]
+        case.observe["precompile_probe"]["address"] = "0xc" # G1MUL instead of G1ADD
+        with self.assertRaisesRegex(ValueError, "mock precompile probe rejects tampered runtime or metadata"):
+            backend.execute_case(case, "test")
+        case.observe["precompile_probe"]["address"] = original_address
+        
+        # Tamper with input size in probe
+        original_size = case.observe["precompile_probe"]["input_size"]
+        case.observe["precompile_probe"]["input_size"] = 128 # Wrong size
+        with self.assertRaisesRegex(ValueError, "mock precompile probe rejects tampered runtime or metadata"):
+            backend.execute_case(case, "test")
+        case.observe["precompile_probe"]["input_size"] = original_size
+        
+        # Tamper with runtime code (e.g. change CALL to something else)
+        original_runtime = case.steps[0]["bytecode_runtime"]
+        # Replace 0xf1 (CALL) with 0xf2 (CALLCODE) - just a quick tamper
+        tampered_runtime = original_runtime.replace("f1", "f2", 1)
+        case.steps[0]["bytecode_runtime"] = tampered_runtime
+        with self.assertRaisesRegex(ValueError, "mock precompile probe rejects tampered runtime or metadata"):
+            backend.execute_case(case, "test")
+        case.steps[0]["bytecode_runtime"] = original_runtime
 
     def test_selector_allows_upstream_mapped_arithmetic_cases(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")

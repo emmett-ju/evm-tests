@@ -66,6 +66,13 @@ class TestSelector:
             opcode = bitwise_probe.get("opcode")
             if opcode == "CLZ" and not self.profile.supports_feature("clz"):
                 return ["bitwise opcode CLZ requires feature_flags.clz=true in chain profile"]
+        precompile_probe = case.observe.get("precompile_probe")
+        if precompile_probe is not None:
+            required_feature = precompile_probe.get("required_feature")
+            if required_feature is not None and not self.profile.supports_feature(required_feature):
+                return [
+                    f"precompile probe requires feature_flags.{required_feature}=true in chain profile"
+                ]
         system_witness = case.observe.get("system_witness")
         if system_witness is not None:
             shape = system_witness.get("shape")
