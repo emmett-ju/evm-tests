@@ -8,7 +8,7 @@ REPORT ?=
 SUMMARY ?=
 SYNC_CHECK_ONLY ?= 0
 
-UPSTREAM_FAMILIES := account_query arithmetic bitwise block_context call_context comparison control_flow keccak log memory stack storage system tx_context
+UPSTREAM_FAMILIES := account_query arithmetic bitwise block_context call_context comparison control_flow keccak log memory precompile stack storage system tx_context
 
 .PHONY: help rpc-all rpc-subset sync-upstream
 

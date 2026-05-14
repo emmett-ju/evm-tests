@@ -14,6 +14,7 @@ DURABLE_EVIDENCE_MANIFESTS = frozenset(
         "upstream-block-context-mapped",
         "upstream-log-mapped",
         "upstream-system-mapped",
+        "upstream-precompile-mapped",
     }
 )
 

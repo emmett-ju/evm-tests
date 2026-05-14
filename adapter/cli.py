@@ -38,6 +38,10 @@ from adapter.keccak_generator import (
     generate_upstream_keccak_manifest,
     generate_upstream_keccak_templates,
 )
+from adapter.precompile_generator import (
+    generate_upstream_precompile_manifest,
+    generate_upstream_precompile_templates,
+)
 from adapter.system_generator import (
     generate_upstream_system_manifest,
     generate_upstream_system_templates,
@@ -228,6 +232,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_tx_context.add_argument("--template-output")
     scan_tx_context.add_argument("--inventory-output", required=True)
+
+    scan_precompile = subparsers.add_parser("scan-upstream-precompile")
+    scan_precompile.add_argument(
+        "--source",
+        default="third_party/execution-specs/tests/prague/eip2537_bls_12_381_precompiles/vectors",
+    )
+    scan_precompile.add_argument("--template-output")
+    scan_precompile.add_argument("--inventory-output", required=True)
+
+    generate_precompile = subparsers.add_parser("generate-precompile-manifest")
+    generate_precompile.add_argument("--template", default="suites/templates/upstream_precompile_templates.json")
+    generate_precompile.add_argument("--output", required=True)
 
     generate_arithmetic = subparsers.add_parser("generate-arithmetic-manifest")
     generate_arithmetic.add_argument("--template", default="suites/templates/upstream_arithmetic_templates.json")
@@ -604,6 +620,25 @@ def main(argv: list[str] | None = None) -> int:
             inventory_path=args.inventory_output,
         )
         print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "scan-upstream-precompile":
+        templates = generate_upstream_precompile_templates(
+            repo_root=Path.cwd(),
+            source_path=args.source,
+            output_path=args.template_output,
+            inventory_path=args.inventory_output,
+        )
+        print(json.dumps(templates, indent=2, sort_keys=True))
+        return 0
+
+    if args.command == "generate-precompile-manifest":
+        manifest = generate_upstream_precompile_manifest(
+            repo_root=Path.cwd(),
+            template_path=args.template,
+            output_path=args.output,
+        )
+        print(json.dumps(manifest, indent=2, sort_keys=True))
         return 0
 
     if args.command == "generate-arithmetic-manifest":

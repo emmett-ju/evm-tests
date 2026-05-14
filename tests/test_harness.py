@@ -40,6 +40,12 @@ from adapter.memory_generator import (
     generate_upstream_memory_templates,
     load_memory_templates,
 )
+from adapter.precompile_generator import (
+    generate_upstream_precompile_manifest,
+    generate_upstream_precompile_templates,
+    generate_precompile_wrapper,
+    scan_vectors,
+)
 from adapter.account_query_generator import (
     _build_codecopy_fixed_runtime,
     generate_upstream_account_query_manifest,
@@ -116,6 +122,100 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class HarnessTests(unittest.TestCase):
+    def test_precompile_checked_in_artifacts_match_generated_bytes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+            template_path = tmpdir_path / "templates.json"
+            inventory_path = tmpdir_path / "inventory.json"
+            manifest_path = tmpdir_path / "manifest.json"
+
+            # Generate
+            generate_upstream_precompile_templates(
+                repo_root=ROOT,
+                output_path=template_path,
+                inventory_path=inventory_path,
+            )
+            generate_upstream_precompile_manifest(
+                repo_root=ROOT,
+                output_path=manifest_path,
+                template_path=template_path,
+            )
+
+            # Compare templates
+            checked_in_templates = json.loads((ROOT / "suites/templates/upstream_precompile_templates.json").read_text())
+            generated_templates = json.loads(template_path.read_text())
+            self.assertEqual(generated_templates, checked_in_templates)
+
+            # Compare inventory
+            checked_in_inventory = json.loads((ROOT / "suites/templates/upstream_precompile_inventory.json").read_text())
+            generated_inventory = json.loads(inventory_path.read_text())
+            self.assertEqual(generated_inventory, checked_in_inventory)
+
+            # Compare manifest
+            checked_in_manifest = json.loads((ROOT / "suites/manifests/upstream_precompile_mapped.json").read_text())
+            generated_manifest = json.loads(manifest_path.read_text())
+            self.assertEqual(generated_manifest, checked_in_manifest)
+
+    def test_cli_scan_upstream_precompile_writes_expected_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmpdir_path = Path(tmpdir)
+            template_path = tmpdir_path / "templates.json"
+            inventory_path = tmpdir_path / "inventory.json"
+            
+            # Execute CLI
+            exit_code = main([
+                "scan-upstream-precompile",
+                "--template-output", str(template_path),
+                "--inventory-output", str(inventory_path),
+            ])
+            self.assertEqual(exit_code, 0)
+            
+            # Verify files exist and are valid JSON
+            self.assertTrue(template_path.exists())
+            self.assertTrue(inventory_path.exists())
+            json.loads(template_path.read_text())
+            json.loads(inventory_path.read_text())
+
+    def test_precompile_generator_emits_minimal_bls_inventory(self):
+        vectors_dir = ROOT / "third_party/execution-specs/tests/prague/eip2537_bls_12_381_precompiles/vectors/"
+        result = scan_vectors(vectors_dir)
+        inventory = result["inventory"]
+        templates = result["templates"]
+        
+        # Verify inventory
+        self.assertEqual(inventory["family"], "upstream-precompile")
+        
+        # Count admitted cases
+        admitted = [e for e in inventory["entries"] if e["admitted"]]
+        # add_G1_bls.json (2) + pairing_check_bls.json (2) = 4
+        self.assertEqual(len(admitted), 4)
+        
+        # Verify manifest (templates in this context)
+        self.assertEqual(len(templates), 4)
+        for template in templates:
+            self.assertIn("BLS12-381", template.description)
+
+    def test_precompile_wrapper_runtime_and_storage_witness_are_deterministic(self):
+        # Representative G1ADD case
+        address = 0x0B
+        input_bytes = bytes.fromhex("00" * 128)
+        
+        init_code1 = generate_precompile_wrapper(address, input_bytes)
+        init_code2 = generate_precompile_wrapper(address, input_bytes)
+        
+        self.assertEqual(init_code1, init_code2)
+        self.assertTrue(init_code1.startswith("0x"))
+        
+        # Check for specific opcodes in init_code (bytecode after init wrapper)
+        # 0xF1 is CALL, 0x55 is SSTORE, 0x3D is RETURNDATASIZE, 0x20 is SHA3
+        runtime_hex = init_code1.split("6000f3")[1]
+        self.assertIn("f1", runtime_hex) # CALL
+        self.assertIn("55", runtime_hex) # SSTORE
+        self.assertIn("3d", runtime_hex) # RETURNDATASIZE
+        
+        # Verify input is appended
+        self.assertTrue(runtime_hex.endswith(input_bytes.hex()))
+
     def test_build_init_code_preserves_short_runtime_encoding_and_supports_long_runtime(self) -> None:
         self.assertEqual(_build_init_code("0x00"), "0x6001600c60003960016000f300")
         long_runtime = "0x" + "00" * 300

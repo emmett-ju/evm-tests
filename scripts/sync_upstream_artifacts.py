@@ -28,6 +28,7 @@ from adapter.keccak_generator import generate_upstream_keccak_manifest, generate
 from adapter.log_generator import generate_upstream_log_manifest, generate_upstream_log_templates
 from adapter.manifest import load_manifest
 from adapter.memory_generator import generate_upstream_memory_manifest, generate_upstream_memory_templates
+from adapter.precompile_generator import generate_upstream_precompile_manifest, generate_upstream_precompile_templates
 from adapter.stack_generator import generate_upstream_stack_manifest, generate_upstream_stack_templates
 from adapter.generator import generate_upstream_storage_manifest, generate_upstream_storage_templates
 from adapter.system_generator import generate_upstream_system_manifest, generate_upstream_system_templates
@@ -138,6 +139,15 @@ FAMILY_SPECS: tuple[FamilySyncSpec, ...] = (
         manifest_file="upstream_memory_mapped.json",
         generate_templates=generate_upstream_memory_templates,
         generate_manifest=generate_upstream_memory_manifest,
+    ),
+    FamilySyncSpec(
+        family="precompile",
+        source="third_party/execution-specs/tests/prague/eip2537_bls_12_381_precompiles/vectors",
+        template_file="upstream_precompile_templates.json",
+        inventory_file="upstream_precompile_inventory.json",
+        manifest_file="upstream_precompile_mapped.json",
+        generate_templates=generate_upstream_precompile_templates,
+        generate_manifest=generate_upstream_precompile_manifest,
     ),
     FamilySyncSpec(
         family="stack",
