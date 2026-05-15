@@ -114,6 +114,225 @@
         }
       },
       "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/add_G1_bls.json:bls_g1add_p1+g1"
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.precompile.bls12_381.mul_G1.0",
+      "family": "upstream-precompile",
+      "description": "BLS12-381 mul_G1 probe: bls_g1mul_(g1+g1=2*g1)",
+      "filters": {
+        "requires_genesis_state": false
+      },
+      "namespace_seed": "upstream.precompile.bls12_381.mul_G1.0",
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x60cc600c60003960cc6000f360a061002c5f395f5f60a05f5f600c62989680f15f553d6001553d61002057005b3d5f5f3e3d5f20600255000000000000000000000000000000000017f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb0000000000000000000000000000000008b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e10000000000000000000000000000000000000000000000000000000000000002",
+          "bytecode_runtime": "0x60a061002c5f395f5f60a05f5f600c62989680f15f553d6001553d61002057005b3d5f5f3e3d5f20600255000000000000000000000000000000000017f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb0000000000000000000000000000000008b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e10000000000000000000000000000000000000000000000000000000000000002",
+          "gas": "0x989680"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x989680"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000080",
+          "0x02": "0xd2b0d7b43ce993a817a069205ed3d7a139117befb9c0865d520f91ba88ac133b"
+        }
+      },
+      "observe": {
+        "storage_address": "$last_contract",
+        "precompile_probe": {
+          "family": "bls12_381",
+          "precompile": "mul_G1",
+          "address": "0xc",
+          "input_size": 160,
+          "output_size": 128,
+          "expected_success": true,
+          "expected_output_digest": "0xd2b0d7b43ce993a817a069205ed3d7a139117befb9c0865d520f91ba88ac133b",
+          "required_feature": "bls12_381_precompiles"
+        }
+      },
+      "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/mul_G1_bls.json:bls_g1mul_(g1+g1=2*g1)"
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.precompile.bls12_381.mul_G1.1",
+      "family": "upstream-precompile",
+      "description": "BLS12-381 mul_G1 probe: bls_g1mul_(p1+p1=2*p1)",
+      "filters": {
+        "requires_genesis_state": false
+      },
+      "namespace_seed": "upstream.precompile.bls12_381.mul_G1.1",
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x60cc600c60003960cc6000f360a061002c5f395f5f60a05f5f600c62989680f15f553d6001553d61002057005b3d5f5f3e3d5f206002550000000000000000000000000000000000112b98340eee2777cc3c14163dea3ec97977ac3dc5c70da32e6e87578f44912e902ccef9efe28d4a78b8999dfbca942600000000000000000000000000000000186b28d92356c4dfec4b5201ad099dbdede3781f8998ddf929b4cd7756192185ca7b8f4ef7088f813270ac3d48868a210000000000000000000000000000000000000000000000000000000000000002",
+          "bytecode_runtime": "0x60a061002c5f395f5f60a05f5f600c62989680f15f553d6001553d61002057005b3d5f5f3e3d5f206002550000000000000000000000000000000000112b98340eee2777cc3c14163dea3ec97977ac3dc5c70da32e6e87578f44912e902ccef9efe28d4a78b8999dfbca942600000000000000000000000000000000186b28d92356c4dfec4b5201ad099dbdede3781f8998ddf929b4cd7756192185ca7b8f4ef7088f813270ac3d48868a210000000000000000000000000000000000000000000000000000000000000002",
+          "gas": "0x989680"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x989680"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000080",
+          "0x02": "0x6ec9a9522b1cae93fb5061b2fdba7133b8efb46178b080eda4b613c3aa14eee4"
+        }
+      },
+      "observe": {
+        "storage_address": "$last_contract",
+        "precompile_probe": {
+          "family": "bls12_381",
+          "precompile": "mul_G1",
+          "address": "0xc",
+          "input_size": 160,
+          "output_size": 128,
+          "expected_success": true,
+          "expected_output_digest": "0x6ec9a9522b1cae93fb5061b2fdba7133b8efb46178b080eda4b613c3aa14eee4",
+          "required_feature": "bls12_381_precompiles"
+        }
+      },
+      "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/mul_G1_bls.json:bls_g1mul_(p1+p1=2*p1)"
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.precompile.p256verify.p256verify",
+      "family": "upstream-precompile",
+      "description": "P256VERIFY probe: p256verify",
+      "filters": {
+        "requires_genesis_state": false
+      },
+      "namespace_seed": "upstream.precompile.p256verify.p256verify",
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x60cd600c60003960cd6000f360a061002d5f395f5f60a05f5f61010062989680f15f553d6001553d61002157005b3d5f5f3e3d5f2060025500bb5a52f42f9c9261ed4361f59422a1e30036e7c32b270c8807a419feca6050232ba3a8be6b94d5ec80a6d9d1190a436effe50d85a1eee859b8cc6af9bd5c2e184cd60b855d442f5b3c7b11eb6c4e0ae7525fe710fab9aa7c77a67f79e6fadd762927b10512bae3eddcfe467828128bad2903269919f7086069c8c4df6c732838c7787964eaac00e5921fb1498a60f4606766b3d9685001558d1a974e7341513e",
+          "bytecode_runtime": "0x60a061002d5f395f5f60a05f5f61010062989680f15f553d6001553d61002157005b3d5f5f3e3d5f2060025500bb5a52f42f9c9261ed4361f59422a1e30036e7c32b270c8807a419feca6050232ba3a8be6b94d5ec80a6d9d1190a436effe50d85a1eee859b8cc6af9bd5c2e184cd60b855d442f5b3c7b11eb6c4e0ae7525fe710fab9aa7c77a67f79e6fadd762927b10512bae3eddcfe467828128bad2903269919f7086069c8c4df6c732838c7787964eaac00e5921fb1498a60f4606766b3d9685001558d1a974e7341513e",
+          "gas": "0x989680"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x989680"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000020",
+          "0x02": "0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6"
+        }
+      },
+      "observe": {
+        "storage_address": "$last_contract",
+        "precompile_probe": {
+          "family": "p256verify",
+          "precompile": "p256verify",
+          "address": "0x100",
+          "input_size": 160,
+          "output_size": 32,
+          "expected_success": true,
+          "expected_output_digest": "0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6",
+          "required_feature": "p256verify_precompile"
+        }
+      },
+      "upstream_ref": "tests/benchmark/compute/precompile/test_p256verify.py::test_p256verify[p256verify]"
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.precompile.p256verify.p256verify_wrong_endianness",
+      "family": "upstream-precompile",
+      "description": "P256VERIFY probe: p256verify_wrong_endianness",
+      "filters": {
+        "requires_genesis_state": false
+      },
+      "namespace_seed": "upstream.precompile.p256verify.p256verify_wrong_endianness",
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x60cd600c60003960cd6000f360a061002d5f395f5f60a05f5f61010062989680f15f553d6001553d61002157005b3d5f5f3e3d5f2060025500235060cafe19a407880c272bc3e73600e3a12294f56143ed61929c2ff4525abb182e5cbdf96accb859e8eea1850de5ff6e430a19d1d9a680ecd5946bbea8a32b76ddfae6797fa6777caab9fa10e75f52e70a4e6ceb117b3c5b2f445d850bd64c3828736cdfc4c8696008f71999260329ad8b12287846fedcede3ba1205b127293e5141734e971a8d55015068d9b3666760f4608a49b11f92e500acea647978c7",
+          "bytecode_runtime": "0x60a061002d5f395f5f60a05f5f61010062989680f15f553d6001553d61002157005b3d5f5f3e3d5f2060025500235060cafe19a407880c272bc3e73600e3a12294f56143ed61929c2ff4525abb182e5cbdf96accb859e8eea1850de5ff6e430a19d1d9a680ecd5946bbea8a32b76ddfae6797fa6777caab9fa10e75f52e70a4e6ceb117b3c5b2f445d850bd64c3828736cdfc4c8696008f71999260329ad8b12287846fedcede3ba1205b127293e5141734e971a8d55015068d9b3666760f4608a49b11f92e500acea647978c7",
+          "gas": "0x989680"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x989680"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      },
+      "observe": {
+        "storage_address": "$last_contract",
+        "precompile_probe": {
+          "family": "p256verify",
+          "precompile": "p256verify",
+          "address": "0x100",
+          "input_size": 160,
+          "output_size": 0,
+          "expected_success": true,
+          "expected_output_digest": "",
+          "required_feature": "p256verify_precompile"
+        }
+      },
+      "upstream_ref": "tests/benchmark/compute/precompile/test_p256verify.py::test_p256verify[p256verify]"
     }
   ]
 }

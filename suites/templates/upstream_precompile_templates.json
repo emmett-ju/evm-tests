@@ -16,7 +16,9 @@
       "address": 11,
       "input_hex": "0000000000000000000000000000000017f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb0000000000000000000000000000000008b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e100000000000000000000000000000000112b98340eee2777cc3c14163dea3ec97977ac3dc5c70da32e6e87578f44912e902ccef9efe28d4a78b8999dfbca942600000000000000000000000000000000186b28d92356c4dfec4b5201ad099dbdede3781f8998ddf929b4cd7756192185ca7b8f4ef7088f813270ac3d48868a21",
       "expected_hex": "000000000000000000000000000000000a40300ce2dec9888b60690e9a41d3004fda4886854573974fab73b046d3147ba5b7a5bde85279ffede1b45b3918d82d0000000000000000000000000000000006d3d887e9f53b9ec4eb6cedf5607226754b07c01ace7834f57f3e7315faefb739e59018e22c492006190fba4a870025",
-      "base_name": "add_G1"
+      "base_name": "add_G1",
+      "precompile_family": "bls12_381",
+      "feature_flag": "bls12_381_precompiles"
     },
     {
       "case_id": "upstream.precompile.bls12_381.add_G1.1",
@@ -31,7 +33,77 @@
       "address": 11,
       "input_hex": "00000000000000000000000000000000112b98340eee2777cc3c14163dea3ec97977ac3dc5c70da32e6e87578f44912e902ccef9efe28d4a78b8999dfbca942600000000000000000000000000000000186b28d92356c4dfec4b5201ad099dbdede3781f8998ddf929b4cd7756192185ca7b8f4ef7088f813270ac3d48868a210000000000000000000000000000000017f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb0000000000000000000000000000000008b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e1",
       "expected_hex": "000000000000000000000000000000000a40300ce2dec9888b60690e9a41d3004fda4886854573974fab73b046d3147ba5b7a5bde85279ffede1b45b3918d82d0000000000000000000000000000000006d3d887e9f53b9ec4eb6cedf5607226754b07c01ace7834f57f3e7315faefb739e59018e22c492006190fba4a870025",
-      "base_name": "add_G1"
+      "base_name": "add_G1",
+      "precompile_family": "bls12_381",
+      "feature_flag": "bls12_381_precompiles"
+    },
+    {
+      "case_id": "upstream.precompile.bls12_381.mul_G1.0",
+      "description": "BLS12-381 mul_G1 probe: bls_g1mul_(g1+g1=2*g1)",
+      "namespace_seed": "upstream.precompile.bls12_381.mul_G1.0",
+      "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/mul_G1_bls.json:bls_g1mul_(g1+g1=2*g1)",
+      "notes": [
+        "Upstream intent: probe BLS12-381 precompile mul_G1.",
+        "RPC mapping: deploy a wrapper that calls the precompile and records success/returndata/output-digest to storage.",
+        "Admitted as part of minimal Prague BLS12-381 probe."
+      ],
+      "address": 12,
+      "input_hex": "0000000000000000000000000000000017f1d3a73197d7942695638c4fa9ac0fc3688c4f9774b905a14e3a3f171bac586c55e83ff97a1aeffb3af00adb22c6bb0000000000000000000000000000000008b3f481e3aaa0f1a09e30ed741d8ae4fcf5e095d5d00af600db18cb2c04b3edd03cc744a2888ae40caa232946c5e7e10000000000000000000000000000000000000000000000000000000000000002",
+      "expected_hex": "000000000000000000000000000000000572cbea904d67468808c8eb50a9450c9721db309128012543902d0ac358a62ae28f75bb8f1c7c42c39a8c5529bf0f4e00000000000000000000000000000000166a9d8cabc673a322fda673779d8e3822ba3ecb8670e461f73bb9021d5fd76a4c56d9d4cd16bd1bba86881979749d28",
+      "base_name": "mul_G1",
+      "precompile_family": "bls12_381",
+      "feature_flag": "bls12_381_precompiles"
+    },
+    {
+      "case_id": "upstream.precompile.bls12_381.mul_G1.1",
+      "description": "BLS12-381 mul_G1 probe: bls_g1mul_(p1+p1=2*p1)",
+      "namespace_seed": "upstream.precompile.bls12_381.mul_G1.1",
+      "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/mul_G1_bls.json:bls_g1mul_(p1+p1=2*p1)",
+      "notes": [
+        "Upstream intent: probe BLS12-381 precompile mul_G1.",
+        "RPC mapping: deploy a wrapper that calls the precompile and records success/returndata/output-digest to storage.",
+        "Admitted as part of minimal Prague BLS12-381 probe."
+      ],
+      "address": 12,
+      "input_hex": "00000000000000000000000000000000112b98340eee2777cc3c14163dea3ec97977ac3dc5c70da32e6e87578f44912e902ccef9efe28d4a78b8999dfbca942600000000000000000000000000000000186b28d92356c4dfec4b5201ad099dbdede3781f8998ddf929b4cd7756192185ca7b8f4ef7088f813270ac3d48868a210000000000000000000000000000000000000000000000000000000000000002",
+      "expected_hex": "0000000000000000000000000000000015222cddbabdd764c4bee0b3720322a65ff4712c86fc4b1588d0c209210a0884fa9468e855d261c483091b2bf7de6a630000000000000000000000000000000009f9edb99bc3b75d7489735c98b16ab78b9386c5f7a1f76c7e96ac6eb5bbde30dbca31a74ec6e0f0b12229eecea33c39",
+      "base_name": "mul_G1",
+      "precompile_family": "bls12_381",
+      "feature_flag": "bls12_381_precompiles"
+    },
+    {
+      "case_id": "upstream.precompile.p256verify.p256verify",
+      "description": "P256VERIFY probe: p256verify",
+      "namespace_seed": "upstream.precompile.p256verify.p256verify",
+      "upstream_ref": "tests/benchmark/compute/precompile/test_p256verify.py::test_p256verify[p256verify]",
+      "notes": [
+        "Upstream intent: probe P256VERIFY precompile.",
+        "RPC mapping: deploy a wrapper that calls the precompile and records success/returndata/output-digest to storage.",
+        "Admitted as part of minimal Osaka P256VERIFY probe."
+      ],
+      "address": 256,
+      "input_hex": "0xBB5A52F42F9C9261ED4361F59422A1E30036E7C32B270C8807A419FECA6050232BA3A8BE6B94D5EC80A6D9D1190A436EFFE50D85A1EEE859B8CC6AF9BD5C2E184CD60B855D442F5B3C7B11EB6C4E0AE7525FE710FAB9AA7C77A67F79E6FADD762927B10512BAE3EDDCFE467828128BAD2903269919F7086069C8C4DF6C732838C7787964EAAC00E5921FB1498A60F4606766B3D9685001558D1A974E7341513E",
+      "expected_hex": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "base_name": "p256verify",
+      "precompile_family": "p256verify",
+      "feature_flag": "p256verify_precompile"
+    },
+    {
+      "case_id": "upstream.precompile.p256verify.p256verify_wrong_endianness",
+      "description": "P256VERIFY probe: p256verify_wrong_endianness",
+      "namespace_seed": "upstream.precompile.p256verify.p256verify_wrong_endianness",
+      "upstream_ref": "tests/benchmark/compute/precompile/test_p256verify.py::test_p256verify[p256verify]",
+      "notes": [
+        "Upstream intent: probe P256VERIFY precompile.",
+        "RPC mapping: deploy a wrapper that calls the precompile and records success/returndata/output-digest to storage.",
+        "Admitted as part of minimal Osaka P256VERIFY probe."
+      ],
+      "address": 256,
+      "input_hex": "0x235060CAFE19A407880C272BC3E73600E3A12294F56143ED61929C2FF4525ABB182E5CBDF96ACCB859E8EEA1850DE5FF6E430A19D1D9A680ECD5946BBEA8A32B76DDFAE6797FA6777CAAB9FA10E75F52E70A4E6CEB117B3C5B2F445D850BD64C3828736CDFC4C8696008F71999260329AD8B12287846FEDCEDE3BA1205B127293E5141734E971A8D55015068D9B3666760F4608A49B11F92E500ACEA647978C7",
+      "expected_hex": "",
+      "base_name": "p256verify",
+      "precompile_family": "p256verify",
+      "feature_flag": "p256verify_precompile"
     }
   ]
 }

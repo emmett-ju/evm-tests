@@ -767,7 +767,7 @@ class MockBackend:
         precompile_probe: dict[str, Any],
         code: str | None,
     ) -> None:
-        if precompile_probe["family"] != "bls12_381":
+        if precompile_probe["family"] not in ("bls12_381", "p256verify"):
             raise ValueError(f"unsupported precompile probe family: {precompile_probe['family']}")
         
         if code is None or not code.startswith("0x"):

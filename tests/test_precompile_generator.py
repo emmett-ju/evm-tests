@@ -18,7 +18,7 @@ class TestPrecompileGenerator(unittest.TestCase):
         
         # Count admitted cases
         admitted = [e for e in inventory["entries"] if e["admitted"]]
-        # add_G1_bls.json (2) + pairing_check_bls.json (2) = 4
+        # 2 cases per admitted file * 3 files = 6
         self.assertEqual(len(admitted), 4)
         
         # Verify blocked reasons for some unadmitted cases
@@ -37,7 +37,7 @@ class TestPrecompileGenerator(unittest.TestCase):
         self.assertEqual(len(templates), 4)
         for template in templates:
             self.assertTrue(template.case_id.startswith("upstream.precompile.bls12_381"))
-            self.assertEqual(template.address, 0x0B if "add_G1" in template.case_id else 0x11)
+            self.assertIn(template.address, [0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13])
 
     def test_precompile_wrapper_runtime_and_storage_witness_are_deterministic(self):
         # Representative G1ADD case

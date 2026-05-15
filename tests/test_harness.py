@@ -188,10 +188,10 @@ class HarnessTests(unittest.TestCase):
         # Count admitted cases
         admitted = [e for e in inventory["entries"] if e["admitted"]]
         # add_G1_bls.json (2) + pairing_check_bls.json (2) = 4
-        self.assertEqual(len(admitted), 2)
+        self.assertEqual(len(admitted), 4)
         
         # Verify manifest (templates in this context)
-        self.assertEqual(len(templates), 2)
+        self.assertEqual(len(templates), 4)
         for template in templates:
             self.assertIn("BLS12-381", template.description)
 
@@ -236,8 +236,8 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(profile.namespace_policy.prefix, "evmtest")
         self.assertEqual(profile.backend, "mock")
         self.assertTrue(profile.supports_feature("clz"))
-        self.assertFalse(profile.supports_feature("bls12_381_precompiles"))
-        self.assertFalse(profile.supports_feature("p256verify_precompile"))
+        self.assertTrue(profile.supports_feature("bls12_381_precompiles"))
+        self.assertTrue(profile.supports_feature("p256verify_precompile"))
         self.assertFalse(profile.supports_feature("modexp_eip7883"))
         self.assertFalse(profile.supports_feature("calldata_floor_eip7623"))
         self.assertFalse(profile.supports_feature("eip7702"))
@@ -254,8 +254,8 @@ class HarnessTests(unittest.TestCase):
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         self.assertEqual(profile.hardfork, "cancun")
         self.assertTrue(profile.supports_feature("clz"))
-        self.assertFalse(profile.supports_feature("bls12_381_precompiles"))
-        self.assertFalse(profile.supports_feature("p256verify_precompile"))
+        self.assertTrue(profile.supports_feature("bls12_381_precompiles"))
+        self.assertTrue(profile.supports_feature("p256verify_precompile"))
         self.assertFalse(profile.supports_feature("modexp_eip7883"))
 
     def test_selector_filters_block_control_case(self) -> None:
@@ -1032,18 +1032,20 @@ class HarnessTests(unittest.TestCase):
         profile.feature_flags["bls12_381_precompiles"] = False
         manifest = load_manifest(ROOT / "suites/manifests/upstream_precompile_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
-        self.assertEqual(selected, [])
-        for decision in decisions:
+        bls_decisions = [d for d in decisions if "bls12_381" in d.case.case_id]
+        for decision in bls_decisions:
             self.assertFalse(decision.selected)
             self.assertIn("precompile probe requires feature_flags.bls12_381_precompiles=true in chain profile", decision.reasons)
 
     def test_selector_admits_precompile_when_bls_feature_enabled(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/mock.toml")
         profile.feature_flags["bls12_381_precompiles"] = True
+        profile.feature_flags["p256verify_precompile"] = False
         manifest = load_manifest(ROOT / "suites/manifests/upstream_precompile_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
-        self.assertEqual(len(selected), 2)
-        self.assertEqual([decision for decision in decisions if not decision.selected], [])
+        self.assertEqual(len(selected), 4)
+        unselected = [decision for decision in decisions if not decision.selected]
+        self.assertEqual(len(unselected), 2)
 
     def test_mock_upstream_precompile_manifest_passes(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/mock.toml")
@@ -5158,7 +5160,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 15, "cases": 1079, "admitted": 539, "blocked": 540},
+            {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -5233,11 +5235,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 13, "cases": 573, "admitted": 527, "blocked": 46},
+                {"families": 14, "cases": 1042, "admitted": 533, "blocked": 509},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 15, "cases": 1079, "admitted": 539, "blocked": 540},
+                {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -5308,11 +5310,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 15, "cases": 1078, "admitted": 538, "blocked": 540},
+                {"families": 15, "cases": 1081, "admitted": 542, "blocked": 539},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 15, "cases": 1079, "admitted": 539, "blocked": 540},
+                {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -5332,7 +5334,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 15, "cases": 1078, "admitted": 538, "blocked": 540},
+                {"families": 15, "cases": 1081, "admitted": 542, "blocked": 539},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -5397,7 +5399,7 @@ class HarnessTests(unittest.TestCase):
             summary = json.loads(output_path.read_text())
 
         self.assertEqual(summary["totals"], {"families": 1, "selected": 2, "passed": 1, "failed": 1})
-        self.assertEqual(summary["coverage_reference"], {"families": 15, "cases": 1079, "admitted": 539, "blocked": 540})
+        self.assertEqual(summary["coverage_reference"], {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539})
         self.assertEqual(summary["families"][0]["failed_cases"], ["failing-case"])
         self.assertFalse(summary["coverage_alignment"]["selected_equals_admitted"])
         self.assertFalse(summary["coverage_alignment"]["failed_zero"])
@@ -5413,7 +5415,7 @@ class HarnessTests(unittest.TestCase):
 
             payload = sync_to_staging(ROOT, staged_templates, staged_manifests)
 
-            self.assertEqual(payload["summary"], {"families": 15, "cases": 1079, "admitted": 539, "blocked": 540})
+            self.assertEqual(payload["summary"], {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539})
             self.assertEqual(len(payload["families"]), len(FAMILY_SPECS))
             for spec in FAMILY_SPECS:
                 self.assertTrue((staged_templates / spec.template_file).exists(), spec.template_file)
@@ -5438,7 +5440,7 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("upstream.benchmark.bitwise.test_clz_same.clz", doc)
         self.assertIn("upstream.benchmark.bitwise.test_clz_diff.clz", doc)
         self.assertIn("does not claim broader Osaka CLZ scenario coverage", doc)
-        self.assertIn("Planned first: BLS12-381 and P256VERIFY", doc)
+        self.assertIn("Proven on Juchain when `feature_flags.bls12_381_precompiles=true`", doc)
         self.assertIn("Deferred: MODEXP gas boundary, EIP-7702, blob/cell, and block access lists", doc)
         self.assertIn("the 76 blocked cases should remain blocked", doc)
         readme = (ROOT / "README.md").read_text()
@@ -5459,7 +5461,7 @@ class HarnessTests(unittest.TestCase):
     def test_prague_osaka_precompile_docs_match_feature_contract(self) -> None:
         doc = (ROOT / "docs/benchmark-coverage-status.md").read_text()
         self.assertIn("Proven on Juchain when `feature_flags.bls12_381_precompiles=true`", doc)
-        self.assertIn("minimal admitted subset (`add_G1`)", doc)
+        self.assertIn("minimal admitted subset (`add_G1`, `add_G2`, `mul_G1`, `mul_G2`, `pairing_check`, `map_fp_to_G1`, `map_fp2_to_G2`)", doc)
         self.assertIn("does not claim broad EIP-2537 compliance beyond those specific vectors", doc)
 
     def test_bootstrapper_is_idempotent(self) -> None:

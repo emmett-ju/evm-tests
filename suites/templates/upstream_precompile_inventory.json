@@ -4367,20 +4367,16 @@
     {
       "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/mul_G1_bls.json:bls_g1mul_(g1+g1=2*g1)",
       "case_id": "upstream.precompile.bls12_381.mul_G1.0",
-      "admitted": false,
-      "reasons": [
-        "precompile mul_G1 deferred"
-      ],
+      "admitted": true,
+      "reasons": [],
       "address": "0xc",
       "input_size": 160
     },
     {
       "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/mul_G1_bls.json:bls_g1mul_(p1+p1=2*p1)",
       "case_id": "upstream.precompile.bls12_381.mul_G1.1",
-      "admitted": false,
-      "reasons": [
-        "precompile mul_G1 deferred"
-      ],
+      "admitted": true,
+      "reasons": [],
       "address": "0xc",
       "input_size": 160
     },
@@ -4389,7 +4385,7 @@
       "case_id": "upstream.precompile.bls12_381.mul_G1.2",
       "admitted": false,
       "reasons": [
-        "precompile mul_G1 deferred"
+        "case limit exceeded for minimal probe"
       ],
       "address": "0xc",
       "input_size": 160
@@ -4399,7 +4395,7 @@
       "case_id": "upstream.precompile.bls12_381.mul_G1.3",
       "admitted": false,
       "reasons": [
-        "precompile mul_G1 deferred"
+        "case limit exceeded for minimal probe"
       ],
       "address": "0xc",
       "input_size": 160
@@ -4409,7 +4405,7 @@
       "case_id": "upstream.precompile.bls12_381.mul_G1.4",
       "admitted": false,
       "reasons": [
-        "precompile mul_G1 deferred"
+        "case limit exceeded for minimal probe"
       ],
       "address": "0xc",
       "input_size": 160
@@ -4419,7 +4415,7 @@
       "case_id": "upstream.precompile.bls12_381.mul_G1.5",
       "admitted": false,
       "reasons": [
-        "precompile mul_G1 deferred"
+        "case limit exceeded for minimal probe"
       ],
       "address": "0xc",
       "input_size": 160
@@ -4429,7 +4425,7 @@
       "case_id": "upstream.precompile.bls12_381.mul_G1.6",
       "admitted": false,
       "reasons": [
-        "precompile mul_G1 deferred"
+        "case limit exceeded for minimal probe"
       ],
       "address": "0xc",
       "input_size": 160
@@ -4439,7 +4435,7 @@
       "case_id": "upstream.precompile.bls12_381.mul_G1.7",
       "admitted": false,
       "reasons": [
-        "precompile mul_G1 deferred"
+        "case limit exceeded for minimal probe"
       ],
       "address": "0xc",
       "input_size": 160
@@ -4449,7 +4445,7 @@
       "case_id": "upstream.precompile.bls12_381.mul_G1.8",
       "admitted": false,
       "reasons": [
-        "precompile mul_G1 deferred"
+        "case limit exceeded for minimal probe"
       ],
       "address": "0xc",
       "input_size": 160
@@ -4459,7 +4455,7 @@
       "case_id": "upstream.precompile.bls12_381.mul_G1.9",
       "admitted": false,
       "reasons": [
-        "precompile mul_G1 deferred"
+        "case limit exceeded for minimal probe"
       ],
       "address": "0xc",
       "input_size": 160
@@ -4469,7 +4465,7 @@
       "case_id": "upstream.precompile.bls12_381.mul_G1.10",
       "admitted": false,
       "reasons": [
-        "precompile mul_G1 deferred"
+        "case limit exceeded for minimal probe"
       ],
       "address": "0xc",
       "input_size": 160
@@ -4733,6 +4729,32 @@
       ],
       "address": "0x11",
       "input_size": 1152
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/precompile/test_p256verify.py::test_p256verify[p256verify]",
+      "case_id": "upstream.precompile.p256verify.p256verify",
+      "admitted": true,
+      "reasons": [],
+      "address": "0x100",
+      "input_size": 160
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/precompile/test_p256verify.py::test_p256verify[p256verify]",
+      "case_id": "upstream.precompile.p256verify.p256verify_wrong_endianness",
+      "admitted": true,
+      "reasons": [],
+      "address": "0x100",
+      "input_size": 160
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/precompile/test_p256verify.py::test_p256verify[p256verify]",
+      "case_id": "upstream.precompile.p256verify.p256verify_modular_comp_x_coordinate_exceeds_n",
+      "admitted": false,
+      "reasons": [
+        "case limit or complexity deferred"
+      ],
+      "address": "0x100",
+      "input_size": 160
     }
   ]
 }

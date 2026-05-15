@@ -15,9 +15,9 @@ Current first-family coverage is:
 | Status | Count |
 |---|---:|
 | Families scanned | 15 |
-| Total cases | 1079 |
-| Admitted cases | 541 |
-| Blocked cases | 538 |
+| Total cases | 1082 |
+| Admitted cases | 543 |
+| Blocked cases | 539 |
 | Coverage | 50.1% |
 
 ## Fork capability coverage contract
@@ -30,7 +30,8 @@ Current fork capability status:
 |---|---|---|
 | Cancun baseline | Covered where cases are already admitted in the first-family inventory. | Existing RPC-observable storage, balance, code, receipt, log, and runtime-context witnesses remain the source of truth for Cancun-era behavior. |
 | Osaka CLZ | Proven on Juchain when `feature_flags.clz=true`. | The two mapped `bitwise` CLZ cases (`upstream.benchmark.bitwise.test_clz_same.clz` and `upstream.benchmark.bitwise.test_clz_diff.clz`) are selected only for profiles that opt in to `clz` after an RPC-observable final-storage proof. Profiles without that proof skip CLZ with an explicit capability diagnostic, and this does not claim broader Osaka CLZ scenario coverage beyond those two benchmark-shape witnesses. |
-| Prague BLS12-381 precompiles | Proven on Juchain when `feature_flags.bls12_381_precompiles=true`. | The minimal admitted subset (`add_G1`) is selected only after an RPC-observable final-storage proof. This subset serves as the minimal executable probe for the feature flag and does not claim broad EIP-2537 compliance beyond those specific vectors. Future precompile probes (like P256VERIFY) must also use individual flags and minimal proofs. |
+| Prague BLS12-381 precompiles | Proven on Juchain when `feature_flags.bls12_381_precompiles=true`. | The minimal admitted subset (`add_G1`, `add_G2`, `mul_G1`, `mul_G2`, `pairing_check`, `map_fp_to_G1`, `map_fp2_to_G2`) is selected only after an RPC-observable final-storage proof. This subset serves as the minimal executable probe for the feature flag and does not claim broad EIP-2537 compliance beyond those specific vectors. Future precompile probes must also use individual flags and minimal proofs. |
+| Osaka P256VERIFY precompiles | Proven on Juchain when `feature_flags.p256verify_precompile=true`. | The minimal admitted subset (valid and wrong-endianness vectors) is selected only after an RPC-observable final-storage proof. |
 | Prague/Osaka transaction and block features | Deferred: MODEXP gas boundary, EIP-7702, blob/cell, and block access lists. | These remain out of coverage until the harness has truthful proof surfaces for their required gas-boundary, authorization, blob/cell, or block-access-list behavior. |
 
 Do not infer Prague or Osaka coverage from a chain profile name, fork label, or network claim alone. Add a feature flag, gate selector admission on that flag, and keep unsupported capabilities visible as skipped/blocked work with actionable reasons.
