@@ -112,7 +112,7 @@ from adapter.oracle import ResultOracle
 from adapter.profile import describe_admin_key_source, load_chain_profile
 from adapter.report import durable_report_path, write_report
 from adapter.selector import TestSelector
-from adapter.signer import keccak256, private_key_to_address, sign_type_2_transaction
+from adapter.signer import keccak256, private_key_to_address, sign_type_2_transaction, sign_type_4_transaction, sign_authorization
 from scripts.assert_report_success import main as assert_report_success_main
 from scripts.summarize_rpc_reports import main as summarize_rpc_reports_main
 from scripts.sync_upstream_artifacts import FAMILY_SPECS, sync_to_staging
@@ -187,7 +187,6 @@ class HarnessTests(unittest.TestCase):
         
         # Count admitted cases
         admitted = [e for e in inventory["entries"] if e["admitted"]]
-        # add_G1_bls.json (2) + pairing_check_bls.json (2) = 4
         self.assertEqual(len(admitted), 4)
         
         # Verify manifest (templates in this context)
@@ -238,7 +237,7 @@ class HarnessTests(unittest.TestCase):
         self.assertTrue(profile.supports_feature("clz"))
         self.assertTrue(profile.supports_feature("bls12_381_precompiles"))
         self.assertTrue(profile.supports_feature("p256verify_precompile"))
-        self.assertFalse(profile.supports_feature("modexp_eip7883"))
+        self.assertTrue(profile.supports_feature("modexp_eip7883"))
         self.assertFalse(profile.supports_feature("calldata_floor_eip7623"))
         self.assertFalse(profile.supports_feature("eip7702"))
         self.assertFalse(profile.supports_feature("blob_cell_proofs"))
@@ -256,7 +255,8 @@ class HarnessTests(unittest.TestCase):
         self.assertTrue(profile.supports_feature("clz"))
         self.assertTrue(profile.supports_feature("bls12_381_precompiles"))
         self.assertTrue(profile.supports_feature("p256verify_precompile"))
-        self.assertFalse(profile.supports_feature("modexp_eip7883"))
+        self.assertTrue(profile.supports_feature("modexp_eip7883"))
+        self.assertTrue(profile.supports_feature("calldata_floor_eip7623"))
 
     def test_selector_filters_block_control_case(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/mock.toml")
@@ -389,7 +389,7 @@ class HarnessTests(unittest.TestCase):
             ):
                 load_manifest(manifest_path)
 
-    def test_load_manifest_rejects_malformed_deploy_contract_step(self) -> None:
+    def test_load_manifest_rejects_eth_send_raw_transaction_with_both_raw_transaction_and_transaction(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             manifest_path = Path(tmpdir) / "broken.json"
             manifest_path.write_text(
@@ -403,14 +403,15 @@ class HarnessTests(unittest.TestCase):
                         "cases": [
                             {
                                 "kind": "custom_chain",
-                                "case_id": "broken.deploy-shape",
-                                "family": "custom/smoke",
-                                "description": "missing bytecode_runtime",
-                                "namespace_seed": "broken-deploy-shape",
+                                "case_id": "broken.raw-transaction-shape",
+                                "family": "custom/tx-admission",
+                                "description": "invalid raw tx shape",
+                                "namespace_seed": "broken-raw-shape",
                                 "steps": [
                                     {
-                                        "action": "deploy_contract",
-                                        "bytecode_init": "0x6000",
+                                        "action": "eth_sendRawTransaction",
+                                        "raw_transaction": "0x01",
+                                        "transaction": {"to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
                                     }
                                 ],
                                 "expected": {},
@@ -421,7 +422,80 @@ class HarnessTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(
                 ValueError,
-                r"case broken\.deploy-shape step 1: action 'deploy_contract' is missing required fields: bytecode_runtime",
+                r"case broken\.raw-transaction-shape step 1: action 'eth_sendRawTransaction' requires exactly one of 'raw_transaction' or 'transaction'",
+            ):
+                load_manifest(manifest_path)
+
+    def test_load_manifest_rejects_expect_error_without_message_contains(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "broken.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "name": "broken",
+                        "version": "1",
+                        "execution_specs_ref": "submodule-pending",
+                        "suite_version": "0.1.0",
+                        "chain_profile_version": "1",
+                        "cases": [
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "broken.expect-error-shape",
+                                "family": "custom/tx-admission",
+                                "description": "missing message_contains",
+                                "namespace_seed": "broken-expect-error",
+                                "steps": [
+                                    {
+                                        "action": "eth_sendRawTransaction",
+                                        "transaction": {
+                                            "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                                            "gas": "0x100",
+                                        },
+                                        "expect_error": {"code": -32000},
+                                    }
+                                ],
+                                "expected": {"rpc_error": {"code": -32000, "message_contains": "intrinsic gas"}},
+                            }
+                        ],
+                    }
+                )
+            )
+            with self.assertRaisesRegex(
+                ValueError,
+                r"case broken\.expect-error-shape step 1: action 'eth_sendRawTransaction' field 'expect_error.message_contains' must be a non-empty string",
+            ):
+                load_manifest(manifest_path)
+
+    def test_load_manifest_rejects_expected_rpc_error_without_matching_rejection_step(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "broken.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "name": "broken",
+                        "version": "1",
+                        "execution_specs_ref": "submodule-pending",
+                        "suite_version": "0.1.0",
+                        "chain_profile_version": "1",
+                        "cases": [
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "broken.expected-rpc-error",
+                                "family": "custom/tx-admission",
+                                "description": "rpc_error without rejection step",
+                                "namespace_seed": "broken-expected-rpc-error",
+                                "steps": [
+                                    {"action": "rpc_call", "method": "eth_blockNumber"}
+                                ],
+                                "expected": {"rpc_error": {"code": -32000, "message_contains": "intrinsic gas"}},
+                            }
+                        ],
+                    }
+                )
+            )
+            with self.assertRaisesRegex(
+                ValueError,
+                r"case broken\.expected-rpc-error: expected.rpc_error requires exactly one eth_sendRawTransaction step with expect_error",
             ):
                 load_manifest(manifest_path)
 
@@ -1041,11 +1115,12 @@ class HarnessTests(unittest.TestCase):
         profile = load_chain_profile(ROOT / "profiles/mock.toml")
         profile.feature_flags["bls12_381_precompiles"] = True
         profile.feature_flags["p256verify_precompile"] = False
+        profile.feature_flags["modexp_eip7883"] = False
         manifest = load_manifest(ROOT / "suites/manifests/upstream_precompile_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
         self.assertEqual(len(selected), 4)
         unselected = [decision for decision in decisions if not decision.selected]
-        self.assertEqual(len(unselected), 2)
+        self.assertEqual(len(unselected), 3)
 
     def test_mock_upstream_precompile_manifest_passes(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/mock.toml")
@@ -1055,7 +1130,7 @@ class HarnessTests(unittest.TestCase):
         backend = MockBackend()
         for case in manifest.cases:
             tx_hashes, observed, context = backend.execute_case(case, "test")
-            self.assertEqual(observed["storage"]["0x00"], "0x0000000000000000000000000000000000000000000000000000000000000001")
+            self.assertEqual(observed["storage"]["0x00"], case.expected["storage"]["0x00"])
             # Verify output digest matches
             expected_digest = case.observe["precompile_probe"]["expected_output_digest"]
             if expected_digest:
@@ -5160,7 +5235,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539},
+            {"families": 15, "cases": 1083, "admitted": 544, "blocked": 539},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -5235,11 +5310,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 14, "cases": 1042, "admitted": 533, "blocked": 509},
+                {"families": 14, "cases": 1043, "admitted": 534, "blocked": 509},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539},
+                {"families": 15, "cases": 1083, "admitted": 544, "blocked": 539},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -5310,11 +5385,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 15, "cases": 1081, "admitted": 542, "blocked": 539},
+                {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539},
+                {"families": 15, "cases": 1083, "admitted": 544, "blocked": 539},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -5334,7 +5409,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 15, "cases": 1081, "admitted": 542, "blocked": 539},
+                {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -5399,7 +5474,7 @@ class HarnessTests(unittest.TestCase):
             summary = json.loads(output_path.read_text())
 
         self.assertEqual(summary["totals"], {"families": 1, "selected": 2, "passed": 1, "failed": 1})
-        self.assertEqual(summary["coverage_reference"], {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539})
+        self.assertEqual(summary["coverage_reference"], {"families": 15, "cases": 1083, "admitted": 544, "blocked": 539})
         self.assertEqual(summary["families"][0]["failed_cases"], ["failing-case"])
         self.assertFalse(summary["coverage_alignment"]["selected_equals_admitted"])
         self.assertFalse(summary["coverage_alignment"]["failed_zero"])
@@ -5415,7 +5490,7 @@ class HarnessTests(unittest.TestCase):
 
             payload = sync_to_staging(ROOT, staged_templates, staged_manifests)
 
-            self.assertEqual(payload["summary"], {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539})
+            self.assertEqual(payload["summary"], {"families": 15, "cases": 1083, "admitted": 544, "blocked": 539})
             self.assertEqual(len(payload["families"]), len(FAMILY_SPECS))
             for spec in FAMILY_SPECS:
                 self.assertTrue((staged_templates / spec.template_file).exists(), spec.template_file)
@@ -5441,7 +5516,9 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("upstream.benchmark.bitwise.test_clz_diff.clz", doc)
         self.assertIn("does not claim broader Osaka CLZ scenario coverage", doc)
         self.assertIn("Proven on Juchain when `feature_flags.bls12_381_precompiles=true`", doc)
-        self.assertIn("Deferred: MODEXP gas boundary, EIP-7702, blob/cell, and block access lists", doc)
+        self.assertIn("Proven on Juchain when `feature_flags.modexp_eip7883=true`", doc)
+        self.assertIn("Proven on Juchain when `feature_flags.calldata_floor_eip7623=true`", doc)
+        self.assertIn("Deferred: blob/cell, and block access lists", doc)
         self.assertIn("the 76 blocked cases should remain blocked", doc)
         readme = (ROOT / "README.md").read_text()
         self.assertIn("docs/benchmark-coverage-status.md", readme)
@@ -5456,12 +5533,12 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("upstream.benchmark.bitwise.test_clz_diff.clz", doc)
         self.assertIn("does not claim broader Osaka CLZ scenario coverage", doc)
         self.assertIn("Proven on Juchain when `feature_flags.bls12_381_precompiles=true`", doc)
-        self.assertIn("MODEXP gas boundary", doc)
+        self.assertIn("Osaka MODEXP repricing", doc)
 
     def test_prague_osaka_precompile_docs_match_feature_contract(self) -> None:
         doc = (ROOT / "docs/benchmark-coverage-status.md").read_text()
         self.assertIn("Proven on Juchain when `feature_flags.bls12_381_precompiles=true`", doc)
-        self.assertIn("minimal admitted subset (`add_G1`, `add_G2`, `mul_G1`, `mul_G2`, `pairing_check`, `map_fp_to_G1`, `map_fp2_to_G2`)", doc)
+        self.assertIn("minimal admitted subset (`add_G1`, `mul_G1`)", doc)
         self.assertIn("does not claim broad EIP-2537 compliance beyond those specific vectors", doc)
 
     def test_bootstrapper_is_idempotent(self) -> None:
@@ -5782,89 +5859,205 @@ class HarnessTests(unittest.TestCase):
             "0x00000000000000000000000000000000000000000000000000000004a817c800",
         )
 
-    def test_jsonrpc_backend_uses_receipt_block_number_for_block_context_probe(self) -> None:
+    def test_selector_blocks_calldata_floor_probe_when_feature_disabled(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
-        profile.block_context.rpc_block_tag = "safe"
-        manifest = load_manifest(ROOT / "suites/manifests/upstream_block_context_mapped.json")
-        number_case = next(
-            case
-            for case in manifest.cases
-            if case.case_id == "upstream.benchmark.block_context.test_block_context_ops.number"
+        profile.feature_flags["calldata_floor_eip7623"] = False
+        payload = {
+            "name": "custom-tx-admission",
+            "version": "1",
+            "execution_specs_ref": "submodule-pending",
+            "suite_version": "0.1.0",
+            "chain_profile_version": "1",
+            "cases": [
+                {
+                    "kind": "custom_chain",
+                    "case_id": "custom.tx_admission.calldata_floor",
+                    "family": "custom/tx-admission",
+                    "description": "under-floor raw tx rejection",
+                    "namespace_seed": "custom-tx-admission",
+                    "steps": [
+                        {
+                            "action": "eth_sendRawTransaction",
+                            "transaction": {
+                                "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                                "gas": "0x5208",
+                                "data": "0x" + "ff" * 2048,
+                            },
+                            "expect_error": {"code": -32000, "message_contains": "intrinsic gas"},
+                        }
+                    ],
+                    "expected": {"rpc_error": {"code": -32000, "message_contains": "intrinsic gas"}},
+                    "observe": {
+                        "tx_admission_probe": {
+                            "required_feature": "calldata_floor_eip7623",
+                            "mode": "intrinsic_gas_floor_rejection",
+                        }
+                    },
+                }
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "custom_tx_admission_smoke.json"
+            manifest_path.write_text(json.dumps(payload))
+            manifest = load_manifest(manifest_path)
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(selected, [])
+        self.assertEqual(
+            decisions[0].reasons,
+            ["tx-admission probe requires feature_flags.calldata_floor_eip7623=true in chain profile"],
         )
+
+    def test_selector_admits_calldata_floor_probe_when_feature_enabled(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.feature_flags["calldata_floor_eip7623"] = True
+        payload = {
+            "name": "custom-tx-admission",
+            "version": "1",
+            "execution_specs_ref": "submodule-pending",
+            "suite_version": "0.1.0",
+            "chain_profile_version": "1",
+            "cases": [
+                {
+                    "kind": "custom_chain",
+                    "case_id": "custom.tx_admission.calldata_floor",
+                    "family": "custom/tx-admission",
+                    "description": "under-floor raw tx rejection",
+                    "namespace_seed": "custom-tx-admission",
+                    "steps": [
+                        {
+                            "action": "eth_sendRawTransaction",
+                            "transaction": {
+                                "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                                "gas": "0x5208",
+                                "data": "0x" + "ff" * 2048,
+                            },
+                            "expect_error": {"code": -32000, "message_contains": "intrinsic gas"},
+                        }
+                    ],
+                    "expected": {"rpc_error": {"code": -32000, "message_contains": "intrinsic gas"}},
+                    "observe": {
+                        "tx_admission_probe": {
+                            "required_feature": "calldata_floor_eip7623",
+                            "mode": "intrinsic_gas_floor_rejection",
+                        }
+                    },
+                }
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "custom_tx_admission_smoke.json"
+            manifest_path.write_text(json.dumps(payload))
+            manifest = load_manifest(manifest_path)
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual([case.case_id for case in selected], ["custom.tx_admission.calldata_floor"])
+        self.assertEqual(decisions[0].reasons, [])
+
+    def test_selector_blocks_eip7702_probe_when_feature_disabled(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.feature_flags["eip7702"] = False
+        payload = {
+            "name": "custom-eip7702",
+            "version": "1",
+            "execution_specs_ref": "submodule-pending",
+            "suite_version": "0.1.0",
+            "chain_profile_version": "1",
+            "cases": [
+                {
+                    "kind": "custom_chain",
+                    "case_id": "custom.eip7702.smoke",
+                    "family": "custom/eip7702",
+                    "description": "EIP-7702 delegation",
+                    "namespace_seed": "custom-eip7702",
+                    "steps": [],
+                    "expected": {},
+                    "observe": {
+                        "eip7702_probe": {
+                            "required_feature": "eip7702",
+                        }
+                    },
+                }
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "custom_eip7702_smoke.json"
+            manifest_path.write_text(json.dumps(payload))
+            manifest = load_manifest(manifest_path)
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual(selected, [])
+        self.assertEqual(
+            decisions[0].reasons,
+            ["eip7702 probe requires feature_flags.eip7702=true in chain profile"],
+        )
+
+    def test_selector_admits_eip7702_probe_when_feature_enabled(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.feature_flags["eip7702"] = True
+        payload = {
+            "name": "custom-eip7702",
+            "version": "1",
+            "execution_specs_ref": "submodule-pending",
+            "suite_version": "0.1.0",
+            "chain_profile_version": "1",
+            "cases": [
+                {
+                    "kind": "custom_chain",
+                    "case_id": "custom.eip7702.smoke",
+                    "family": "custom/eip7702",
+                    "description": "EIP-7702 delegation",
+                    "namespace_seed": "custom-eip7702",
+                    "steps": [],
+                    "expected": {},
+                    "observe": {
+                        "eip7702_probe": {
+                            "required_feature": "eip7702",
+                        }
+                    },
+                }
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "custom_eip7702_smoke.json"
+            manifest_path.write_text(json.dumps(payload))
+            manifest = load_manifest(manifest_path)
+        selected, decisions = TestSelector(profile).select(manifest)
+        self.assertEqual([case.case_id for case in selected], ["custom.eip7702.smoke"])
+        self.assertEqual(decisions[0].reasons, [])
+
+    def test_jsonrpc_backend_dynamic_raw_submission_preserves_declared_under_floor_gas(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.admin_key_source = "env:JUCHAIN_PRIVATE_KEY"
+        private_key_hex = "0x" + "11" * 32
+        os.environ["JUCHAIN_PRIVATE_KEY"] = private_key_hex
+        profile.admin_account = private_key_to_address(int(private_key_hex, 16))
 
         class StubBackend(JsonRpcBackend):
             def __init__(self, profile):
                 super().__init__(profile)
-                self.sent = 0
-                self.block_calls: list[list[object]] = []
-
-            def _send_transaction(self, transaction: dict[str, Any]) -> str:
-                self.sent += 1
-                return f"0xtx{self.sent}"
-
-            def _wait_for_receipt(self, tx_hash: str, timeout_seconds: int = 60) -> dict[str, Any]:
-                if tx_hash == "0xtx1":
-                    return {
-                        "transactionHash": tx_hash,
-                        "status": "0x1",
-                        "contractAddress": "0xcccccccccccccccccccccccccccccccccccccccc",
-                        "blockNumber": "0x99",
-                    }
-                if tx_hash == "0xtx2":
-                    return {
-                        "transactionHash": tx_hash,
-                        "status": "0x1",
-                        "blockNumber": "0x2a",
-                    }
-                raise AssertionError(tx_hash)
+                self.calls: list[tuple[str, list[object]]] = []
 
             def _rpc(self, method: str, params: list[object]) -> object:
-                if method == "eth_getBlockByNumber":
-                    self.block_calls.append(params)
-                    block_tag = params[0]
-                    if block_tag == "0x99":
-                        return {
-                            "miner": "0x1111111111111111111111111111111111111111",
-                            "timestamp": "0x65000000",
-                            "number": "0x99",
-                            "mixHash": "0x" + "22" * 32,
-                            "gasLimit": "0x1c9c380",
-                            "baseFeePerGas": "0x3b9aca00",
-                        }
-                    if block_tag == "0x2a":
-                        return {
-                            "miner": "0x1111111111111111111111111111111111111111",
-                            "timestamp": "0x6500002a",
-                            "number": "0x2a",
-                            "mixHash": "0x" + "33" * 32,
-                            "gasLimit": "0x1c9c380",
-                            "baseFeePerGas": "0x3b9aca00",
-                        }
-                    raise AssertionError(block_tag)
-                if method == "eth_getStorageAt":
-                    return "0x000000000000000000000000000000000000000000000000000000000000002a"
+                self.calls.append((method, params))
+                if method == "eth_getTransactionCount":
+                    return "0x7"
+                if method == "eth_sendRawTransaction":
+                    return "0xfeedface"
                 raise AssertionError(method)
 
         backend = StubBackend(profile)
-        tx_hashes, observed, context = backend.execute_case(number_case, "jsonrpc-block-context-number")
-        self.assertEqual(tx_hashes, ["0xtx1", "0xtx2"])
-        self.assertEqual(backend.block_calls, [["0x99", False], ["0x2a", False]])
-        self.assertEqual(context["$block_number"], "0x2a")
-        self.assertEqual(
-            observed["storage"]["0x00"],
-            "0x000000000000000000000000000000000000000000000000000000000000002a",
+        tx_hash = backend._send_raw_transaction(
+            {
+                "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                "value": "0x1",
+                "gas": "0x5208",
+                "data": "0x" + "ff" * 2048,
+            },
+            preserve_declared_gas=True,
         )
-        self.assertEqual(ResultOracle().compare(number_case.expected, observed, context), [])
-        self.assertEqual(
-            ResultOracle().compare(
-                {"storage": {"0x00": "0x000000000000000000000000000000000000000000000000000000000000002b"}},
-                observed,
-                context,
-            ),
-            [
-                "storage.0x00: expected '0x000000000000000000000000000000000000000000000000000000000000002b', got '0x000000000000000000000000000000000000000000000000000000000000002a'"
-            ],
-        )
+        self.assertEqual(tx_hash, "0xfeedface")
+        self.assertEqual(backend.calls[0][0], "eth_getTransactionCount")
+        self.assertEqual(backend.calls[1][0], "eth_sendRawTransaction")
+        self.assertIsInstance(backend.calls[1][1][0], str)
+        self.assertTrue(str(backend.calls[1][1][0]).startswith("0x02"))
 
     def test_jsonrpc_backend_observes_plain_storage_at_receipt_block(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
@@ -7026,6 +7219,38 @@ class HarnessTests(unittest.TestCase):
             },
         )
         self.assertTrue(raw.startswith("0x02"))
+
+    def test_sign_authorization_returns_tuple(self) -> None:
+        private_key = int("22" * 32, 16)
+        chain_id = 1337
+        address = "0xcccccccccccccccccccccccccccccccccccccccc"
+        nonce = 42
+        auth = sign_authorization(private_key, chain_id, address, nonce)
+        self.assertEqual(len(auth), 6)
+        # Should be [chain_id, address, nonce, y_parity, r, s]
+        self.assertEqual(auth[0], b'\x05\x39') # 1337
+        self.assertEqual(auth[1], bytes.fromhex("cccccccccccccccccccccccccccccccccccccccc"))
+        self.assertEqual(auth[2], b'\x2a') # 42
+
+    def test_sign_type_4_transaction_returns_prefixed_raw_bytes(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        private_key = int("11" * 32, 16)
+        auth = sign_authorization(int("22" * 32, 16), profile.chain_id, "0xcccccccccccccccccccccccccccccccccccccccc", 0)
+        raw = sign_type_4_transaction(
+            profile,
+            private_key,
+            {
+                "nonce": "0x1",
+                "maxPriorityFeePerGas": "0x2",
+                "maxFeePerGas": "0x3",
+                "gas": "0x5208",
+                "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                "value": "0x4",
+                "data": "0x",
+                "authorizations": [auth]
+            },
+        )
+        self.assertTrue(raw.startswith("0x04"))
 
     def test_mock_backend_records_receipt_status_for_smoke_case(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

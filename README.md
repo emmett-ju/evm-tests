@@ -107,6 +107,7 @@ For `jsonrpc` profiles, `admin_key_source` is optional:
 - omit it or set `rpc_unlocked` when the RPC node can send from `admin_account`;
 - set `env:YOUR_PRIVATE_KEY_VAR` or `file:/abs/path/to/key.hex` for local EIP-1559 signing;
 - use pre-signed `eth_sendRawTransaction` steps when signing happens outside this harness.
+- use step-local `transaction` + `expect_error` on `eth_sendRawTransaction` when the harness itself must sign and submit a negative admission proof, such as EIP-7623 calldata-floor rejection.
 
 Use `backend = "mock"` only for local harness self-tests.
 

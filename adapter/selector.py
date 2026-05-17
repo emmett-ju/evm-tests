@@ -73,6 +73,17 @@ class TestSelector:
                 return [
                     f"precompile probe requires feature_flags.{required_feature}=true in chain profile"
                 ]
+        tx_admission_probe = case.observe.get("tx_admission_probe")
+        if tx_admission_probe is not None:
+            required_feature = tx_admission_probe.get("required_feature")
+            if required_feature is not None and not self.profile.supports_feature(required_feature):
+                return [
+                    f"tx-admission probe requires feature_flags.{required_feature}=true in chain profile"
+                ]
+        eip7702_probe = case.observe.get("eip7702_probe")
+        if eip7702_probe is not None:
+            if not self.profile.supports_feature("eip7702"):
+                return ["eip7702 probe requires feature_flags.eip7702=true in chain profile"]
         system_witness = case.observe.get("system_witness")
         if system_witness is not None:
             shape = system_witness.get("shape")

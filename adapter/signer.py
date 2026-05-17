@@ -4,6 +4,7 @@ import os
 import secrets
 import subprocess
 from pathlib import Path
+from typing import Any
 
 from adapter.models import ChainProfile
 
@@ -63,6 +64,48 @@ def sign_type_2_transaction(profile: ChainProfile, private_key: int, transaction
         _int_to_bytes(s),
     ]
     return "0x" + (b"\x02" + _rlp_encode(signed)).hex()
+
+
+def sign_authorization(private_key: int, chain_id: int, address: str, nonce: int) -> list[bytes]:
+    payload = [
+        _int_to_bytes(chain_id),
+        _hex_to_bytes(address),
+        _int_to_bytes(nonce),
+    ]
+    signing_hash = keccak256(b"\x05" + _rlp_encode(payload))
+    y_parity, r, s = _sign_digest(private_key, signing_hash)
+    return [
+        _int_to_bytes(chain_id),
+        _hex_to_bytes(address),
+        _int_to_bytes(nonce),
+        _int_to_bytes(y_parity),
+        _int_to_bytes(r),
+        _int_to_bytes(s),
+    ]
+
+
+def sign_type_4_transaction(profile: ChainProfile, private_key: int, transaction: dict[str, Any]) -> str:
+    authorizations = transaction.get("authorizations", [])
+    payload = [
+        _int_to_bytes(int(profile.chain_id)),
+        _int_to_bytes(_hex_to_int(transaction["nonce"])),
+        _int_to_bytes(_hex_to_int(transaction["maxPriorityFeePerGas"])),
+        _int_to_bytes(_hex_to_int(transaction["maxFeePerGas"])),
+        _int_to_bytes(_hex_to_int(transaction["gas"])),
+        _hex_to_bytes(transaction.get("to", "0x")),
+        _int_to_bytes(_hex_to_int(transaction.get("value", "0x0"))),
+        _hex_to_bytes(transaction.get("data", "0x")),
+        [],  # access_list
+        authorizations,
+    ]
+    signing_hash = keccak256(b"\x04" + _rlp_encode(payload))
+    y_parity, r, s = _sign_digest(private_key, signing_hash)
+    signed = payload + [
+        _int_to_bytes(y_parity),
+        _int_to_bytes(r),
+        _int_to_bytes(s),
+    ]
+    return "0x" + (b"\x04" + _rlp_encode(signed)).hex()
 
 
 def keccak256(data: bytes) -> bytes:

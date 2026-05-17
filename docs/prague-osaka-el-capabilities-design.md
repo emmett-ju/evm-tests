@@ -23,9 +23,9 @@ The Osaka hardfork includes EIP-7883, which increases the gas cost of the MODEXP
 EIP-7623 introduces a higher intrinsic gas floor for transactions with large amounts of non-zero calldata. The existing JSON-RPC adapter applies an intrinsic gas ceiling, but we need to prove the chain correctly enforces the EIP-7623 rule at the mempool/RPC level.
 
 ### Design Strategy
-- **Direct RPC Proof:** This feature cannot be proven via EVM storage because the transaction will be rejected before execution.
-- **Mechanism:** The harness must generate a transaction with a large calldata payload (e.g., 10+ KB) and set the transaction `gas` to a value *above* the traditional intrinsic gas but *below* the new EIP-7623 floor.
-- **Observable Evidence:** The adapter must capture the RPC rejection error. We need to expand the manifest action schema to support `expect_error` for `eth_sendRawTransaction`.
+- **Direct RPC Proof:** This feature cannot be proven via EVM storage because the transaction is rejected before execution.
+- **Mechanism:** The harness generates a large non-zero calldata transaction, preserves a caller-declared `gas` value below the EIP-7623 floor, signs it locally as a type-2 transaction, and submits it through `eth_sendRawTransaction`.
+- **Observable Evidence:** The JSON-RPC backend matches the RPC rejection error (`code=-32000`, message containing `intrinsic gas`) and records that matched rejection under `observed.rpc_error`. No receipt or storage effects are claimed.
 - **Feature Gate:** `feature_flags.calldata_floor_eip7623`
 
 ## 3. EIP-7702 Set EOA Account Code (Prague)
@@ -34,12 +34,12 @@ EIP-7623 introduces a higher intrinsic gas floor for transactions with large amo
 EIP-7702 introduces a new transaction type (Type-4) that allows EOAs to temporarily set their code during a transaction via an authorization tuple.
 
 ### Design Strategy
-- **Harness Expansion:** The current transaction signer only supports Type-2 (EIP-1559) and Legacy transactions. It must be extended to encode Type-4 transactions and sign authorization lists.
+- **Harness Expansion:** The transaction signer supports Type-4 transactions and dynamically signs `authorizations_to_sign`.
 - **Mechanism:** 
-    1. Sign an authorization tuple delegating an EOA to a specific deployed contract.
-    2. Submit a Type-4 transaction containing this authorization.
+    1. Deploy a simple target contract.
+    2. Submit a Type-4 transaction containing an authorization delegating an EOA to the target contract.
     3. The transaction executes a call against the delegated EOA.
-- **Observable Evidence:** The target contract must perform an operation (e.g., a storage write) that is observable on the receipt or via a subsequent `eth_getStorageAt` call on the EOA (if state is modified) or via `eth_getCode` if the delegation persists across the transaction (though EIP-7702 is transaction-scoped, some effects can be permanently recorded).
+- **Observable Evidence:** The EOA performs a storage write, which is verified by `eth_getStorageAt` at the end of the transaction.
 - **Feature Gate:** `feature_flags.eip7702`
 
 ## 4. Blob Transactions and BLOBHASH (Cancun/Prague)

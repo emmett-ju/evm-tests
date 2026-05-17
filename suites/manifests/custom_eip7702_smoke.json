@@ -1,0 +1,59 @@
+{
+  "name": "custom-eip7702-smoke",
+  "version": "1",
+  "execution_specs_ref": "submodule-pending",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "custom_chain",
+      "case_id": "custom.eip7702.authorization_delegation",
+      "family": "custom/eip7702",
+      "description": "Submits a Type-4 transaction with an authorization list delegating an EOA to a target contract, and observes the state change on the EOA.",
+      "namespace_seed": "custom-eip7702-auth-delegation",
+      "notes": [
+        "This proof validates EIP-7702 support."
+      ],
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6001600c60003960016000f300",
+          "bytecode_runtime": "0x00",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last"
+        },
+        {
+          "action": "eth_sendTransaction",
+          "transaction": {
+            "to": "0x1563915e194d8cfba1943570603f7606a3115508",
+            "gas": "0x186a0",
+            "authorizations_to_sign": [
+              {
+                "address": "$last_contract",
+                "private_key": "0x2222222222222222222222222222222222222222222222222222222222222222",
+                "chain_id": "0x0"
+              }
+            ]
+          }
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last"
+        }
+      ],
+      "expected": {
+        "storage": {}
+      },
+      "observe": {
+        "address": "0x1563915e194d8cfba1943570603f7606a3115508",
+        "eip7702_probe": {
+          "required_feature": "eip7702"
+        }
+      },
+      "filters": {}
+    }
+  ]
+}

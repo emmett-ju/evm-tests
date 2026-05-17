@@ -27,9 +27,9 @@ selfdestruct_created_clears_code = false
 clz = true
 bls12_381_precompiles = true
 p256verify_precompile = true
-modexp_eip7883 = false
-calldata_floor_eip7623 = false
-eip7702 = false
+modexp_eip7883 = true
+calldata_floor_eip7623 = true
+eip7702 = true
 blob_cell_proofs = false
 block_access_lists = false
 

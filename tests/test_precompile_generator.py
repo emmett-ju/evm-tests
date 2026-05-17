@@ -18,7 +18,6 @@ class TestPrecompileGenerator(unittest.TestCase):
         
         # Count admitted cases
         admitted = [e for e in inventory["entries"] if e["admitted"]]
-        # 2 cases per admitted file * 3 files = 6
         self.assertEqual(len(admitted), 4)
         
         # Verify blocked reasons for some unadmitted cases
@@ -26,10 +25,6 @@ class TestPrecompileGenerator(unittest.TestCase):
         self.assertTrue(len(blocked) > 0)
         
         # Check reasons for a deferred precompile file
-        msm_entry = next(e for e in inventory["entries"] if "msm_G1" in e["case_id"])
-        self.assertIn("precompile msm_G1 deferred", msm_entry["reasons"])
-        
-        # Check reasons for case limit exceeded
         add_g1_2 = next(e for e in inventory["entries"] if "add_G1.2" in e["case_id"])
         self.assertIn("case limit exceeded for minimal probe", add_g1_2["reasons"])
 

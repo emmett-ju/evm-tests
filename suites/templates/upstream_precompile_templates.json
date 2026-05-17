@@ -104,6 +104,24 @@
       "base_name": "p256verify",
       "precompile_family": "p256verify",
       "feature_flag": "p256verify_precompile"
+    },
+    {
+      "case_id": "upstream.precompile.modexp.osaka_repricing",
+      "description": "MODEXP Osaka repricing probe: mod_exp_298_gas_exp_heavy",
+      "namespace_seed": "upstream.precompile.modexp.osaka_repricing",
+      "upstream_ref": "tests/benchmark/compute/precompile/test_modexp.py::test_modexp_uncachable[mod_exp_298_gas_exp_heavy]",
+      "notes": [
+        "Upstream intent: probe MODEXP gas cost for EIP-7883.",
+        "RPC mapping: deploy a wrapper that calls MODEXP with a gas stipend of C_new - 1 (20975).",
+        "An Osaka node will fail (OOG for the inner call) because it requires 20976 gas. A Cancun node will pass because it requires 223 gas.",
+        "Admitted to prove Osaka EIP-7883 MODEXP repricing via strict gas boundary."
+      ],
+      "address": 5,
+      "input_hex": "0x000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000007ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "expected_hex": "",
+      "base_name": "modexp",
+      "precompile_family": "modexp",
+      "feature_flag": "modexp_eip7883"
     }
   ]
 }

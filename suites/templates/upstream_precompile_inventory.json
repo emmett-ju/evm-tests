@@ -4755,6 +4755,14 @@
       ],
       "address": "0x100",
       "input_size": 160
+    },
+    {
+      "upstream_ref": "tests/benchmark/compute/precompile/test_modexp.py::test_modexp_uncachable[mod_exp_298_gas_exp_heavy]",
+      "case_id": "upstream.precompile.modexp.osaka_repricing",
+      "admitted": true,
+      "reasons": [],
+      "address": "0x5",
+      "input_size": 223
     }
   ]
 }

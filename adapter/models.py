@@ -37,7 +37,7 @@ _ACTION_REQUIRED_FIELDS: dict[str, frozenset[str]] = {
     "invoke_contract": frozenset({"to", "data"}),
     "wait_receipt": frozenset({"tx_hash"}),
     "rpc_call": frozenset({"method"}),
-    "eth_sendRawTransaction": frozenset({"raw_transaction"}),
+    "eth_sendRawTransaction": frozenset(),
     "eth_sendTransaction": frozenset({"transaction"}),
 }
 _ACTION_OPTIONAL_FIELDS: dict[str, frozenset[str]] = {
@@ -49,7 +49,7 @@ _ACTION_OPTIONAL_FIELDS: dict[str, frozenset[str]] = {
     "invoke_contract": frozenset({"expected_receipt_status", "gas", "gas_price", "value"}),
     "wait_receipt": frozenset({"timeout_seconds"}),
     "rpc_call": frozenset({"params"}),
-    "eth_sendRawTransaction": frozenset(),
+    "eth_sendRawTransaction": frozenset({"raw_transaction", "transaction", "expect_error"}),
     "eth_sendTransaction": frozenset(),
 }
 _ACTION_STRING_FIELDS: dict[str, frozenset[str]] = {
@@ -128,6 +128,29 @@ def validate_execution_step(
         errors.append(f"{context}: action 'wait_receipt' field 'timeout_seconds' must be an integer")
     if action == "rpc_call" and "params" in step and not isinstance(step["params"], list):
         errors.append(f"{context}: action 'rpc_call' field 'params' must be a list")
+    if action == "eth_sendRawTransaction":
+        has_raw = "raw_transaction" in step
+        has_transaction = "transaction" in step
+        if has_raw == has_transaction:
+            errors.append(
+                f"{context}: action 'eth_sendRawTransaction' requires exactly one of 'raw_transaction' or 'transaction'"
+            )
+        if has_transaction and not isinstance(step["transaction"], dict):
+            errors.append(f"{context}: action 'eth_sendRawTransaction' field 'transaction' must be an object")
+        if "expect_error" in step:
+            expect_error = step["expect_error"]
+            if not isinstance(expect_error, dict):
+                errors.append(f"{context}: action 'eth_sendRawTransaction' field 'expect_error' must be an object")
+            else:
+                message_contains = expect_error.get("message_contains")
+                if not isinstance(message_contains, str) or not message_contains:
+                    errors.append(
+                        f"{context}: action 'eth_sendRawTransaction' field 'expect_error.message_contains' must be a non-empty string"
+                    )
+                if "code" in expect_error and not isinstance(expect_error["code"], int):
+                    errors.append(
+                        f"{context}: action 'eth_sendRawTransaction' field 'expect_error.code' must be an integer"
+                    )
     if action == "eth_sendTransaction" and "transaction" in step and not isinstance(step["transaction"], dict):
         errors.append(f"{context}: action 'eth_sendTransaction' field 'transaction' must be an object")
     if action == "deploy_contract" and "initial_storage" in step:
@@ -261,6 +284,7 @@ class TestCase:
         if not isinstance(self.steps, list):
             errors.append(f"{context}: steps must be a list")
         else:
+            rejection_steps = 0
             for step_index, step in enumerate(self.steps):
                 errors.extend(
                     validate_execution_step(
@@ -270,8 +294,31 @@ class TestCase:
                         backend=backend,
                     )
                 )
-        if not isinstance(self.expected, dict):
-            errors.append(f"{context}: expected must be an object")
+                if isinstance(step, dict) and step.get("action") == "eth_sendRawTransaction" and "expect_error" in step:
+                    rejection_steps += 1
+                    if step_index != len(self.steps) - 1:
+                        errors.append(
+                            f"{context}: eth_sendRawTransaction step with expect_error must be the final step"
+                        )
+            if not isinstance(self.expected, dict):
+                errors.append(f"{context}: expected must be an object")
+            else:
+                if "rpc_error" in self.expected:
+                    if rejection_steps != 1:
+                        errors.append(
+                            f"{context}: expected.rpc_error requires exactly one eth_sendRawTransaction step with expect_error"
+                        )
+                    rpc_error = self.expected["rpc_error"]
+                    if not isinstance(rpc_error, dict):
+                        errors.append(f"{context}: expected.rpc_error must be an object")
+                    else:
+                        message_contains = rpc_error.get("message_contains")
+                        if not isinstance(message_contains, str) or not message_contains:
+                            errors.append(
+                                f"{context}: expected.rpc_error.message_contains must be a non-empty string"
+                            )
+                        if "code" in rpc_error and not isinstance(rpc_error["code"], int):
+                            errors.append(f"{context}: expected.rpc_error.code must be an integer")
         if not isinstance(self.observe, dict):
             errors.append(f"{context}: observe must be an object")
         else:

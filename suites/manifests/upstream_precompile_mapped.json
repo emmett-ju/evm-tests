@@ -55,7 +55,8 @@
           "output_size": 128,
           "expected_success": true,
           "expected_output_digest": "0xd561ebeea3a050a16d1bb72c0ab17ecdc876bb821079a7e42bc077a5c7c99bc5",
-          "required_feature": "bls12_381_precompiles"
+          "required_feature": "bls12_381_precompiles",
+          "inner_gas": 10000000
         }
       },
       "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/add_G1_bls.json:bls_g1add_g1+p1"
@@ -110,7 +111,8 @@
           "output_size": 128,
           "expected_success": true,
           "expected_output_digest": "0xd561ebeea3a050a16d1bb72c0ab17ecdc876bb821079a7e42bc077a5c7c99bc5",
-          "required_feature": "bls12_381_precompiles"
+          "required_feature": "bls12_381_precompiles",
+          "inner_gas": 10000000
         }
       },
       "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/add_G1_bls.json:bls_g1add_p1+g1"
@@ -165,7 +167,8 @@
           "output_size": 128,
           "expected_success": true,
           "expected_output_digest": "0xd2b0d7b43ce993a817a069205ed3d7a139117befb9c0865d520f91ba88ac133b",
-          "required_feature": "bls12_381_precompiles"
+          "required_feature": "bls12_381_precompiles",
+          "inner_gas": 10000000
         }
       },
       "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/mul_G1_bls.json:bls_g1mul_(g1+g1=2*g1)"
@@ -220,7 +223,8 @@
           "output_size": 128,
           "expected_success": true,
           "expected_output_digest": "0x6ec9a9522b1cae93fb5061b2fdba7133b8efb46178b080eda4b613c3aa14eee4",
-          "required_feature": "bls12_381_precompiles"
+          "required_feature": "bls12_381_precompiles",
+          "inner_gas": 10000000
         }
       },
       "upstream_ref": "eip2537_bls_12_381_precompiles/vectors/mul_G1_bls.json:bls_g1mul_(p1+p1=2*p1)"
@@ -275,7 +279,8 @@
           "output_size": 32,
           "expected_success": true,
           "expected_output_digest": "0xb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf6",
-          "required_feature": "p256verify_precompile"
+          "required_feature": "p256verify_precompile",
+          "inner_gas": 10000000
         }
       },
       "upstream_ref": "tests/benchmark/compute/precompile/test_p256verify.py::test_p256verify[p256verify]"
@@ -329,10 +334,66 @@
           "output_size": 0,
           "expected_success": true,
           "expected_output_digest": "",
-          "required_feature": "p256verify_precompile"
+          "required_feature": "p256verify_precompile",
+          "inner_gas": 10000000
         }
       },
       "upstream_ref": "tests/benchmark/compute/precompile/test_p256verify.py::test_p256verify[p256verify]"
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.precompile.modexp.osaka_repricing",
+      "family": "upstream-precompile",
+      "description": "MODEXP Osaka repricing probe: mod_exp_298_gas_exp_heavy",
+      "filters": {
+        "requires_genesis_state": false
+      },
+      "namespace_seed": "upstream.precompile.modexp.osaka_repricing",
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x61010a600e60003961010a6000f360df61002b5f395f5f60df5f5f60056151eff15f553d6001553d61001f57005b3d5f5f3e3d5f2060025500000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000007ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "bytecode_runtime": "0x60df61002b5f395f5f60df5f5f60056151eff15f553d6001553d61001f57005b3d5f5f3e3d5f2060025500000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000700000000000000000000000000000000000000000000000000000000000000007ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "gas": "0x989680"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x989680"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      },
+      "observe": {
+        "storage_address": "$last_contract",
+        "precompile_probe": {
+          "family": "modexp",
+          "precompile": "modexp",
+          "address": "0x5",
+          "input_size": 223,
+          "output_size": 0,
+          "expected_success": false,
+          "expected_output_digest": "",
+          "required_feature": "modexp_eip7883",
+          "inner_gas": 20975
+        }
+      },
+      "upstream_ref": "tests/benchmark/compute/precompile/test_modexp.py::test_modexp_uncachable[mod_exp_298_gas_exp_heavy]"
     }
   ]
 }

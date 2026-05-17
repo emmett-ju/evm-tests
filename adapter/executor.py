@@ -45,7 +45,7 @@ from adapter.log_generator import (
 )
 from adapter.models import ChainProfile, ExecutionResult, TestCase
 from adapter.profile import describe_admin_key_source
-from adapter.signer import keccak256, load_private_key, private_key_to_address, sign_type_2_transaction
+from adapter.signer import keccak256, load_private_key, private_key_to_address, sign_type_2_transaction, sign_type_4_transaction
 from adapter.system_witness import (
     _create_child_code_payload,
     collect_system_witness_from_storage,
@@ -767,7 +767,7 @@ class MockBackend:
         precompile_probe: dict[str, Any],
         code: str | None,
     ) -> None:
-        if precompile_probe["family"] not in ("bls12_381", "p256verify"):
+        if precompile_probe["family"] not in ("bls12_381", "p256verify", "modexp"):
             raise ValueError(f"unsupported precompile probe family: {precompile_probe['family']}")
         
         if code is None or not code.startswith("0x"):
@@ -778,8 +778,9 @@ class MockBackend:
         output_size = precompile_probe["output_size"]
         expected_success = precompile_probe["expected_success"]
         expected_digest = precompile_probe["expected_output_digest"]
+        inner_gas = precompile_probe.get("inner_gas", 10_000_000)
         
-        if not self._is_precompile_wrapper_runtime(code, address, input_size):
+        if not self._is_precompile_wrapper_runtime(code, address, input_size, inner_gas):
              raise ValueError("mock precompile probe rejects tampered runtime or metadata")
 
         storage["0x00"] = WORD_01 if expected_success else ZERO_STORAGE_WORD
@@ -787,13 +788,13 @@ class MockBackend:
         if output_size > 0:
             storage["0x02"] = expected_digest
 
-    def _is_precompile_wrapper_runtime(self, code: str, address: int, input_size: int) -> bool:
+    def _is_precompile_wrapper_runtime(self, code: str, address: int, input_size: int, inner_gas: int) -> bool:
         from adapter.precompile_generator import generate_precompile_runtime
         code_bytes = bytes.fromhex(code.removeprefix("0x"))
         if len(code_bytes) < input_size:
             return False
         input_bytes = code_bytes[-input_size:] if input_size > 0 else b""
-        expected_runtime = generate_precompile_runtime(address, input_bytes)
+        expected_runtime = generate_precompile_runtime(address, input_bytes, inner_gas)
         return code_bytes == expected_runtime
 
     def _decode_selfdestruct_existing_mode(self, data: str) -> int:
@@ -980,6 +981,7 @@ class JsonRpcBackend:
         last_contract_address: str | None = None
         block_context: dict[str, str] | None = None
         expected_receipt_by_tx_hash: dict[str, str] = {}
+        observed_rpc_error: dict[str, Any] | None = None
         context: dict[str, Any] = {
             "$admin_account": self.profile.admin_account,
         }
@@ -988,11 +990,43 @@ class JsonRpcBackend:
             if action == "rpc_call":
                 self._rpc(step["method"], step.get("params", []))
             elif action == "eth_sendRawTransaction":
-                tx_hash = self._rpc("eth_sendRawTransaction", [step["raw_transaction"]])
+                expect_error = step.get("expect_error")
+                try:
+                    if "raw_transaction" in step:
+                        tx_hash = self._rpc("eth_sendRawTransaction", [step["raw_transaction"]])
+                    else:
+                        transaction = step["transaction"]
+                        if "authorizations_to_sign" in transaction:
+                            for auth_req in transaction["authorizations_to_sign"]:
+                                if "address" in auth_req:
+                                    auth_req["address"] = self._resolve_address(auth_req["address"], last_contract_address)
+                        tx_hash = self._send_raw_transaction(transaction, preserve_declared_gas=True)
+                except RuntimeError as exc:
+                    if expect_error is None:
+                        raise
+                    matched_error = self._match_expected_rpc_error(exc, expect_error)
+                    if matched_error is None:
+                        raise RuntimeError(
+                            "eth_sendRawTransaction rpc error did not match expectation: "
+                            f"expected {expect_error!r}, got {exc}"
+                        ) from exc
+                    context["$rpc_error_message"] = str(exc)
+                    observed_rpc_error = matched_error
+                    continue
+                if expect_error is not None:
+                    raise RuntimeError(
+                        "eth_sendRawTransaction unexpectedly succeeded despite expect_error: "
+                        f"returned {tx_hash}"
+                    )
                 tx_hashes.append(tx_hash)
                 expected_receipt_by_tx_hash[tx_hash] = "0x1"
             elif action == "eth_sendTransaction":
-                tx_hash = self._send_transaction(step["transaction"])
+                transaction = step["transaction"]
+                if "authorizations_to_sign" in transaction:
+                    for auth_req in transaction["authorizations_to_sign"]:
+                        if "address" in auth_req:
+                            auth_req["address"] = self._resolve_address(auth_req["address"], last_contract_address)
+                tx_hash = self._send_transaction(transaction)
                 tx_hashes.append(tx_hash)
                 expected_receipt_by_tx_hash[tx_hash] = step["transaction"].get("expected_receipt_status", "0x1")
             elif action == "transfer_native":
@@ -1058,6 +1092,10 @@ class JsonRpcBackend:
             else:
                 raise ValueError(f"unsupported jsonrpc action: {action}")
         observed = self._observe(case, last_receipt, last_contract_address)
+        if observed_rpc_error is not None:
+            observed["rpc_error"] = observed_rpc_error
+        elif "rpc_error" in case.expected:
+            observed["rpc_error"] = None
         if last_contract_address is not None:
             context["$last_contract"] = last_contract_address
         if last_receipt is not None and last_receipt.get("effectiveGasPrice") is not None:
@@ -1200,24 +1238,103 @@ class JsonRpcBackend:
             prepared = self._prepare_transaction(transaction)
             return self._rpc("eth_sendTransaction", [prepared])
         if source in {"env_private_key", "file_private_key"}:
+            return self._send_raw_transaction(transaction, preserve_declared_gas=False)
+        raise NotImplementedError(
+            "unsupported admin_key_source; use rpc_unlocked, env:VAR, file:/path, "
+            "or provide pre-signed raw transactions"
+        )
+
+    def _send_raw_transaction(self, transaction: dict[str, Any], *, preserve_declared_gas: bool = False) -> str:
+        source = describe_admin_key_source(self.profile)
+        if source in {"env_private_key", "file_private_key"}:
             private_key = load_private_key(self.profile)
             derived_address = private_key_to_address(private_key)
             if derived_address.lower() != self.profile.admin_account.lower():
                 raise ValueError(
                     "admin_account does not match the address derived from admin_key_source"
                 )
-            prepared = self._prepare_transaction(transaction)
-            raw_transaction = sign_type_2_transaction(self.profile, private_key, prepared)
+            prepared = self._prepare_transaction_without_floor(transaction) if preserve_declared_gas else self._prepare_transaction(transaction)
+            if "authorizations" in prepared:
+                raw_transaction = sign_type_4_transaction(self.profile, private_key, prepared)
+            else:
+                raw_transaction = sign_type_2_transaction(self.profile, private_key, prepared)
             return self._rpc("eth_sendRawTransaction", [raw_transaction])
         raise NotImplementedError(
-            "unsupported admin_key_source; use rpc_unlocked, env:VAR, file:/path, "
-            "or provide pre-signed raw transactions"
+            "raw transaction signing requires env:VAR or file:/path admin_key_source"
         )
+
+    def _prepare_transaction_without_floor(self, transaction: dict[str, Any]) -> dict[str, Any]:
+        prepared = dict(transaction)
+        prepared.setdefault("from", self.profile.admin_account)
+        prepared.setdefault("chainId", hex(self.profile.chain_id))
+        if not prepared.get("gas"):
+            prepared["gas"] = hex(self.profile.gas_policy.gas_limit)
+        prepared.setdefault("value", "0x0")
+        if not prepared.get("data"):
+            prepared["data"] = "0x"
+        if self.profile.gas_policy.max_fee_per_gas is not None:
+            prepared.setdefault("maxFeePerGas", hex(self.profile.gas_policy.max_fee_per_gas))
+        if self.profile.gas_policy.max_priority_fee_per_gas is not None:
+            prepared.setdefault(
+                "maxPriorityFeePerGas",
+                hex(self.profile.gas_policy.max_priority_fee_per_gas),
+            )
+        if "nonce" not in prepared:
+            prepared["nonce"] = self._rpc("eth_getTransactionCount", [prepared["from"], "pending"])
+        return prepared
+
+    def _match_expected_rpc_error(self, exc: RuntimeError, expect_error: dict[str, Any]) -> dict[str, Any] | None:
+        message = str(exc)
+        prefix = "rpc error for eth_sendRawTransaction: "
+        if not message.startswith(prefix):
+            return None
+        formatted = message.removeprefix(prefix)
+        code_part: int | None = None
+        message_part = formatted
+        if formatted.startswith("code="):
+            code_split = formatted.split(" message=", 1)
+            if len(code_split) == 2:
+                code_text = code_split[0].removeprefix("code=")
+                try:
+                    code_part = int(code_text)
+                except ValueError:
+                    return None
+                message_part = code_split[1].strip("\'")
+        expected_code = expect_error.get("code")
+        if expected_code is not None and code_part is not None and code_part != int(expected_code):
+            return None
+        expected_substring = expect_error.get("message_contains")
+        if expected_substring and expected_substring not in message_part:
+            return None
+        matched: dict[str, Any] = {"message_contains": expected_substring or message_part}
+        if code_part is not None:
+            matched["code"] = code_part
+        return matched
 
     def _prepare_transaction(self, transaction: dict[str, Any]) -> dict[str, Any]:
         prepared = dict(transaction)
         prepared.setdefault("from", self.profile.admin_account)
         prepared.setdefault("chainId", hex(self.profile.chain_id))
+
+        # Dynamically sign authorizations if requested
+        if "authorizations_to_sign" in prepared:
+            from adapter.signer import sign_authorization, private_key_to_address
+            authorizations = prepared.get("authorizations", [])
+            for auth_req in prepared["authorizations_to_sign"]:
+                priv_key = self._hex_to_int(auth_req["private_key"])
+                chain_id = self._hex_to_int(auth_req.get("chain_id", "0x0"))
+                target_address = auth_req["address"]
+                # Dynamically fetch nonce if not provided
+                if "nonce" in auth_req:
+                    nonce = self._hex_to_int(auth_req["nonce"])
+                else:
+                    derived_addr = private_key_to_address(priv_key)
+                    nonce = self._hex_to_int(self._rpc("eth_getTransactionCount", [derived_addr, "pending"]))
+                signed_auth = sign_authorization(priv_key, chain_id, target_address, nonce)
+                authorizations.append(signed_auth)
+            prepared["authorizations"] = authorizations
+            del prepared["authorizations_to_sign"]
+
         if not prepared.get("gas"):
             prepared["gas"] = hex(self.profile.gas_policy.gas_limit)
         prepared.setdefault("value", "0x0")
