@@ -215,7 +215,7 @@ class MockBackend:
                 if receipt_status == "0x0":
                     continue
                 storage = contract_state.setdefault("storage", {})
-                
+
                 memory_probe = case.observe.get("memory_probe")
                 if memory_probe is not None:
                     from adapter.memory_generator import (
@@ -364,7 +364,7 @@ class MockBackend:
                 if self._is_system_self_call_runtime(code):
                     self._simulate_system_self_call_probe(storage, code)
                     continue
-                
+
                 if code in {"0x60003560005500", "0x60003560005560006000fd"}:
                     padded = data[2:] if data.startswith("0x") else data
                     storage["0x00"] = "0x" + padded.rjust(64, "0")
@@ -769,17 +769,17 @@ class MockBackend:
     ) -> None:
         if precompile_probe["family"] not in ("bls12_381", "p256verify", "modexp"):
             raise ValueError(f"unsupported precompile probe family: {precompile_probe['family']}")
-        
+
         if code is None or not code.startswith("0x"):
              raise ValueError("precompile probe requires valid contract code")
-             
+
         address = int(precompile_probe["address"], 16)
         input_size = precompile_probe["input_size"]
         output_size = precompile_probe["output_size"]
         expected_success = precompile_probe["expected_success"]
         expected_digest = precompile_probe["expected_output_digest"]
         inner_gas = precompile_probe.get("inner_gas", 10_000_000)
-        
+
         if not self._is_precompile_wrapper_runtime(code, address, input_size, inner_gas):
              raise ValueError("mock precompile probe rejects tampered runtime or metadata")
 
