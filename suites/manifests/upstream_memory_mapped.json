@@ -9,13 +9,13 @@
       "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_0.dynamic.success",
       "family": "state/memory",
-      "description": "Mapped from execution-specs MCOPY with mem_size 0, copy_size 0, and dynamic source/destination with zero copy size onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-memory-mcopy-mem0-copy0-dynamic-zero",
+      "description": "Mapped from execution-specs MCOPY with mem_size 0, copy_size 0, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem0-copy0-dynamic",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=0-fixed_src_dst=False]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=0, copy_size=0, fixed_src_dst=False.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -23,15 +23,17 @@
           "mode": "mcopy",
           "mem_size": 0,
           "copy_size": 0,
-          "fixed_src_dst": false
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6012600c60003960126000f35f5a6007065a6007065e595f555960015500",
-          "bytecode_runtime": "0x5f5a6007065a6007065e595f555960015500",
+          "bytecode_init": "0x601a600c600039601a6000f35f5a600706806003555a600706806004555e595f555960015500",
+          "bytecode_runtime": "0x5f5a600706806003555a600706806004555e595f555960015500",
           "gas": "0x186a0"
         },
         {
@@ -67,8 +69,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=0-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=0, copy_size=0, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -113,6 +115,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_1024.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 0, copy_size 1024, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem0-copy1024-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=1024-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=0, copy_size=1024, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 0,
+          "copy_size": 1024,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601c600c600039601c6000f36104005a600706806003555a600706806004555e595f555960015500",
+          "bytecode_runtime": "0x6104005a600706806003555a600706806004555e595f555960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000420",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000420"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_1024.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 0, copy_size 1024, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -120,8 +177,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=1024-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=0, copy_size=1024, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -166,6 +223,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_256.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 0, copy_size 256, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem0-copy256-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=256-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=0, copy_size=256, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 0,
+          "copy_size": 256,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601c600c600039601c6000f36101005a600706806003555a600706806004555e595f555960015500",
+          "bytecode_runtime": "0x6101005a600706806003555a600706806004555e595f555960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000120",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000120"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_256.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 0, copy_size 256, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -173,8 +285,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=256-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=0, copy_size=256, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -219,6 +331,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_32.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 0, copy_size 32, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem0-copy32-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=32-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=0, copy_size=32, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 0,
+          "copy_size": 32,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x601b600c600039601b6000f360205a600706806003555a600706806004555e595f555960015500",
+          "bytecode_runtime": "0x60205a600706806003555a600706806004555e595f555960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000040",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000040"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_32.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 0, copy_size 32, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -226,8 +393,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=32-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=0, copy_size=32, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -274,13 +441,13 @@
       "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_0.dynamic.success",
       "family": "state/memory",
-      "description": "Mapped from execution-specs MCOPY with mem_size 1024, copy_size 0, and dynamic source/destination with zero copy size onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-memory-mcopy-mem1024-copy0-dynamic-zero",
+      "description": "Mapped from execution-specs MCOPY with mem_size 1024, copy_size 0, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem1024-copy0-dynamic",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=0-fixed_src_dst=False]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=1024, copy_size=0, fixed_src_dst=False.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -288,15 +455,17 @@
           "mode": "mcopy",
           "mem_size": 1024,
           "copy_size": 0,
-          "fixed_src_dst": false
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x601f600c600039601f6000f35f5a6007065a6007065e595f555a5f535a610200535a6103ff535960015500",
-          "bytecode_runtime": "0x5f5a6007065a6007065e595f555a5f535a610200535a6103ff535960015500",
+          "bytecode_init": "0x6027600c60003960276000f35f5a600706806003555a600706806004555e595f555a5f535a610200535a6103ff535960015500",
+          "bytecode_runtime": "0x5f5a600706806003555a600706806004555e595f555a5f535a610200535a6103ff535960015500",
           "gas": "0x186a0"
         },
         {
@@ -332,8 +501,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=0-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=1024, copy_size=0, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -378,6 +547,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_1024.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 1024, copy_size 1024, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem1024-copy1024-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=1024-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=1024, copy_size=1024, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 1024,
+          "copy_size": 1024,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6029600c60003960296000f36104005a600706806003555a600706806004555e595f555a5f535a610200535a6103ff535960015500",
+          "bytecode_runtime": "0x6104005a600706806003555a600706806004555e595f555a5f535a610200535a6103ff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000420",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000420"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_1024.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 1024, copy_size 1024, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -385,8 +609,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=1024-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=1024, copy_size=1024, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -431,6 +655,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_256.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 1024, copy_size 256, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem1024-copy256-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=256-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=1024, copy_size=256, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 1024,
+          "copy_size": 256,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6029600c60003960296000f36101005a600706806003555a600706806004555e595f555a5f535a610200535a6103ff535960015500",
+          "bytecode_runtime": "0x6101005a600706806003555a600706806004555e595f555a5f535a610200535a6103ff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000120",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_256.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 1024, copy_size 256, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -438,8 +717,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=256-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=1024, copy_size=256, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -484,6 +763,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_32.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 1024, copy_size 32, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem1024-copy32-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=32-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=1024, copy_size=32, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 1024,
+          "copy_size": 32,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6028600c60003960286000f360205a600706806003555a600706806004555e595f555a5f535a610200535a6103ff535960015500",
+          "bytecode_runtime": "0x60205a600706806003555a600706806004555e595f555a5f535a610200535a6103ff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000040",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_32.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 1024, copy_size 32, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -491,8 +825,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=32-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=1024, copy_size=32, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -539,13 +873,13 @@
       "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_0.dynamic.success",
       "family": "state/memory",
-      "description": "Mapped from execution-specs MCOPY with mem_size 10240, copy_size 0, and dynamic source/destination with zero copy size onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-memory-mcopy-mem10240-copy0-dynamic-zero",
+      "description": "Mapped from execution-specs MCOPY with mem_size 10240, copy_size 0, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem10240-copy0-dynamic",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=0-fixed_src_dst=False]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=10240, copy_size=0, fixed_src_dst=False.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -553,15 +887,17 @@
           "mode": "mcopy",
           "mem_size": 10240,
           "copy_size": 0,
-          "fixed_src_dst": false
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x601f600c600039601f6000f35f5a6007065a6007065e595f555a5f535a611400535a6127ff535960015500",
-          "bytecode_runtime": "0x5f5a6007065a6007065e595f555a5f535a611400535a6127ff535960015500",
+          "bytecode_init": "0x6027600c60003960276000f35f5a600706806003555a600706806004555e595f555a5f535a611400535a6127ff535960015500",
+          "bytecode_runtime": "0x5f5a600706806003555a600706806004555e595f555a5f535a611400535a6127ff535960015500",
           "gas": "0x186a0"
         },
         {
@@ -597,8 +933,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=0-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=10240, copy_size=0, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -643,6 +979,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_1024.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 10240, copy_size 1024, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem10240-copy1024-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=1024-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=10240, copy_size=1024, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 10240,
+          "copy_size": 1024,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6029600c60003960296000f36104005a600706806003555a600706806004555e595f555a5f535a611400535a6127ff535960015500",
+          "bytecode_runtime": "0x6104005a600706806003555a600706806004555e595f555a5f535a611400535a6127ff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000420",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000002800"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_1024.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 10240, copy_size 1024, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -650,8 +1041,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=1024-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=10240, copy_size=1024, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -696,6 +1087,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_256.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 10240, copy_size 256, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem10240-copy256-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=256-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=10240, copy_size=256, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 10240,
+          "copy_size": 256,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6029600c60003960296000f36101005a600706806003555a600706806004555e595f555a5f535a611400535a6127ff535960015500",
+          "bytecode_runtime": "0x6101005a600706806003555a600706806004555e595f555a5f535a611400535a6127ff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000120",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000002800"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_256.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 10240, copy_size 256, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -703,8 +1149,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=256-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=10240, copy_size=256, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -749,6 +1195,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_32.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 10240, copy_size 32, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem10240-copy32-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=32-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=10240, copy_size=32, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 10240,
+          "copy_size": 32,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6028600c60003960286000f360205a600706806003555a600706806004555e595f555a5f535a611400535a6127ff535960015500",
+          "bytecode_runtime": "0x60205a600706806003555a600706806004555e595f555a5f535a611400535a6127ff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x061a80"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000040",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000002800"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_32.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 10240, copy_size 32, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -756,8 +1257,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=32-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=10240, copy_size=32, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -804,13 +1305,13 @@
       "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_0.dynamic.success",
       "family": "state/memory",
-      "description": "Mapped from execution-specs MCOPY with mem_size 1048576, copy_size 0, and dynamic source/destination with zero copy size onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-memory-mcopy-mem1048576-copy0-dynamic-zero",
+      "description": "Mapped from execution-specs MCOPY with mem_size 1048576, copy_size 0, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem1048576-copy0-dynamic",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=0-fixed_src_dst=False]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=1048576, copy_size=0, fixed_src_dst=False.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -818,15 +1319,17 @@
           "mode": "mcopy",
           "mem_size": 1048576,
           "copy_size": 0,
-          "fixed_src_dst": false
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6021600c60003960216000f35f5a6007065a6007065e595f555a5f535a62080000535a620fffff535960015500",
-          "bytecode_runtime": "0x5f5a6007065a6007065e595f555a5f535a62080000535a620fffff535960015500",
+          "bytecode_init": "0x6029600c60003960296000f35f5a600706806003555a600706806004555e595f555a5f535a62080000535a620fffff535960015500",
+          "bytecode_runtime": "0x5f5a600706806003555a600706806004555e595f555a5f535a62080000535a620fffff535960015500",
           "gas": "0x186a0"
         },
         {
@@ -862,8 +1365,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=0-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=1048576, copy_size=0, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -908,6 +1411,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_1024.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 1048576, copy_size 1024, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem1048576-copy1024-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=1024-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=1048576, copy_size=1024, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 1048576,
+          "copy_size": 1024,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x602b600c600039602b6000f36104005a600706806003555a600706806004555e595f555a5f535a62080000535a620fffff535960015500",
+          "bytecode_runtime": "0x6104005a600706806003555a600706806004555e595f555a5f535a62080000535a620fffff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000420",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_1024.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 1048576, copy_size 1024, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -915,8 +1473,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=1024-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=1048576, copy_size=1024, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -961,6 +1519,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_256.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 1048576, copy_size 256, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem1048576-copy256-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=256-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=1048576, copy_size=256, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 1048576,
+          "copy_size": 256,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x602b600c600039602b6000f36101005a600706806003555a600706806004555e595f555a5f535a62080000535a620fffff535960015500",
+          "bytecode_runtime": "0x6101005a600706806003555a600706806004555e595f555a5f535a62080000535a620fffff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000120",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_256.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 1048576, copy_size 256, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -968,8 +1581,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=256-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=1048576, copy_size=256, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1014,6 +1627,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_32.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 1048576, copy_size 32, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem1048576-copy32-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=32-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=1048576, copy_size=32, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 1048576,
+          "copy_size": 32,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x602a600c600039602a6000f360205a600706806003555a600706806004555e595f555a5f535a62080000535a620fffff535960015500",
+          "bytecode_runtime": "0x60205a600706806003555a600706806004555e595f555a5f535a62080000535a620fffff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000040",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000100000"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_32.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 1048576, copy_size 32, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -1021,8 +1689,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=32-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=1048576, copy_size=32, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1069,13 +1737,13 @@
       "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_0.dynamic.success",
       "family": "state/memory",
-      "description": "Mapped from execution-specs MCOPY with mem_size 256, copy_size 0, and dynamic source/destination with zero copy size onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-memory-mcopy-mem256-copy0-dynamic-zero",
+      "description": "Mapped from execution-specs MCOPY with mem_size 256, copy_size 0, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem256-copy0-dynamic",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=0-fixed_src_dst=False]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=256, copy_size=0, fixed_src_dst=False.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1083,15 +1751,17 @@
           "mode": "mcopy",
           "mem_size": 256,
           "copy_size": 0,
-          "fixed_src_dst": false
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x601d600c600039601d6000f35f5a6007065a6007065e595f555a5f535a6080535a60ff535960015500",
-          "bytecode_runtime": "0x5f5a6007065a6007065e595f555a5f535a6080535a60ff535960015500",
+          "bytecode_init": "0x6025600c60003960256000f35f5a600706806003555a600706806004555e595f555a5f535a6080535a60ff535960015500",
+          "bytecode_runtime": "0x5f5a600706806003555a600706806004555e595f555a5f535a6080535a60ff535960015500",
           "gas": "0x186a0"
         },
         {
@@ -1127,8 +1797,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=0-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=256, copy_size=0, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1173,6 +1843,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_1024.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 256, copy_size 1024, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem256-copy1024-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=1024-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=256, copy_size=1024, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 256,
+          "copy_size": 1024,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6027600c60003960276000f36104005a600706806003555a600706806004555e595f555a5f535a6080535a60ff535960015500",
+          "bytecode_runtime": "0x6104005a600706806003555a600706806004555e595f555a5f535a6080535a60ff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000420",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000420"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_1024.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 256, copy_size 1024, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -1180,8 +1905,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=1024-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=256, copy_size=1024, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1226,6 +1951,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_256.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 256, copy_size 256, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem256-copy256-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=256-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=256, copy_size=256, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 256,
+          "copy_size": 256,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6027600c60003960276000f36101005a600706806003555a600706806004555e595f555a5f535a6080535a60ff535960015500",
+          "bytecode_runtime": "0x6101005a600706806003555a600706806004555e595f555a5f535a6080535a60ff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000120",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000120"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_256.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 256, copy_size 256, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -1233,8 +2013,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=256-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=256, copy_size=256, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1279,6 +2059,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_32.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 256, copy_size 32, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem256-copy32-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=32-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=256, copy_size=32, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 256,
+          "copy_size": 32,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6026600c60003960266000f360205a600706806003555a600706806004555e595f555a5f535a6080535a60ff535960015500",
+          "bytecode_runtime": "0x60205a600706806003555a600706806004555e595f555a5f535a6080535a60ff535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000040",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000100"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_32.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 256, copy_size 32, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -1286,8 +2121,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=32-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=256, copy_size=32, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1334,13 +2169,13 @@
       "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_0.dynamic.success",
       "family": "state/memory",
-      "description": "Mapped from execution-specs MCOPY with mem_size 32, copy_size 0, and dynamic source/destination with zero copy size onto an RPC-only deploy/call/storage-assert flow.",
-      "namespace_seed": "upstream-memory-mcopy-mem32-copy0-dynamic-zero",
+      "description": "Mapped from execution-specs MCOPY with mem_size 32, copy_size 0, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem32-copy0-dynamic",
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=0-fixed_src_dst=False]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=32, copy_size=0, fixed_src_dst=False.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1348,15 +2183,17 @@
           "mode": "mcopy",
           "mem_size": 32,
           "copy_size": 0,
-          "fixed_src_dst": false
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x601d600c600039601d6000f35f5a6007065a6007065e595f555a5f535a6010535a601f535960015500",
-          "bytecode_runtime": "0x5f5a6007065a6007065e595f555a5f535a6010535a601f535960015500",
+          "bytecode_init": "0x6025600c60003960256000f35f5a600706806003555a600706806004555e595f555a5f535a6010535a601f535960015500",
+          "bytecode_runtime": "0x5f5a600706806003555a600706806004555e595f555a5f535a6010535a601f535960015500",
           "gas": "0x186a0"
         },
         {
@@ -1392,8 +2229,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=0-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=32, copy_size=0, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1438,6 +2275,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_1024.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 32, copy_size 1024, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem32-copy1024-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=1024-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=32, copy_size=1024, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 32,
+          "copy_size": 1024,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6027600c60003960276000f36104005a600706806003555a600706806004555e595f555a5f535a6010535a601f535960015500",
+          "bytecode_runtime": "0x6104005a600706806003555a600706806004555e595f555a5f535a6010535a601f535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000420",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000420"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_1024.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 32, copy_size 1024, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -1445,8 +2337,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=1024-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=32, copy_size=1024, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1491,6 +2383,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_256.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 32, copy_size 256, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem32-copy256-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=256-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=32, copy_size=256, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 32,
+          "copy_size": 256,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6027600c60003960276000f36101005a600706806003555a600706806004555e595f555a5f535a6010535a601f535960015500",
+          "bytecode_runtime": "0x6101005a600706806003555a600706806004555e595f555a5f535a6010535a601f535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000120",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000120"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_256.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 32, copy_size 256, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -1498,8 +2445,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=256-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=32, copy_size=256, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",
@@ -1544,6 +2491,61 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_32.dynamic.success",
+      "family": "state/memory",
+      "description": "Mapped from execution-specs MCOPY with mem_size 32, copy_size 32, and dynamic source/destination onto an RPC-only deploy/call/storage-assert flow.",
+      "namespace_seed": "upstream-memory-mcopy-mem32-copy32-dynamic",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=32-fixed_src_dst=False]",
+      "notes": [
+        "Upstream intent: benchmark MCOPY with mem_size=32, copy_size=32, fixed_src_dst=False.",
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
+      ],
+      "observe": {
+        "storage_address": "$last_contract",
+        "memory_probe": {
+          "mode": "mcopy",
+          "mem_size": 32,
+          "copy_size": 32,
+          "fixed_src_dst": false,
+          "dynamic_src_slot": "0x03",
+          "dynamic_dst_slot": "0x04"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6026600c60003960266000f360205a600706806003555a600706806004555e595f555a5f535a6010535a601f535960015500",
+          "bytecode_runtime": "0x60205a600706806003555a600706806004555e595f555a5f535a6010535a601f535960015500",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0x030d40"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "storage": {
+          "0x00": "0x0000000000000000000000000000000000000000000000000000000000000040",
+          "0x01": "0x0000000000000000000000000000000000000000000000000000000000000040"
+        }
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_32.fixed.success",
       "family": "state/memory",
       "description": "Mapped from execution-specs MCOPY with mem_size 32, copy_size 32, and fixed source/destination 0 onto an RPC-only deploy/call/storage-assert flow.",
@@ -1551,8 +2553,8 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=32-fixed_src_dst=True]",
       "notes": [
         "Upstream intent: benchmark MCOPY with mem_size=32, copy_size=32, fixed_src_dst=True.",
-        "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-        "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE."
+        "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+        "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation."
       ],
       "observe": {
         "storage_address": "$last_contract",

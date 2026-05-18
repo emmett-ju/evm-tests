@@ -35,11 +35,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=1024-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_1024.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -65,11 +63,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=256-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_256.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -95,11 +91,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=0-copy_size=32-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_0.copy_size_32.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -153,11 +147,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=1024-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_1024.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -183,11 +175,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=256-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_256.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -213,11 +203,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1024-copy_size=32-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1024.copy_size_32.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -271,11 +259,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=1024-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_1024.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -301,11 +287,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=256-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_256.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -331,11 +315,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=10240-copy_size=32-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_10240.copy_size_32.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -389,11 +371,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=1024-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_1024.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -419,11 +399,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=256-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_256.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -449,11 +427,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=1048576-copy_size=32-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_1048576.copy_size_32.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -507,11 +483,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=1024-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_1024.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -537,11 +511,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=256-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_256.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -567,11 +539,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=256-copy_size=32-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_256.copy_size_32.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -625,11 +595,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=1024-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_1024.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -655,11 +623,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=256-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_256.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,
@@ -685,11 +651,9 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_memory.py::test_mcopy[mem_size=32-copy_size=32-fixed_src_dst=False]",
       "case_id": "upstream.benchmark.memory.mcopy.mem_size_32.copy_size_32.dynamic.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "mcopy",
+      "reasons": [],
       "source": "mcopy",
       "opcode": "MCOPY",
       "offset": null,

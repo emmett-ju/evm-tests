@@ -1027,7 +1027,7 @@ class HarnessTests(unittest.TestCase):
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_memory_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
-        self.assertEqual(len(selected), 125)
+        self.assertEqual(len(selected), 143)
         selected_ids = [case.case_id for case in selected]
         self.assertIn("upstream.benchmark.memory.mstore.offset_0.uninitialized.mem_size_0.success", selected_ids)
         self.assertIn("upstream.benchmark.memory.msize.mem_size_1.success", selected_ids)
@@ -1514,7 +1514,7 @@ class HarnessTests(unittest.TestCase):
         selected, decisions = TestSelector(profile).select(manifest)
         blocked = {decision.case.case_id: decision.reasons for decision in decisions if not decision.selected}
         self.assertEqual(len(selected), 100)
-        self.assertEqual(len(blocked), 30)
+        self.assertEqual(len(blocked), 40)
         self.assertEqual(
             set(tuple(reasons) for reasons in blocked.values()),
             {("log payload requires feature_flags.large_log_payload=true in chain profile",)},
@@ -2070,7 +2070,7 @@ class HarnessTests(unittest.TestCase):
 
     def test_memory_templates_load(self) -> None:
         templates = load_memory_templates(ROOT / "suites/templates/upstream_memory_templates.json")
-        self.assertEqual(len(templates), 125)
+        self.assertEqual(len(templates), 143)
         self.assertEqual(templates[0].mode, "mcopy")
 
     def test_call_context_templates_load(self) -> None:
@@ -2122,8 +2122,8 @@ class HarnessTests(unittest.TestCase):
             inventory = json.loads(inventory_path.read_text())
             admitted = [entry for entry in inventory["entries"] if entry["admitted"]]
             blocked = [entry for entry in inventory["entries"] if not entry["admitted"]]
-            self.assertEqual(len(admitted), 125)
-            self.assertEqual(len(blocked), 18)
+            self.assertEqual(len(admitted), 143)
+            self.assertEqual(len(blocked), 0)
 
     def test_m022_remaining_blocked_cluster_audit_lock(self) -> None:
         def load_inventory(family_slug: str) -> dict[str, object]:
@@ -2145,9 +2145,9 @@ class HarnessTests(unittest.TestCase):
         }
 
         expected_counts = {
-            "memory": (143, 125, 18),
+            "memory": (143, 143, 0),
             "account-query": (40, 10, 30),
-            "log": (140, 130, 10),
+            "log": (140, 140, 0),
             "system": (46, 35, 11),
             "block-context": (13, 8, 5),
             "tx-context": (4, 2, 2),
@@ -2169,14 +2169,14 @@ class HarnessTests(unittest.TestCase):
             for entry in inventories["memory"]
             if entry["admitted"] and entry["source"] == "mcopy"
         ]
-        self.assertEqual(Counter(entry["source"] for entry in memory_blocked), Counter({"mcopy": 18}))
+        self.assertEqual(Counter(entry["source"] for entry in memory_blocked), Counter())
         self.assertEqual(
             Counter(reason for entry in memory_blocked for reason in entry["reasons"]),
-            Counter({"requires gas-derived dynamic MCOPY source/destination expansion observation not yet mapped": 18}),
+            Counter(),
         )
-        self.assertEqual(Counter(entry["fixed_src_dst"] for entry in memory_blocked), Counter({False: 18}))
-        self.assertEqual(Counter(entry["copy_size"] for entry in memory_blocked), Counter({32: 6, 256: 6, 1024: 6}))
-        self.assertEqual(len(memory_admitted_mcopy), 30)
+        self.assertEqual(Counter(entry["fixed_src_dst"] for entry in memory_blocked), Counter())
+        self.assertEqual(Counter(entry["copy_size"] for entry in memory_blocked), Counter())
+        self.assertEqual(len(memory_admitted_mcopy), 48)
         self.assertEqual(sum(1 for entry in memory_admitted_mcopy if entry["fixed_src_dst"] is True), 24)
         self.assertEqual(
             sum(
@@ -2203,10 +2203,10 @@ class HarnessTests(unittest.TestCase):
         )
 
         log_blocked = [entry for entry in inventories["log"] if not entry["admitted"]]
-        self.assertEqual(Counter(entry["source"] for entry in log_blocked), Counter({"test_log": 10}))
+        self.assertEqual(Counter(entry["source"] for entry in log_blocked), Counter())
         self.assertEqual(
             Counter(reason for entry in log_blocked for reason in entry["reasons"]),
-            Counter({"requires gas-derived dynamic log offset observation not yet mapped": 10}),
+            Counter({}),
         )
         self.assertEqual(
             sum(1 for entry in log_blocked if entry["log_size"] == 0),
@@ -2226,7 +2226,7 @@ class HarnessTests(unittest.TestCase):
                 for entry in log_blocked
                 if entry["log_size"] == 1048576 and entry["memory_seed_kind"] == "ff"
             ),
-            10,
+            0,
         )
 
         system_blocked = [entry for entry in inventories["system"] if not entry["admitted"]]
@@ -2719,8 +2719,8 @@ class HarnessTests(unittest.TestCase):
 
         admitted = [entry for entry in entries if entry["admitted"]]
         blocked = [entry for entry in entries if not entry["admitted"]]
-        self.assertEqual(len(admitted), 130, "log admitted count drifted")
-        self.assertEqual(len(blocked), 10, "log blocked count drifted")
+        self.assertEqual(len(admitted), 140, "log admitted count drifted")
+        self.assertEqual(len(blocked), 0, "log blocked count drifted")
 
         admitted_case_ids = [entry["case_id"] for entry in admitted]
         self.assertEqual(
@@ -2728,31 +2728,28 @@ class HarnessTests(unittest.TestCase):
             {"test_log_fixed_offset", "test_log_dynamic_offset", "test_log_benchmark"},
         )
         dynamic_admitted = [entry for entry in admitted if entry["mode"] == "test_log_dynamic_offset"]
-        self.assertEqual(len(dynamic_admitted), 20)
+        self.assertEqual(len(dynamic_admitted), 30)
         self.assertEqual(
             Counter(entry["log_size"] for entry in dynamic_admitted),
-            Counter({0: 10, 1048576: 10}),
+            Counter({1048576: 20, 0: 10}),
         )
+        # All dynamic log modes are now admitted
         self.assertTrue(
-            all(
-                entry["log_size"] == 0
-                or (entry["log_size"] == 1048576 and entry["memory_seed_kind"] == "zero")
-                for entry in dynamic_admitted
-            )
+            all(entry["mode"] == "test_log_dynamic_offset" for entry in dynamic_admitted)
         )
         self.assertEqual(
             Counter(reason for entry in blocked for reason in entry["reasons"]),
-            Counter({"requires gas-derived dynamic log offset observation not yet mapped": 10}),
+            Counter({}),
         )
         self.assertEqual(
             Counter(entry["source"] for entry in blocked),
-            Counter({"test_log": 10}),
+            Counter(),
         )
         self.assertTrue(all(entry["mode"] is None for entry in blocked))
 
         template_case_ids = [case["case_id"] for case in templates_payload["cases"]]
         self.assertEqual(template_case_ids, admitted_case_ids)
-        self.assertEqual(len(templates_payload["cases"]), 130)
+        self.assertEqual(len(templates_payload["cases"]), 140)
 
         dynamic_template = next(
             case
@@ -2768,14 +2765,14 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(manifest_payload, checked_in_manifest, "log manifest JSON drift")
             manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
             self.assertEqual(manifest_case_ids, admitted_case_ids)
-            self.assertEqual(len(manifest_payload["cases"]), 130)
+            self.assertEqual(len(manifest_payload["cases"]), 140)
             self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/log"})
             observed_by_case = {case["case_id"]: case for case in manifest_payload["cases"]}
             dynamic_observed = observed_by_case[
                 "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false"
             ]
             self.assertEqual(dynamic_observed["observe"]["log_probe"]["offset_mode"], "dynamic_gas_mod_7")
-            self.assertIn("5a600706a1", dynamic_observed["steps"][0]["bytecode_runtime"])
+            self.assertIn("5a60070680600255a1", dynamic_observed["steps"][0]["bytecode_runtime"])
             self.assertEqual(dynamic_observed["expected"]["receipt_logs"], [{"topics": [NON_ZERO_TOPIC_WORD], "data": "0x"}])
             self.assertEqual(
                 observed_by_case[
@@ -2853,16 +2850,16 @@ class HarnessTests(unittest.TestCase):
         manifest_case_ids = [case.case_id for case in manifest.cases]
 
         self.assertEqual(selected_case_ids, manifest_case_ids)
-        self.assertEqual(len(selected_case_ids), 130)
+        self.assertEqual(len(selected_case_ids), 140)
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual({case.family for case in selected}, {"state/log"})
-        self.assertEqual(Counter(case.case_id.split(".")[4] for case in selected), Counter({"log0": 26, "log1": 26, "log2": 26, "log3": 26, "log4": 26}))
+        self.assertEqual(Counter(case.case_id.split(".")[4] for case in selected), Counter({"log0": 28, "log1": 28, "log2": 28, "log3": 28, "log4": 28}))
         self.assertEqual(
             Counter(
                 "digest" if "data_digest" in case.expected["receipt_logs"][0] else "exact"
                 for case in selected
             ),
-            Counter({"exact": 80, "digest": 50}),
+            Counter({"exact": 80, "digest": 60}),
         )
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
 
@@ -2876,7 +2873,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(ResultOracle().compare(case.expected, observed, context), [])
             observed_by_case[case.case_id] = observed
 
-        self.assertEqual(len(observed_by_case), 130)
+        self.assertEqual(len(observed_by_case), 140)
         self.assertEqual(
             observed_by_case[
                 "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true"
@@ -2975,7 +2972,7 @@ class HarnessTests(unittest.TestCase):
             report = json.loads(report_path.read_text())
             self.assertEqual(report["manifest"], "upstream-log-mapped")
             self.assertEqual(report["chain_profile"], "mock-devnet")
-            self.assertEqual(len(report["results"]), 130)
+            self.assertEqual(len(report["results"]), 140)
             self.assertTrue(all(result["success"] for result in report["results"]))
             self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
             observed_by_case = {result["case_id"]: result for result in report["results"]}
@@ -4316,7 +4313,7 @@ class HarnessTests(unittest.TestCase):
             )
             generated = json.loads(output_path.read_text())
             self.assertEqual(generated["name"], "upstream-memory-mapped")
-            self.assertEqual(len(generated["cases"]), 125)
+            self.assertEqual(len(generated["cases"]), 143)
 
     def test_cli_generate_account_query_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -4369,8 +4366,8 @@ class HarnessTests(unittest.TestCase):
             generated = json.loads(output_path.read_text())
             inventory = json.loads(inventory_path.read_text())
             self.assertEqual(generated["name"], "upstream-memory-mapping-templates")
-            self.assertEqual(len(generated["cases"]), 125)
-            self.assertGreater(len(inventory["entries"]), len(generated["cases"]))
+            self.assertEqual(len(generated["cases"]), 143)
+            self.assertEqual(len(inventory["entries"]), len(generated["cases"]))
 
     def test_cli_generate_call_context_manifest_writes_expected_output(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -5235,7 +5232,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 15, "cases": 1083, "admitted": 544, "blocked": 539},
+            {"families": 15, "cases": 1083, "admitted":  572, "blocked":  511},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -5272,11 +5269,11 @@ class HarnessTests(unittest.TestCase):
                 "account-query": {"total": 40, "admitted": 10, "blocked": 30},
                 "block-context": {"total": 13, "admitted": 8, "blocked": 5},
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
-                "log": {"total": 140, "admitted": 130, "blocked": 10},
+                "log": {"total": 140, "admitted": 140, "blocked": 0},
                 "keccak": {"total": 35, "admitted": 35, "blocked": 0},
                 "system": {"total": 46, "admitted": 35, "blocked": 11},
                 "tx-context": {"total": 4, "admitted": 2, "blocked": 2},
-                "memory": {"total": 143, "admitted": 125, "blocked": 18},
+                "memory": {"total": 143, "admitted": 143, "blocked": 0},
             },
         )
         self.assertEqual(
@@ -5288,7 +5285,7 @@ class HarnessTests(unittest.TestCase):
         )
         self.assertEqual(
             families["log"]["blocked_reasons"],
-            {"requires gas-derived dynamic log offset observation not yet mapped": 10},
+            {},
         )
         self._assert_checked_in_phase3_inventory_summary(summary)
 
@@ -5310,11 +5307,11 @@ class HarnessTests(unittest.TestCase):
             self.assertNotIn("account-query", families)
             self.assertEqual(
                 summary["totals"],
-                {"families": 14, "cases": 1043, "admitted": 534, "blocked": 509},
+                {"families": 14, "cases": 1043, "admitted": 562, "blocked": 481},
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 15, "cases": 1083, "admitted": 544, "blocked": 539},
+                {"families": 15, "cases": 1083, "admitted":  572, "blocked":  511},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -5385,11 +5382,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539},
+                {"families": 15, "cases": 1082, "admitted":  571, "blocked":  511},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 15, "cases": 1083, "admitted": 544, "blocked": 539},
+                {"families": 15, "cases": 1083, "admitted":  572, "blocked":  511},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -5409,7 +5406,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 15, "cases": 1082, "admitted": 543, "blocked": 539},
+                {"families": 15, "cases": 1082, "admitted":  571, "blocked":  511},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -5474,7 +5471,7 @@ class HarnessTests(unittest.TestCase):
             summary = json.loads(output_path.read_text())
 
         self.assertEqual(summary["totals"], {"families": 1, "selected": 2, "passed": 1, "failed": 1})
-        self.assertEqual(summary["coverage_reference"], {"families": 15, "cases": 1083, "admitted": 544, "blocked": 539})
+        self.assertEqual(summary["coverage_reference"], {"families": 15, "cases": 1083, "admitted":  572, "blocked":  511})
         self.assertEqual(summary["families"][0]["failed_cases"], ["failing-case"])
         self.assertFalse(summary["coverage_alignment"]["selected_equals_admitted"])
         self.assertFalse(summary["coverage_alignment"]["failed_zero"])
@@ -5490,7 +5487,7 @@ class HarnessTests(unittest.TestCase):
 
             payload = sync_to_staging(ROOT, staged_templates, staged_manifests)
 
-            self.assertEqual(payload["summary"], {"families": 15, "cases": 1083, "admitted": 544, "blocked": 539})
+            self.assertEqual(payload["summary"], {"families": 15, "cases": 1083, "admitted":  572, "blocked":  511})
             self.assertEqual(len(payload["families"]), len(FAMILY_SPECS))
             for spec in FAMILY_SPECS:
                 self.assertTrue((staged_templates / spec.template_file).exists(), spec.template_file)
@@ -5653,7 +5650,7 @@ class HarnessTests(unittest.TestCase):
     def test_cli_run_operational_manifests_preserve_closeout_evidence(self) -> None:
         scenarios = [
             ("upstream_block_context_mapped.json", "upstream-block-context-mapped", 8),
-            ("upstream_log_mapped.json", "upstream-log-mapped", 130),
+            ("upstream_log_mapped.json", "upstream-log-mapped", 140),
             ("upstream_system_mapped.json", "upstream-system-mapped", 35),
         ]
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -7427,7 +7424,7 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 125)
+            self.assertEqual(len(report["results"]), 143)
             
             # Spot-check representative memory-access, MSIZE, and MCOPY cases instead of all 125.
             expected_storage = {

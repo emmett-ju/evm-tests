@@ -1,0 +1,71 @@
+{
+  "name": "upstream-log-mapped",
+  "version": "1",
+  "execution_specs_ref": "5cdb055e069e246a877c8aa018079eb0b9093f57",
+  "suite_version": "0.1.0",
+  "chain_profile_version": "1",
+  "cases": [
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG0 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 0 topic(s), 0 payload bytes, and exact payload proof.",
+      "namespace_seed": "upstream-log-test-log-log0-size-0-bytes-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=0_bytes_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=0.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
+        "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
+        "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG0",
+          "topic_count": 0,
+          "topic_word": null,
+          "log_size": 0,
+          "memory_seed_kind": "zero",
+          "memory_seed_size": 0,
+          "witness_mode": "exact",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x600b600c600039600b6000f35f5a60070680600255a000",
+          "bytecode_runtime": "0x5f5a60070680600255a000",
+          "gas": "0x186a0"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xc350"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [],
+            "data": "0x"
+          }
+        ]
+      }
+    }
+  ]
+}

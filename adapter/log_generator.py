@@ -43,6 +43,7 @@ class LogMappingTemplate:
     memory_seed_kind: LogMemorySeedKind
     memory_seed_size: int
     witness_mode: LogWitnessMode
+    dynamic_offset_slot: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -221,7 +222,7 @@ def render_log_case(template: LogMappingTemplate) -> dict[str, Any]:
                 "memory_seed_kind": template.memory_seed_kind,
                 "memory_seed_size": template.memory_seed_size,
                 "witness_mode": template.witness_mode,
-                **({"offset_mode": "dynamic_gas_mod_7"} if template.mode == "test_log_dynamic_offset" else {}),
+                **({"offset_mode": "dynamic_gas_mod_7", "dynamic_offset_slot": "0x02"} if template.mode == "test_log_dynamic_offset" else {}),
             }
         },
         "filters": {},
@@ -288,6 +289,7 @@ def _load_log_template_entry(entry: object, *, index: int) -> LogMappingTemplate
         memory_seed_kind=memory_seed_kind,
         memory_seed_size=int(entry["memory_seed_size"]),
         witness_mode=witness_mode,
+        dynamic_offset_slot=str(entry["dynamic_offset_slot"]) if entry.get("dynamic_offset_slot") is not None else None,
     )
 
 
@@ -323,28 +325,20 @@ def _scan_test_log_cases(text: str) -> list[AutoLogInventoryEntry]:
                     topic_word = _resolve_topic_word(topic_count=topic_count, zeros_topic=zeros_topic)
                     witness_mode = _resolve_witness_mode(size_value)
                     memory_seed_kind: LogMemorySeedKind = "ff" if non_zero_data else "zero"
-                    dynamic_offset_admitted = (
-                        not fixed_offset
-                        and (
-                            size_value == 0
-                            or (size_value == 1024 * 1024 and not non_zero_data)
-                        )
-                    )
-                    admitted = fixed_offset or dynamic_offset_admitted
+                    dynamic_offset_admitted = not fixed_offset
+                    admitted = True
                     mode: LogTemplateMode | None
                     if fixed_offset:
                         mode = "test_log_fixed_offset"
-                    elif dynamic_offset_admitted:
-                        mode = "test_log_dynamic_offset"
                     else:
-                        mode = None
+                        mode = "test_log_dynamic_offset"
                     results.append(
                         AutoLogInventoryEntry(
                             upstream_ref=upstream_ref,
                             case_id=case_id,
                             admitted=admitted,
                             mode=mode,
-                            reasons=[] if admitted else [DYNAMIC_OFFSET_BLOCKED_REASON],
+                            reasons=[],
                             source="test_log",
                             opcode=opcode,
                             topic_count=topic_count,
@@ -426,6 +420,7 @@ def _inventory_entry_to_template(entry: AutoLogInventoryEntry) -> LogMappingTemp
         memory_seed_kind=_require_inventory_field(entry.memory_seed_kind, field="memory_seed_kind"),
         memory_seed_size=_require_inventory_field(entry.memory_seed_size, field="memory_seed_size"),
         witness_mode=_require_inventory_field(entry.witness_mode, field="witness_mode"),
+        dynamic_offset_slot="0x02" if entry.mode == "test_log_dynamic_offset" else None,
     )
 
 
@@ -491,10 +486,10 @@ def _build_notes(entry: AutoLogInventoryEntry) -> list[str]:
             (
                 "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload."
                 if log_size == 0
-                else "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload."
+                else "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window."
             ),
             witness_note,
-            "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped.",
+            "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
         ]
         if topic_count == 0:
             notes.append(
@@ -531,6 +526,10 @@ def _build_log_runtime(template: LogMappingTemplate) -> str:
         builder.op(0x5A)  # GAS
         builder.push_int(7)
         builder.op(0x06)  # MOD, producing GAS % 7
+        if template.dynamic_offset_slot:
+            builder.op(0x80)  # DUP1
+            builder.push_int(int(template.dynamic_offset_slot, 16))
+            builder.op(0x55)  # SSTORE
     else:
         builder.push_int(0)
     builder.op(0xA0 + template.topic_count)
@@ -595,18 +594,19 @@ def build_validated_log_probe_template(log_probe: dict[str, Any]) -> LogMappingT
         memory_seed_kind=str(normalized["memory_seed_kind"]),
         memory_seed_size=int(normalized["memory_seed_size"]),
         witness_mode=str(normalized["witness_mode"]),
+        dynamic_offset_slot=normalized.get("dynamic_offset_slot"),
     )
 
 
 
-def derive_receipt_log_expectation(log_probe: dict[str, Any]) -> dict[str, Any]:
-    return _expected_receipt_log(build_validated_log_probe_template(log_probe))
+def derive_receipt_log_expectation(log_probe: dict[str, Any], dynamic_offset: int | None = None) -> dict[str, Any]:
+    return _expected_receipt_log(build_validated_log_probe_template(log_probe), dynamic_offset)
 
 
 
-def _expected_receipt_log(template: LogMappingTemplate) -> dict[str, Any]:
+def _expected_receipt_log(template: LogMappingTemplate, dynamic_offset: int | None = None) -> dict[str, Any]:
     topics = [] if template.topic_word is None else [template.topic_word] * template.topic_count
-    payload = _payload_bytes(template)
+    payload = _payload_bytes(template, dynamic_offset)
     if template.witness_mode == "exact":
         return {"topics": topics, "data": "0x" + payload.hex()}
     return {
@@ -616,13 +616,24 @@ def _expected_receipt_log(template: LogMappingTemplate) -> dict[str, Any]:
     }
 
 
-def _payload_bytes(template: LogMappingTemplate) -> bytes:
+def _payload_bytes(template: LogMappingTemplate, dynamic_offset: int | None = None) -> bytes:
     if template.log_size == 0:
         return b""
     if template.memory_seed_kind == "zero" or template.memory_seed_size == 0:
         return b"\x00" * template.log_size
-    filled = min(template.log_size, template.memory_seed_size)
-    return (b"\xff" * filled) + (b"\x00" * (template.log_size - filled))
+        
+    offset = dynamic_offset if dynamic_offset is not None else 0
+    seed = b"\xff" * template.memory_seed_size
+    
+    end = offset + template.log_size
+    if end <= len(seed):
+        return seed[offset:end]
+        
+    payload = bytearray()
+    if offset < len(seed):
+        payload.extend(seed[offset:])
+    payload.extend(b"\x00" * (template.log_size - len(payload)))
+    return bytes(payload)
 
 
 def _deploy_gas(template: LogMappingTemplate) -> str:

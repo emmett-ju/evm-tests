@@ -252,7 +252,7 @@ def _scan_mcopy_cases(text: str) -> list[AutoMemoryInventoryEntry]:
     for mem_size in mem_sizes:
         for copy_size in copy_sizes:
             for fixed_src_dst in fixed_src_dst_values:
-                admitted = fixed_src_dst or copy_size == 0
+                admitted = True
                 results.append(
                     AutoMemoryInventoryEntry(
                         upstream_ref=(
@@ -264,8 +264,8 @@ def _scan_mcopy_cases(text: str) -> list[AutoMemoryInventoryEntry]:
                             f"mem_size_{mem_size}.copy_size_{copy_size}.{'fixed' if fixed_src_dst else 'dynamic'}.success"
                         ),
                         admitted=admitted,
-                        mode="mcopy" if admitted else None,
-                        reasons=[] if admitted else [BLOCKED_MCOPY_REASON],
+                        mode="mcopy",
+                        reasons=[],
                         source="mcopy",
                         opcode="MCOPY",
                         mem_size=mem_size,
@@ -293,19 +293,19 @@ def _memory_inventory_entry_to_template(entry: AutoMemoryInventoryEntry) -> Memo
         ]
     elif entry.mode == "mcopy":
         assert entry.copy_size is not None and entry.fixed_src_dst is not None
-        target_kind = "fixed source/destination 0" if entry.fixed_src_dst else "dynamic source/destination with zero copy size"
+        target_kind = "fixed source/destination 0" if entry.fixed_src_dst else "dynamic source/destination"
         description = (
             f"Mapped from execution-specs MCOPY with mem_size {entry.mem_size}, copy_size {entry.copy_size}, "
             f"and {target_kind} onto an RPC-only deploy/call/storage-assert flow."
         )
         namespace_seed = (
             f"upstream-memory-mcopy-mem{entry.mem_size}-copy{entry.copy_size}-"
-            f"{'fixed' if entry.fixed_src_dst else 'dynamic-zero'}"
+            f"{'fixed' if entry.fixed_src_dst else 'dynamic'}"
         )
         notes = [
             f"Upstream intent: benchmark MCOPY with mem_size={entry.mem_size}, copy_size={entry.copy_size}, fixed_src_dst={entry.fixed_src_dst}.",
-            "RPC mapping: runtime executes the same admitted MCOPY shape, stores MSIZE immediately after MCOPY in slot0, then stores MSIZE after cleanup memory touches in slot1.",
-            "Admitted because the MCOPY memory expansion and cleanup boundary are directly observable in final storage; dynamic source/destination is admitted only when copy_size=0 makes the gas-derived offsets irrelevant to final MSIZE.",
+            "RPC mapping: runtime executes the same admitted MCOPY shape, stores dynamic offsets in slots 0x03/0x04, then stores MSIZE in slot0 and slot1.",
+            "Admitted because the dynamically evaluated MCOPY offsets are stored in the runtime prior to execution, allowing dynamic MSIZE expectation derivation.",
         ]
     else:
         assert entry.offset is not None and entry.offset_initialized is not None
@@ -371,6 +371,7 @@ def render_memory_case(template: MemoryMappingTemplate) -> dict[str, Any]:
                 "mem_size": template.mem_size,
                 "copy_size": template.copy_size,
                 "fixed_src_dst": template.fixed_src_dst,
+                **({"dynamic_src_slot": "0x03", "dynamic_dst_slot": "0x04"} if not template.fixed_src_dst else {}),
             },
         }
     else:
@@ -478,12 +479,21 @@ def _build_mcopy_runtime(mem_size: int, copy_size: int, fixed_src_dst: bool) -> 
         code += _push_int(0)
         code += _push_int(0)
     else:
+        # Source offset
         code.append(0x5A)  # GAS
         code += _push_int(7)
         code.append(0x06)  # MOD
+        code.append(0x80)  # DUP1
+        code += _push_int(3)
+        code.append(0x55)  # SSTORE (0x03)
+        # Destination offset
         code.append(0x5A)  # GAS
         code += _push_int(7)
         code.append(0x06)  # MOD
+        code.append(0x80)  # DUP1
+        code += _push_int(4)
+        code.append(0x55)  # SSTORE (0x04)
+        
     code.append(0x5E)  # MCOPY
     code.append(0x59)  # MSIZE
     code += _push_int(0)
@@ -530,16 +540,48 @@ def _simulate_msize_case(mem_size: int) -> int:
     return memory.msize()
 
 
-def _simulate_mcopy_case(mem_size: int, copy_size: int, fixed_src_dst: bool) -> tuple[int, int]:
+def _simulate_mcopy_case(
+    mem_size: int,
+    copy_size: int,
+    fixed_src_dst: bool,
+    src_offset: int | None = None,
+    dst_offset: int | None = None,
+) -> tuple[int, int]:
     memory = _MemoryState()
-    src_dst = 0 if fixed_src_dst else 6
-    memory.mcopy(src_dst, src_dst, copy_size)
+    if fixed_src_dst:
+        src = 0
+        dst = 0
+    else:
+        src = src_offset if src_offset is not None else 6
+        dst = dst_offset if dst_offset is not None else 6
+        
+    memory.mcopy(dst, src, copy_size)
     slot0 = memory.msize()
     if mem_size > 0:
         memory.mstore8(0, 0)
         memory.mstore8(mem_size // 2, 0)
         memory.mstore8(mem_size - 1, 0)
     return slot0, memory.msize()
+
+
+def derive_memory_expectation(
+    memory_probe: dict[str, Any],
+    src_offset: int | None = None,
+    dst_offset: int | None = None,
+) -> dict[str, str]:
+    mem_size = memory_probe["mem_size"]
+    copy_size = memory_probe["copy_size"]
+    fixed_src_dst = memory_probe["fixed_src_dst"]
+    
+    slot0, slot1 = _simulate_mcopy_case(
+        mem_size=mem_size,
+        copy_size=copy_size,
+        fixed_src_dst=fixed_src_dst,
+        src_offset=src_offset,
+        dst_offset=dst_offset,
+    )
+    from adapter.assembler import _word_hex
+    return {"0x00": _word_hex(slot0), "0x01": _word_hex(slot1)}
 
 
 class _MemoryState:

@@ -16,9 +16,9 @@ Current first-family coverage is:
 |---|---:|
 | Families scanned | 15 |
 | Total cases | 1083 |
-| Admitted cases | 544 |
-| Blocked cases | 539 |
-| Coverage | 50.1% |
+| Admitted cases | 572 |
+| Blocked cases | 511 |
+| Coverage | 52.8% |
 
 ## Fork capability coverage contract
 
@@ -62,7 +62,7 @@ The remaining blocked cases are intentionally deferred for now. They are not sim
 |---|---:|---:|---:|---|
 | account-query | 40 | 10 | 30 | Dynamic CODECOPY and EXTCODECOPY require byte-range code-copy observation and external-account code fixtures. The fixed CODECOPY subset is already admitted. |
 | block-context | 13 | 8 | 5 | Historical BLOCKHASH and blob-base-fee cases require controllable block/blob environment witnesses that are not available through the current RPC-only model. |
-| log | 140 | 130 | 10 | Remaining cases use gas-derived dynamic log offsets with non-zero payloads; truthful admission requires observing the actual byte window, not just receipt existence. |
+| log | 140 | 140 | 0 | All cases are now admitted via dynamic byte-window observation. |
 | memory | 143 | 125 | 18 | Remaining MCOPY cases use gas-derived dynamic source/destination offsets with non-zero copies; final storage proof for the actual copied byte window is not yet mapped. |
 | system | 46 | 35 | 11 | Remaining cases require multi-address external-call orchestration, SELFDESTRUCT initcode lifecycle witnesses, or mutable future CREATE address pre-allocation. |
 | tx-context | 4 | 2 | 2 | BLOBHASH cases require blob transaction construction and a blob-capable execution/profile witness. |

@@ -15,7 +15,7 @@ class ResultOracle:
         observed_contract: dict[str, Any] | None = None,
     ) -> list[str]:
         diffs: list[str] = []
-        resolved_expected = self.resolve_expected(expected, context, observed_contract)
+        resolved_expected = self.resolve_expected(expected, context, observed_contract, observed)
         self._compare_node("", resolved_expected, observed, diffs)
         return diffs
 
@@ -24,11 +24,12 @@ class ResultOracle:
         expected: dict[str, Any],
         context: dict[str, Any] | None = None,
         observed_contract: dict[str, Any] | None = None,
+        observed: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         resolved = self._resolve_placeholders(expected, context or {})
         if not isinstance(resolved, dict):
             raise ValueError("resolved expected payload must be an object")
-        return self._canonicalize_expected(resolved, observed_contract)
+        return self._canonicalize_expected(resolved, observed_contract, observed)
 
     def _resolve_placeholders(self, node: Any, context: dict[str, Any]) -> Any:
         if isinstance(node, dict):
@@ -60,6 +61,7 @@ class ResultOracle:
         self,
         expected: dict[str, Any],
         observed_contract: dict[str, Any] | None = None,
+        observed: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         canonical = dict(expected)
         receipt_logs = canonical.get("receipt_logs")
@@ -69,13 +71,58 @@ class ResultOracle:
             canonical["receipt_logs"] = self._canonicalize_receipt_logs(
                 receipt_logs,
                 observed_contract or {},
+                observed,
             )
+        
+        storage = canonical.get("storage")
+        if storage is not None:
+            canonical["storage"] = self._canonicalize_storage(
+                storage,
+                observed_contract or {},
+                observed,
+            )
+            
         return canonical
+
+    def _canonicalize_storage(
+        self,
+        storage: dict[str, str],
+        observed_contract: dict[str, Any],
+        observed: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
+        memory_probe = observed_contract.get("memory_probe")
+        if memory_probe is None or memory_probe.get("mode") != "mcopy":
+            return storage
+            
+        dynamic_src_slot = memory_probe.get("dynamic_src_slot")
+        dynamic_dst_slot = memory_probe.get("dynamic_dst_slot")
+        if dynamic_src_slot is None and dynamic_dst_slot is None:
+            return storage
+            
+        if observed is None or "storage" not in observed:
+            return storage
+            
+        src_offset: int | None = None
+        if dynamic_src_slot:
+            val = observed["storage"].get(dynamic_src_slot)
+            if val:
+                src_offset = int(val, 16)
+        
+        dst_offset: int | None = None
+        if dynamic_dst_slot:
+            val = observed["storage"].get(dynamic_dst_slot)
+            if val:
+                dst_offset = int(val, 16)
+                
+        # Re-derive expectations using the observed offsets
+        from adapter.memory_generator import derive_memory_expectation
+        return derive_memory_expectation(memory_probe, src_offset=src_offset, dst_offset=dst_offset)
 
     def _canonicalize_receipt_logs(
         self,
         receipt_logs: list[Any],
         observed_contract: dict[str, Any],
+        observed: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         log_probe = observed_contract.get("log_probe") if isinstance(observed_contract, dict) else None
         if log_probe is None:
@@ -86,8 +133,18 @@ class ResultOracle:
             raise ValueError(
                 f"expected receipt_logs to contain exactly 1 entry for observe.log_probe, got {len(receipt_logs)}"
             )
+            
+        dynamic_offset: int | None = None
+        if log_probe.get("dynamic_offset_slot") is not None:
+            if observed is None or "storage" not in observed or log_probe["dynamic_offset_slot"] not in observed["storage"]:
+                raise ValueError(
+                    f"dynamic_offset_slot {log_probe['dynamic_offset_slot']} requested but not present in observed storage"
+                )
+            slot_value = observed["storage"][log_probe["dynamic_offset_slot"]]
+            dynamic_offset = int(slot_value, 16)
+            
         canonical_entry = self._canonicalize_receipt_log(receipt_logs[0], 0)
-        derived_entry = self._canonicalize_receipt_log(derive_receipt_log_expectation(log_probe), 0)
+        derived_entry = self._canonicalize_receipt_log(derive_receipt_log_expectation(log_probe, dynamic_offset), 0)
         self._validate_declared_receipt_log_matches_runtime_contract(canonical_entry, derived_entry)
         return [derived_entry]
 

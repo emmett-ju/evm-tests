@@ -341,7 +341,7 @@ def main(argv: list[str] | None = None) -> int:
             namespace = bootstrapper.prepare_case_namespace(case).namespace
             try:
                 tx_hashes, observed, context = executor.run_case(case, namespace)
-                resolved_expected = oracle.resolve_expected(case.expected, context, case.observe)
+                resolved_expected = oracle.resolve_expected(case.expected, context, case.observe, observed)
                 diffs = oracle.compare(case.expected, observed, context, case.observe)
                 results.append(
                     result_from_execution(

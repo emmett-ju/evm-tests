@@ -85,11 +85,17 @@ def validate_log_probe_declaration(log_probe: Any) -> dict[str, Any]:
         raise ValueError("observe.log_probe.offset_mode must be a non-empty string when present")
     if offset_mode not in ("fixed_zero", "dynamic_gas_mod_7"):
         raise ValueError(f"unsupported observe.log_probe.offset_mode: {offset_mode}")
-    if offset_mode == "dynamic_gas_mod_7" and not (
+        
+    dynamic_offset_slot = log_probe.get("dynamic_offset_slot")
+    if dynamic_offset_slot is not None:
+        if not isinstance(dynamic_offset_slot, str) or not _HEX_RE.match(dynamic_offset_slot):
+            raise ValueError("observe.log_probe.dynamic_offset_slot must be a hex string")
+            
+    if offset_mode == "dynamic_gas_mod_7" and dynamic_offset_slot is None and not (
         log_size == 0 or (memory_seed_kind == "zero" and memory_seed_size == 0)
     ):
         raise ValueError(
-            "observe.log_probe.offset_mode dynamic_gas_mod_7 requires an offset-independent payload"
+            "observe.log_probe.offset_mode dynamic_gas_mod_7 requires an offset-independent payload or a dynamic_offset_slot"
         )
 
     return {
@@ -101,4 +107,5 @@ def validate_log_probe_declaration(log_probe: Any) -> dict[str, Any]:
         "memory_seed_size": memory_seed_size,
         "witness_mode": witness_mode,
         "offset_mode": offset_mode,
+        "dynamic_offset_slot": dynamic_offset_slot,
     }

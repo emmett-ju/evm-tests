@@ -16,7 +16,7 @@
         "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
         "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
       ],
       "observe": {
@@ -29,15 +29,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "exact",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6007600c60003960076000f35f5a600706a000",
-          "bytecode_runtime": "0x5f5a600706a000",
+          "bytecode_init": "0x600b600c600039600b6000f35f5a60070680600255a000",
+          "bytecode_runtime": "0x5f5a60070680600255a000",
           "gas": "0x186a0"
         },
         {
@@ -137,7 +138,7 @@
         "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
         "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
       ],
       "observe": {
@@ -150,15 +151,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "exact",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6007600c60003960076000f35f5a600706a000",
-          "bytecode_runtime": "0x5f5a600706a000",
+          "bytecode_init": "0x600b600c600039600b6000f35f5a60070680600255a000",
+          "bytecode_runtime": "0x5f5a60070680600255a000",
           "gas": "0x186a0"
         },
         {
@@ -249,6 +251,69 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG0 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 0 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log0-size-1-mib-non-zero-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=1_MiB_non_zero_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
+        "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG0",
+          "topic_count": 0,
+          "topic_word": null,
+          "log_size": 1048576,
+          "memory_seed_kind": "ff",
+          "memory_seed_size": 1048576,
+          "witness_mode": "digest",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6047600c60003960476000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005a60070680600255a000",
+          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005a60070680600255a000",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [],
+            "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+            "data_length_bytes": 1048576
+          }
+        ]
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true",
       "family": "state/log",
       "description": "Mapped from execution-specs LOG0 fixed-offset log benchmark onto a receipt-log witness with 0 topic(s), 1048576 payload bytes, and digest payload proof.",
@@ -279,6 +344,69 @@
           "action": "deploy_contract",
           "bytecode_init": "0x6040600c60003960406000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005fa000",
           "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005fa000",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [],
+            "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+            "data_length_bytes": 1048576
+          }
+        ]
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG0 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 0 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log0-size-1-mib-non-zero-data-topic-zeros-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=1_MiB_non_zero_data-zeros_topic=zeros_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
+        "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG0",
+          "topic_count": 0,
+          "topic_word": null,
+          "log_size": 1048576,
+          "memory_seed_kind": "ff",
+          "memory_seed_size": 1048576,
+          "witness_mode": "digest",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6047600c60003960476000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005a60070680600255a000",
+          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005a60070680600255a000",
           "gas": "0x200000"
         },
         {
@@ -378,9 +506,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
         "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
       ],
       "observe": {
@@ -393,15 +521,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "digest",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x600a600c600039600a6000f3621000005a600706a000",
-          "bytecode_runtime": "0x621000005a600706a000",
+          "bytecode_init": "0x600e600c600039600e6000f3621000005a60070680600255a000",
+          "bytecode_runtime": "0x621000005a60070680600255a000",
           "gas": "0x200000"
         },
         {
@@ -501,9 +630,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
         "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
       ],
       "observe": {
@@ -516,15 +645,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "digest",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x600a600c600039600a6000f3621000005a600706a000",
-          "bytecode_runtime": "0x621000005a600706a000",
+          "bytecode_init": "0x600e600c600039600e6000f3621000005a60070680600255a000",
+          "bytecode_runtime": "0x621000005a60070680600255a000",
           "gas": "0x200000"
         },
         {
@@ -626,7 +756,7 @@
         "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated non-zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -638,15 +768,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "exact",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6028600c60003960286000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a600706a100",
-          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a600706a100",
+          "bytecode_init": "0x602c600c600039602c6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a60070680600255a100",
+          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a60070680600255a100",
           "gas": "0x186a0"
         },
         {
@@ -749,7 +880,7 @@
         "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -761,15 +892,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "exact",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6008600c60003960086000f35f5f5a600706a100",
-          "bytecode_runtime": "0x5f5f5a600706a100",
+          "bytecode_init": "0x600c600c600039600c6000f35f5f5a60070680600255a100",
+          "bytecode_runtime": "0x5f5f5a60070680600255a100",
           "gas": "0x186a0"
         },
         {
@@ -863,6 +995,70 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG1 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 1 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log1-size-1-mib-non-zero-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=1_MiB_non_zero_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated non-zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG1",
+          "topic_count": 1,
+          "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "log_size": 1048576,
+          "memory_seed_kind": "ff",
+          "memory_seed_size": 1048576,
+          "witness_mode": "digest",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6068600c60003960686000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a100",
+          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a100",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ],
+            "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+            "data_length_bytes": 1048576
+          }
+        ]
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true",
       "family": "state/log",
       "description": "Mapped from execution-specs LOG1 fixed-offset log benchmark onto a receipt-log witness with 1 topic(s), 1048576 payload bytes, and digest payload proof.",
@@ -916,6 +1112,70 @@
           {
             "topics": [
               "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ],
+            "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+            "data_length_bytes": 1048576
+          }
+        ]
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG1 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 1 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log1-size-1-mib-non-zero-data-topic-zeros-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=1_MiB_non_zero_data-zeros_topic=zeros_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG1",
+          "topic_count": 1,
+          "topic_word": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "log_size": 1048576,
+          "memory_seed_kind": "ff",
+          "memory_seed_size": 1048576,
+          "witness_mode": "digest",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6048600c60003960486000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f621000005a60070680600255a100",
+          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f621000005a60070680600255a100",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [
+              "0x0000000000000000000000000000000000000000000000000000000000000000"
             ],
             "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
             "data_length_bytes": 1048576
@@ -994,9 +1254,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated non-zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -1008,15 +1268,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "digest",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x602b600c600039602b6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a600706a100",
-          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a600706a100",
+          "bytecode_init": "0x602f600c600039602f6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a100",
+          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a100",
           "gas": "0x200000"
         },
         {
@@ -1119,9 +1380,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -1133,15 +1394,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "digest",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x600b600c600039600b6000f35f621000005a600706a100",
-          "bytecode_runtime": "0x5f621000005a600706a100",
+          "bytecode_init": "0x600f600c600039600f6000f35f621000005a60070680600255a100",
+          "bytecode_runtime": "0x5f621000005a60070680600255a100",
           "gas": "0x200000"
         },
         {
@@ -1246,7 +1508,7 @@
         "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated non-zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -1258,15 +1520,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "exact",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6049600c60003960496000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a600706a200",
-          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a600706a200",
+          "bytecode_init": "0x604d600c600039604d6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a60070680600255a200",
+          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a60070680600255a200",
           "gas": "0x186a0"
         },
         {
@@ -1371,7 +1634,7 @@
         "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -1383,15 +1646,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "exact",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6009600c60003960096000f35f5f5f5a600706a200",
-          "bytecode_runtime": "0x5f5f5f5a600706a200",
+          "bytecode_init": "0x600d600c600039600d6000f35f5f5f5a60070680600255a200",
+          "bytecode_runtime": "0x5f5f5f5a60070680600255a200",
           "gas": "0x186a0"
         },
         {
@@ -1487,6 +1751,71 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG2 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 2 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log2-size-1-mib-non-zero-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=1_MiB_non_zero_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated non-zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG2",
+          "topic_count": 2,
+          "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "log_size": 1048576,
+          "memory_seed_kind": "ff",
+          "memory_seed_size": 1048576,
+          "witness_mode": "digest",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6089600c60003960896000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a200",
+          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a200",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ],
+            "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+            "data_length_bytes": 1048576
+          }
+        ]
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true",
       "family": "state/log",
       "description": "Mapped from execution-specs LOG2 fixed-offset log benchmark onto a receipt-log witness with 2 topic(s), 1048576 payload bytes, and digest payload proof.",
@@ -1541,6 +1870,71 @@
             "topics": [
               "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
               "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ],
+            "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+            "data_length_bytes": 1048576
+          }
+        ]
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG2 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 2 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log2-size-1-mib-non-zero-data-topic-zeros-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=1_MiB_non_zero_data-zeros_topic=zeros_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG2",
+          "topic_count": 2,
+          "topic_word": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "log_size": 1048576,
+          "memory_seed_kind": "ff",
+          "memory_seed_size": 1048576,
+          "witness_mode": "digest",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x6049600c60003960496000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f621000005a60070680600255a200",
+          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f621000005a60070680600255a200",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "0x0000000000000000000000000000000000000000000000000000000000000000"
             ],
             "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
             "data_length_bytes": 1048576
@@ -1620,9 +2014,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated non-zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -1634,15 +2028,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "digest",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x604c600c600039604c6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a600706a200",
-          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a600706a200",
+          "bytecode_init": "0x6050600c60003960506000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a200",
+          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a200",
           "gas": "0x200000"
         },
         {
@@ -1747,9 +2142,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -1761,15 +2156,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "digest",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x600c600c600039600c6000f35f5f621000005a600706a200",
-          "bytecode_runtime": "0x5f5f621000005a600706a200",
+          "bytecode_init": "0x6010600c60003960106000f35f5f621000005a60070680600255a200",
+          "bytecode_runtime": "0x5f5f621000005a60070680600255a200",
           "gas": "0x200000"
         },
         {
@@ -1876,7 +2272,7 @@
         "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated non-zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -1888,15 +2284,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "exact",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x606a600c600039606a6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a600706a300",
-          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a600706a300",
+          "bytecode_init": "0x606e600c600039606e6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a60070680600255a300",
+          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a60070680600255a300",
           "gas": "0x186a0"
         },
         {
@@ -2003,7 +2400,7 @@
         "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -2015,15 +2412,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "exact",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x600a600c600039600a6000f35f5f5f5f5a600706a300",
-          "bytecode_runtime": "0x5f5f5f5f5a600706a300",
+          "bytecode_init": "0x600e600c600039600e6000f35f5f5f5f5a60070680600255a300",
+          "bytecode_runtime": "0x5f5f5f5f5a60070680600255a300",
           "gas": "0x186a0"
         },
         {
@@ -2121,6 +2519,72 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG3 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 3 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log3-size-1-mib-non-zero-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=1_MiB_non_zero_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated non-zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG3",
+          "topic_count": 3,
+          "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "log_size": 1048576,
+          "memory_seed_kind": "ff",
+          "memory_seed_size": 1048576,
+          "witness_mode": "digest",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x60aa600c60003960aa6000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a300",
+          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a300",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ],
+            "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+            "data_length_bytes": 1048576
+          }
+        ]
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true",
       "family": "state/log",
       "description": "Mapped from execution-specs LOG3 fixed-offset log benchmark onto a receipt-log witness with 3 topic(s), 1048576 payload bytes, and digest payload proof.",
@@ -2176,6 +2640,72 @@
               "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
               "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
               "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ],
+            "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+            "data_length_bytes": 1048576
+          }
+        ]
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG3 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 3 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log3-size-1-mib-non-zero-data-topic-zeros-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=1_MiB_non_zero_data-zeros_topic=zeros_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG3",
+          "topic_count": 3,
+          "topic_word": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "log_size": 1048576,
+          "memory_seed_kind": "ff",
+          "memory_seed_size": 1048576,
+          "witness_mode": "digest",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x604a600c600039604a6000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f621000005a60070680600255a300",
+          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f621000005a60070680600255a300",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "0x0000000000000000000000000000000000000000000000000000000000000000"
             ],
             "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
             "data_length_bytes": 1048576
@@ -2256,9 +2786,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated non-zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -2270,15 +2800,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "digest",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x606d600c600039606d6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a600706a300",
-          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a600706a300",
+          "bytecode_init": "0x6071600c60003960716000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a300",
+          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a300",
           "gas": "0x200000"
         },
         {
@@ -2385,9 +2916,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -2399,15 +2930,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "digest",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x600d600c600039600d6000f35f5f5f621000005a600706a300",
-          "bytecode_runtime": "0x5f5f5f621000005a600706a300",
+          "bytecode_init": "0x6011600c60003960116000f35f5f5f621000005a60070680600255a300",
+          "bytecode_runtime": "0x5f5f5f621000005a60070680600255a300",
           "gas": "0x200000"
         },
         {
@@ -2516,7 +3048,7 @@
         "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated non-zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -2528,15 +3060,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "exact",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x608b600c600039608b6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a600706a400",
-          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a600706a400",
+          "bytecode_init": "0x608f600c600039608f6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a60070680600255a400",
+          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff5f5a60070680600255a400",
           "gas": "0x186a0"
         },
         {
@@ -2645,7 +3178,7 @@
         "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -2657,15 +3190,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "exact",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x600b600c600039600b6000f35f5f5f5f5f5a600706a400",
-          "bytecode_runtime": "0x5f5f5f5f5f5a600706a400",
+          "bytecode_init": "0x600f600c600039600f6000f35f5f5f5f5f5a60070680600255a400",
+          "bytecode_runtime": "0x5f5f5f5f5f5a60070680600255a400",
           "gas": "0x186a0"
         },
         {
@@ -2765,6 +3299,73 @@
     },
     {
       "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG4 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 4 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log4-size-1-mib-non-zero-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=1_MiB_non_zero_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated non-zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG4",
+          "topic_count": 4,
+          "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "log_size": 1048576,
+          "memory_seed_kind": "ff",
+          "memory_seed_size": 1048576,
+          "witness_mode": "digest",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x60cb600c60003960cb6000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a400",
+          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a400",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+              "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ],
+            "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+            "data_length_bytes": 1048576
+          }
+        ]
+      }
+    },
+    {
+      "kind": "upstream_mapped",
       "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true",
       "family": "state/log",
       "description": "Mapped from execution-specs LOG4 fixed-offset log benchmark onto a receipt-log witness with 4 topic(s), 1048576 payload bytes, and digest payload proof.",
@@ -2821,6 +3422,73 @@
               "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
               "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
               "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+            ],
+            "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
+            "data_length_bytes": 1048576
+          }
+        ]
+      }
+    },
+    {
+      "kind": "upstream_mapped",
+      "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_false",
+      "family": "state/log",
+      "description": "Mapped from execution-specs LOG4 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 4 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log4-size-1-mib-non-zero-data-topic-zeros-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=1_MiB_non_zero_data-zeros_topic=zeros_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "observe": {
+        "log_probe": {
+          "mode": "parametric_log",
+          "opcode": "LOG4",
+          "topic_count": 4,
+          "topic_word": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "log_size": 1048576,
+          "memory_seed_kind": "ff",
+          "memory_seed_size": 1048576,
+          "witness_mode": "digest",
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
+        }
+      },
+      "filters": {},
+      "steps": [
+        {
+          "action": "deploy_contract",
+          "bytecode_init": "0x604b600c600039604b6000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f5f621000005a60070680600255a400",
+          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f5f621000005a60070680600255a400",
+          "gas": "0x200000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        },
+        {
+          "action": "invoke_contract",
+          "to": "$last_contract",
+          "data": "0x",
+          "gas": "0xff0000"
+        },
+        {
+          "action": "wait_receipt",
+          "tx_hash": "$last",
+          "timeout_seconds": 60
+        }
+      ],
+      "expected": {
+        "receipt_logs": [
+          {
+            "topics": [
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "0x0000000000000000000000000000000000000000000000000000000000000000"
             ],
             "data_digest": "0x789682af96df9ddffff256ac9ee0b1b2f2dafd22b19a4e10e9c68d4176c05615",
             "data_length_bytes": 1048576
@@ -2902,9 +3570,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated non-zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -2916,15 +3584,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "digest",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x608e600c600039608e6000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a600706a400",
-          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a600706a400",
+          "bytecode_init": "0x6092600c60003960926000f37fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a400",
+          "bytecode_runtime": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a400",
           "gas": "0x200000"
         },
         {
@@ -3033,9 +3702,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "observe": {
         "log_probe": {
@@ -3047,15 +3716,16 @@
           "memory_seed_kind": "zero",
           "memory_seed_size": 0,
           "witness_mode": "digest",
-          "offset_mode": "dynamic_gas_mod_7"
+          "offset_mode": "dynamic_gas_mod_7",
+          "dynamic_offset_slot": "0x02"
         }
       },
       "filters": {},
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x600e600c600039600e6000f35f5f5f5f621000005a600706a400",
-          "bytecode_runtime": "0x5f5f5f5f621000005a600706a400",
+          "bytecode_init": "0x6012600c60003960126000f35f5f5f5f621000005a60070680600255a400",
+          "bytecode_runtime": "0x5f5f5f5f621000005a60070680600255a400",
           "gas": "0x200000"
         },
         {

@@ -12,7 +12,7 @@
         "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
         "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
       ],
       "mode": "test_log_dynamic_offset",
@@ -22,7 +22,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true",
@@ -43,7 +44,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_false",
@@ -54,7 +56,7 @@
         "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
         "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
       ],
       "mode": "test_log_dynamic_offset",
@@ -64,7 +66,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log0.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
@@ -85,7 +88,30 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_false",
+      "description": "Mapped from execution-specs LOG0 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 0 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log0-size-1-mib-non-zero-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=1_MiB_non_zero_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
+        "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
+      ],
+      "mode": "test_log_dynamic_offset",
+      "opcode": "LOG0",
+      "topic_count": 0,
+      "topic_word": null,
+      "log_size": 1048576,
+      "memory_seed_kind": "ff",
+      "memory_seed_size": 1048576,
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true",
@@ -106,7 +132,30 @@
       "log_size": 1048576,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1048576,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_false",
+      "description": "Mapped from execution-specs LOG0 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 0 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log0-size-1-mib-non-zero-data-topic-zeros-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=1_MiB_non_zero_data-zeros_topic=zeros_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
+        "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
+      ],
+      "mode": "test_log_dynamic_offset",
+      "opcode": "LOG0",
+      "topic_count": 0,
+      "topic_word": null,
+      "log_size": 1048576,
+      "memory_seed_kind": "ff",
+      "memory_seed_size": 1048576,
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_true",
@@ -127,7 +176,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1048576,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_false",
@@ -136,9 +186,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
         "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
       ],
       "mode": "test_log_dynamic_offset",
@@ -148,7 +198,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_true",
@@ -169,7 +220,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_false",
@@ -178,9 +230,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG0-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG0 with offset=GAS % 7, no topics, and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation.",
         "For LOG0 the upstream zeros_topic branch does not affect the receipt because the opcode consumes no topics; both branch labels are still tracked as distinct upstream cases."
       ],
       "mode": "test_log_dynamic_offset",
@@ -190,7 +242,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log0.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_true",
@@ -211,7 +264,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false",
@@ -222,7 +276,7 @@
         "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated non-zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG1",
@@ -231,7 +285,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true",
@@ -251,7 +306,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_false",
@@ -262,7 +318,7 @@
         "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG1",
@@ -271,7 +327,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log1.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
@@ -291,7 +348,29 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_false",
+      "description": "Mapped from execution-specs LOG1 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 1 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log1-size-1-mib-non-zero-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=1_MiB_non_zero_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated non-zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "mode": "test_log_dynamic_offset",
+      "opcode": "LOG1",
+      "topic_count": 1,
+      "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "log_size": 1048576,
+      "memory_seed_kind": "ff",
+      "memory_seed_size": 1048576,
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true",
@@ -311,7 +390,29 @@
       "log_size": 1048576,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1048576,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_false",
+      "description": "Mapped from execution-specs LOG1 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 1 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log1-size-1-mib-non-zero-data-topic-zeros-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=1_MiB_non_zero_data-zeros_topic=zeros_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "mode": "test_log_dynamic_offset",
+      "opcode": "LOG1",
+      "topic_count": 1,
+      "topic_word": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "log_size": 1048576,
+      "memory_seed_kind": "ff",
+      "memory_seed_size": 1048576,
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_true",
@@ -331,7 +432,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1048576,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_false",
@@ -340,9 +442,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated non-zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG1",
@@ -351,7 +453,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_true",
@@ -371,7 +474,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_false",
@@ -380,9 +484,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG1-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG1 with offset=GAS % 7, 1 repeated zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG1",
@@ -391,7 +495,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log1.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_true",
@@ -411,7 +516,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log2.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false",
@@ -422,7 +528,7 @@
         "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated non-zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG2",
@@ -431,7 +537,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log2.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true",
@@ -451,7 +558,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log2.size_0_bytes_data.topic_zeros_topic.fixed_offset_false",
@@ -462,7 +570,7 @@
         "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG2",
@@ -471,7 +579,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log2.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
@@ -491,7 +600,29 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_false",
+      "description": "Mapped from execution-specs LOG2 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 2 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log2-size-1-mib-non-zero-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=1_MiB_non_zero_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated non-zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "mode": "test_log_dynamic_offset",
+      "opcode": "LOG2",
+      "topic_count": 2,
+      "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "log_size": 1048576,
+      "memory_seed_kind": "ff",
+      "memory_seed_size": 1048576,
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true",
@@ -511,7 +642,29 @@
       "log_size": 1048576,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1048576,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_false",
+      "description": "Mapped from execution-specs LOG2 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 2 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log2-size-1-mib-non-zero-data-topic-zeros-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=1_MiB_non_zero_data-zeros_topic=zeros_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "mode": "test_log_dynamic_offset",
+      "opcode": "LOG2",
+      "topic_count": 2,
+      "topic_word": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "log_size": 1048576,
+      "memory_seed_kind": "ff",
+      "memory_seed_size": 1048576,
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_true",
@@ -531,7 +684,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1048576,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_false",
@@ -540,9 +694,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated non-zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG2",
@@ -551,7 +705,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_true",
@@ -571,7 +726,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_false",
@@ -580,9 +736,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG2-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG2 with offset=GAS % 7, 2 repeated zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG2",
@@ -591,7 +747,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log2.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_true",
@@ -611,7 +768,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log3.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false",
@@ -622,7 +780,7 @@
         "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated non-zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG3",
@@ -631,7 +789,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log3.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true",
@@ -651,7 +810,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log3.size_0_bytes_data.topic_zeros_topic.fixed_offset_false",
@@ -662,7 +822,7 @@
         "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG3",
@@ -671,7 +831,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log3.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
@@ -691,7 +852,29 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_false",
+      "description": "Mapped from execution-specs LOG3 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 3 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log3-size-1-mib-non-zero-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=1_MiB_non_zero_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated non-zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "mode": "test_log_dynamic_offset",
+      "opcode": "LOG3",
+      "topic_count": 3,
+      "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "log_size": 1048576,
+      "memory_seed_kind": "ff",
+      "memory_seed_size": 1048576,
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true",
@@ -711,7 +894,29 @@
       "log_size": 1048576,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1048576,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_false",
+      "description": "Mapped from execution-specs LOG3 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 3 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log3-size-1-mib-non-zero-data-topic-zeros-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=1_MiB_non_zero_data-zeros_topic=zeros_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "mode": "test_log_dynamic_offset",
+      "opcode": "LOG3",
+      "topic_count": 3,
+      "topic_word": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "log_size": 1048576,
+      "memory_seed_kind": "ff",
+      "memory_seed_size": 1048576,
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_true",
@@ -731,7 +936,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1048576,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_false",
@@ -740,9 +946,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated non-zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG3",
@@ -751,7 +957,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_true",
@@ -771,7 +978,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_false",
@@ -780,9 +988,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG3-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG3 with offset=GAS % 7, 3 repeated zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG3",
@@ -791,7 +999,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log3.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_true",
@@ -811,7 +1020,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log4.size_0_bytes_data.topic_non_zero_topic.fixed_offset_false",
@@ -822,7 +1032,7 @@
         "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated non-zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG4",
@@ -831,7 +1041,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log4.size_0_bytes_data.topic_non_zero_topic.fixed_offset_true",
@@ -851,7 +1062,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log4.size_0_bytes_data.topic_zeros_topic.fixed_offset_false",
@@ -862,7 +1074,7 @@
         "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated zero topic word(s), and log_size=0.",
         "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG, then emits the zero-length payload. The dynamic offset is still present in bytecode but cannot affect an empty log payload.",
         "Witness keeps full `data` equality because the payload is small enough for stable diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG4",
@@ -871,7 +1083,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log4.size_0_bytes_data.topic_zeros_topic.fixed_offset_true",
@@ -891,7 +1104,29 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_false",
+      "description": "Mapped from execution-specs LOG4 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 4 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log4-size-1-mib-non-zero-data-topic-non-zero-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=1_MiB_non_zero_data-zeros_topic=non_zero_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated non-zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "mode": "test_log_dynamic_offset",
+      "opcode": "LOG4",
+      "topic_count": 4,
+      "topic_word": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "log_size": 1048576,
+      "memory_seed_kind": "ff",
+      "memory_seed_size": 1048576,
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_non_zero_topic.fixed_offset_true",
@@ -911,7 +1146,29 @@
       "log_size": 1048576,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1048576,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
+    },
+    {
+      "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_false",
+      "description": "Mapped from execution-specs LOG4 dynamic-offset log benchmark onto an offset-independent receipt-log witness with 4 topic(s), 1048576 payload bytes, and digest payload proof.",
+      "namespace_seed": "upstream-log-test-log-log4-size-1-mib-non-zero-data-topic-zeros-topic-fixed-offset-false",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=1_MiB_non_zero_data-zeros_topic=zeros_topic-fixed_offset=False]",
+      "notes": [
+        "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated zero topic word(s), and log_size=1048576.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
+        "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
+      ],
+      "mode": "test_log_dynamic_offset",
+      "opcode": "LOG4",
+      "topic_count": 4,
+      "topic_word": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "log_size": 1048576,
+      "memory_seed_kind": "ff",
+      "memory_seed_size": 1048576,
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_non_zero_data.topic_zeros_topic.fixed_offset_true",
@@ -931,7 +1188,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1048576,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_false",
@@ -940,9 +1198,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=1_MiB_zeros_data-zeros_topic=non_zero_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated non-zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG4",
@@ -951,7 +1209,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_zeros_data.topic_non_zero_topic.fixed_offset_true",
@@ -971,7 +1230,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_false",
@@ -980,9 +1240,9 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_log.py::test_log[opcode=LOG4-size=1_MiB_zeros_data-zeros_topic=zeros_topic-fixed_offset=False]",
       "notes": [
         "Upstream intent: benchmark LOG4 with offset=GAS % 7, 4 repeated zero topic word(s), and log_size=1048576.",
-        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG without pre-seeding memory, so every possible dynamic offset reads the same all-zero payload.",
+        "RPC mapping: deploy a small runtime that computes GAS % 7 immediately before LOG. The offset is saved to slot 0x02 before execution, so the Oracle can dynamically verify the payload byte window.",
         "Witness records `data_digest` plus `data_length_bytes` so large payload variants stay truthful without noisy full-byte diffs.",
-        "Admitted because the dynamic offset is present in the runtime and the emitted payload is independent of its value; non-zero dynamic-offset payloads remain blocked until gas-derived byte-window observation is mapped."
+        "Admitted because the dynamic offset is stored in the runtime prior to execution, allowing dynamic payload derivation."
       ],
       "mode": "test_log_dynamic_offset",
       "opcode": "LOG4",
@@ -991,7 +1251,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": "0x02"
     },
     {
       "case_id": "upstream.benchmark.log.test_log.log4.size_1_mib_zeros_data.topic_zeros_topic.fixed_offset_true",
@@ -1011,7 +1272,8 @@
       "log_size": 1048576,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_0.log_size_0",
@@ -1031,7 +1293,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_0.log_size_1024",
@@ -1051,7 +1314,8 @@
       "log_size": 1024,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_0.log_size_256",
@@ -1071,7 +1335,8 @@
       "log_size": 256,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_0.log_size_32",
@@ -1091,7 +1356,8 @@
       "log_size": 32,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_1024.log_size_0",
@@ -1111,7 +1377,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_1024.log_size_1024",
@@ -1131,7 +1398,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_1024.log_size_256",
@@ -1151,7 +1419,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_1024.log_size_32",
@@ -1171,7 +1440,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_256.log_size_0",
@@ -1191,7 +1461,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_256.log_size_1024",
@@ -1211,7 +1482,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_256.log_size_256",
@@ -1231,7 +1503,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_256.log_size_32",
@@ -1251,7 +1524,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_32.log_size_0",
@@ -1271,7 +1545,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_32.log_size_1024",
@@ -1291,7 +1566,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_32.log_size_256",
@@ -1311,7 +1587,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log0.mem_size_32.log_size_32",
@@ -1331,7 +1608,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_0.log_size_0",
@@ -1351,7 +1629,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_0.log_size_1024",
@@ -1371,7 +1650,8 @@
       "log_size": 1024,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_0.log_size_256",
@@ -1391,7 +1671,8 @@
       "log_size": 256,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_0.log_size_32",
@@ -1411,7 +1692,8 @@
       "log_size": 32,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_1024.log_size_0",
@@ -1431,7 +1713,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_1024.log_size_1024",
@@ -1451,7 +1734,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_1024.log_size_256",
@@ -1471,7 +1755,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_1024.log_size_32",
@@ -1491,7 +1776,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_256.log_size_0",
@@ -1511,7 +1797,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_256.log_size_1024",
@@ -1531,7 +1818,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_256.log_size_256",
@@ -1551,7 +1839,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_256.log_size_32",
@@ -1571,7 +1860,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_32.log_size_0",
@@ -1591,7 +1881,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_32.log_size_1024",
@@ -1611,7 +1902,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_32.log_size_256",
@@ -1631,7 +1923,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log1.mem_size_32.log_size_32",
@@ -1651,7 +1944,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_0.log_size_0",
@@ -1671,7 +1965,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_0.log_size_1024",
@@ -1691,7 +1986,8 @@
       "log_size": 1024,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_0.log_size_256",
@@ -1711,7 +2007,8 @@
       "log_size": 256,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_0.log_size_32",
@@ -1731,7 +2028,8 @@
       "log_size": 32,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_1024.log_size_0",
@@ -1751,7 +2049,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_1024.log_size_1024",
@@ -1771,7 +2070,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_1024.log_size_256",
@@ -1791,7 +2091,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_1024.log_size_32",
@@ -1811,7 +2112,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_256.log_size_0",
@@ -1831,7 +2133,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_256.log_size_1024",
@@ -1851,7 +2154,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_256.log_size_256",
@@ -1871,7 +2175,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_256.log_size_32",
@@ -1891,7 +2196,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_32.log_size_0",
@@ -1911,7 +2217,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_32.log_size_1024",
@@ -1931,7 +2238,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_32.log_size_256",
@@ -1951,7 +2259,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log2.mem_size_32.log_size_32",
@@ -1971,7 +2280,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_0.log_size_0",
@@ -1991,7 +2301,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_0.log_size_1024",
@@ -2011,7 +2322,8 @@
       "log_size": 1024,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_0.log_size_256",
@@ -2031,7 +2343,8 @@
       "log_size": 256,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_0.log_size_32",
@@ -2051,7 +2364,8 @@
       "log_size": 32,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_1024.log_size_0",
@@ -2071,7 +2385,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_1024.log_size_1024",
@@ -2091,7 +2406,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_1024.log_size_256",
@@ -2111,7 +2427,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_1024.log_size_32",
@@ -2131,7 +2448,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_256.log_size_0",
@@ -2151,7 +2469,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_256.log_size_1024",
@@ -2171,7 +2490,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_256.log_size_256",
@@ -2191,7 +2511,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_256.log_size_32",
@@ -2211,7 +2532,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_32.log_size_0",
@@ -2231,7 +2553,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_32.log_size_1024",
@@ -2251,7 +2574,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_32.log_size_256",
@@ -2271,7 +2595,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log3.mem_size_32.log_size_32",
@@ -2291,7 +2616,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_0.log_size_0",
@@ -2311,7 +2637,8 @@
       "log_size": 0,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_0.log_size_1024",
@@ -2331,7 +2658,8 @@
       "log_size": 1024,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_0.log_size_256",
@@ -2351,7 +2679,8 @@
       "log_size": 256,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_0.log_size_32",
@@ -2371,7 +2700,8 @@
       "log_size": 32,
       "memory_seed_kind": "zero",
       "memory_seed_size": 0,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_1024.log_size_0",
@@ -2391,7 +2721,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_1024.log_size_1024",
@@ -2411,7 +2742,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_1024.log_size_256",
@@ -2431,7 +2763,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_1024.log_size_32",
@@ -2451,7 +2784,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 1024,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_256.log_size_0",
@@ -2471,7 +2805,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_256.log_size_1024",
@@ -2491,7 +2826,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_256.log_size_256",
@@ -2511,7 +2847,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_256.log_size_32",
@@ -2531,7 +2868,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 256,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_32.log_size_0",
@@ -2551,7 +2889,8 @@
       "log_size": 0,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_32.log_size_1024",
@@ -2571,7 +2910,8 @@
       "log_size": 1024,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "digest"
+      "witness_mode": "digest",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_32.log_size_256",
@@ -2591,7 +2931,8 @@
       "log_size": 256,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     },
     {
       "case_id": "upstream.benchmark.log.test_log_benchmark.log4.mem_size_32.log_size_32",
@@ -2611,7 +2952,8 @@
       "log_size": 32,
       "memory_seed_kind": "ff",
       "memory_seed_size": 32,
-      "witness_mode": "exact"
+      "witness_mode": "exact",
+      "dynamic_offset_slot": null
     }
   ]
 }

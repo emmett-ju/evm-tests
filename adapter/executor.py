@@ -242,6 +242,10 @@ class MockBackend:
                         )
                         storage["0x00"] = _word_hex(slot0)
                         storage["0x01"] = _word_hex(slot1)
+                        if memory_probe.get("dynamic_src_slot"):
+                            storage[memory_probe["dynamic_src_slot"]] = ZERO_STORAGE_WORD
+                        if memory_probe.get("dynamic_dst_slot"):
+                            storage[memory_probe["dynamic_dst_slot"]] = ZERO_STORAGE_WORD
                     else:
                         slot0, slot1 = _simulate_memory_access_case(
                             memory_probe["opcode"],
@@ -340,7 +344,7 @@ class MockBackend:
 
                 log_probe = case.observe.get("log_probe")
                 if log_probe is not None:
-                    self._simulate_log_probe(last_receipt, log_probe, code)
+                    self._simulate_log_probe(storage, last_receipt, log_probe, code)
                     continue
 
                 system_witness = case.observe.get("system_witness")
@@ -455,13 +459,17 @@ class MockBackend:
             if code_address is None:
                 code_address = target_address
             observed["code"] = self._address_state(contracts, code_address).get("code", "0x")
-        if "storage" in expected_shape:
+        if "storage" in expected_shape or (observe_config.get("log_probe") and observe_config["log_probe"].get("dynamic_offset_slot")):
             storage_address = observe_config.get("storage_address", target_address)
             if storage_address == "$last_contract":
                 storage_address = last_contract_address
             observed["storage"] = {}
             storage = self._address_state(contracts, storage_address).get("storage", {})
-            for slot in expected_shape["storage"]:
+            if "storage" in expected_shape:
+                for slot in expected_shape["storage"]:
+                    observed["storage"][slot] = storage.get(slot, ZERO_STORAGE_WORD)
+            if observe_config.get("log_probe") and observe_config["log_probe"].get("dynamic_offset_slot"):
+                slot = observe_config["log_probe"]["dynamic_offset_slot"]
                 observed["storage"][slot] = storage.get(slot, ZERO_STORAGE_WORD)
         if "system_witness" in expected_shape:
             witness_config = observe_config.get("system_witness")
@@ -644,6 +652,7 @@ class MockBackend:
 
     def _simulate_log_probe(
         self,
+        storage: dict[str, str],
         last_receipt: dict[str, Any] | None,
         log_probe: dict[str, Any],
         code: str | None,
@@ -652,10 +661,15 @@ class MockBackend:
         expected_runtime = _build_log_runtime(template)
         if code != expected_runtime:
             raise ValueError(f"unsupported mock contract code path: {code}")
+            
+        # If dynamic offset is used, mock it (e.g., 0) in storage so the Oracle can find it
+        if template.dynamic_offset_slot:
+            storage[template.dynamic_offset_slot] = ZERO_STORAGE_WORD
+            
         if last_receipt is None:
             raise ValueError("log probe requires a receipt context")
         topics = [] if template.topic_word is None else [template.topic_word] * template.topic_count
-        payload = _payload_bytes(template)
+        payload = _payload_bytes(template, dynamic_offset=0)
         last_receipt["logs"] = [
             {
                 "topics": topics,
@@ -1124,7 +1138,7 @@ class JsonRpcBackend:
             if code_address is None:
                 code_address = target_address
             observed["code"] = self._rpc("eth_getCode", [code_address, "latest"])
-        if "storage" in expected_shape:
+        if "storage" in expected_shape or (observe_config.get("log_probe") and observe_config["log_probe"].get("dynamic_offset_slot")):
             storage_address = observe_config.get("storage_address", target_address)
             if storage_address == "$last_contract":
                 storage_address = last_contract_address
@@ -1132,7 +1146,15 @@ class JsonRpcBackend:
             if last_receipt is not None:
                 storage_block_tag = last_receipt.get("blockNumber") or storage_block_tag
             observed["storage"] = {}
-            for slot in expected_shape["storage"]:
+            if "storage" in expected_shape:
+                for slot in expected_shape["storage"]:
+                    observed["storage"][slot] = self._get_storage_at(
+                        storage_address,
+                        slot,
+                        storage_block_tag,
+                    )
+            if observe_config.get("log_probe") and observe_config["log_probe"].get("dynamic_offset_slot"):
+                slot = observe_config["log_probe"]["dynamic_offset_slot"]
                 observed["storage"][slot] = self._get_storage_at(
                     storage_address,
                     slot,
