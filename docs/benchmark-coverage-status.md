@@ -16,9 +16,9 @@ Current first-family coverage is:
 |---|---:|
 | Families scanned | 15 |
 | Total cases | 1083 |
-| Admitted cases | 572 |
-| Blocked cases | 511 |
-| Coverage | 52.8% |
+| Admitted cases | 597 |
+| Blocked cases | 486 |
+| Coverage | 55.1% |
 
 ## Fork capability coverage contract
 
@@ -60,10 +60,10 @@ The remaining blocked cases are intentionally deferred for now. They are not sim
 
 | Family | Total | Admitted | Blocked | Deferred reason |
 |---|---:|---:|---:|---|
-| account-query | 40 | 10 | 30 | Dynamic CODECOPY and EXTCODECOPY require byte-range code-copy observation and external-account code fixtures. The fixed CODECOPY subset is already admitted. |
+| account-query | 40 | 35 | 5 | Remaining EXTCODECOPY cases require external-account code fixtures and byte-range observation models. CODECOPY (including dynamic offsets) is now fully admitted. |
 | block-context | 13 | 8 | 5 | Historical BLOCKHASH and blob-base-fee cases require controllable block/blob environment witnesses that are not available through the current RPC-only model. |
 | log | 140 | 140 | 0 | All cases are now admitted via dynamic byte-window observation. |
-| memory | 143 | 125 | 18 | Remaining MCOPY cases use gas-derived dynamic source/destination offsets with non-zero copies; final storage proof for the actual copied byte window is not yet mapped. |
+| memory | 143 | 143 | 0 | All cases are now admitted via dynamic byte-window observation. |
 | system | 46 | 35 | 11 | Remaining cases require multi-address external-call orchestration, SELFDESTRUCT initcode lifecycle witnesses, or mutable future CREATE address pre-allocation. |
 | tx-context | 4 | 2 | 2 | BLOBHASH cases require blob transaction construction and a blob-capable execution/profile witness. |
 
@@ -73,7 +73,7 @@ The project now has a useful stopping point for the current harness model:
 
 - Low-risk, final-storage-observable families are complete.
 - `bitwise` no longer has the single remaining blocked CLZ-diff gap.
-- `account-query`, `memory`, and `log` have already admitted their safe fixed or offset-independent subsets.
+- `account-query`, `memory`, and `log` have now admitted their in-scope CODECOPY / MCOPY / byte-window cases.
 - The remaining blocked cases are high-complexity harness-expansion work, not routine family coverage.
 
 Do not admit the deferred cases just to improve the coverage percentage. A case should move from blocked to admitted only when the manifest can prove the upstream intent through deterministic final observables or through an explicitly designed new observation surface.
@@ -85,9 +85,8 @@ If coverage work resumes, treat it as harness capability design, not as a small 
 Reasonable future milestones:
 
 1. **External-code byte-window observation** for the remaining account-query EXTCODECOPY cases.
-2. **Dynamic byte-window witness design** for memory MCOPY and log payload cases.
-3. **Multi-address orchestration** for the remaining system call-family cases.
-4. **Blob transaction/profile support** for tx-context and block-context blob cases.
-5. **Historical block witness strategy** for BLOCKHASH cases.
+2. **Multi-address orchestration** for the remaining system call-family cases.
+3. **Blob transaction/profile support** for tx-context and block-context blob cases.
+4. **Historical block witness strategy** for BLOCKHASH cases.
 
-Until one of those capabilities is explicitly planned, the 76 blocked cases should remain blocked with their current reasons.
+Until one of those capabilities is explicitly planned, the 486 blocked cases should remain blocked with their current reasons.

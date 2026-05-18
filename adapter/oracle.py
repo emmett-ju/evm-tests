@@ -73,15 +73,21 @@ class ResultOracle:
                 observed_contract or {},
                 observed,
             )
-        
+
         storage = canonical.get("storage")
         if storage is not None:
-            canonical["storage"] = self._canonicalize_storage(
+            storage = self._canonicalize_storage(
                 storage,
                 observed_contract or {},
                 observed,
             )
-            
+            storage = self._canonicalize_account_query_storage(
+                storage,
+                observed_contract or {},
+                observed,
+            )
+            canonical["storage"] = storage
+
         return canonical
 
     def _canonicalize_storage(
@@ -93,30 +99,59 @@ class ResultOracle:
         memory_probe = observed_contract.get("memory_probe")
         if memory_probe is None or memory_probe.get("mode") != "mcopy":
             return storage
-            
+
         dynamic_src_slot = memory_probe.get("dynamic_src_slot")
         dynamic_dst_slot = memory_probe.get("dynamic_dst_slot")
         if dynamic_src_slot is None and dynamic_dst_slot is None:
             return storage
-            
+
         if observed is None or "storage" not in observed:
             return storage
-            
+
         src_offset: int | None = None
         if dynamic_src_slot:
             val = observed["storage"].get(dynamic_src_slot)
             if val:
                 src_offset = int(val, 16)
-        
+
         dst_offset: int | None = None
         if dynamic_dst_slot:
             val = observed["storage"].get(dynamic_dst_slot)
             if val:
                 dst_offset = int(val, 16)
-                
+
         # Re-derive expectations using the observed offsets
         from adapter.memory_generator import derive_memory_expectation
         return derive_memory_expectation(memory_probe, src_offset=src_offset, dst_offset=dst_offset)
+
+    def _canonicalize_account_query_storage(
+        self,
+        storage: dict[str, str],
+        observed_contract: dict[str, Any],
+        observed: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
+        probe = observed_contract.get("account_query_probe")
+        if probe is None or probe.get("mode") != "codecopy":
+            return storage
+
+        dynamic_offset_slot = probe.get("dynamic_offset_slot")
+        if dynamic_offset_slot is None:
+            return storage
+
+        if observed is None or "storage" not in observed:
+            return storage
+
+        offset_val = observed["storage"].get(dynamic_offset_slot)
+        if offset_val is None:
+            return storage
+
+        offset = int(offset_val, 16)
+
+        runtime_code = observed.get("code", "0x")
+
+        # Re-derive expectations using the observed offset
+        from adapter.account_query_generator import derive_codecopy_expectation
+        return derive_codecopy_expectation(probe, runtime_code=runtime_code, dynamic_offset=offset)
 
     def _canonicalize_receipt_logs(
         self,
@@ -133,7 +168,7 @@ class ResultOracle:
             raise ValueError(
                 f"expected receipt_logs to contain exactly 1 entry for observe.log_probe, got {len(receipt_logs)}"
             )
-            
+
         dynamic_offset: int | None = None
         if log_probe.get("dynamic_offset_slot") is not None:
             if observed is None or "storage" not in observed or log_probe["dynamic_offset_slot"] not in observed["storage"]:
@@ -142,7 +177,7 @@ class ResultOracle:
                 )
             slot_value = observed["storage"][log_probe["dynamic_offset_slot"]]
             dynamic_offset = int(slot_value, 16)
-            
+
         canonical_entry = self._canonicalize_receipt_log(receipt_logs[0], 0)
         derived_entry = self._canonicalize_receipt_log(derive_receipt_log_expectation(log_probe, dynamic_offset), 0)
         self._validate_declared_receipt_log_matches_runtime_contract(canonical_entry, derived_entry)

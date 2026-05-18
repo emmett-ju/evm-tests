@@ -47,6 +47,7 @@ from adapter.precompile_generator import (
     scan_vectors,
 )
 from adapter.account_query_generator import (
+    _build_codecopy_dynamic_runtime,
     _build_codecopy_fixed_runtime,
     generate_upstream_account_query_manifest,
     generate_upstream_account_query_templates,
@@ -161,7 +162,7 @@ class HarnessTests(unittest.TestCase):
             tmpdir_path = Path(tmpdir)
             template_path = tmpdir_path / "templates.json"
             inventory_path = tmpdir_path / "inventory.json"
-            
+
             # Execute CLI
             exit_code = main([
                 "scan-upstream-precompile",
@@ -169,7 +170,7 @@ class HarnessTests(unittest.TestCase):
                 "--inventory-output", str(inventory_path),
             ])
             self.assertEqual(exit_code, 0)
-            
+
             # Verify files exist and are valid JSON
             self.assertTrue(template_path.exists())
             self.assertTrue(inventory_path.exists())
@@ -181,14 +182,14 @@ class HarnessTests(unittest.TestCase):
         result = scan_vectors(vectors_dir)
         inventory = result["inventory"]
         templates = result["templates"]
-        
+
         # Verify inventory
         self.assertEqual(inventory["family"], "upstream-precompile")
-        
+
         # Count admitted cases
         admitted = [e for e in inventory["entries"] if e["admitted"]]
         self.assertEqual(len(admitted), 4)
-        
+
         # Verify manifest (templates in this context)
         self.assertEqual(len(templates), 4)
         for template in templates:
@@ -198,20 +199,20 @@ class HarnessTests(unittest.TestCase):
         # Representative G1ADD case
         address = 0x0B
         input_bytes = bytes.fromhex("00" * 128)
-        
+
         init_code1 = generate_precompile_wrapper(address, input_bytes)
         init_code2 = generate_precompile_wrapper(address, input_bytes)
-        
+
         self.assertEqual(init_code1, init_code2)
         self.assertTrue(init_code1.startswith("0x"))
-        
+
         # Check for specific opcodes in init_code (bytecode after init wrapper)
         # 0xF1 is CALL, 0x55 is SSTORE, 0x3D is RETURNDATASIZE, 0x20 is SHA3
         runtime_hex = init_code1.split("6000f3")[1]
         self.assertIn("f1", runtime_hex) # CALL
         self.assertIn("55", runtime_hex) # SSTORE
         self.assertIn("3d", runtime_hex) # RETURNDATASIZE
-        
+
         # Verify input is appended
         self.assertTrue(runtime_hex.endswith(input_bytes.hex()))
 
@@ -1126,7 +1127,7 @@ class HarnessTests(unittest.TestCase):
         profile = load_chain_profile(ROOT / "profiles/mock.toml")
         profile.feature_flags["bls12_381_precompiles"] = True
         manifest = load_manifest(ROOT / "suites/manifests/upstream_precompile_mapped.json")
-        
+
         backend = MockBackend()
         for case in manifest.cases:
             tx_hashes, observed, context = backend.execute_case(case, "test")
@@ -1141,23 +1142,23 @@ class HarnessTests(unittest.TestCase):
         profile.feature_flags["bls12_381_precompiles"] = True
         manifest = load_manifest(ROOT / "suites/manifests/upstream_precompile_mapped.json")
         case = manifest.cases[0]
-        
+
         backend = MockBackend()
-        
+
         # Tamper with address in probe
         original_address = case.observe["precompile_probe"]["address"]
         case.observe["precompile_probe"]["address"] = "0xc" # G1MUL instead of G1ADD
         with self.assertRaisesRegex(ValueError, "mock precompile probe rejects tampered runtime or metadata"):
             backend.execute_case(case, "test")
         case.observe["precompile_probe"]["address"] = original_address
-        
+
         # Tamper with input size in probe
         original_size = case.observe["precompile_probe"]["input_size"]
         case.observe["precompile_probe"]["input_size"] = 128 # Wrong size
         with self.assertRaisesRegex(ValueError, "mock precompile probe rejects tampered runtime or metadata"):
             backend.execute_case(case, "test")
         case.observe["precompile_probe"]["input_size"] = original_size
-        
+
         # Tamper with runtime code (e.g. change CALL to something else)
         original_runtime = case.steps[0]["bytecode_runtime"]
         # Replace 0xf1 (CALL) with 0xf2 (CALLCODE) - just a quick tamper
@@ -1250,31 +1251,18 @@ class HarnessTests(unittest.TestCase):
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
         manifest = load_manifest(ROOT / "suites/manifests/upstream_account_query_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
-        codecopy_case_ids = [
-            "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_bytes.success",
-            "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_25x_max_code_size.success",
-            "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_50x_max_code_size.success",
-            "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_75x_max_code_size.success",
-            "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_max_code_size.success",
-        ]
-        self.assertEqual(
-            [case.case_id for case in selected],
-            codecopy_case_ids
-            + [
-                "upstream.benchmark.account_query.codesize.success",
-                "upstream.benchmark.account_query.balance.cold.present_accounts.success",
-                "upstream.benchmark.account_query.balance.cold.absent_accounts.success",
-                "upstream.benchmark.account_query.selfbalance.contract_balance_0.success",
-                "upstream.benchmark.account_query.selfbalance.contract_balance_1.success",
-            ],
-        )
+
+        self.assertEqual(len(selected), 35)
         self.assertEqual({case.kind for case in selected}, {"upstream_mapped"})
         self.assertEqual([decision for decision in decisions if not decision.selected], [])
+
+        from adapter.account_query_generator import _build_codecopy_fixed_runtime, _build_codecopy_dynamic_runtime
         allowed_runtimes = {
             CODESIZE_RUNTIME,
             BALANCE_RUNTIME,
             SELFBALANCE_RUNTIME,
             *{_build_codecopy_fixed_runtime(size) for size in (0, 6144, 12288, 18432, 24576)},
+            *{_build_codecopy_dynamic_runtime(size) for size in (0, 32, 256, 1024, 6144, 12288, 18432, 24576)},
         }
         self.assertEqual(
             {case.steps[0]["bytecode_runtime"] for case in selected if case.steps and case.steps[0]["action"] == "deploy_contract"},
@@ -1647,8 +1635,8 @@ class HarnessTests(unittest.TestCase):
 
         admitted = [entry for entry in entries if entry["admitted"]]
         blocked = [entry for entry in entries if not entry["admitted"]]
-        self.assertEqual(len(admitted), 10, "account-query admitted count drifted")
-        self.assertEqual(len(blocked), 30, "account-query blocked count drifted")
+        self.assertEqual(len(admitted), 35, "account-query admitted count drifted")
+        self.assertEqual(len(blocked), 5, "account-query blocked count drifted")
 
         admitted_case_ids = [entry["case_id"] for entry in admitted]
         codecopy_fixed_case_ids = [entry["case_id"] for entry in admitted if entry["mode"] == "codecopy_fixed"]
@@ -1667,20 +1655,10 @@ class HarnessTests(unittest.TestCase):
             [0, 6144, 12288, 18432, 24576],
         )
         self.assertEqual(
-            admitted_case_ids,
-            codecopy_fixed_case_ids
-            + [
-                "upstream.benchmark.account_query.codesize.success",
-                "upstream.benchmark.account_query.balance.cold.present_accounts.success",
-                "upstream.benchmark.account_query.balance.cold.absent_accounts.success",
-                "upstream.benchmark.account_query.selfbalance.contract_balance_0.success",
-                "upstream.benchmark.account_query.selfbalance.contract_balance_1.success",
-            ],
-        )
-        self.assertEqual(
             {entry["mode"] for entry in admitted},
             {
                 "codecopy_fixed",
+                "codecopy_dynamic",
                 "codesize",
                 "balance_cold_present_accounts",
                 "balance_cold_absent_accounts",
@@ -1688,6 +1666,17 @@ class HarnessTests(unittest.TestCase):
                 "selfbalance_contract_balance_1",
             },
         )
+        self.assertEqual(len(admitted_case_ids), 35)
+        for expected in codecopy_fixed_case_ids + [
+            "upstream.benchmark.account_query.codesize.success",
+            "upstream.benchmark.account_query.balance.cold.present_accounts.success",
+            "upstream.benchmark.account_query.balance.cold.absent_accounts.success",
+            "upstream.benchmark.account_query.selfbalance.contract_balance_0.success",
+            "upstream.benchmark.account_query.selfbalance.contract_balance_1.success",
+        ]:
+            self.assertIn(expected, admitted_case_ids)
+        self.assertEqual(sum(1 for case_id in admitted_case_ids if ".codecopy.dynamic." in case_id), 5)
+        self.assertEqual(sum(1 for case_id in admitted_case_ids if ".codecopy_benchmark." in case_id), 20)
 
         blocked_reason_counts = Counter(
             reason
@@ -1698,7 +1687,6 @@ class HarnessTests(unittest.TestCase):
             blocked_reason_counts,
             Counter(
                 {
-                    "requires byte-range code-copy observation not yet mapped": 25,
                     "requires external-account code-copy fixtures and byte-range observation not yet mapped": 5,
                 }
             ),
@@ -1706,7 +1694,7 @@ class HarnessTests(unittest.TestCase):
         )
         self.assertEqual(
             Counter(entry["source"] for entry in blocked),
-            Counter({"codecopy": 5, "codecopy_benchmark": 20, "extcodecopy_warm": 5}),
+            Counter({"extcodecopy_warm": 5}),
             "account-query blocked source-family counts drifted",
         )
         self.assertTrue(all(entry["mode"] is None for entry in blocked))
@@ -1720,13 +1708,19 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(manifest_payload, checked_in_manifest, "account-query manifest JSON drift")
             manifest_case_ids = [case["case_id"] for case in manifest_payload["cases"]]
             self.assertEqual(manifest_case_ids, admitted_case_ids)
-            self.assertEqual(len(manifest_payload["cases"]), 10)
+            self.assertEqual(len(manifest_payload["cases"]), 35)
             self.assertEqual({case["family"] for case in manifest_payload["cases"]}, {"state/account-query"})
             manifest_by_id = {case["case_id"]: case for case in manifest_payload["cases"]}
             for case_id, copy_size in zip(codecopy_fixed_case_ids, [0, 6144, 12288, 18432, 24576], strict=True):
                 case = manifest_by_id[case_id]
                 self.assertEqual(case["observe"]["account_query_probe"], {"mode": "codecopy_fixed", "copy_size": copy_size})
                 self.assertEqual(case["expected"]["storage"]["0x00"], f"0x{copy_size:064x}")
+                self.assertIn("0x01", case["expected"]["storage"])
+            dynamic_codecopy_case_ids = [entry["case_id"] for entry in admitted if entry["mode"] == "codecopy_dynamic"]
+            for case_id in dynamic_codecopy_case_ids:
+                case = manifest_by_id[case_id]
+                self.assertEqual(case["observe"]["account_query_probe"]["mode"], "codecopy")
+                self.assertEqual(case["observe"]["account_query_probe"]["dynamic_offset_slot"], "0x02")
                 self.assertIn("0x01", case["expected"]["storage"])
             present_case = manifest_by_id["upstream.benchmark.account_query.balance.cold.present_accounts.success"]
             self.assertEqual(
@@ -2080,8 +2074,9 @@ class HarnessTests(unittest.TestCase):
 
     def test_account_query_templates_load(self) -> None:
         templates = load_account_query_templates(ROOT / "suites/templates/upstream_account_query_templates.json")
-        self.assertEqual(len(templates), 10)
-        self.assertEqual(templates[0].mode, "codecopy_fixed")
+        self.assertEqual(len(templates), 35)
+        self.assertEqual(templates[0].mode, "codecopy_dynamic")
+        self.assertEqual(sum(1 for template in templates if template.mode == "codecopy_dynamic"), 25)
         self.assertEqual(sum(1 for template in templates if template.mode == "codecopy_fixed"), 5)
 
     def test_tx_context_templates_load(self) -> None:
@@ -2146,7 +2141,7 @@ class HarnessTests(unittest.TestCase):
 
         expected_counts = {
             "memory": (143, 143, 0),
-            "account-query": (40, 10, 30),
+            "account-query": (40, 35, 5),
             "log": (140, 140, 0),
             "system": (46, 35, 11),
             "block-context": (13, 8, 5),
@@ -2190,13 +2185,12 @@ class HarnessTests(unittest.TestCase):
         account_blocked = [entry for entry in inventories["account-query"] if not entry["admitted"]]
         self.assertEqual(
             Counter(entry["source"] for entry in account_blocked),
-            Counter({"codecopy_benchmark": 20, "codecopy": 5, "extcodecopy_warm": 5}),
+            Counter({"extcodecopy_warm": 5}),
         )
         self.assertEqual(
             Counter(reason for entry in account_blocked for reason in entry["reasons"]),
             Counter(
                 {
-                    "requires byte-range code-copy observation not yet mapped": 25,
                     "requires external-account code-copy fixtures and byte-range observation not yet mapped": 5,
                 }
             ),
@@ -4344,7 +4338,7 @@ class HarnessTests(unittest.TestCase):
                 manifest_payload=generated,
             )
             self.assertEqual(generated["name"], "upstream-account-query-mapped")
-            self.assertEqual(len(generated["cases"]), 10)
+            self.assertEqual(len(generated["cases"]), 35)
             self.assertEqual(generated["cases"][0]["family"], "state/account-query")
 
     def test_cli_scan_upstream_memory_writes_expected_output(self) -> None:
@@ -5232,7 +5226,7 @@ class HarnessTests(unittest.TestCase):
     def _assert_checked_in_first_family_inventory_summary(self, summary: dict[str, object]) -> None:
         self.assertEqual(
             summary["totals"],
-            {"families": 15, "cases": 1083, "admitted":  572, "blocked":  511},
+            {"families": 15, "cases": 1083, "admitted": 597, "blocked": 486},
         )
 
         families = {item["family"]: item for item in summary["families"]}
@@ -5266,7 +5260,7 @@ class HarnessTests(unittest.TestCase):
                 "comparison": {"total": 6, "admitted": 6, "blocked": 0},
                 "stack": {"total": 65, "admitted": 65, "blocked": 0},
                 "control-flow": {"total": 7, "admitted": 7, "blocked": 0},
-                "account-query": {"total": 40, "admitted": 10, "blocked": 30},
+                "account-query": {"total": 40, "admitted": 35, "blocked": 5},
                 "block-context": {"total": 13, "admitted": 8, "blocked": 5},
                 "call-context": {"total": 20, "admitted": 20, "blocked": 0},
                 "log": {"total": 140, "admitted": 140, "blocked": 0},
@@ -5279,7 +5273,6 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(
             families["account-query"]["blocked_reasons"],
             {
-                "requires byte-range code-copy observation not yet mapped": 25,
                 "requires external-account code-copy fixtures and byte-range observation not yet mapped": 5,
             },
         )
@@ -5311,7 +5304,7 @@ class HarnessTests(unittest.TestCase):
             )
             self.assertNotEqual(
                 summary["totals"],
-                {"families": 15, "cases": 1083, "admitted":  572, "blocked":  511},
+                {"families": 15, "cases": 1083, "admitted": 597, "blocked": 486},
             )
 
     def test_cli_summarize_upstream_inventory_writes_expected_output(self) -> None:
@@ -5382,11 +5375,11 @@ class HarnessTests(unittest.TestCase):
             helper_summary = summarize_inventory_dir(inventory_dir)
             self.assertEqual(
                 helper_summary["totals"],
-                {"families": 15, "cases": 1082, "admitted":  571, "blocked":  511},
+                {"families": 15, "cases": 1082, "admitted": 596, "blocked": 486},
             )
             self.assertNotEqual(
                 helper_summary["totals"],
-                {"families": 15, "cases": 1083, "admitted":  572, "blocked":  511},
+                {"families": 15, "cases": 1083, "admitted": 597, "blocked": 486},
             )
 
             output_path = Path(tmpdir) / "summary.json"
@@ -5406,7 +5399,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(cli_summary, helper_summary)
             self.assertEqual(
                 cli_summary["totals"],
-                {"families": 15, "cases": 1082, "admitted":  571, "blocked":  511},
+                {"families": 15, "cases": 1082, "admitted": 596, "blocked": 486},
             )
             account_query_row = next(item for item in cli_summary["families"] if item["family"] == "account-query")
             self.assertEqual(
@@ -5415,7 +5408,7 @@ class HarnessTests(unittest.TestCase):
                     "admitted": account_query_row["admitted"],
                     "blocked": account_query_row["blocked"],
                 },
-                {"total": 39, "admitted": 9, "blocked": 30},
+                {"total": 39, "admitted": 34, "blocked": 5},
             )
 
     def test_summarize_rpc_reports_includes_inventory_coverage_reference(self) -> None:
@@ -5471,7 +5464,7 @@ class HarnessTests(unittest.TestCase):
             summary = json.loads(output_path.read_text())
 
         self.assertEqual(summary["totals"], {"families": 1, "selected": 2, "passed": 1, "failed": 1})
-        self.assertEqual(summary["coverage_reference"], {"families": 15, "cases": 1083, "admitted":  572, "blocked":  511})
+        self.assertEqual(summary["coverage_reference"], {"families": 15, "cases": 1083, "admitted": 597, "blocked": 486})
         self.assertEqual(summary["families"][0]["failed_cases"], ["failing-case"])
         self.assertFalse(summary["coverage_alignment"]["selected_equals_admitted"])
         self.assertFalse(summary["coverage_alignment"]["failed_zero"])
@@ -5487,7 +5480,7 @@ class HarnessTests(unittest.TestCase):
 
             payload = sync_to_staging(ROOT, staged_templates, staged_manifests)
 
-            self.assertEqual(payload["summary"], {"families": 15, "cases": 1083, "admitted":  572, "blocked":  511})
+            self.assertEqual(payload["summary"], {"families": 15, "cases": 1083, "admitted": 597, "blocked": 486})
             self.assertEqual(len(payload["families"]), len(FAMILY_SPECS))
             for spec in FAMILY_SPECS:
                 self.assertTrue((staged_templates / spec.template_file).exists(), spec.template_file)
@@ -5516,7 +5509,7 @@ class HarnessTests(unittest.TestCase):
         self.assertIn("Proven on Juchain when `feature_flags.modexp_eip7883=true`", doc)
         self.assertIn("Proven on Juchain when `feature_flags.calldata_floor_eip7623=true`", doc)
         self.assertIn("Deferred: blob/cell, and block access lists", doc)
-        self.assertIn("the 76 blocked cases should remain blocked", doc)
+        self.assertIn("the 486 blocked cases should remain blocked", doc)
         readme = (ROOT / "README.md").read_text()
         self.assertIn("docs/benchmark-coverage-status.md", readme)
         self.assertIn("Prague/Osaka fork capability coverage contract", readme)
@@ -7425,7 +7418,7 @@ class HarnessTests(unittest.TestCase):
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
             self.assertEqual(len(report["results"]), 143)
-            
+
             # Spot-check representative memory-access, MSIZE, and MCOPY cases instead of all 125.
             expected_storage = {
                 "upstream.benchmark.memory.mload.offset_0.initialized.mem_size_0.success": {
@@ -7451,13 +7444,13 @@ class HarnessTests(unittest.TestCase):
                     "0x01": "0x0000000000000000000000000000000000000000000000000000000000000400",
                 },
             }
-            
+
             observed_by_case = {result["case_id"]: result for result in report["results"]}
             for case_id, expected_slots in expected_storage.items():
                 self.assertIn(case_id, observed_by_case)
                 for slot, value in expected_slots.items():
                     self.assertEqual(observed_by_case[case_id]["observed"]["storage"][slot], value)
-            
+
             for result in report["results"]:
                 self.assertEqual(result["diffs"], [])
                 self.assertIs(result["success"], True)
@@ -7816,7 +7809,7 @@ class HarnessTests(unittest.TestCase):
             ]
             self.assertEqual(main(args), 0)
             report = json.loads(report_path.read_text())
-            self.assertEqual(len(report["results"]), 10)
+            self.assertEqual(len(report["results"]), 35)
             manifest_payload = json.loads((ROOT / "suites/manifests/upstream_account_query_mapped.json").read_text())
             expected_storage = {case["case_id"]: case["expected"]["storage"] for case in manifest_payload["cases"]}
             observed_by_case = {result["case_id"]: result for result in report["results"]}
@@ -8163,28 +8156,21 @@ class HarnessTests(unittest.TestCase):
             report = json.loads(report_path.read_text())
             self.assertEqual(report["manifest"], "upstream-account-query-mapped")
             self.assertEqual(report["chain_profile"], "mock-devnet")
-            self.assertEqual(len(report["results"]), 10)
+            self.assertEqual(len(report["results"]), 35)
             self.assertTrue(all(result["success"] for result in report["results"]))
             self.assertTrue(all(result["diffs"] == [] for result in report["results"]))
-            observed_by_case = {result["case_id"]: result["observed"]["storage"] for result in report["results"]}
-            self.assertEqual(
-                {case_id: storage["0x00"] for case_id, storage in observed_by_case.items()},
-                {
-                    "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_bytes.success": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_25x_max_code_size.success": "0x0000000000000000000000000000000000000000000000000000000000001800",
-                    "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_50x_max_code_size.success": "0x0000000000000000000000000000000000000000000000000000000000003000",
-                    "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_75x_max_code_size.success": "0x0000000000000000000000000000000000000000000000000000000000004800",
-                    "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_max_code_size.success": "0x0000000000000000000000000000000000000000000000000000000000006000",
-                    "upstream.benchmark.account_query.codesize.success": "0x0000000000000000000000000000000000000000000000000000000000000005",
-                    "upstream.benchmark.account_query.balance.cold.present_accounts.success": "0x000000000000000000000000000000000000000000000000000000000000002a",
-                    "upstream.benchmark.account_query.balance.cold.absent_accounts.success": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "upstream.benchmark.account_query.selfbalance.contract_balance_0.success": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                    "upstream.benchmark.account_query.selfbalance.contract_balance_1.success": "0x0000000000000000000000000000000000000000000000000000000000000001",
-                },
-            )
-            for case_id in observed_by_case:
-                if "codecopy.fixed" in case_id:
-                    self.assertIn("0x01", observed_by_case[case_id])
+            observed_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertEqual(set(observed_by_case), {case["case_id"] for case in json.loads((ROOT / "suites/manifests/upstream_account_query_mapped.json").read_text())["cases"]})
+            for case_id, result in observed_by_case.items():
+                self.assertIn("storage", result["observed"])
+                self.assertEqual(result["observed"]["storage"]["0x00"], result["expected"]["storage"]["0x00"])
+                if "0x01" in result["expected"]["storage"]:
+                    self.assertEqual(result["observed"]["storage"]["0x01"], result["expected"]["storage"]["0x01"])
+                if "codecopy" in case_id:
+                    self.assertIn("0x01", result["observed"]["storage"])
+                if ".codecopy.dynamic." in case_id or ".codecopy_benchmark." in case_id:
+                    self.assertIn("code", result["observed"])
+                    self.assertIn("0x02", result["observed"]["storage"])
 
     def test_cli_run_mock_upstream_keccak_manifest_writes_passing_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -8768,10 +8754,15 @@ class HarnessTests(unittest.TestCase):
             for case in selected
             if case.steps and case.steps[0]["action"] == "deploy_contract"
         }
+        from adapter.account_query_generator import _build_codecopy_fixed_runtime, _build_codecopy_dynamic_runtime
         expected_codecopy_runtimes = {
             _build_codecopy_fixed_runtime(copy_size)
             for copy_size in (0, 6144, 12288, 18432, 24576)
         }
+        expected_codecopy_runtimes.update({
+            _build_codecopy_dynamic_runtime(copy_size)
+            for copy_size in (0, 32, 256, 1024, 6144, 12288, 18432, 24576)
+        })
         self.assertEqual(
             selected_runtimes,
             {CODESIZE_RUNTIME, BALANCE_RUNTIME, SELFBALANCE_RUNTIME, *expected_codecopy_runtimes},

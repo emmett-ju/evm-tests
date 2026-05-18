@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from adapter.assembler import _push_int, _word_hex
-from adapter.generator import deploy_contract_step, invoke_contract_step, wait_receipt_step
+from adapter.generator import build_case, deploy_contract_step, invoke_contract_step, wait_receipt_step
 from adapter.inventory import write_inventory_payload
 from adapter.manifest import resolve_execution_specs_ref
 from adapter.signer import keccak256
@@ -37,6 +37,7 @@ AccountQueryTemplateMode = Literal[
     "balance_cold_absent_accounts",
     "balance_cold_present_accounts",
     "codecopy_fixed",
+    "codecopy_dynamic",
 ]
 
 
@@ -70,7 +71,6 @@ ACCOUNT_QUERY_MODE_SPECS: dict[AccountQueryTemplateMode, dict[str, str]] = {
             [
                 "Upstream intent: benchmark SELFBALANCE on the currently executing account with zero balance.",
                 "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control.",
-                "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented.",
             ]
         ),
     },
@@ -81,7 +81,6 @@ ACCOUNT_QUERY_MODE_SPECS: dict[AccountQueryTemplateMode, dict[str, str]] = {
             [
                 "Upstream intent: benchmark SELFBALANCE on the currently executing account with a funded balance.",
                 "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control.",
-                "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented.",
             ]
         ),
     },
@@ -92,7 +91,6 @@ ACCOUNT_QUERY_MODE_SPECS: dict[AccountQueryTemplateMode, dict[str, str]] = {
             [
                 "Upstream intent: benchmark CODESIZE on the currently executing account.",
                 "Admitted because deployed runtime bytecode size is directly observable from the deployed contract code.",
-                "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented.",
             ]
         ),
     },
@@ -103,7 +101,6 @@ ACCOUNT_QUERY_MODE_SPECS: dict[AccountQueryTemplateMode, dict[str, str]] = {
             [
                 "Upstream intent: benchmark BALANCE over cold absent target accounts.",
                 "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
-                "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented.",
             ]
         ),
     },
@@ -114,7 +111,16 @@ ACCOUNT_QUERY_MODE_SPECS: dict[AccountQueryTemplateMode, dict[str, str]] = {
             [
                 "Upstream intent: benchmark BALANCE over cold present target accounts.",
                 "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
-                "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented.",
+            ]
+        ),
+    },
+    "codecopy_dynamic": {
+        "description": "Admitted execution-specs CODECOPY benchmark variant with dynamic memory offset.",
+        "namespace_seed": "upstream-account-query-codecopy-dynamic",
+        "notes": json.dumps(
+            [
+                "Upstream intent: benchmark CODECOPY with offset=GAS % 7.",
+                "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation.",
             ]
         ),
     },
@@ -324,6 +330,31 @@ def render_account_query_case(template: AccountQueryMappingTemplate) -> dict[str
             },
             observe_extra={"account_query_probe": {"mode": "codecopy_fixed", "copy_size": copy_size}},
         )
+    if template.mode == "codecopy_dynamic":
+        copy_size = _require_template_copy_size(template)
+        runtime_code = _build_codecopy_dynamic_runtime(copy_size)
+        return build_account_query_case(
+            template,
+            steps=[
+                deploy_account_query_contract_step(runtime_code=runtime_code),
+                wait_receipt_step(),
+                invoke_contract_step(data_hex="0x", gas=_codecopy_invoke_gas(copy_size)),
+                wait_receipt_step(),
+            ],
+            expected={
+                "storage": {
+                    "0x00": _word_hex(copy_size),
+                    "0x01": _codecopy_dynamic_digest(runtime_code, 0, copy_size),
+                }
+            },
+            observe_extra={
+                "account_query_probe": {
+                    "mode": "codecopy",
+                    "copy_size": copy_size,
+                    "dynamic_offset_slot": "0x02",
+                }
+            },
+        )
     raise ValueError(f"unsupported account-query mapping mode: {template.mode}")
 
 
@@ -334,7 +365,7 @@ def build_account_query_case(
     expected: dict[str, Any],
     observe_extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    observe = {"storage_address": "$last_contract"}
+    observe = {"storage_address": "$last_contract", "code_address": "$last_contract"}
     if observe_extra:
         observe.update(observe_extra)
     return {
@@ -388,11 +419,11 @@ def _load_account_query_template_entry(entry: object, *, index: int) -> AccountQ
     if not isinstance(notes, list) or not all(isinstance(note, str) for note in notes):
         raise ValueError(f"account query template entry {index} field 'notes' must be a list of strings")
     copy_size = entry.get("copy_size")
-    if mode == "codecopy_fixed":
+    if mode in ("codecopy_fixed", "codecopy_dynamic"):
         if not isinstance(copy_size, int) or isinstance(copy_size, bool) or copy_size < 0:
             raise ValueError(f"account query template entry {index} field 'copy_size' must be a non-negative integer")
     elif copy_size is not None:
-        raise ValueError(f"account query template entry {index} field 'copy_size' is only supported for codecopy_fixed")
+        raise ValueError(f"account query template entry {index} field 'copy_size' is only supported for codecopy families")
     return AccountQueryMappingTemplate(
         case_id=str(entry["case_id"]),
         description=str(entry["description"]),
@@ -464,6 +495,8 @@ def _scan_codecopy_cases(text: str) -> list[AutoAccountQueryInventoryEntry]:
         for _ratio_value, ratio_label in ratio_entries:
             ratio_slug = _slugify_label(ratio_label)
             fixed_slug = "fixed" if fixed_src_dst else "dynamic"
+            admitted = True
+            mode = "codecopy_fixed" if fixed_src_dst else "codecopy_dynamic"
             results.append(
                 AutoAccountQueryInventoryEntry(
                     upstream_ref=(
@@ -474,11 +507,11 @@ def _scan_codecopy_cases(text: str) -> list[AutoAccountQueryInventoryEntry]:
                         "upstream.benchmark.account_query.codecopy."
                         f"{fixed_slug}.max_code_size_ratio_{ratio_slug}.success"
                     ),
-                    admitted=fixed_src_dst,
-                    mode="codecopy_fixed" if fixed_src_dst else None,
-                    reasons=[] if fixed_src_dst else [BLOCKED_CODECOPY_REASON],
+                    admitted=admitted,
+                    mode=mode,
+                    reasons=[],
                     source="codecopy",
-                    copy_size=_codecopy_size_for_ratio(_ratio_value) if fixed_src_dst else None,
+                    copy_size=_codecopy_size_for_ratio(_ratio_value),
                 )
             )
     if len(results) != 10:
@@ -509,10 +542,11 @@ def _scan_codecopy_benchmark_cases(text: str) -> list[AutoAccountQueryInventoryE
                         "upstream.benchmark.account_query.codecopy_benchmark."
                         f"mem_size_{mem_size}.code_size_{code_size}.success"
                     ),
-                    admitted=False,
-                    mode=None,
-                    reasons=[BLOCKED_CODECOPY_REASON],
+                    admitted=True,
+                    mode="codecopy_dynamic",
+                    reasons=[],
                     source="codecopy_benchmark",
+                    copy_size=code_size,
                 )
             )
     if len(results) != 20:
@@ -606,9 +640,23 @@ def _inventory_entry_to_template(entry: AutoAccountQueryInventoryEntry) -> Accou
                 f"Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying {copy_size} byte(s).",
                 "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
                 "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
-                "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped.",
             ],
             mode="codecopy_fixed",
+            copy_size=copy_size,
+        )
+    if entry.mode == "codecopy_dynamic":
+        copy_size = _require_copy_size(entry)
+        return AccountQueryMappingTemplate(
+            case_id=entry.case_id,
+            description=f"Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying {copy_size} byte(s).",
+            namespace_seed=_build_namespace_seed(entry.case_id),
+            upstream_ref=entry.upstream_ref,
+            notes=[
+                f"Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying {copy_size} byte(s).",
+                "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+                "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation.",
+            ],
+            mode="codecopy_dynamic",
             copy_size=copy_size,
         )
     spec = ACCOUNT_QUERY_MODE_SPECS[entry.mode]
@@ -675,66 +723,68 @@ def _codecopy_fixed_digest(runtime_code: str, copy_size: int) -> str:
     return "0x" + keccak256(copied).hex()
 
 
+def _codecopy_dynamic_digest(runtime_code: str, offset: int, copy_size: int) -> str:
+    runtime = bytes.fromhex(runtime_code.removeprefix("0x"))
+    if offset >= len(runtime):
+        copied = b"\x00" * copy_size
+    else:
+        available = runtime[offset:]
+        copied = available[:copy_size] + (b"\x00" * max(0, copy_size - len(available)))
+    return "0x" + keccak256(copied).hex()
+
+
+def derive_codecopy_expectation(probe: dict[str, Any], runtime_code: str, dynamic_offset: int | None = None) -> dict[str, str]:
+    copy_size = probe["copy_size"]
+    offset = dynamic_offset if dynamic_offset is not None else 0
+    slot0 = _word_hex(copy_size)
+    slot1 = _codecopy_dynamic_digest(runtime_code, offset, copy_size)
+    return {"0x00": slot0, "0x01": slot1}
+
+
+def _build_codecopy_dynamic_runtime(copy_size: int) -> str:
+    if copy_size < 0 or copy_size > UPSTREAM_MAX_CODE_SIZE:
+        raise ValueError(f"unsupported CODECOPY copy_size: {copy_size}")
+    code = bytearray()
+    code += _push_int(copy_size)
+    code.append(0x5A)  # GAS
+    code += _push_int(7)
+    code.append(0x06)  # MOD (offset)
+    code.append(0x80)  # DUP1 (keep offset for SSTORE)
+    code += _push_int(2)
+    code.append(0x55)  # slot2 <- offset
+    code.append(0x80)  # DUP1 (restore offset for CODECOPY)
+    code.append(0x39)  # CODECOPY(offset, offset, copy_size)
+
+    code += _push_int(copy_size)
+    code += _push_int(2)
+    code.append(0x54)  # SLOAD slot2 -> offset
+    code.append(0x20)  # KECCAK256(memory[offset:offset+copy_size])
+    code.append(0x80)  # duplicate digest for storage
+    code += _push_int(1)
+    code.append(0x55)  # slot1 <- digest
+    code.append(0x50)  # discard duplicate digest
+    code += _push_int(copy_size)
+    code += _push_int(0)
+    code.append(0x55)  # slot0 <- copy_size
+    code.append(0x00)
+    return "0x" + code.hex()
+
+
 def _codecopy_invoke_gas(copy_size: int) -> str:
     if copy_size >= UPSTREAM_MAX_CODE_SIZE:
         return "0x400000"
-    if copy_size >= 1024:
-        return "0x200000"
-    return "0xc350"
+    return "0x200000"
 
 
 def _build_init_code(runtime_code: str) -> str:
-    runtime_hex = runtime_code.removeprefix("0x")
-    runtime_bytes = bytes.fromhex(runtime_hex)
-    length = len(runtime_bytes)
-    if length == 0:
-        raise ValueError("runtime_code must not be empty")
-    if length > 0xFF:
-        raise ValueError("runtime_code too long for PUSH1 init helper")
-    return f"0x60{length:02x}600c60003960{length:02x}6000f3{runtime_hex}"
+    from adapter.assembler import _build_init_code as _shared_build_init_code
+    return _shared_build_init_code(runtime_code)
 
 
 def _address_to_word(address: str) -> str:
     if not address.startswith("0x") or len(address) != 42:
         raise ValueError(f"unsupported address literal: {address}")
     return "0x" + address[2:].lower().rjust(64, "0")
-
-
-def _load_account_query_template_entry(entry: object, *, index: int) -> AccountQueryMappingTemplate:
-    if not isinstance(entry, dict):
-        raise ValueError(f"account query template entry {index} must be an object")
-    required_fields = (
-        "case_id",
-        "description",
-        "namespace_seed",
-        "upstream_ref",
-        "notes",
-        "mode",
-    )
-    for field in required_fields:
-        if field not in entry:
-            raise ValueError(f"account query template entry {index} missing required field: {field}")
-    mode = entry["mode"]
-    if mode not in ACCOUNT_QUERY_MODE_SPECS and mode != "codecopy_fixed":
-        raise ValueError(f"unsupported account query template mode: {mode}")
-    notes = entry["notes"]
-    if not isinstance(notes, list) or not all(isinstance(note, str) for note in notes):
-        raise ValueError(f"account query template entry {index} field 'notes' must be a list of strings")
-    copy_size = entry.get("copy_size")
-    if mode == "codecopy_fixed":
-        if not isinstance(copy_size, int) or isinstance(copy_size, bool) or copy_size < 0:
-            raise ValueError(f"account query template entry {index} field 'copy_size' must be a non-negative integer")
-    elif copy_size is not None:
-        raise ValueError(f"account query template entry {index} field 'copy_size' is only supported for codecopy_fixed")
-    return AccountQueryMappingTemplate(
-        case_id=str(entry["case_id"]),
-        description=str(entry["description"]),
-        namespace_seed=str(entry["namespace_seed"]),
-        upstream_ref=str(entry["upstream_ref"]),
-        notes=list(notes),
-        mode=mode,
-        copy_size=copy_size,
-    )
 
 
 def _require_function(text: str, function_name: str) -> None:

@@ -274,6 +274,21 @@ class MockBackend:
                         storage["0x00"] = self._hex_to_word(hex(copy_size))
                         storage["0x01"] = _codecopy_fixed_digest(expected_runtime, copy_size)
                         continue
+                    if mode == "codecopy":
+                        from adapter.account_query_generator import _build_codecopy_dynamic_runtime, _codecopy_dynamic_digest
+                        copy_size = int(account_query_probe["copy_size"])
+                        expected_runtime = _build_codecopy_dynamic_runtime(copy_size)
+                        if code != expected_runtime:
+                            raise ValueError(f"unsupported mock contract code path: {code}")
+
+                        dynamic_offset_slot = account_query_probe.get("dynamic_offset_slot")
+                        offset = 0
+                        if dynamic_offset_slot:
+                            storage[dynamic_offset_slot] = self._hex_to_word(hex(offset))
+
+                        storage["0x00"] = self._hex_to_word(hex(copy_size))
+                        storage["0x01"] = _codecopy_dynamic_digest(expected_runtime, offset, copy_size)
+                        continue
                     raise ValueError(f"unsupported account-query probe mode: {mode}")
 
                 bitwise_probe = case.observe.get("bitwise_probe")
@@ -452,25 +467,38 @@ class MockBackend:
         if "balance" in expected_shape:
             balance_address = observe_config.get("balance_address", target_address)
             observed["balance"] = self._address_state(contracts, balance_address).get("balance", "0x0")
-        if "code" in expected_shape:
+        if "code" in expected_shape or (observe_config.get("account_query_probe") and observe_config["account_query_probe"].get("mode") == "codecopy"):
             code_address = observe_config.get("code_address")
             if code_address == "$last_contract":
                 code_address = last_contract_address
             if code_address is None:
                 code_address = target_address
             observed["code"] = self._address_state(contracts, code_address).get("code", "0x")
-        if "storage" in expected_shape or (observe_config.get("log_probe") and observe_config["log_probe"].get("dynamic_offset_slot")):
+        log_probe = observe_config.get("log_probe")
+        aq_probe = observe_config.get("account_query_probe")
+
+        has_dynamic_log = isinstance(log_probe, dict) and log_probe.get("dynamic_offset_slot")
+        has_dynamic_aq = isinstance(aq_probe, dict) and aq_probe.get("dynamic_offset_slot")
+
+        if "storage" in expected_shape or has_dynamic_log or has_dynamic_aq:
             storage_address = observe_config.get("storage_address", target_address)
             if storage_address == "$last_contract":
                 storage_address = last_contract_address
             observed["storage"] = {}
-            storage = self._address_state(contracts, storage_address).get("storage", {})
+            storage_state = self._address_state(contracts, storage_address).get("storage", {})
+
             if "storage" in expected_shape:
                 for slot in expected_shape["storage"]:
-                    observed["storage"][slot] = storage.get(slot, ZERO_STORAGE_WORD)
-            if observe_config.get("log_probe") and observe_config["log_probe"].get("dynamic_offset_slot"):
-                slot = observe_config["log_probe"]["dynamic_offset_slot"]
-                observed["storage"][slot] = storage.get(slot, ZERO_STORAGE_WORD)
+                    observed["storage"][slot] = storage_state.get(slot, ZERO_STORAGE_WORD)
+
+            # Forced observation for dynamic probes
+            if has_dynamic_log:
+                slot = log_probe["dynamic_offset_slot"]
+                observed["storage"][slot] = storage_state.get(slot, ZERO_STORAGE_WORD)
+
+            if has_dynamic_aq:
+                slot = aq_probe["dynamic_offset_slot"]
+                observed["storage"][slot] = storage_state.get(slot, ZERO_STORAGE_WORD)
         if "system_witness" in expected_shape:
             witness_config = observe_config.get("system_witness")
             if witness_config is None:
@@ -661,11 +689,11 @@ class MockBackend:
         expected_runtime = _build_log_runtime(template)
         if code != expected_runtime:
             raise ValueError(f"unsupported mock contract code path: {code}")
-            
+
         # If dynamic offset is used, mock it (e.g., 0) in storage so the Oracle can find it
         if template.dynamic_offset_slot:
             storage[template.dynamic_offset_slot] = ZERO_STORAGE_WORD
-            
+
         if last_receipt is None:
             raise ValueError("log probe requires a receipt context")
         topics = [] if template.topic_word is None else [template.topic_word] * template.topic_count
@@ -1131,14 +1159,14 @@ class JsonRpcBackend:
         if "balance" in expected_shape:
             balance_address = observe_config.get("balance_address", target_address)
             observed["balance"] = self._rpc("eth_getBalance", [balance_address, "latest"])
-        if "code" in expected_shape:
+        if "code" in expected_shape or (observe_config.get("account_query_probe") and observe_config["account_query_probe"].get("mode") == "codecopy"):
             code_address = observe_config.get("code_address")
             if code_address == "$last_contract":
                 code_address = last_contract_address
             if code_address is None:
                 code_address = target_address
             observed["code"] = self._rpc("eth_getCode", [code_address, "latest"])
-        if "storage" in expected_shape or (observe_config.get("log_probe") and observe_config["log_probe"].get("dynamic_offset_slot")):
+        if "storage" in expected_shape or (observe_config.get("log_probe") and observe_config["log_probe"].get("dynamic_offset_slot")) or (observe_config.get("account_query_probe") and observe_config["account_query_probe"].get("dynamic_offset_slot")):
             storage_address = observe_config.get("storage_address", target_address)
             if storage_address == "$last_contract":
                 storage_address = last_contract_address
@@ -1153,8 +1181,20 @@ class JsonRpcBackend:
                         slot,
                         storage_block_tag,
                     )
-            if observe_config.get("log_probe") and observe_config["log_probe"].get("dynamic_offset_slot"):
-                slot = observe_config["log_probe"]["dynamic_offset_slot"]
+
+            # Forced observation for dynamic probes
+            log_probe = observe_config.get("log_probe")
+            if log_probe and log_probe.get("dynamic_offset_slot"):
+                slot = log_probe["dynamic_offset_slot"]
+                observed["storage"][slot] = self._get_storage_at(
+                    storage_address,
+                    slot,
+                    storage_block_tag,
+                )
+
+            aq_probe = observe_config.get("account_query_probe")
+            if aq_probe and aq_probe.get("dynamic_offset_slot"):
+                slot = aq_probe["dynamic_offset_slot"]
                 observed["storage"][slot] = self._get_storage_at(
                     storage_address,
                     slot,

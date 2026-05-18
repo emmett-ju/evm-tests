@@ -4,6 +4,71 @@
   "source": "third_party/execution-specs/tests/benchmark/compute/instruction/test_account_query.py",
   "cases": [
     {
+      "case_id": "upstream.benchmark.account_query.codecopy.dynamic.max_code_size_ratio_0_bytes.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 0 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-dynamic-max-code-size-ratio-0-bytes-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0 bytes]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 0 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy.dynamic.max_code_size_ratio_0_25x_max_code_size.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 6144 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-dynamic-max-code-size-ratio-0-25x-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0.25x max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 6144 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 6144
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy.dynamic.max_code_size_ratio_0_50x_max_code_size.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 12288 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-dynamic-max-code-size-ratio-0-50x-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0.50x max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 12288 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 12288
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy.dynamic.max_code_size_ratio_0_75x_max_code_size.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 18432 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-dynamic-max-code-size-ratio-0-75x-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0.75x max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 18432 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 18432
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy.dynamic.max_code_size_ratio_max_code_size.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 24576 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-dynamic-max-code-size-ratio-max-code-size-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=max code size]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 24576 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 24576
+    },
+    {
       "case_id": "upstream.benchmark.account_query.codecopy.fixed.max_code_size_ratio_0_bytes.success",
       "description": "Admitted execution-specs CODECOPY fixed source/destination benchmark variant copying 0 byte(s).",
       "namespace_seed": "upstream-account-query-codecopy-fixed-max-code-size-ratio-0-bytes-success",
@@ -11,8 +76,7 @@
       "notes": [
         "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 0 byte(s).",
         "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
-        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
-        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables."
       ],
       "mode": "codecopy_fixed",
       "copy_size": 0
@@ -25,8 +89,7 @@
       "notes": [
         "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 6144 byte(s).",
         "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
-        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
-        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables."
       ],
       "mode": "codecopy_fixed",
       "copy_size": 6144
@@ -39,8 +102,7 @@
       "notes": [
         "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 12288 byte(s).",
         "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
-        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
-        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables."
       ],
       "mode": "codecopy_fixed",
       "copy_size": 12288
@@ -53,8 +115,7 @@
       "notes": [
         "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 18432 byte(s).",
         "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
-        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
-        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables."
       ],
       "mode": "codecopy_fixed",
       "copy_size": 18432
@@ -67,11 +128,270 @@
       "notes": [
         "Upstream intent: benchmark CODECOPY with fixed source and destination offsets while copying 24576 byte(s).",
         "RPC mapping: deploy a deterministic runtime that executes CODECOPY(0, 0, size), stores the copied byte count in slot0, and stores KECCAK256 of the copied memory window in slot1.",
-        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables.",
-        "Dynamic CODECOPY source/destination, CODECOPY benchmark matrix, and EXTCODECOPY cases remain blocked until their byte-window or external-code observation models are mapped."
+        "Admitted because fixed source/destination removes the gas-derived byte-window branch and the copied byte count plus digest are deterministic final storage observables."
       ],
       "mode": "codecopy_fixed",
       "copy_size": 24576
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_0.code_size_0.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 0 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-0-code-size-0-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=0]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 0 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_1024.code_size_0.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 0 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-1024-code-size-0-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 0 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_256.code_size_0.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 0 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-256-code-size-0-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=256]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 0 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_32.code_size_0.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 0 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-32-code-size-0-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=32]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 0 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 0
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_0.code_size_1024.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 1024 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-0-code-size-1024-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=0]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 1024 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_1024.code_size_1024.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 1024 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-1024-code-size-1024-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 1024 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_256.code_size_1024.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 1024 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-256-code-size-1024-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=256]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 1024 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_32.code_size_1024.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 1024 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-32-code-size-1024-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=32]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 1024 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 1024
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_0.code_size_24576.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 24576 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-0-code-size-24576-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=0]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 24576 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 24576
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_1024.code_size_24576.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 24576 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-1024-code-size-24576-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 24576 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 24576
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_256.code_size_24576.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 24576 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-256-code-size-24576-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=256]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 24576 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 24576
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_32.code_size_24576.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 24576 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-32-code-size-24576-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=32]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 24576 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 24576
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_0.code_size_256.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 256 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-0-code-size-256-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=0]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 256 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_1024.code_size_256.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 256 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-1024-code-size-256-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 256 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_256.code_size_256.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 256 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-256-code-size-256-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=256]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 256 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_32.code_size_256.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 256 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-32-code-size-256-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=32]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 256 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 256
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_0.code_size_32.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 32 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-0-code-size-32-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=0]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 32 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_1024.code_size_32.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 32 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-1024-code-size-32-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=1024]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 32 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_256.code_size_32.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 32 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-256-code-size-32-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=256]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 32 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 32
+    },
+    {
+      "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_32.code_size_32.success",
+      "description": "Admitted execution-specs CODECOPY dynamic-offset benchmark variant copying 32 byte(s).",
+      "namespace_seed": "upstream-account-query-codecopy-benchmark-mem-size-32-code-size-32-success",
+      "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=32]",
+      "notes": [
+        "Upstream intent: benchmark CODECOPY with gas-derived dynamic memory offsets while copying 32 byte(s).",
+        "RPC mapping: deploy a runtime that stores the evaluated dynamic offset in slot0x02, executes CODECOPY(offset, offset, size), and stores the result count and hash.",
+        "Admitted because the dynamically evaluated memory offset is stored in the runtime prior to execution, allowing dynamic hash expectation derivation."
+      ],
+      "mode": "codecopy_dynamic",
+      "copy_size": 32
     },
     {
       "case_id": "upstream.benchmark.account_query.codesize.success",
@@ -80,8 +400,7 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codesize",
       "notes": [
         "Upstream intent: benchmark CODESIZE on the currently executing account.",
-        "Admitted because deployed runtime bytecode size is directly observable from the deployed contract code.",
-        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+        "Admitted because deployed runtime bytecode size is directly observable from the deployed contract code."
       ],
       "mode": "codesize",
       "copy_size": null
@@ -93,8 +412,7 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_ext_account_query_cold[absent_accounts=False-opcode=BALANCE]",
       "notes": [
         "Upstream intent: benchmark BALANCE over cold present target accounts.",
-        "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
-        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+        "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals."
       ],
       "mode": "balance_cold_present_accounts",
       "copy_size": null
@@ -106,8 +424,7 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_ext_account_query_cold[absent_accounts=True-opcode=BALANCE]",
       "notes": [
         "Upstream intent: benchmark BALANCE over cold absent target accounts.",
-        "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals.",
-        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+        "Admitted because target-account balance outcomes can be observed directly without copying account code or controlling block internals."
       ],
       "mode": "balance_cold_absent_accounts",
       "copy_size": null
@@ -119,8 +436,7 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_selfbalance[contract_balance=0]",
       "notes": [
         "Upstream intent: benchmark SELFBALANCE on the currently executing account with zero balance.",
-        "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control.",
-        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+        "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control."
       ],
       "mode": "selfbalance_contract_balance_0",
       "copy_size": null
@@ -132,8 +448,7 @@
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_selfbalance[contract_balance=1]",
       "notes": [
         "Upstream intent: benchmark SELFBALANCE on the currently executing account with a funded balance.",
-        "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control.",
-        "This template is scan-stage inventory for later runtime wiring; CODECOPY and EXTCODE* neighbors stay blocked until their observation model is implemented."
+        "Admitted because the executing contract balance is directly observable and can be asserted without block-environment control."
       ],
       "mode": "selfbalance_contract_balance_1",
       "copy_size": null

@@ -7,57 +7,47 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0 bytes]",
       "case_id": "upstream.benchmark.account_query.codecopy.dynamic.max_code_size_ratio_0_bytes.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy",
-      "copy_size": null
+      "copy_size": 0
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0.25x max code size]",
       "case_id": "upstream.benchmark.account_query.codecopy.dynamic.max_code_size_ratio_0_25x_max_code_size.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy",
-      "copy_size": null
+      "copy_size": 6144
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0.50x max code size]",
       "case_id": "upstream.benchmark.account_query.codecopy.dynamic.max_code_size_ratio_0_50x_max_code_size.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy",
-      "copy_size": null
+      "copy_size": 12288
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=0.75x max code size]",
       "case_id": "upstream.benchmark.account_query.codecopy.dynamic.max_code_size_ratio_0_75x_max_code_size.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy",
-      "copy_size": null
+      "copy_size": 18432
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=False-max_code_size_ratio=max code size]",
       "case_id": "upstream.benchmark.account_query.codecopy.dynamic.max_code_size_ratio_max_code_size.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy",
-      "copy_size": null
+      "copy_size": 24576
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy[fixed_src_dst=True-max_code_size_ratio=0 bytes]",
@@ -107,222 +97,182 @@
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=0]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_0.code_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 0
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=1024]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_1024.code_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 0
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=256]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_256.code_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 0
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=0-mem_size=32]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_32.code_size_0.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 0
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=0]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_0.code_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 1024
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=1024]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_1024.code_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 1024
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=256]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_256.code_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 1024
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=1024-mem_size=32]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_32.code_size_1024.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 1024
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=0]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_0.code_size_24576.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 24576
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=1024]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_1024.code_size_24576.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 24576
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=256]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_256.code_size_24576.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 24576
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=24576-mem_size=32]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_32.code_size_24576.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 24576
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=0]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_0.code_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 256
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=1024]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_1024.code_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 256
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=256]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_256.code_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 256
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=256-mem_size=32]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_32.code_size_256.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 256
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=0]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_0.code_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 32
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=1024]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_1024.code_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 32
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=256]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_256.code_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 32
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codecopy_benchmark[code_size=32-mem_size=32]",
       "case_id": "upstream.benchmark.account_query.codecopy_benchmark.mem_size_32.code_size_32.success",
-      "admitted": false,
-      "mode": null,
-      "reasons": [
-        "requires byte-range code-copy observation not yet mapped"
-      ],
+      "admitted": true,
+      "mode": "codecopy_dynamic",
+      "reasons": [],
       "source": "codecopy_benchmark",
-      "copy_size": null
+      "copy_size": 32
     },
     {
       "upstream_ref": "tests/benchmark/compute/instruction/test_account_query.py::test_codesize",
