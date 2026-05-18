@@ -3126,6 +3126,345 @@ class HarnessTests(unittest.TestCase):
                     ]
                 )
 
+    def test_cli_run_records_transport_error_as_failed_case_and_continues(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            manifest_path = tmp_path / "jsonrpc-transport-continue.json"
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "name": "jsonrpc-transport-continue",
+                        "version": "1",
+                        "execution_specs_ref": "test-ref",
+                        "suite_version": "0.1.0",
+                        "chain_profile_version": "1",
+                        "cases": [
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "transport-fails",
+                                "family": "custom/jsonrpc",
+                                "description": "First case hits a transport failure.",
+                                "namespace_seed": "transport-fails",
+                                "notes": [],
+                                "filters": {},
+                                "observe": {},
+                                "steps": [
+                                    {
+                                        "action": "invoke_contract",
+                                        "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                                        "data": "0x",
+                                        "gas": "0x5208",
+                                        "expected_receipt_status": "0x1",
+                                    }
+                                ],
+                                "expected": {},
+                            },
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "transport-recovers-next-case",
+                                "family": "custom/jsonrpc",
+                                "description": "Second case still runs after the first transport failure.",
+                                "namespace_seed": "transport-recovers-next-case",
+                                "notes": [],
+                                "filters": {},
+                                "observe": {},
+                                "steps": [
+                                    {
+                                        "action": "invoke_contract",
+                                        "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                                        "data": "0x",
+                                        "gas": "0x5208",
+                                        "expected_receipt_status": "0x1",
+                                    }
+                                ],
+                                "expected": {},
+                            },
+                        ],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+
+            from adapter import cli as cli_module
+
+            original_backend = cli_module.JsonRpcBackend
+
+            class StubBackend:
+                def __init__(self, profile):
+                    self.calls = 0
+
+                def execute_case(self, case, namespace):
+                    self.calls += 1
+                    if case.case_id == "transport-fails":
+                        raise RuntimeError(
+                            "rpc transport error for eth_getTransactionCount against https://example.invalid: [Errno 51] Network is unreachable"
+                        )
+                    return ["0xabc"], {}, {}
+
+            cli_module.JsonRpcBackend = StubBackend  # type: ignore[assignment]
+            stdout = StringIO()
+            try:
+                with redirect_stdout(stdout):
+                    exit_code = main(
+                        [
+                            "run",
+                            "--profile",
+                            str(ROOT / "profiles/juchain.toml"),
+                            "--manifest",
+                            str(manifest_path),
+                            "--state-dir",
+                            str(state_dir),
+                            "--report",
+                            str(report_path),
+                        ]
+                    )
+            finally:
+                cli_module.JsonRpcBackend = original_backend  # type: ignore[assignment]
+
+            self.assertEqual(exit_code, 0)
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(payload["passed"], 1)
+            self.assertEqual(payload["failed"], 1)
+            report = json.loads(report_path.read_text())
+            results_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertFalse(results_by_case["transport-fails"]["success"])
+            self.assertEqual(
+                results_by_case["transport-fails"]["diffs"],
+                [
+                    "execution error: rpc transport error for eth_getTransactionCount against https://example.invalid: [Errno 51] Network is unreachable"
+                ],
+            )
+            self.assertTrue(results_by_case["transport-recovers-next-case"]["success"])
+
+    def test_cli_run_records_timeout_error_as_failed_case_and_continues(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            manifest_path = tmp_path / "jsonrpc-timeout-continue.json"
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "name": "jsonrpc-timeout-continue",
+                        "version": "1",
+                        "execution_specs_ref": "test-ref",
+                        "suite_version": "0.1.0",
+                        "chain_profile_version": "1",
+                        "cases": [
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "timeout-fails",
+                                "family": "custom/jsonrpc",
+                                "description": "First case hits a timeout failure.",
+                                "namespace_seed": "timeout-fails",
+                                "notes": [],
+                                "filters": {},
+                                "observe": {},
+                                "steps": [
+                                    {
+                                        "action": "invoke_contract",
+                                        "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                                        "data": "0x",
+                                        "gas": "0x5208",
+                                        "expected_receipt_status": "0x1",
+                                    }
+                                ],
+                                "expected": {},
+                            },
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "timeout-recovers-next-case",
+                                "family": "custom/jsonrpc",
+                                "description": "Second case still runs after the first timeout.",
+                                "namespace_seed": "timeout-recovers-next-case",
+                                "notes": [],
+                                "filters": {},
+                                "observe": {},
+                                "steps": [
+                                    {
+                                        "action": "invoke_contract",
+                                        "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                                        "data": "0x",
+                                        "gas": "0x5208",
+                                        "expected_receipt_status": "0x1",
+                                    }
+                                ],
+                                "expected": {},
+                            },
+                        ],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+
+            from adapter import cli as cli_module
+
+            original_backend = cli_module.JsonRpcBackend
+
+            class StubBackend:
+                def __init__(self, profile):
+                    self.calls = 0
+
+                def execute_case(self, case, namespace):
+                    self.calls += 1
+                    if case.case_id == "timeout-fails":
+                        raise TimeoutError(
+                            "rpc timeout for eth_getTransactionReceipt after 60s against https://example.invalid"
+                        )
+                    return ["0xabc"], {}, {}
+
+            cli_module.JsonRpcBackend = StubBackend  # type: ignore[assignment]
+            stdout = StringIO()
+            try:
+                with redirect_stdout(stdout):
+                    exit_code = main(
+                        [
+                            "run",
+                            "--profile",
+                            str(ROOT / "profiles/juchain.toml"),
+                            "--manifest",
+                            str(manifest_path),
+                            "--state-dir",
+                            str(state_dir),
+                            "--report",
+                            str(report_path),
+                        ]
+                    )
+            finally:
+                cli_module.JsonRpcBackend = original_backend  # type: ignore[assignment]
+
+            self.assertEqual(exit_code, 0)
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(payload["passed"], 1)
+            self.assertEqual(payload["failed"], 1)
+            report = json.loads(report_path.read_text())
+            results_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertFalse(results_by_case["timeout-fails"]["success"])
+            self.assertEqual(
+                results_by_case["timeout-fails"]["diffs"],
+                [
+                    "execution error: rpc timeout for eth_getTransactionReceipt after 60s against https://example.invalid"
+                ],
+            )
+            self.assertTrue(results_by_case["timeout-recovers-next-case"]["success"])
+
+    def test_cli_run_records_exhausted_retry_transport_error_as_failed_case_and_continues(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            manifest_path = tmp_path / "jsonrpc-exhausted-retry-continue.json"
+            state_dir = tmp_path / "state"
+            report_path = tmp_path / "report.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "name": "jsonrpc-exhausted-retry-continue",
+                        "version": "1",
+                        "execution_specs_ref": "test-ref",
+                        "suite_version": "0.1.0",
+                        "chain_profile_version": "1",
+                        "cases": [
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "retries-exhausted",
+                                "family": "custom/jsonrpc",
+                                "description": "First case exhausts network retries.",
+                                "namespace_seed": "retries-exhausted",
+                                "notes": [],
+                                "filters": {},
+                                "observe": {},
+                                "steps": [
+                                    {
+                                        "action": "invoke_contract",
+                                        "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                                        "data": "0x",
+                                        "gas": "0x5208",
+                                        "expected_receipt_status": "0x1",
+                                    }
+                                ],
+                                "expected": {},
+                            },
+                            {
+                                "kind": "custom_chain",
+                                "case_id": "retries-exhausted-next-case",
+                                "family": "custom/jsonrpc",
+                                "description": "Second case still runs after exhausted retries.",
+                                "namespace_seed": "retries-exhausted-next-case",
+                                "notes": [],
+                                "filters": {},
+                                "observe": {},
+                                "steps": [
+                                    {
+                                        "action": "invoke_contract",
+                                        "to": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                                        "data": "0x",
+                                        "gas": "0x5208",
+                                        "expected_receipt_status": "0x1",
+                                    }
+                                ],
+                                "expected": {},
+                            },
+                        ],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+
+            from adapter import cli as cli_module
+
+            original_backend = cli_module.JsonRpcBackend
+
+            class StubBackend:
+                def __init__(self, profile):
+                    self.calls = 0
+
+                def execute_case(self, case, namespace):
+                    self.calls += 1
+                    if case.case_id == "retries-exhausted":
+                        raise RuntimeError(
+                            "rpc transport error for eth_getTransactionCount against https://example.invalid: exhausted retries"
+                        )
+                    return ["0xabc"], {}, {}
+
+            cli_module.JsonRpcBackend = StubBackend  # type: ignore[assignment]
+            stdout = StringIO()
+            try:
+                with redirect_stdout(stdout):
+                    exit_code = main(
+                        [
+                            "run",
+                            "--profile",
+                            str(ROOT / "profiles/juchain.toml"),
+                            "--manifest",
+                            str(manifest_path),
+                            "--state-dir",
+                            str(state_dir),
+                            "--report",
+                            str(report_path),
+                        ]
+                    )
+            finally:
+                cli_module.JsonRpcBackend = original_backend  # type: ignore[assignment]
+
+            self.assertEqual(exit_code, 0)
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(payload["passed"], 1)
+            self.assertEqual(payload["failed"], 1)
+            report = json.loads(report_path.read_text())
+            results_by_case = {result["case_id"]: result for result in report["results"]}
+            self.assertFalse(results_by_case["retries-exhausted"]["success"])
+            self.assertEqual(
+                results_by_case["retries-exhausted"]["diffs"],
+                [
+                    "execution error: rpc transport error for eth_getTransactionCount against https://example.invalid: exhausted retries"
+                ],
+            )
+            self.assertTrue(results_by_case["retries-exhausted-next-case"]["success"])
+
     def test_assert_report_success_exits_nonzero_for_failed_report(self) -> None:
         passed = ExecutionResult(
             case_id="passing-case",
@@ -6215,6 +6554,122 @@ class HarnessTests(unittest.TestCase):
         try:
             urllib.request.urlopen = fake_urlopen  # type: ignore[assignment]
             self.assertEqual(backend._rpc("eth_getTransactionCount", [profile.admin_account, "pending"]), "0x7")
+        finally:
+            urllib.request.urlopen = original_urlopen  # type: ignore[assignment]
+        self.assertEqual(calls["count"], 2)
+
+    def test_jsonrpc_backend_retries_unreachable_network_transport_errors(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calls = {"count": 0}
+
+        class Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self) -> bytes:
+                return json.dumps({"jsonrpc": "2.0", "id": 1, "result": "0x7"}).encode()
+
+        def fake_urlopen(request, timeout):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise urllib.error.URLError(OSError(51, "Network is unreachable"))
+            return Response()
+
+        original_urlopen = urllib.request.urlopen
+        try:
+            urllib.request.urlopen = fake_urlopen  # type: ignore[assignment]
+            self.assertEqual(backend._rpc("eth_getTransactionCount", [profile.admin_account, "pending"]), "0x7")
+        finally:
+            urllib.request.urlopen = original_urlopen  # type: ignore[assignment]
+        self.assertEqual(calls["count"], 2)
+
+    def test_jsonrpc_backend_retries_connection_reset_transport_errors(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calls = {"count": 0}
+
+        class Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self) -> bytes:
+                return json.dumps({"jsonrpc": "2.0", "id": 1, "result": "0x1"}).encode()
+
+        def fake_urlopen(request, timeout):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise urllib.error.URLError(ConnectionResetError(54, "Connection reset by peer"))
+            return Response()
+
+        original_urlopen = urllib.request.urlopen
+        try:
+            urllib.request.urlopen = fake_urlopen  # type: ignore[assignment]
+            self.assertEqual(backend._rpc("eth_chainId", []), "0x1")
+        finally:
+            urllib.request.urlopen = original_urlopen  # type: ignore[assignment]
+        self.assertEqual(calls["count"], 2)
+
+    def test_jsonrpc_backend_retries_broken_pipe_transport_errors(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calls = {"count": 0}
+
+        class Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self) -> bytes:
+                return json.dumps({"jsonrpc": "2.0", "id": 1, "result": "0x1"}).encode()
+
+        def fake_urlopen(request, timeout):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise urllib.error.URLError(BrokenPipeError(32, "Broken pipe"))
+            return Response()
+
+        original_urlopen = urllib.request.urlopen
+        try:
+            urllib.request.urlopen = fake_urlopen  # type: ignore[assignment]
+            self.assertEqual(backend._rpc("eth_chainId", []), "0x1")
+        finally:
+            urllib.request.urlopen = original_urlopen  # type: ignore[assignment]
+        self.assertEqual(calls["count"], 2)
+
+    def test_jsonrpc_backend_retries_connection_aborted_transport_errors(self) -> None:
+        profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        backend = JsonRpcBackend(profile)
+        calls = {"count": 0}
+
+        class Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return False
+
+            def read(self) -> bytes:
+                return json.dumps({"jsonrpc": "2.0", "id": 1, "result": "0x1"}).encode()
+
+        def fake_urlopen(request, timeout):
+            calls["count"] += 1
+            if calls["count"] == 1:
+                raise urllib.error.URLError(ConnectionAbortedError(53, "Software caused connection abort"))
+            return Response()
+
+        original_urlopen = urllib.request.urlopen
+        try:
+            urllib.request.urlopen = fake_urlopen  # type: ignore[assignment]
+            self.assertEqual(backend._rpc("eth_chainId", []), "0x1")
         finally:
             urllib.request.urlopen = original_urlopen  # type: ignore[assignment]
         self.assertEqual(calls["count"], 2)

@@ -1510,7 +1510,14 @@ class JsonRpcBackend:
             except urllib.error.URLError as exc:
                 if isinstance(
                     exc.reason,
-                    (socket.gaierror, TimeoutError, socket.timeout, ssl.SSLError, ConnectionError),
+                    (
+                        socket.gaierror,
+                        TimeoutError,
+                        socket.timeout,
+                        ssl.SSLError,
+                        ConnectionError,
+                        OSError,
+                    ),
                 ) and attempt + 1 < attempts:
                     time.sleep(1)
                     continue

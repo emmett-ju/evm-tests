@@ -366,6 +366,18 @@ def main(argv: list[str] | None = None) -> int:
                         expected=case.expected,
                     )
                 )
+            except (RuntimeError, TimeoutError) as error:
+                results.append(
+                    result_from_execution(
+                        case,
+                        namespace,
+                        [],
+                        {},
+                        {},
+                        [f"execution error: {error}"],
+                        expected=case.expected,
+                    )
+                )
         report = Report(
             manifest=manifest.name,
             execution_specs_ref=manifest.execution_specs_ref,

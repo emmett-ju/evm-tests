@@ -32,16 +32,24 @@ help:
 rpc-all:
 	@mkdir -p $(REPORT_DIR)
 	@set -e; \
+	status=0; \
 	for family in $(UPSTREAM_FAMILIES); do \
 		manifest="suites/manifests/upstream_$${family}_mapped.json"; \
 		report="$(REPORT_DIR)/$${family}.json"; \
 		echo "==> $$manifest"; \
-		$(PYTHON) -m adapter.cli run --profile $(PROFILE) --manifest "$$manifest" --state-dir $(STATE_DIR) --report "$$report"; \
-		$(PYTHON) scripts/assert_report_success.py "$$report"; \
+		if ! $(PYTHON) -m adapter.cli run --profile $(PROFILE) --manifest "$$manifest" --state-dir $(STATE_DIR) --report "$$report"; then \
+			status=1; \
+		fi; \
+		if ! $(PYTHON) scripts/assert_report_success.py "$$report"; then \
+			status=1; \
+		fi; \
 	done; \
 	summary="$(SUMMARY)"; \
 	if [ -z "$$summary" ]; then summary="$(REPORT_DIR)/summary.json"; fi; \
-	$(PYTHON) scripts/summarize_rpc_reports.py --report-dir $(REPORT_DIR) --inventory-dir suites/templates --output "$$summary"
+	if ! $(PYTHON) scripts/summarize_rpc_reports.py --report-dir $(REPORT_DIR) --inventory-dir suites/templates --output "$$summary"; then \
+		status=1; \
+	fi; \
+	exit $$status
 
 rpc-subset:
 	@mkdir -p $(REPORT_DIR)
@@ -59,12 +67,20 @@ rpc-subset:
 	test -f "$$manifest" || { echo "Manifest not found: $$manifest" >&2; exit 2; }; \
 	report="$(REPORT)"; \
 	if [ -z "$$report" ]; then report="$(REPORT_DIR)/$${name}.json"; fi; \
+	status=0; \
 	echo "==> $$manifest"; \
-	$(PYTHON) -m adapter.cli run --profile $(PROFILE) --manifest "$$manifest" --state-dir $(STATE_DIR) --report "$$report"; \
-	$(PYTHON) scripts/assert_report_success.py "$$report"; \
+	if ! $(PYTHON) -m adapter.cli run --profile $(PROFILE) --manifest "$$manifest" --state-dir $(STATE_DIR) --report "$$report"; then \
+		status=1; \
+	fi; \
+	if ! $(PYTHON) scripts/assert_report_success.py "$$report"; then \
+		status=1; \
+	fi; \
 	summary="$(SUMMARY)"; \
 	if [ -z "$$summary" ]; then summary="$(REPORT_DIR)/$${name}-summary.json"; fi; \
-	$(PYTHON) scripts/summarize_rpc_reports.py --report "$$report" --inventory-dir suites/templates --output "$$summary"
+	if ! $(PYTHON) scripts/summarize_rpc_reports.py --report "$$report" --inventory-dir suites/templates --output "$$summary"; then \
+		status=1; \
+	fi; \
+	exit $$status
 
 sync-upstream:
 	@if [ "$(SYNC_CHECK_ONLY)" = "1" ]; then \
