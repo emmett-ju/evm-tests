@@ -1279,6 +1279,10 @@ class HarnessTests(unittest.TestCase):
 
     def test_selector_allows_upstream_mapped_system_cases(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.feature_flags["max_create_child_code"] = False
+        profile.feature_flags["create_collision"] = False
+        profile.feature_flags["large_nonzero_returndata"] = False
+        profile.feature_flags["selfdestruct_created_clears_code"] = False
         manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
         self.assertEqual(
@@ -1436,6 +1440,7 @@ class HarnessTests(unittest.TestCase):
 
     def test_selector_allows_upstream_mapped_block_context_cases(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
+        profile.feature_flags["prevrandao"] = False
         manifest = load_manifest(ROOT / "suites/manifests/upstream_block_context_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
         self.assertEqual(

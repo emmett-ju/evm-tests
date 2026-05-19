@@ -1412,9 +1412,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6063600c60003960636000f3365f1461004857621000005b805f14610039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8160200352602003610004565b50621000005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
-          "bytecode_runtime": "0x365f1461004857621000005b805f14610039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8160200352602003610004565b50621000005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
-          "gas": "0x19654"
+          "bytecode_init": "0x6065600c60003960656000f3365f1461004a57621000005b805f1461003b577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602090035260209003610004565b50621000005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f1461004a57621000005b805f1461003b577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602090035260209003610004565b50621000005ff35b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x1980c"
         },
         {
           "action": "wait_receipt",
@@ -1692,9 +1692,9 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6063600c60003960636000f3365f1461004857621000005b805f14610039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8160200352602003610004565b50621000005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
-          "bytecode_runtime": "0x365f1461004857621000005b805f14610039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8160200352602003610004565b50621000005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
-          "gas": "0x19654"
+          "bytecode_init": "0x6065600c60003960656000f3365f1461004a57621000005b805f1461003b577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602090035260209003610004565b50621000005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "bytecode_runtime": "0x365f1461004a57621000005b805f1461003b577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602090035260209003610004565b50621000005ffd5b5f5f60015f5f305af15f553d80600155805f5f3e5f2060025500",
+          "gas": "0x1980c"
         },
         {
           "action": "wait_receipt",

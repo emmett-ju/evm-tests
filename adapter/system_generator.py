@@ -1338,9 +1338,11 @@ def _build_fill_ff_prefix(size: int) -> bytes:
         builder.push_int((1 << 256) - 1)
         builder.op(0x81)  # DUP2
         builder.push_int(32)
+        builder.op(0x90)  # SWAP1
         builder.op(0x03)  # SUB
         builder.op(0x52)  # MSTORE
         builder.push_int(32)
+        builder.op(0x90)  # SWAP1
         builder.op(0x03)  # SUB
         builder.push_label("fill_words_loop")
         builder.op(0x56)  # JUMP

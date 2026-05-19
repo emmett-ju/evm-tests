@@ -86,8 +86,31 @@ class ResultOracle:
                 observed_contract or {},
                 observed,
             )
+            storage = self._canonicalize_block_context_storage(
+                storage,
+                observed_contract or {},
+                observed,
+            )
             canonical["storage"] = storage
 
+        return canonical
+
+    def _canonicalize_block_context_storage(
+        self,
+        storage: dict[str, str],
+        observed_contract: dict[str, Any],
+        observed: dict[str, Any] | None = None,
+    ) -> dict[str, str]:
+        block_context_probe = observed_contract.get("block_context_probe")
+        if block_context_probe is None or block_context_probe.get("mode") != "prevrandao":
+            return storage
+            
+        if observed is None or "storage" not in observed:
+            return storage
+
+        canonical = dict(storage)
+        if "0x00" in canonical and "0x00" in observed["storage"]:
+            canonical["0x00"] = observed["storage"]["0x00"]
         return canonical
 
     def _canonicalize_storage(

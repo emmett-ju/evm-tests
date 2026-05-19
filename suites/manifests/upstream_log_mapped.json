@@ -281,8 +281,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6047600c60003960476000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005a60070680600255a000",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005a60070680600255a000",
+          "bytecode_init": "0x6049600c60003960496000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b50621000005a60070680600255a000",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b50621000005a60070680600255a000",
           "gas": "0x200000"
         },
         {
@@ -294,7 +294,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -342,8 +342,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6040600c60003960406000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005fa000",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005fa000",
+          "bytecode_init": "0x6042600c60003960426000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b50621000005fa000",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b50621000005fa000",
           "gas": "0x200000"
         },
         {
@@ -355,7 +355,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -405,8 +405,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6047600c60003960476000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005a60070680600255a000",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005a60070680600255a000",
+          "bytecode_init": "0x6049600c60003960496000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b50621000005a60070680600255a000",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b50621000005a60070680600255a000",
           "gas": "0x200000"
         },
         {
@@ -418,7 +418,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -466,8 +466,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6040600c60003960406000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005fa000",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b50621000005fa000",
+          "bytecode_init": "0x6042600c60003960426000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b50621000005fa000",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b50621000005fa000",
           "gas": "0x200000"
         },
         {
@@ -479,7 +479,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -542,7 +542,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -603,7 +603,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -666,7 +666,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -727,7 +727,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1024,8 +1024,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6068600c60003960686000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a100",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a100",
+          "bytecode_init": "0x606a600c600039606a6000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a100",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a100",
           "gas": "0x200000"
         },
         {
@@ -1037,7 +1037,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1086,8 +1086,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6061600c60003960616000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa100",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa100",
+          "bytecode_init": "0x6063600c60003960636000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa100",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa100",
           "gas": "0x200000"
         },
         {
@@ -1099,7 +1099,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1150,8 +1150,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6048600c60003960486000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f621000005a60070680600255a100",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f621000005a60070680600255a100",
+          "bytecode_init": "0x604a600c600039604a6000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f621000005a60070680600255a100",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f621000005a60070680600255a100",
           "gas": "0x200000"
         },
         {
@@ -1163,7 +1163,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1212,8 +1212,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6041600c60003960416000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f621000005fa100",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f621000005fa100",
+          "bytecode_init": "0x6043600c60003960436000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f621000005fa100",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f621000005fa100",
           "gas": "0x200000"
         },
         {
@@ -1225,7 +1225,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1289,7 +1289,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1351,7 +1351,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1415,7 +1415,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1477,7 +1477,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1780,8 +1780,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6089600c60003960896000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a200",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a200",
+          "bytecode_init": "0x608b600c600039608b6000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a200",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a200",
           "gas": "0x200000"
         },
         {
@@ -1793,7 +1793,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1843,8 +1843,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6082600c60003960826000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa200",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa200",
+          "bytecode_init": "0x6084600c60003960846000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa200",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa200",
           "gas": "0x200000"
         },
         {
@@ -1856,7 +1856,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1908,8 +1908,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6049600c60003960496000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f621000005a60070680600255a200",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f621000005a60070680600255a200",
+          "bytecode_init": "0x604b600c600039604b6000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f621000005a60070680600255a200",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f621000005a60070680600255a200",
           "gas": "0x200000"
         },
         {
@@ -1921,7 +1921,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -1971,8 +1971,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6042600c60003960426000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f621000005fa200",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f621000005fa200",
+          "bytecode_init": "0x6044600c60003960446000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f621000005fa200",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f621000005fa200",
           "gas": "0x200000"
         },
         {
@@ -1984,7 +1984,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2049,7 +2049,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2112,7 +2112,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2177,7 +2177,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2240,7 +2240,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2548,8 +2548,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x60aa600c60003960aa6000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a300",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a300",
+          "bytecode_init": "0x60ac600c60003960ac6000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a300",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a300",
           "gas": "0x200000"
         },
         {
@@ -2561,7 +2561,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2612,8 +2612,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x60a3600c60003960a36000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa300",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa300",
+          "bytecode_init": "0x60a5600c60003960a56000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa300",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa300",
           "gas": "0x200000"
         },
         {
@@ -2625,7 +2625,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2678,8 +2678,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x604a600c600039604a6000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f621000005a60070680600255a300",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f621000005a60070680600255a300",
+          "bytecode_init": "0x604c600c600039604c6000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f5f621000005a60070680600255a300",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f5f621000005a60070680600255a300",
           "gas": "0x200000"
         },
         {
@@ -2691,7 +2691,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2742,8 +2742,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6043600c60003960436000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f621000005fa300",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f621000005fa300",
+          "bytecode_init": "0x6045600c60003960456000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f5f621000005fa300",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f5f621000005fa300",
           "gas": "0x200000"
         },
         {
@@ -2755,7 +2755,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2821,7 +2821,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2885,7 +2885,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -2951,7 +2951,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -3015,7 +3015,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -3328,8 +3328,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x60cb600c60003960cb6000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a400",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a400",
+          "bytecode_init": "0x60cd600c60003960cd6000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a400",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005a60070680600255a400",
           "gas": "0x200000"
         },
         {
@@ -3341,7 +3341,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -3393,8 +3393,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x60c4600c60003960c46000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa400",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa400",
+          "bytecode_init": "0x60c6600c60003960c66000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa400",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff621000005fa400",
           "gas": "0x200000"
         },
         {
@@ -3406,7 +3406,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -3460,8 +3460,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x604b600c600039604b6000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f5f621000005a60070680600255a400",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f5f621000005a60070680600255a400",
+          "bytecode_init": "0x604d600c600039604d6000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f5f5f621000005a60070680600255a400",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f5f5f621000005a60070680600255a400",
           "gas": "0x200000"
         },
         {
@@ -3473,7 +3473,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -3525,8 +3525,8 @@
       "steps": [
         {
           "action": "deploy_contract",
-          "bytecode_init": "0x6044600c60003960446000f3621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f5f621000005fa400",
-          "bytecode_runtime": "0x621000005b805f146037577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81602003526020036004565b505f5f5f5f621000005fa400",
+          "bytecode_init": "0x6046600c60003960466000f3621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f5f5f621000005fa400",
+          "bytecode_runtime": "0x621000005b805f146039577fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff816020900352602090036004565b505f5f5f5f621000005fa400",
           "gas": "0x200000"
         },
         {
@@ -3538,7 +3538,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -3605,7 +3605,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -3670,7 +3670,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -3737,7 +3737,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -3802,7 +3802,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -3926,7 +3926,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4104,7 +4104,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4163,7 +4163,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4223,7 +4223,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4282,7 +4282,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4341,7 +4341,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4400,7 +4400,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4460,7 +4460,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4519,7 +4519,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4578,7 +4578,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4637,7 +4637,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4697,7 +4697,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4756,7 +4756,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -4876,7 +4876,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5060,7 +5060,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5121,7 +5121,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5183,7 +5183,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5244,7 +5244,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5305,7 +5305,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5366,7 +5366,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5428,7 +5428,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5489,7 +5489,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5550,7 +5550,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5611,7 +5611,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5673,7 +5673,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5734,7 +5734,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -5857,7 +5857,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6044,7 +6044,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6106,7 +6106,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6169,7 +6169,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6231,7 +6231,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6293,7 +6293,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6355,7 +6355,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6418,7 +6418,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6480,7 +6480,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6542,7 +6542,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6604,7 +6604,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6667,7 +6667,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6729,7 +6729,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -6854,7 +6854,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7044,7 +7044,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7107,7 +7107,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7171,7 +7171,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7234,7 +7234,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7297,7 +7297,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7360,7 +7360,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7424,7 +7424,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7487,7 +7487,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7550,7 +7550,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7613,7 +7613,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7677,7 +7677,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7740,7 +7740,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -7867,7 +7867,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8060,7 +8060,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8124,7 +8124,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8189,7 +8189,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8253,7 +8253,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8317,7 +8317,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8381,7 +8381,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8446,7 +8446,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8510,7 +8510,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8574,7 +8574,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8638,7 +8638,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8703,7 +8703,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",
@@ -8767,7 +8767,7 @@
           "action": "invoke_contract",
           "to": "$last_contract",
           "data": "0x",
-          "gas": "0xff0000"
+          "gas": "0xffffff"
         },
         {
           "action": "wait_receipt",

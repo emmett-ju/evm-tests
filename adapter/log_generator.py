@@ -562,9 +562,11 @@ def _build_fill_ff_prefix(size: int) -> bytes:
         builder.push_int((1 << 256) - 1)
         builder.op(0x81)  # DUP2
         builder.push_int(32)
+        builder.op(0x90)  # SWAP1
         builder.op(0x03)  # SUB
         builder.op(0x52)  # MSTORE
         builder.push_int(32)
+        builder.op(0x90)  # SWAP1
         builder.op(0x03)  # SUB
         builder.push_label("fill_words_loop")
         builder.op(0x56)  # JUMP
@@ -644,9 +646,9 @@ def _deploy_gas(template: LogMappingTemplate) -> str:
 
 def _invoke_gas(template: LogMappingTemplate) -> str:
     if template.log_size >= 1024 * 1024:
-        return "0xff0000"
+        return "0xffffff"
     if template.memory_seed_size > 0 or template.log_size >= 1024:
-        return "0xff0000"
+        return "0xffffff"
     return "0xc350"
 
 
