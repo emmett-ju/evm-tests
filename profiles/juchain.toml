@@ -18,10 +18,9 @@ reuse_strategy = "idempotent"
 [feature_flags]
 base_fee = true
 blob = false
-prevrandao = false
 large_log_payload = true
 max_create_child_code = true
-create_collision = false
+create_collision = true
 large_nonzero_returndata = true
 selfdestruct_created_clears_code = false
 clz = true
@@ -31,7 +30,18 @@ modexp_eip7883 = true
 calldata_floor_eip7623 = true
 eip7702 = true
 blob_cell_proofs = false
+
+# block_access_lists is false because the current test framework lacks support
+# for building and asserting EIP-2930 access list transactions.
 block_access_lists = false
+
+# prevrandao is false by intentional design choice in Juchain's Congress/PoA consensus.
+# - Congress has no Beacon chain, so there is no real beacon randao.
+# - Legacy Clique/PoA logic requires the RPC MixDigest == 0.
+# - To ensure the EVM PREVRANDAO opcode does not return 0, Juchain uses keccak(block.number).
+# This causes an intentional mismatch between the RPC mixHash and the actual EVM
+# execution state, which breaks the test harness's prediction oracle.
+prevrandao = false
 
 [block_context]
 rpc_block_tag = "latest"

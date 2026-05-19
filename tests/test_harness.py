@@ -1279,10 +1279,6 @@ class HarnessTests(unittest.TestCase):
 
     def test_selector_allows_upstream_mapped_system_cases(self) -> None:
         profile = load_chain_profile(ROOT / "profiles/juchain.toml")
-        profile.feature_flags["max_create_child_code"] = False
-        profile.feature_flags["create_collision"] = False
-        profile.feature_flags["large_nonzero_returndata"] = False
-        profile.feature_flags["selfdestruct_created_clears_code"] = False
         manifest = load_manifest(ROOT / "suites/manifests/upstream_system_mapped.json")
         selected, decisions = TestSelector(profile).select(manifest)
         self.assertEqual(
@@ -1296,6 +1292,8 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.system.test_create.create.0_50x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create.0_75x_max_code_size_with_zero_data",
+                "upstream.benchmark.system.test_create.create.max_code_size_with_non_zero_data",
+                "upstream.benchmark.system.test_create.create.max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_bytes_with_value",
                 "upstream.benchmark.system.test_create.create2.0_bytes_without_value",
                 "upstream.benchmark.system.test_create.create2.0_25x_max_code_size_with_non_zero_data",
@@ -1304,12 +1302,17 @@ class HarnessTests(unittest.TestCase):
                 "upstream.benchmark.system.test_create.create2.0_50x_max_code_size_with_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_non_zero_data",
                 "upstream.benchmark.system.test_create.create2.0_75x_max_code_size_with_zero_data",
+                "upstream.benchmark.system.test_create.create2.max_code_size_with_non_zero_data",
+                "upstream.benchmark.system.test_create.create2.max_code_size_with_zero_data",
+                "upstream.benchmark.system.test_creates_collisions.create2",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1kib_of_zero_data",
+                "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.1mib_of_zero_data",
                 "upstream.benchmark.system.test_return_revert.return.empty",
                 "upstream.benchmark.system.test_return_revert.revert.1kib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.revert.1kib_of_zero_data",
+                "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data",
                 "upstream.benchmark.system.test_return_revert.revert.1mib_of_zero_data",
                 "upstream.benchmark.system.test_return_revert.revert.empty",
                 "upstream.benchmark.system.test_selfdestruct_existing.value_bearing_false",
@@ -1322,27 +1325,6 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(
             skipped,
             {
-                "upstream.benchmark.system.test_create.create.max_code_size_with_non_zero_data": [
-                    "max CREATE child-code payload requires feature_flags.max_create_child_code=true in chain profile"
-                ],
-                "upstream.benchmark.system.test_create.create.max_code_size_with_zero_data": [
-                    "max CREATE child-code payload requires feature_flags.max_create_child_code=true in chain profile"
-                ],
-                "upstream.benchmark.system.test_create.create2.max_code_size_with_non_zero_data": [
-                    "max CREATE child-code payload requires feature_flags.max_create_child_code=true in chain profile"
-                ],
-                "upstream.benchmark.system.test_create.create2.max_code_size_with_zero_data": [
-                    "max CREATE child-code payload requires feature_flags.max_create_child_code=true in chain profile"
-                ],
-                "upstream.benchmark.system.test_creates_collisions.create2": [
-                    "CREATE collision witness requires feature_flags.create_collision=true in chain profile"
-                ],
-                "upstream.benchmark.system.test_return_revert.return.1mib_of_non_zero_data": [
-                    "1MiB non-zero returndata requires feature_flags.large_nonzero_returndata=true in chain profile"
-                ],
-                "upstream.benchmark.system.test_return_revert.revert.1mib_of_non_zero_data": [
-                    "1MiB non-zero returndata requires feature_flags.large_nonzero_returndata=true in chain profile"
-                ],
                 "upstream.benchmark.system.test_selfdestruct_created.value_bearing_false": [
                     "created-contract selfdestruct cleanup requires feature_flags.selfdestruct_created_clears_code=true in chain profile"
                 ],

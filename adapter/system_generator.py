@@ -1190,6 +1190,16 @@ def _build_create_collision_runtime(opcode: str, *, proxy_call_gas: int = 100_00
     proxy.push_int(0)  # offset
     proxy.push_int(0)  # value
     proxy.op(0xF5)  # CREATE2
+
+    # Check collision: if CREATE2 returns 0 (fails), explicit REVERT
+    proxy.op(0x80)  # DUP1 (address)
+    proxy.push_label("success")
+    proxy.op(0x57)  # JUMPI
+    proxy.push_int(0)
+    proxy.push_int(0)
+    proxy.op(0xFD)  # REVERT(0, 0)
+    proxy.mark("success")
+
     proxy.push_int(0)
     proxy.op(0x52)  # MSTORE(0, created_address)
     proxy.push_int(32)
